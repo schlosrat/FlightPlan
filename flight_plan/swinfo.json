@@ -1,0 +1,22 @@
+{
+  "mod_id": "flight_plan",
+  "author": "schlosrat",
+  "name": "Flight Plan",
+  "description": "Plan your (Space) Flight! Set up useful maneuver nodes to get you where you want to be",
+  "source": "https://github.com/schlosrat/FlightPlan",
+  "version": "0.5.0",
+  "version_check": "",
+  "dependencies": [
+    {
+      "id":  "SpaceWarp",
+      "version": {
+        "min": "1.0.1",
+        "max": "*"
+      }
+    }
+  ],
+  "ksp2_version": {
+    "min": "0.1.0",
+    "max": "*"
+  }
+}
