@@ -11,7 +11,14 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Profiling;
 using Object = UnityEngine.Object;
-using I2.Loc;
+using I2.Loc; // For localization
+using SpaceWarp.API.UI;
+using KSP.Game;
+using KSP.Sim;
+using KSP.Sim.impl;
+using KSP.Rendering.impl;
+using KSP.Rendering.Planets;
+using KSP.Map;
 
 namespace MuMech
 {
@@ -28,7 +35,7 @@ namespace MuMech
     //double so that if you are not doing text input you can treat an EditableDouble like a double.
     public class EditableDoubleMult : IEditable
     {
-        [PersistentSettings]
+        // [Persistent]
         protected double _val;
 
         public virtual double val
@@ -45,7 +52,7 @@ namespace MuMech
 
         public bool parsed;
 
-        [Persistent]
+        // [Persistent]
         protected string _text;
 
         public virtual string text
@@ -137,16 +144,16 @@ namespace MuMech
 
     public class EditableAngle
     {
-        [Persistent]
+        // [Persistent]
         public EditableDouble degrees = 0;
 
-        [Persistent]
+        // [Persistent]
         public EditableDouble minutes = 0;
 
-        [Persistent]
+        // [Persistent]
         public EditableDouble seconds = 0;
 
-        [PersistentStorage]
+        // [PersistentStorage]
         public bool negative;
 
         public EditableAngle(double angle)
@@ -191,7 +198,7 @@ namespace MuMech
 
     public class EditableInt : IEditable
     {
-        [Persistent]
+        // [Persistent]
         private int _val;
 
         public int val
@@ -206,7 +213,7 @@ namespace MuMech
 
         private bool _parsed;
 
-        [Persistent]
+        // [Persistent]
         private string _text;
 
         public virtual string text
@@ -240,10 +247,10 @@ namespace MuMech
 
     public class EditableIntList : IEditable
     {
-        [Persistent]
+        // [Persistent]
         public readonly List<int> val = new List<int>();
 
-        [Persistent]
+        // [Persistent]
         private string _text = "";
 
         public string text
@@ -486,6 +493,7 @@ namespace MuMech
 
         public enum SkinType { Default, MechJeb1, Compact }
 
+        private static GUISkin _spaceWarpUISkin;
         public static GUISkin skin;
         public static float   scale                      = 1;
         public static int     scaledScreenWidth          = 1;
@@ -551,6 +559,7 @@ namespace MuMech
 
         public static void LoadSkin(SkinType skinType)
         {
+            _spaceWarpUISkin = Skins.ConsoleSkin;
             if (defaultSkin == null) CopyDefaultSkin();
             if (compactSkin == null) CopyCompactSkin();
             if (transparentSkin == null) CopyTransparentSkin();
@@ -562,7 +571,8 @@ namespace MuMech
                     break;
 
                 case SkinType.MechJeb1:
-                    skin = AssetBase.GetGUISkin("KSP window 2");
+                    // skin = AssetBase.GetGUISkin("KSP window 2");
+                    skin = _spaceWarpUISkin;
                     break;
 
                 case SkinType.Compact:
@@ -710,8 +720,8 @@ namespace MuMech
             return ArrowSelector(index, modulo, drawLabel);
         }
 
-        public static int HoursPerDay => GameSettings.KERBIN_TIME ? 6 : 24;
-        public static int DaysPerYear => GameSettings.KERBIN_TIME ? 426 : 365;
+        // public static int HoursPerDay => GameSettings.KERBIN_TIME ? 6 : 24;
+        // public static int DaysPerYear => GameSettings.KERBIN_TIME ? 426 : 365;
 
         public static string TimeToDHMS(double seconds, int decimalPlaces = 0)
         {
@@ -789,77 +799,81 @@ namespace MuMech
 
         public static double ArcDistance(Vector3 From, Vector3 To)
         {
-            double a = (FlightGlobals.ActiveVessel.mainBody.transform.position - From).magnitude;
-            double b = (FlightGlobals.ActiveVessel.mainBody.transform.position - To).magnitude;
+            VesselComponent activeVessel = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
+            double a = (activeVessel.mainBody.transform.Position.localPosition - From).magnitude;
+            double b = (activeVessel.mainBody.transform.Position.localPosition - To).magnitude;
             double c = Vector3d.Distance(From, To);
             double ang = Math.Acos((a * a + b * b - c * c) / (2f * a * b));
-            return ang * FlightGlobals.ActiveVessel.mainBody.Radius;
+            return ang * activeVessel.mainBody.radius;
         }
 
         public static double FromToETA(Vector3 From, Vector3 To, double Speed = 0)
         {
-            return ArcDistance(From, To) / (Speed > 0 ? Speed : FlightGlobals.ActiveVessel.horizontalSrfSpeed);
+            VesselComponent activeVessel = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
+            return ArcDistance(From, To) / (Speed > 0 ? Speed : activeVessel.HorizontalSrfSpeed);
         }
 
-        public static bool MouseIsOverWindow(MechJebCore core)
-        {
-            //try to check if the mouse is over any active DisplayModule
-            foreach (DisplayModule m in core.GetComputerModules<DisplayModule>())
-            {
-                if (m.enabled && m.showInCurrentScene && !m.IsOverlay
-                    && m.windowPos.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y) / scale))
-                {
-                    return true;
-                }
-            }
+        //public static bool MouseIsOverWindow(MechJebCore core)
+        //{
+        //    try to check if the mouse is over any active DisplayModule
+        //    foreach (DisplayModule m in core.GetComputerModules<DisplayModule>())
+        //    {
+        //        if (m.enabled && m.showInCurrentScene && !m.IsOverlay
+        //            && m.windowPos.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y) / scale))
+        //        {
+        //            return true;
+        //        }
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
-        public static Coordinates GetMouseCoordinates(CelestialBody body)
-        {
-            Ray mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(Input.mousePosition);
-            mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
-            Vector3d relOrigin = mouseRay.origin - body.position;
-            Vector3d relSurfacePosition;
-            double curRadius = body.pqsController.radiusMax;
-            double lastRadius = 0;
-            double error = 0;
-            int loops = 0;
-            float st = Time.time;
-            while (loops < 50)
-            {
-                if (PQS.LineSphereIntersection(relOrigin, mouseRay.direction, curRadius, out relSurfacePosition))
-                {
-                    Vector3d surfacePoint = body.position + relSurfacePosition;
-                    double alt = body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) *
-                                                                     QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) *
-                                                                     Vector3d.right);
-                    error = Math.Abs(curRadius - alt);
-                    if (error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
-                    {
-                        return new Coordinates(body.GetLatitude(surfacePoint), MuUtils.ClampDegrees180(body.GetLongitude(surfacePoint)));
-                    }
+        //public static Coordinates GetMouseCoordinates(CelestialBodyComponent body)
+        //{
+        //    // Ray mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(Input.mousePosition);
+        //    // FlightCameraContext.
+        //    Ray mouseRay = FlightCamera.ScreenPointToRay(Input.mousePosition);
+        //    mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
+        //    Vector3d relOrigin = mouseRay.origin - body.Position.localPosition;
+        //    Vector3d relSurfacePosition;
+        //    double curRadius = body.pqsController.radiusMax;
+        //    double lastRadius = 0;
+        //    double error = 0;
+        //    int loops = 0;
+        //    float st = Time.time;
+        //    while (loops < 50)
+        //    {
+        //        if (PQS.LineSphereIntersection(relOrigin, mouseRay.direction, curRadius, out relSurfacePosition))
+        //        {
+        //            Vector3d surfacePoint = body.Position.localPosition + relSurfacePosition;
+        //            double alt = body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) *
+        //                                                             QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) *
+        //                                                             Vector3d.right);
+        //            error = Math.Abs(curRadius - alt);
+        //            if (error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
+        //            {
+        //                return new Coordinates(body.GetLatitude(surfacePoint), MuUtils.ClampDegrees180(body.GetLongitude(surfacePoint)));
+        //            }
 
-                    lastRadius = curRadius;
-                    curRadius  = alt;
-                    loops++;
-                }
-                else
-                {
-                    if (loops == 0)
-                    {
-                        break;
-                    }
+        //            lastRadius = curRadius;
+        //            curRadius  = alt;
+        //            loops++;
+        //        }
+        //        else
+        //        {
+        //            if (loops == 0)
+        //            {
+        //                break;
+        //            }
 
-                    // Went too low, needs to try higher
-                    curRadius = (lastRadius * 9 + curRadius) / 10;
-                    loops++;
-                }
-            }
+        //            // Went too low, needs to try higher
+        //            curRadius = (lastRadius * 9 + curRadius) / 10;
+        //            loops++;
+        //        }
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         public class ComboBox
         {
@@ -902,11 +916,11 @@ namespace MuMech
                 if (popupOwner == null || rect.height == 0 || !popupActive)
                     return;
 
-                if (style.normal.background == null)
-                {
-                    style.normal.background   = MechJebBundlesManager.comboBoxBackground;
-                    style.onNormal.background = MechJebBundlesManager.comboBoxBackground;
-                }
+                //if (style.normal.background == null)
+                //{
+                //    style.normal.background   = MechJebBundlesManager.comboBoxBackground;
+                //    style.onNormal.background = MechJebBundlesManager.comboBoxBackground;
+                //}
 
                 // Make sure the rectangle is fully on screen
                 rect.x = Math.Max(0, Math.Min(rect.x, scaledScreenWidth - rect.width));
