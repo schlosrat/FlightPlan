@@ -10,14 +10,14 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 * Requires SpaceWarp 1.0.1
 ## Features
 ### Display Current Target Selection
-### Create Maneuver Nodes for Ownship Maneuvers
+### Create Maneuver Nodes for Own Ship Maneuvers
 * Circularize at Ap
 * Circularize at Pe
 * Circularize Now
 * New Pe (for user specified value) - planned for next Ap
 * New Ap (for user specified value) - planned for next Pe
 * New Pe & Ap (for user specified values) - planned now
-* New Inclination (for user specified value) - Planeed for next equatorial AN
+* New Inclination (for user specified value) - Planned for next equatorial AN
 ### Create Maneuver Nodes for Maneuvers Relative to the Selected Target (only available if a target is selected)
 * Match planes at AN
 * Match Planed at DN
