@@ -7,7 +7,10 @@
  */
 
 using UnityEngine;
-using KSP.Localization;
+using I2.Loc; // KSP.Localization;
+using KSP.Sim.impl;
+using System;
+
 namespace MuMech
 {
     public enum TimeReference
@@ -24,15 +27,15 @@ namespace MuMech
         public double universalTime;
 
         private readonly TimeReference[] allowedTimeRef;
-        [Persistent(pass = (int)Pass.Global)]
+        // [Persistent(pass = (int)Pass.Global)]
         private int currentTimeRef;
 
         public TimeReference timeReference { get {return allowedTimeRef[currentTimeRef];}}
 
         // Input parameters
-        [Persistent(pass = (int)Pass.Global)]
+        // [Persistent(pass = (int)Pass.Global)]
         public EditableTime leadTime = 0;
-        [Persistent(pass = (int)Pass.Global)]
+        // [Persistent(pass = (int)Pass.Global)]
         public EditableDoubleMult circularizeAltitude = new EditableDoubleMult(150000, 1000);
 
         public TimeSelector(TimeReference[] allowedTimeRef)
@@ -44,27 +47,58 @@ namespace MuMech
             {
                 switch (allowedTimeRef[i])
                 {
-                    case TimeReference.COMPUTED:          timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect1"); break;//at the optimum time
-                    case TimeReference.APOAPSIS:          timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect2"); break;//"at the next apoapsis"
-                    case TimeReference.CLOSEST_APPROACH:  timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect3"); break;//"at closest approach to target"
-                    case TimeReference.EQ_ASCENDING:      timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect4"); break;//"at the equatorial AN"
-                    case TimeReference.EQ_DESCENDING:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect5"); break;//"at the equatorial DN"
-                    case TimeReference.PERIAPSIS:         timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect6"); break;//"at the next periapsis"
-                    case TimeReference.REL_ASCENDING:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect7"); break;//"at the next AN with the target."
-                    case TimeReference.REL_DESCENDING:    timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect8"); break;//"at the next DN with the target."
-                    case TimeReference.X_FROM_NOW:        timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect9"); break;//"after a fixed time"
-                    case TimeReference.ALTITUDE:          timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect10"); break;//"at an altitude"
-                    case TimeReference.EQ_NEAREST_AD:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect11"); break;//"at the nearest equatorial AN/DN"
-                    case TimeReference.EQ_HIGHEST_AD:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect12"); break;//"at the cheapest equatorial AN/DN"
-                    case TimeReference.REL_NEAREST_AD:    timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect13"); break;//"at the nearest AN/DN with the target"
-                    case TimeReference.REL_HIGHEST_AD:    timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect14"); break;//"at the cheapest AN/DN with the target"
+                    case TimeReference.COMPUTED:          timeRefNames[i] = "at the optimum time";                   break;//at the optimum time
+                    case TimeReference.APOAPSIS:          timeRefNames[i] = "at the next apoapsis";                  break;//"at the next apoapsis"
+                    case TimeReference.CLOSEST_APPROACH:  timeRefNames[i] = "at closest approach to target";         break;//"at closest approach to target"
+                    case TimeReference.EQ_ASCENDING:      timeRefNames[i] = "at the equatorial AN";                  break;//"at the equatorial AN"
+                    case TimeReference.EQ_DESCENDING:     timeRefNames[i] = "at the equatorial DN";                  break;//"at the equatorial DN"
+                    case TimeReference.PERIAPSIS:         timeRefNames[i] = "at the next periapsis";                 break;//"at the next periapsis"
+                    case TimeReference.REL_ASCENDING:     timeRefNames[i] = "at the next AN with the target";        break;//"at the next AN with the target."
+                    case TimeReference.REL_DESCENDING:    timeRefNames[i] = "at the next DN with the target";        break;//"at the next DN with the target."
+                    case TimeReference.X_FROM_NOW:        timeRefNames[i] = "after a fixed time";                    break;//"after a fixed time"
+                    case TimeReference.ALTITUDE:          timeRefNames[i] = "at an altitude";                        break;//"at an altitude"
+                    case TimeReference.EQ_NEAREST_AD:     timeRefNames[i] = "at the nearest equatorial AN/DN";       break;//"at the nearest equatorial AN/DN"
+                    case TimeReference.EQ_HIGHEST_AD:     timeRefNames[i] = "at the cheapest equatorial AN/DN";      break;//"at the cheapest equatorial AN/DN"
+                    case TimeReference.REL_NEAREST_AD:    timeRefNames[i] = "at the nearest AN/DN with the target";  break;//"at the nearest AN/DN with the target"
+                    case TimeReference.REL_HIGHEST_AD:    timeRefNames[i] = "at the cheapest AN/DN with the target"; break;//"at the cheapest AN/DN with the target"
+
+                    //case TimeReference.COMPUTED:          timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect1");  break;//at the optimum time
+                    //case TimeReference.APOAPSIS:          timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect2");  break;//"at the next apoapsis"
+                    //case TimeReference.CLOSEST_APPROACH:  timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect3");  break;//"at closest approach to target"
+                    //case TimeReference.EQ_ASCENDING:      timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect4");  break;//"at the equatorial AN"
+                    //case TimeReference.EQ_DESCENDING:     timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect5");  break;//"at the equatorial DN"
+                    //case TimeReference.PERIAPSIS:         timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect6");  break;//"at the next periapsis"
+                    //case TimeReference.REL_ASCENDING:     timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect7");  break;//"at the next AN with the target."
+                    //case TimeReference.REL_DESCENDING:    timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect8");  break;//"at the next DN with the target."
+                    //case TimeReference.X_FROM_NOW:        timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect9");  break;//"after a fixed time"
+                    //case TimeReference.ALTITUDE:          timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect10"); break;//"at an altitude"
+                    //case TimeReference.EQ_NEAREST_AD:     timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect11"); break;//"at the nearest equatorial AN/DN"
+                    //case TimeReference.EQ_HIGHEST_AD:     timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect12"); break;//"at the cheapest equatorial AN/DN"
+                    //case TimeReference.REL_NEAREST_AD:    timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect13"); break;//"at the nearest AN/DN with the target"
+                    //case TimeReference.REL_HIGHEST_AD:    timeRefNames[i] = LocalizedString.Format("#MechJeb_Maneu_TimeSelect14"); break;//"at the cheapest AN/DN with the target"
+
+                    //case TimeReference.COMPUTED:          timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect1");  break;//at the optimum time
+                    //case TimeReference.APOAPSIS:          timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect2");  break;//"at the next apoapsis"
+                    //case TimeReference.CLOSEST_APPROACH:  timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect3");  break;//"at closest approach to target"
+                    //case TimeReference.EQ_ASCENDING:      timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect4");  break;//"at the equatorial AN"
+                    //case TimeReference.EQ_DESCENDING:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect5");  break;//"at the equatorial DN"
+                    //case TimeReference.PERIAPSIS:         timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect6");  break;//"at the next periapsis"
+                    //case TimeReference.REL_ASCENDING:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect7");  break;//"at the next AN with the target."
+                    //case TimeReference.REL_DESCENDING:    timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect8");  break;//"at the next DN with the target."
+                    //case TimeReference.X_FROM_NOW:        timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect9");  break;//"after a fixed time"
+                    //case TimeReference.ALTITUDE:          timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect10"); break;//"at an altitude"
+                    //case TimeReference.EQ_NEAREST_AD:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect11"); break;//"at the nearest equatorial AN/DN"
+                    //case TimeReference.EQ_HIGHEST_AD:     timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect12"); break;//"at the cheapest equatorial AN/DN"
+                    //case TimeReference.REL_NEAREST_AD:    timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect13"); break;//"at the nearest AN/DN with the target"
+                    //case TimeReference.REL_HIGHEST_AD:    timeRefNames[i] = Localizer.Format("#MechJeb_Maneu_TimeSelect14"); break;//"at the cheapest AN/DN with the target"
                 }
             }
         }
 
         public void DoChooseTimeGUI()
         {
-            GUILayout.Label(Localizer.Format("#MechJeb_Maneu_STB"));//Schedule the burn
+            // GUILayout.Label(Localizer.Format("#MechJeb_Maneu_STB"));//Schedule the burn
+            GUILayout.Label("Schedule the burn");//Schedule the burn
             GUILayout.BeginHorizontal();
             currentTimeRef = GuiUtils.ComboBox.Box(currentTimeRef, timeRefNames, this);
             switch (timeReference)
@@ -85,17 +119,19 @@ namespace MuMech
                     break;
 
                 case TimeReference.X_FROM_NOW:
-                    GuiUtils.SimpleTextBox(Localizer.Format("#MechJeb_of"), leadTime);//"of"
+                    // GuiUtils.SimpleTextBox(Localizer.Format("#MechJeb_of"), leadTime);//"of"
+                    GuiUtils.SimpleTextBox("of", leadTime);//"of"
                     break;
 
                 case TimeReference.ALTITUDE:
-                    GuiUtils.SimpleTextBox(Localizer.Format("#MechJeb_of"), circularizeAltitude, "km");//"of"
+                    // GuiUtils.SimpleTextBox(Localizer.Format("#MechJeb_of"), circularizeAltitude, "km");//"of"
+                    GuiUtils.SimpleTextBox("of", circularizeAltitude);//"of"
                     break;
             }
             GUILayout.EndHorizontal();
         }
 
-        public double ComputeManeuverTime(Orbit o, double UT, MechJebModuleTargetController target)
+        public double ComputeManeuverTime(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target) // was MechJebModuleTargetController target
         {
             switch (allowedTimeRef[currentTimeRef])
             {
@@ -110,7 +146,8 @@ namespace MuMech
                     }
                     else
                     {
-                        throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception1"));//"Warning: orbit is hyperbolic, so apoapsis doesn't exist."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception1"));//"Warning: orbit is hyperbolic, so apoapsis doesn't exist."
+                        throw new Exception("Warning: orbit is hyperbolic, so apoapsis doesn't exist.");//"Warning: orbit is hyperbolic, so apoapsis doesn't exist."
                     }
                     break;
 
@@ -119,24 +156,26 @@ namespace MuMech
                     break;
 
                 case TimeReference.CLOSEST_APPROACH:
-                    if (target.NormalTargetExists)
+                    if (target != null) // was target.NormalTargetExists
                     {
-                        UT = o.NextClosestApproachTime(target.TargetOrbit, UT);
+                        UT = o.NextClosestApproachTime(target, UT);
                     }
                     else
                     {
-                        throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception2"));//"Warning: no target selected."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception2"));//"Warning: no target selected."
+                        throw new Exception("Warning: no target selected.");//"Warning: no target selected."
                     }
                     break;
 
                 case TimeReference.ALTITUDE:
-                    if (circularizeAltitude > o.PeA && (circularizeAltitude < o.ApA || o.eccentricity >= 1))
+                    if (circularizeAltitude > o.PeriapsisArl && (circularizeAltitude < o.ApoapsisArl || o.eccentricity >= 1))
                     {
-                        UT = o.NextTimeOfRadius(UT, o.referenceBody.Radius + circularizeAltitude);
+                        UT = o.NextTimeOfRadius(UT, o.referenceBody.radius + circularizeAltitude);
                     }
                     else
                     {
-                        throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception3"));//"Warning: can't circularize at this altitude, since current orbit does not reach it."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception3"));//"Warning: can't circularize at this altitude, since current orbit does not reach it."
+                        throw new Exception("Warning: can't circularize at this altitude, since current orbit does not reach it.");//"Warning: can't circularize at this altitude, since current orbit does not reach it."
                     }
                     break;
 
@@ -147,7 +186,8 @@ namespace MuMech
                     }
                     else
                     {
-                        throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception4"));//"Warning: equatorial ascending node doesn't exist."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception4"));//"Warning: equatorial ascending node doesn't exist."
+                        throw new Exception("Warning: equatorial ascending node doesn't exist.");//"Warning: equatorial ascending node doesn't exist."
                     }
                     break;
 
@@ -158,7 +198,8 @@ namespace MuMech
                     }
                     else
                     {
-                        throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception5"));//"Warning: equatorial descending node doesn't exist."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception5"));//"Warning: equatorial descending node doesn't exist."
+                        throw new Exception("Warning: equatorial descending node doesn't exist.");//"Warning: equatorial descending node doesn't exist."
                     }
                     break;
 
@@ -175,7 +216,8 @@ namespace MuMech
                     }
                     else
                     {
-                        throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception6"));//Warning: neither ascending nor descending node exists.
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception6"));//Warning: neither ascending nor descending node exists.
+                        throw new Exception("Warning: neither ascending nor descending node exists.");//Warning: neither ascending nor descending node exists.
                     }
                     break;
 
@@ -186,7 +228,7 @@ namespace MuMech
                         {
                             var anTime = o.TimeOfAscendingNodeEquatorial(UT);
                             var dnTime = o.TimeOfDescendingNodeEquatorial(UT);
-                            UT = o.getOrbitalVelocityAtUT(anTime).magnitude <= o.getOrbitalVelocityAtUT(dnTime).magnitude
+                            UT = o.GetOrbitalVelocityAtUTZup(anTime).magnitude <= o.GetOrbitalVelocityAtUTZup(dnTime).magnitude
                                 ? anTime
                                 : dnTime;
                         }
@@ -201,7 +243,8 @@ namespace MuMech
                     }
                     else
                     {
-                        throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception7"));//"Warning: neither ascending nor descending node exists."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception7"));//"Warning: neither ascending nor descending node exists."
+                        throw new Exception("Warning: neither ascending nor descending node exists.");//"Warning: neither ascending nor descending node exists."
                     }
                     break;
             }
