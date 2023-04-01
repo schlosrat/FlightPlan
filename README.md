@@ -18,7 +18,7 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 * New Ap (for user specified value) - planned for next Pe
 * New Pe & Ap (for user specified values) - planned now
 * New Inclination (for user specified value) - Planeed for next equatorial AN
-### Create Maneuver Nodes for Maneuvers Relative to the Selected Target
+### Create Maneuver Nodes for Maneuvers Relative to the Selected Target (only available if a target is selected)
 * Match planes at AN
 * Match Planed at DN
 * Hohmann Transfer to Target
@@ -26,8 +26,9 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 * Course Correction (requires being on an intercept trajectory)
 * Match Velocity at Closest Approach (requires being on an intercept trajectory)
 * Match Velocity Now
-### Create Interplanetary Transfer Maneuver Nodes
-### Create Moon Specific Maneuver Nodes
+### Create Interplanetary Transfer Maneuver Nodes (only available if a planet is the selected target)
+* Interplanetary Transfer
+### Create Moon Specific Maneuver Nodes (only available when in orbit about a moon)
 * Return from a Moon
 
 ## Planned Improvements
