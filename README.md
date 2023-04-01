@@ -1,6 +1,6 @@
 # Flight Plan
-Plan your (Space) Flight! Set up useful maneuver nodes to get you where you want to be.
 ![Flight Plan GUI](https://i.imgur.com/nAqnh60.png)
+Plan your (Space) Flight! Set up useful maneuver nodes to get you where you want to be.
 Making resonant orbit planning easier for Kerbal Space Program 2 one mission at a time.
 
 NOTE: This mod draws heavily on MechJeb2 code that has been adapted to work in KSP2, and would not be possible without the kind and generous contributions of Sarbian and the MechJeb development team! It is not the intent to replicate all MechJeb2 features and functions, but merely to bring some handy maneuver planning tools to the users disposal. You may be able to create useful nodes with this mod, but you'll still need to execute them accurately!
