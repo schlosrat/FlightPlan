@@ -1,7 +1,7 @@
 # Flight Plan
 ![Flight Plan GUI](https://i.imgur.com/nAqnh60.png)
 Plan your (Space) Flight! Fly your Plan! Handy tools to help you set up maneuver nodes that will get you where you want to be.
-Making flight planning easier for Kerbal Space Program 2 one mission at a time.
+Making spaceflight planning easier for Kerbal Space Program 2 one mission at a time.
 
 NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/MechJeb2) code that has been adapted to work in KSP2, and would not be possible without the kind and generous contributions of Sarbian and the MechJeb development team! It is not the intent to replicate all MechJeb2 features and functions in this mod, but merely to make some handy maneuver planning tools available for KSP2 players. While you may be able to create some useful nodes with this mod, you'll still need to execute them accurately! Also, understanding some basic mission planning will be very usful for those employing the tools in this toolbox.
 
