@@ -1,4 +1,11 @@
-﻿using System;
+﻿/*
+ * This Software was obtained from the MechJeb2 project (https://github.com/MuMech/MechJeb2) on 3/25/23
+ * and was further modified as needed for compatibility with KSP2 and/or for incorporation into the
+ * FlightPlan project (https://github.com/schlosrat/FlightPlan)
+ * 
+ * This work is relaesed under the same license(s) inherited from the originating version.
+ */
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
