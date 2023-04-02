@@ -639,11 +639,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             else if (newPe) // Does not create node!
             {
                 Logger.LogInfo("Flight Plan: Set New Pe");
+                Debug.Log("Flight Plan: Set New Pe");
                 var TimeToAp = activeVessel.Orbit.TimeToAp;
                 var burnUT = UT + TimeToAp;
                 // double newPeR = activeVessel.Orbit.referenceBody.radius + 50000; // m
                 // double newPeR = activeVessel.Orbit.Periapsis * 0.9;
-                Logger.LogInfo($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {activeVessel.Orbit.Periapsis} m");
+                Logger.LogInfo($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {activeVessel.Orbit.Periapsis} m, body.radius {activeVessel.Orbit.referenceBody.radius} m");
+                Debug.Log($"[Flight Plan: Seeking Solution: targetPeR {targetPeR} m, currentPeR {activeVessel.Orbit.Periapsis} m, body.radius {activeVessel.Orbit.referenceBody.radius} m");
                 burnParams = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(activeVessel.Orbit, burnUT, targetPeR);
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(activeVessel.Orbit, burnParams, burnUT);
@@ -651,11 +653,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             else if (newAp) // Does not create node!
             {
                 Logger.LogInfo("Flight Plan: Set New Ap");
+                Debug.Log("Flight Plan: Set New Ap");
                 var TimeToPe = activeVessel.Orbit.TimeToPe;
                 var burnUT = UT + TimeToPe;
                 // double newApR = activeVessel.Orbit.referenceBody.radius + 250000; // m
                 // double newApR = activeVessel.Orbit.Apoapsis * 1.5;
                 Logger.LogInfo($"Seeking Solution: targetApR {targetApR} m, currentApR {activeVessel.Orbit.Apoapsis} m");
+                Debug.Log($"Seeking Solution: targetApR {targetApR} m, currentApR {activeVessel.Orbit.Apoapsis} m");
                 burnParams = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(activeVessel.Orbit, burnUT, targetApR);
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(activeVessel.Orbit, burnParams, burnUT);
@@ -667,12 +671,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 // double newApR = activeVessel.Orbit.referenceBody.radius + 250000; // m;
                 // double newPeR = activeVessel.Orbit.Periapsis * 0.9;
                 // double newApR = activeVessel.Orbit.Apoapsis * 1.5;
-                Logger.LogInfo($"Seeking Solution: targetPeR {targetPeR1} m, targetApR {targetApR1} m");
+                Logger.LogInfo($"Seeking Solution: targetPeR {targetPeR1} m, targetApR {targetApR1} m, body.radius {activeVessel.Orbit.referenceBody.radius} m");
                 burnParams = OrbitalManeuverCalculator.DeltaVToEllipticize(activeVessel.Orbit, UT, targetPeR1, targetApR1);
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
                 CreateManeuverNodeAtUT(activeVessel.Orbit, burnParams, UT);
             }
-            else if (newInc) // Bizzare results, sometimes leaves SOI, does not seem to get to correct inc in any case.
+            else if (newInc) // Seems OK
             {
                 Logger.LogInfo("Flight Plan: Set New Inclination");
                 // double newInclination = 20;  // in degrees
@@ -680,14 +684,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 var TDN = activeVessel.Orbit.TimeOfDescendingNodeEquatorial(UT);
                 Logger.LogInfo($"Seeking Solution: targetInc {targetInc} °");
                 burnParams = OrbitalManeuverCalculator.DeltaVToChangeInclination(activeVessel.Orbit, TAN, targetInc);
+                burnParams.z *= -1; // Need to flip prograde burn component... Why?
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {TAN - UT} s from UT");
                 CreateManeuverNodeAtUT(activeVessel.Orbit, burnParams, TAN);
             }
-            else if (matchPlanesA) // leaves SOI at inclination unlike that of target
+            else if (matchPlanesA) // Seems OK
             {
                 Logger.LogInfo("Flight Plan: Match Planes at AN");
                 double burnUT;
                 burnParams = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(activeVessel.Orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+                if (burnUT < UT)
+                    burnUT += activeVessel.Orbit.period;
+                burnParams.z *= -1; // Need to flip prograde burn component... Why?
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(activeVessel.Orbit, burnParams, burnUT);
             }
@@ -696,6 +704,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo("Flight Plan: Match Planes at DN");
                 double burnUT;
                 burnParams = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(activeVessel.Orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+                if (burnUT < UT)
+                    burnUT += activeVessel.Orbit.period;
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(activeVessel.Orbit, burnParams, burnUT);
             }
@@ -895,9 +905,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //nodeData.SetManeuverState((PatchedConicsOrbit)orbit);
 
         nodeData.BurnVector = burnVector;
-        //Logger.LogInfo($"Flight Plan: BurnVector.x {nodeData.BurnVector.x}");
-        //Logger.LogInfo($"Flight Plan: BurnVector.y {nodeData.BurnVector.y}");
-        //Logger.LogInfo($"Flight Plan: BurnVector.z {nodeData.BurnVector.z}");
+
+        // For KSP2, WeakReference want the to start burns early to make them centered on the node
+        // nodeData.Time -= nodeData.BurnDuration / 2;
+
+        // Logger.LogInfo($"Flight Plan CreateManeuverNodeAtUT: Original Burn Time {UT} s");
+        Logger.LogInfo($"Flight Plan CreateManeuverNodeAtUT: BurnVector [{burnVector.x}, {burnVector.y}, {burnVector.z}] m/s");
+        Logger.LogInfo($"Flight Plan CreateManeuverNodeAtUT: BurnDuration {nodeData.BurnDuration} s");
+        Logger.LogInfo($"Flight Plan CreateManeuverNodeAtUT: Burn Time {nodeData.Time} s");
         //Logger.LogInfo($"Flight Plan: Burn Time    {nodeData.Time}");
 
         AddManeuverNode(nodeData);
@@ -906,10 +921,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void AddManeuverNode(ManeuverNodeData nodeData)
     {
         Logger.LogInfo("FlightPlan.AddManeuverNode");
-        //Logger.LogInfo($"Flight Plan: BurnVector.x {nodeData.BurnVector.x}");
-        //Logger.LogInfo($"Flight Plan: BurnVector.y {nodeData.BurnVector.y}");
-        //Logger.LogInfo($"Flight Plan: BurnVector.z {nodeData.BurnVector.z}");
-        //Logger.LogInfo($"Flight Plan: Burn Time    {nodeData.Time}");
+        // var burnVector = nodeData.BurnVector;
+        //Logger.LogInfo($"Flight Plan AddManeuverNode: BurnVector [{burnVector.x}, {burnVector.y}, {burnVector.z}] m/s");
+        //Logger.LogInfo($"Flight Plan AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
+        //Logger.LogInfo($"Flight Plan AddManeuverNode: Burn Time    {nodeData.Time}");
 
         GameManager.Instance.Game.SpaceSimulation.Maneuvers.AddNodeToVessel(nodeData);
 
@@ -922,7 +937,19 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         mapCore.map3D.ManeuverManager.UpdateAll();
         // mapCore.map3D.ManeuverManager.RemoveAll();
 
-        // activeVessel.SimulationObject.ManeuverPlan.UpdateChangeOnNode(nodeData, burnParams);
-        // activeVessel.SimulationObject.ManeuverPlan.RefreshManeuverNodeState(0);
+        // For KSP2, WeakReference want the to start burns early to make them centered on the node
+        nodeData = activeVessel.SimulationObject.ManeuverPlan.ActiveNode;
+        nodeData.Time -= nodeData.BurnDuration / 2;
+        var burnVector = nodeData.BurnVector;
+        Vector3d nodeParams = Vector3d.zero;
+
+        Logger.LogInfo($"Flight Plan AddManeuverNode: BurnVector [{burnVector.x}, {burnVector.y}, {burnVector.z}] m/s");
+        Logger.LogInfo($"Flight Plan AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
+        Logger.LogInfo($"Flight Plan AddManeuverNode: Burn Time    {nodeData.Time}");
+
+        activeVessel.SimulationObject.ManeuverPlan.UpdateChangeOnNode(nodeData, nodeParams);
+        activeVessel.SimulationObject.ManeuverPlan.RefreshManeuverNodeState(0);
+        mapCore.map3D.ManeuverManager.UpdatePositionForGizmo(nodeData.NodeID);
+        mapCore.map3D.ManeuverManager.UpdateAll();
     }
 }
