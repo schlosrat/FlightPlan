@@ -21,7 +21,6 @@ using KSP.Sim.impl;
 //using SpaceWarp.API.UI;
 //using SpaceWarp.API.UI.Appbar;
 //using KSP.UI.Binding;
-//using ManeuverNodeController;
 // using KSP.Api;
 
 namespace MuMech
@@ -116,8 +115,8 @@ namespace MuMech
         //normalized vector parallel to the planet's surface and pointing in the northward direction
         public static Vector3d North(this PatchedConicsOrbit o, double UT)
         {
-            // was: (float)o.referenceBody.Radius -> o.referenceBody.radius
-            // was: o.referenceBody.transform.up -> io.referenceBody.transform.up.vector
+            // was: o.referenceBody.Radius -> o.referenceBody.radius
+            // was: o.referenceBody.transform.up -> o.referenceBody.transform.up.vector
             return Vector3d.Exclude(o.Up(UT), (o.referenceBody.transform.up.vector * (float)o.referenceBody.radius) - o.SwappedRelativePositionAtUT(UT)).normalized;
         }
 
