@@ -95,25 +95,36 @@ namespace MuMech
         public static Vector3d DeltaVToEllipticize(PatchedConicsOrbit o, double UT, double newPeR, double newApR)
         {
             double radius = o.Radius(UT);
+            Debug.Log($"[DeltaVToEllipticize]: radius {radius} m");
 
             //sanitize inputs
             newPeR = MuUtils.Clamp(newPeR, 0 + 1, radius - 1);
+            Debug.Log($"[DeltaVToEllipticize]: newPeR {newPeR} m");
             newApR = Math.Max(newApR, radius + 1);
+            Debug.Log($"[DeltaVToEllipticize]: newApR {newApR} m");
 
             double GM = o.referenceBody.gravParameter;
             double E = -GM / (newPeR + newApR); //total energy per unit mass of new orbit
             double L = Math.Sqrt(Math.Abs((Math.Pow(E * (newApR - newPeR), 2) - GM * GM) / (2 * E))); //angular momentum per unit mass of new orbit
             double kineticE = E + GM / radius; //kinetic energy (per unit mass) of new orbit at UT
             double horizontalV = L / radius;   //horizontal velocity of new orbit at UT
+            Debug.Log($"[DeltaVToEllipticize]: horizontalV {horizontalV} m");
             double verticalV = Math.Sqrt(Math.Abs(2 * kineticE - horizontalV * horizontalV)); //vertical velocity of new orbit at UT
+            Debug.Log($"[DeltaVToEllipticize]: verticalV {verticalV} m");
 
-            Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
+            Vector3d actualVelocity = o.GetOrbitalVelocityAtUTZup(UT); // was o.SwappedOrbitalVelocityAtUT(UT);
+            Debug.Log($"[DeltaVToEllipticize]: actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
 
             //untested:
-            verticalV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
+            // verticalV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
+            // Debug.Log($"[DeltaVToEllipticize]: verticalV {verticalV} m");
 
             Vector3d desiredVelocity = horizontalV * o.Horizontal(UT) + verticalV * o.Up(UT);
-            return desiredVelocity - actualVelocity;
+            Debug.Log($"[DeltaVToEllipticize]: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
+
+            var finalDeltaV = desiredVelocity - actualVelocity;
+            Debug.Log($"[DeltaVToEllipticize]: finalDeltaV [{finalDeltaV.x}, {finalDeltaV.y}, {finalDeltaV.z}] m/s");
+            return finalDeltaV;
         }
 
         //Computes the delta-V of the burn required to attain a given periapsis, starting from
@@ -125,10 +136,14 @@ namespace MuMech
 
             //sanitize input
             newPeR = MuUtils.Clamp(newPeR, 0 + 1, radius - 1);
+            Debug.Log($"[DeltaVToChangePeriapsis] newPeR {newPeR}");
 
             //are we raising or lowering the periapsis?
             bool raising = (newPeR > o.Periapsis);
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Horizontal(UT);
+            Debug.Log($"[DeltaVToChangePeriapsis] raising {raising}");
+
+            Vector3d burnDirection = (raising ? 1 : -1) * o.Horizontal(UT); // Why do we use o.Horizontal here and o.Prograde for DeltaVToChangeApoapsis?
+            Debug.Log($"[DeltaVToChangePeriapsis] burnDirection [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
 
             double minDeltaV = 0;
             double maxDeltaV;
@@ -146,14 +161,29 @@ namespace MuMech
             else
             {
                 //when lowering periapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
-                maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection));
+                maxDeltaV = Math.Abs(Vector3d.Dot(o.GetOrbitalVelocityAtUTZup(UT), burnDirection)); // was o.SwappedOrbitalVelocityAtUT(UT)
+            }
+            Debug.Log($"[DeltaVToChangePeriapsis] maxDeltaV {maxDeltaV} m/s");
+
+            Func<double, object, double> f = delegate (double testDeltaV, object ign)
+            {
+                return o.PerturbedOrbit(UT, testDeltaV * burnDirection).Periapsis - newPeR;
+            };
+            double dV = 0;
+            try
+            {
+                dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null);
+            }
+            catch (TimeoutException)
+            {
+                Debug.Log("[MechJeb] Brents method threw a timeout error (supressed)");
             }
 
-            double dV = 0;
-            try { dV = BrentRoot.Solve(delegate (double testDeltaV,object ign) { return o.PerturbedOrbit(UT,testDeltaV*burnDirection).Periapsis-newPeR; }, minDeltaV, maxDeltaV, null); }
-            catch (TimeoutException) { Debug.Log("[MechJeb] Brents method threw a timeout error (supressed)"); }
+            var finalDv = dV * burnDirection;
 
-            return dV * burnDirection;
+            Debug.Log($"[DeltaVToChangePeriapsis] finalDv [{finalDv.x}, {finalDv.y}, {finalDv.z}] m/s");
+
+            return finalDv;
         }
 
         public static bool ApoapsisIsHigher(double ApR, double than)
@@ -172,24 +202,41 @@ namespace MuMech
 
             //sanitize input
             if (newApR > 0) newApR = Math.Max(newApR, radius + 1);
+            Debug.Log($"[DeltaVToChangeApoapsis] newApR {newApR}");
 
             //are we raising or lowering the periapsis?
             bool raising = ApoapsisIsHigher(newApR, o.Apoapsis);
+            Debug.Log($"[DeltaVToChangeApoapsis] raising {raising}");
 
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT);
+            Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT); // Why do we use o.Prograde here and o.Horizontal for DeltaVToChangePeriapsis?
+            Debug.Log($"[DeltaVToChangeApoapsis] burnDirection [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
 
             double minDeltaV = 0;
             // 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
             double maxDeltaV = raising ? 10000 : o.SwappedOrbitalVelocityAtUT(UT).magnitude;
+            Debug.Log($"[DeltaVToChangeApoapsis] maxDeltaV {maxDeltaV}");
 
             // solve for the reciprocal of the ApR which is a continuous function that avoids the parabolic singularity and
             // change of sign for hyperbolic orbits.
-            Func<double, object, double> f = delegate(double testDeltaV, object ign) { return 1.0/o.PerturbedOrbit(UT, testDeltaV * burnDirection).Apoapsis - 1.0/newApR;  };
+            Func<double, object, double> f = delegate(double testDeltaV, object ign)
+            {
+                return 1.0/o.PerturbedOrbit(UT, testDeltaV * burnDirection).Apoapsis - 1.0/newApR;
+            };
             double dV = 0;
-            try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
-            catch (TimeoutException) { Debug.Log("[MechJeb] Brents method threw a timeout error (supressed)"); }
+            try
+            {
+                dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null);
+            }
+            catch (TimeoutException)
+            {
+                Debug.Log("[MechJeb] Brents method threw a timeout error (supressed)");
+            }
 
-            return dV * burnDirection;
+            var finalDv = dV * burnDirection;
+
+            Debug.Log($"[DeltaVToChangeApoapsis] finalDv [{finalDv.x}, {finalDv.y}, {finalDv.z}] m/s");
+
+            return finalDv;
         }
 
         //Computes the heading of the ground track of an orbit with a given inclination at a given latitude.
@@ -314,7 +361,8 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeToMatchPlanesAscending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
         {
             burnUT = o.TimeOfAscendingNode(target, UT);
-            Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT));
+            if (burnUT < UT) { burnUT += o.period; }
+            Vector3d desiredHorizontal = Vector3d.Cross(target.NormalPlus(burnUT), o.Up(burnUT)); // was target.SwappedOrbitNormal()
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(burnUT), o.SwappedOrbitalVelocityAtUT(burnUT));
             Vector3d desiredHorizontalVelocity = actualHorizontalVelocity.magnitude * desiredHorizontal;
             return desiredHorizontalVelocity - actualHorizontalVelocity;
@@ -326,6 +374,7 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeToMatchPlanesDescending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
         {
             burnUT = o.TimeOfDescendingNode(target, UT);
+            if (burnUT < UT) { burnUT += o.period; }
             Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT));
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(burnUT), o.SwappedOrbitalVelocityAtUT(burnUT));
             Vector3d desiredHorizontalVelocity = actualHorizontalVelocity.magnitude * desiredHorizontal;
