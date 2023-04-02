@@ -55,19 +55,20 @@ namespace MuMech
             double circSpeed2 = o.SwappedOrbitalVelocityAtUT(UT).magnitude;
             Vector3d horizontal = o.Horizontal(UT);
             Vector3d prograde = o.Prograde(UT);
-            // Vector3d newPrograde = Vector3d.Cross(o.SwappedOrbitNormal(), o.SwappedRelativePositionAtUT(UT).normalized).normalized;
             Vector3d newPrograde = Vector3d.Exclude(o.RadialPlus(UT), o.Horizontal(UT)).normalized;
             Vector3d desiredVelocity = circSpeed1 * newPrograde;
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
-            Debug.Log($"DeltaVToCircularize: circSpeed1 {circSpeed1} m/s");
-            Debug.Log($"DeltaVToCircularize: circSpeed2 {circSpeed2} m/s");
-            Debug.Log($"DeltaVToCircularize: Delta-v {circSpeed1 - circSpeed2} m/s");
-            Debug.Log($"DeltaVToCircularize: Horizontal Vec [{horizontal.x},{horizontal.y}, {horizontal.z}]");
-            Debug.Log($"DeltaVToCircularize: Prograde Vec   [{prograde.x},{prograde.y}, {prograde.z}]");
-            Debug.Log($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
-            Debug.Log($"DeltaVToCircularize: desiredVelocity [{desiredVelocity.x},{desiredVelocity.y}, {desiredVelocity.z}] m/s");
-            Debug.Log($"DeltaVToCircularize: actualVelocity  [{actualVelocity.x},{actualVelocity.y}, {actualVelocity.z}] m/s");
-            return desiredVelocity - actualVelocity;
+            Debug.Log($"[DeltaVToCircularize] circSpeed1 {circSpeed1} m/s");
+            Debug.Log($"[DeltaVToCircularize] circSpeed2 {circSpeed2} m/s");
+            Debug.Log($"[DeltaVToCircularize] Delta-v {circSpeed1 - circSpeed2} m/s");
+            Debug.Log($"[DeltaVToCircularize] Horizontal Vec [{horizontal.x},{horizontal.y}, {horizontal.z}]");
+            Debug.Log($"[DeltaVToCircularize] Prograde Vec   [{prograde.x},{prograde.y}, {prograde.z}]");
+            Debug.Log($"[DeltaVToCircularize] New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
+            Debug.Log($"[DeltaVToCircularize] desiredVelocity [{desiredVelocity.x},{desiredVelocity.y}, {desiredVelocity.z}] m/s");
+            Debug.Log($"[DeltaVToCircularize] actualVelocity  [{actualVelocity.x},{actualVelocity.y}, {actualVelocity.z}] m/s");
+            var deltaV = actualVelocity - desiredVelocity;
+            Debug.Log($"[DeltaVToCircularize] deltaV  [{deltaV.x},{deltaV.y}, {deltaV.z}] m/s");
+            return deltaV;
         }
 
         //Computes the deltaV of the burn needed to circularize an orbit at a given Ap or Pe UT.
@@ -112,7 +113,7 @@ namespace MuMech
             double verticalV = Math.Sqrt(Math.Abs(2 * kineticE - horizontalV * horizontalV)); //vertical velocity of new orbit at UT
             Debug.Log($"[DeltaVToEllipticize]: verticalV {verticalV} m");
 
-            Vector3d actualVelocity = o.GetOrbitalVelocityAtUTZup(UT); // was o.SwappedOrbitalVelocityAtUT(UT);
+            Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT); // was o.SwappedOrbitalVelocityAtUT(UT); tried GetOrbitalVelocityAtUTZup
             Debug.Log($"[DeltaVToEllipticize]: actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
 
             //untested:
@@ -161,7 +162,7 @@ namespace MuMech
             else
             {
                 //when lowering periapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
-                maxDeltaV = Math.Abs(Vector3d.Dot(o.GetOrbitalVelocityAtUTZup(UT), burnDirection)); // was o.SwappedOrbitalVelocityAtUT(UT)
+                maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection)); // was o.SwappedOrbitalVelocityAtUT(UT) tried GetOrbitalVelocityAtUTZup
             }
             Debug.Log($"[DeltaVToChangePeriapsis] maxDeltaV {maxDeltaV} m/s");
 
@@ -342,17 +343,36 @@ namespace MuMech
         //   - if newInclination < 0, do the more expensive burn to set that inclination
         public static Vector3d DeltaVToChangeInclination(PatchedConicsOrbit o, double UT, double newInclination)
         {
-            double latitude, longitude, altitude;
-            KSP.Sim.Position position = o.Position; // was: o.SwappedAbsolutePositionAtUT(UT)
+            double latitude, longitude, altitude, latDeg;
+            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT); // was: o.SwappedAbsolutePositionAtUT(UT), ISSUE all the o.*position*() values return Vector3d, need type Position
+            KSP.Sim.Position position = new KSP.Sim.Position // SOLUTION: Make a new KSP.Sim.Position variable, tried = o.GetTruePositionAtUT(UT)
+            {
+                localPosition = thisPosition              // and populate the localPosition component - hope that's all we need!
+            };
             o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
-            double desiredHeading = HeadingForInclination(newInclination, latitude);
-            Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.SwappedOrbitalVelocityAtUT(UT));
-            Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
+            latDeg = latitude * UtilMath.Rad2Deg;
+            Debug.Log($"[DeltaVToChangeInclination] latitude {latitude} = {latDeg}°, newInclination {newInclination}°");
+            double desiredHeading = HeadingForInclination(newInclination, latDeg);
+            Debug.Log($"[DeltaVToChangeInclination] desiredHeading {desiredHeading}°");
+            Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.GetOrbitalVelocityAtUTZup(UT));  // was o.SwappedOrbitalVelocityAtUT(UT)
+            Debug.Log($"[DeltaVToChangeInclination] actualHorizontalVelocity* [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
+            actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.SwappedOrbitalVelocityAtUT(UT));  // tried o.GetOrbitalVelocityAtUTZup(UT)
+            Debug.Log($"[DeltaVToChangeInclination] actualHorizontalVelocity [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
+            Vector3d eastComponent = -1 * actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
+            Debug.Log($"[DeltaVToChangeInclination] eastComponent* [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
+            eastComponent *= -1;
+            Debug.Log($"[DeltaVToChangeInclination] eastComponent [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
             Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeading) * o.North(UT);
+            Debug.Log($"[DeltaVToChangeInclination] northComponent [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
             if (Vector3d.Dot(actualHorizontalVelocity, northComponent) < 0) northComponent *= -1;
+            Debug.Log($"[DeltaVToChangeInclination] northComponent [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
             if (MuUtils.ClampDegrees180(newInclination) < 0) northComponent *= -1;
+            Debug.Log($"[DeltaVToChangeInclination] northComponent [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
             Vector3d desiredHorizontalVelocity = eastComponent + northComponent;
-            return desiredHorizontalVelocity - actualHorizontalVelocity;
+            Debug.Log($"[DeltaVToChangeInclination] desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
+            var deltaV = desiredHorizontalVelocity - actualHorizontalVelocity;
+            Debug.Log($"[DeltaVToChangeInclination] deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
+            return deltaV;
         }
 
         //Computes the delta-V and time of a burn to match planes with the target orbit. The output burnUT
@@ -362,7 +382,7 @@ namespace MuMech
         {
             burnUT = o.TimeOfAscendingNode(target, UT);
             if (burnUT < UT) { burnUT += o.period; }
-            Vector3d desiredHorizontal = Vector3d.Cross(target.NormalPlus(burnUT), o.Up(burnUT)); // was target.SwappedOrbitNormal()
+            Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT)); // was target.SwappedOrbitNormal(), tried target.NormalPlus(burnUT)
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(burnUT), o.SwappedOrbitalVelocityAtUT(burnUT));
             Vector3d desiredHorizontalVelocity = actualHorizontalVelocity.magnitude * desiredHorizontal;
             return desiredHorizontalVelocity - actualHorizontalVelocity;
@@ -768,15 +788,16 @@ namespace MuMech
                 alglib.minlmsetlc(state, C, CT);
             alglib.minlmsetcond(state, eps, maxIter);
 
-            LambertProblem prob = new LambertProblem();
-
-            prob.pos = pos;
-            prob.vel = vel;
-            prob.tpos = tpos;
-            prob.tvel = tvel;
-            prob.GM = GM;
-            prob.shortway = shortway;
-            prob.intercept_only = intercept_only;
+            LambertProblem prob = new LambertProblem
+            {
+                pos = pos,
+                vel = vel,
+                tpos = tpos,
+                tvel = tvel,
+                GM = GM,
+                shortway = shortway,
+                intercept_only = intercept_only
+            };
 
             alglib.minlmoptimize(state, LambertCost, null, prob);
             alglib.minlmresultsbuf(state, ref x, rep);
@@ -1110,15 +1131,17 @@ namespace MuMech
 
             //construct an orbit at the target radius around the primary, in the same plane as the moon. This is a fake target
             // The inputs look like what would be in a KeplerOrbitState, but using that doesn't work?
-            PatchedConicsOrbit primaryOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
-            primaryOrbit.referenceBody = primary;
-            primaryOrbit.inclination = moon.Orbit.inclination;
-            primaryOrbit.eccentricity = moon.Orbit.eccentricity;
-            primaryOrbit.semiMajorAxis = targetPrimaryRadius;
-            primaryOrbit.longitudeOfAscendingNode = moon.Orbit.longitudeOfAscendingNode;
-            primaryOrbit.argumentOfPeriapsis = moon.Orbit.argumentOfPeriapsis;
-            primaryOrbit.meanAnomalyAtEpoch = moon.Orbit.meanAnomalyAtEpoch;
-            primaryOrbit.epoch = moon.Orbit.epoch;
+            PatchedConicsOrbit primaryOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel)
+            {
+                referenceBody = primary,
+                inclination = moon.Orbit.inclination,
+                eccentricity = moon.Orbit.eccentricity,
+                semiMajorAxis = targetPrimaryRadius,
+                longitudeOfAscendingNode = moon.Orbit.longitudeOfAscendingNode,
+                argumentOfPeriapsis = moon.Orbit.argumentOfPeriapsis,
+                meanAnomalyAtEpoch = moon.Orbit.meanAnomalyAtEpoch,
+                epoch = moon.Orbit.epoch
+            };
 
             return DeltaVAndTimeForInterplanetaryTransferEjection(o, UT, primaryOrbit, false, out burnUT);
         }
@@ -1281,7 +1304,7 @@ namespace MuMech
             double target_sma = 0;
 
             while (oppositeRadius-o.referenceBody.radius < o.referenceBody.TimeWarpAltitudeOffset*4 && N < 20)
-            { // was o.referenceBody.timeWarpAltitudeLimits[4]
+            { // was o.referenceBody.timeWarpAltitudeLimits[4] -> o.referenceBody.TimeWarpAltitudeOffset*4
                 N++;
                 double target_period = o.referenceBody.rotationPeriod * (LongitudeOffset / 360 + N);
                 target_sma = Math.Pow ((o.referenceBody.gravParameter * target_period * target_period) / (4 * Math.PI * Math.PI), 1.0 / 3.0); // cube roo
@@ -1316,7 +1339,7 @@ namespace MuMech
         //public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT, out PatchedConicsOrbit intercept)
         //{
         //    PatchedConicsOrbit orbit = OrbitPool.Borrow();
-        //    orbit.UpdateFromStateVectors(initial.GetRelativePositionAtUT(burnUT), initial.GetOrbitalVelocityAtUTZup(burnUT) + dV.xzy, initial.referenceBody, burnUT);
+        //    orbit.UpdateFromStateVectors(initial.SwappedRelativePositionAtUT(burnUT), initial.SwappedOrbitalVelocityAtUT(burnUT) + dV.xzy, initial.referenceBody, burnUT);
         //    orbit.StartUT = burnUT;
         //    orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
         //    PatchedConicsOrbit next_orbit = OrbitPool.Borrow();
