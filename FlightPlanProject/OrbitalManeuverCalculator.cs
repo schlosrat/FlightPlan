@@ -43,6 +43,19 @@ namespace MuMech
         // Prograde is Vector3d.z
         // Normal   is Vector3d.y
         // Radial   is Vector3d.x
+        public static Vector3d DvToBurnVec(PatchedConicsOrbit o, Vector3d dV, double UT)
+        {
+            Vector3d burnVec;
+            burnVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));
+            burnVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));
+            burnVec.z = Vector3d.Dot(dV, -1 * o.Prograde(UT));
+            return burnVec;
+        }
+
+        public static Vector3d BurnVecToDv(PatchedConicsOrbit o, Vector3d burnVec, double UT)
+        {
+            return burnVec.x * o.RadialPlus(UT) + burnVec.y * o.NormalPlus(UT) - burnVec.z * o.Prograde(UT);
+        }
 
         //ManualLogSource logger;
         //logger = BepInEx.Logging.Logger.CreateLogSource("MuMech");
@@ -117,38 +130,38 @@ namespace MuMech
         public static Vector3d DeltaVToEllipticize(PatchedConicsOrbit o, double UT, double newPeR, double newApR)
         {
             double radius = o.Radius(UT);
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: radius {radius} m");
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] radius {radius} m");
 
             //sanitize inputs
             newPeR = MuUtils.Clamp(newPeR, 0 + 1, radius - 1);
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: newPeR {newPeR} m");
             newApR = Math.Max(newApR, radius + 1);
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: newApR {newApR} m");
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] newPeR {newPeR} m");
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] newApR {newApR} m");
 
             double GM = o.referenceBody.gravParameter;
             double E = -GM / (newPeR + newApR); //total energy per unit mass of new orbit
             double L = Math.Sqrt(Math.Abs((Math.Pow(E * (newApR - newPeR), 2) - GM * GM) / (2 * E))); //angular momentum per unit mass of new orbit
             double kineticE = E + GM / radius; //kinetic energy (per unit mass) of new orbit at UT
             double horizontalV = L / radius;   //horizontal velocity of new orbit at UT
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: horizontalV {horizontalV} m/s");
             double verticalV = Math.Sqrt(Math.Abs(2 * kineticE - horizontalV * horizontalV)); //vertical velocity of new orbit at UT
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: verticalV {verticalV} m/s");
 
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT); // was o.SwappedOrbitalVelocityAtUT(UT); tried GetOrbitalVelocityAtUTZup
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] horizontalV {horizontalV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] verticalV {verticalV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
 
             //untested:
-            // verticalV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
-            // FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: verticalV {verticalV} m");
+            verticalV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: verticalV* {verticalV} m/s");
 
+            Vector3d desiredVelocity = horizontalV * o.Horizontal(UT) + verticalV * o.Up(UT);
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToCircularize] Horizontal Vec [{o.Horizontal(UT).x},{o.Horizontal(UT).y}, {o.Horizontal(UT).z}]");
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToCircularize] Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
-            Vector3d desiredVelocity = horizontalV * o.Horizontal(UT) + verticalV * o.Up(UT);
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
 
-            var finalDeltaV = desiredVelocity - actualVelocity;
-            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: finalDeltaV [{finalDeltaV.x}, {finalDeltaV.y}, {finalDeltaV.z}] m/s");
-            return finalDeltaV;
+            var deltaV = desiredVelocity - actualVelocity;
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] finalDeltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+            return deltaV;
         }
 
         //Computes the delta-V of the burn required to attain a given periapsis, starting from
@@ -236,7 +249,7 @@ namespace MuMech
             bool raising = ApoapsisIsHigher(newApR, o.Apoapsis);
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToChangeApoapsis] raising {raising}");
 
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT); // Why do we use o.Prograde here and o.Horizontal for DeltaVToChangePeriapsis?
+            Vector3d burnDirection = (raising ? 1 : -1) * o.Horizontal(UT); // Why do we use o.Prograde here and o.Horizontal for DeltaVToChangePeriapsis? Trying o.Horizontal...
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToChangeApoapsis] burnDirection [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
 
             double minDeltaV = 0;
