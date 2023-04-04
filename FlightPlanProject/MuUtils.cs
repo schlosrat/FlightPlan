@@ -166,9 +166,10 @@ namespace MuMech
         public static PatchedConicsOrbit OrbitFromStateVectors(Vector3d pos, Vector3d vel, CelestialBodyComponent body, double UT) // was: CelestialBody
         {
             PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
-            KSP.Sim.Position position = new KSP.Sim.Position(body.coordinateSystem, OrbitExtensions.SwapYZ(pos - body.Position.localPosition));
-            KSP.Sim.Velocity velocity = new KSP.Sim.Velocity(body.relativeToMotion, OrbitExtensions.SwapYZ(vel));
+            KSP.Sim.Position position = new KSP.Sim.Position(body.Orbit.coordinateSystem, OrbitExtensions.SwapYZ(pos - body.Position.localPosition)); // tried body.coordinateSystem
+            KSP.Sim.Velocity velocity = new KSP.Sim.Velocity(body.celestialMotionFrame , OrbitExtensions.SwapYZ(vel)); // tried body.relativeToMotion
             ret.UpdateFromStateVectors(position, velocity, body, UT); // was: body.position
+            // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
             if (double.IsNaN(ret.argumentOfPeriapsis))
             {
                 // was: ret.LAN -> longitudeOfAscendingNode
