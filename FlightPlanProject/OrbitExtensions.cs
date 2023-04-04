@@ -12,6 +12,7 @@ using UnityEngine;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
+using FlightPlan;
 //using KSP.Sim.State;
 //using KSP.Sim.Maneuver;
 //using SpaceWarp;
@@ -408,11 +409,11 @@ namespace MuMech
             Vector3d ret = -o.Apoapsis * vectorToPe; // was: o.Apr - Apoapsis, should this be o.ApoapsisArl?
             if (double.IsNaN(ret.x))
             {
-                Debug.LogError("OrbitExtensions.SwappedRelativePositionAtApoapsis got a NaN result!");
-                Debug.LogError("o.LAN = " + o.longitudeOfAscendingNode); // was: o.LAN -> longitudeOfAscendingNode
-                Debug.LogError("o.inclination = " + o.inclination);
-                Debug.LogError("o.argumentOfPeriapsis = " + o.argumentOfPeriapsis);
-                Debug.LogError("o.GetRelativeOrbitNormal() = " + o.SwappedOrbitNormal()); // tried: GetRelativeOrbitNormal()
+                FlightPlanPlugin.Logger.LogError("OrbitExtensions.SwappedRelativePositionAtApoapsis got a NaN result!");
+                FlightPlanPlugin.Logger.LogError("o.LAN = " + o.longitudeOfAscendingNode); // was: o.LAN -> longitudeOfAscendingNode
+                FlightPlanPlugin.Logger.LogError("o.inclination = " + o.inclination);
+                FlightPlanPlugin.Logger.LogError("o.argumentOfPeriapsis = " + o.argumentOfPeriapsis);
+                FlightPlanPlugin.Logger.LogError("o.GetRelativeOrbitNormal() = " + o.SwappedOrbitNormal()); // tried: GetRelativeOrbitNormal()
             }
             return ret;
         }
@@ -515,7 +516,7 @@ namespace MuMech
         //large enough that it never attains the given true anomaly
         public static double TimeOfTrueAnomaly(this PatchedConicsOrbit o, double trueAnomaly, double UT)
         {
-            Debug.LogWarning($"ManeuverNodeController.OrbitExtensions: trueAnomaly: {trueAnomaly*UtilMath.Deg2Rad}");
+            FlightPlanPlugin.Logger.LogWarning($"ManeuverNodeController.OrbitExtensions: trueAnomaly: {trueAnomaly*UtilMath.Deg2Rad}");
             return o.GetUTforTrueAnomaly(trueAnomaly*UtilMath.Deg2Rad, o.period);
             //return o.UTAtMeanAnomaly(o.GetMeanAnomalyAtEccentricAnomaly(o.GetEccentricAnomalyAtTrueAnomaly(trueAnomaly)), UT);
         }

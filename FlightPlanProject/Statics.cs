@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using MechJebLib.Primitives;
+using FlightPlan;
 
 namespace MechJebLib.Utils
 {
@@ -284,7 +285,7 @@ namespace MechJebLib.Utils
 
         public static void Log(string message)
         {
-            Logger.Log(message);
+            FlightPlanPlugin.Logger.LogInfo(message);
         }
     }
 }
