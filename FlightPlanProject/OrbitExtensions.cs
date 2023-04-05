@@ -6,23 +6,11 @@
  * This work is relaesed under the same license(s) inherited from the originating version.
  */
 
-//using BepInEx;
-//using System;
-using UnityEngine;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using FlightPlan;
-//using KSP.Sim.State;
-//using KSP.Sim.Maneuver;
-//using SpaceWarp;
-//using SpaceWarp.API;
-//using SpaceWarp.API.Mods;
-//using SpaceWarp.API.Assets;
-//using SpaceWarp.API.UI;
-//using SpaceWarp.API.UI.Appbar;
-//using KSP.UI.Binding;
-// using KSP.Api;
+
 
 namespace MuMech
 {
@@ -529,7 +517,9 @@ namespace MuMech
         //occurs at a true anomaly that a does not actually ever attain
         public static double TimeOfAscendingNode(this PatchedConicsOrbit a, IKeplerOrbit b, double UT)
         {
-            return a.TimeOfTrueAnomaly(a.AscendingNodeTrueAnomaly(b), UT);
+            var UTAN = a.TimeOfTrueAnomaly(a.AscendingNodeTrueAnomaly(b), UT);
+            if (UTAN < UT) UTAN += a.period;
+            return UTAN;
         }
 
         //Returns the next time at which a will cross its descending node with b.
@@ -540,7 +530,9 @@ namespace MuMech
         //occurs at a true anomaly that a does not actually ever attain
         public static double TimeOfDescendingNode(this PatchedConicsOrbit a, IKeplerOrbit b, double UT)
         {
-            return a.TimeOfTrueAnomaly(a.DescendingNodeTrueAnomaly(b), UT);
+            var UTDN = a.TimeOfTrueAnomaly(a.DescendingNodeTrueAnomaly(b), UT);
+            if (UTDN < UT) UTDN += a.period;
+            return UTDN;
         }
 
         //Returns the next time at which the orbiting object will cross the equator
