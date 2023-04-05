@@ -314,17 +314,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         activeVessel = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
         currentTarget = activeVessel?.TargetObject;
 
-        //try { targetPeR = double.Parse(targetPeAStr) + activeVessel.Orbit.referenceBody.radius; }
-        //catch { targetPeR = 0; }
-        //try { targetApR = double.Parse(targetApAStr) + activeVessel.Orbit.referenceBody.radius; }
-        //catch { targetApR = 0; }
-        //try { targetPeR1 = double.Parse(targetPeAStr1) + activeVessel.Orbit.referenceBody.radius; }
-        //catch { targetPeR1 = 0;}
-        //try { targetApR1 = double.Parse(targetApAStr1) + activeVessel.Orbit.referenceBody.radius; }
-        //catch { targetApR1 = 0; }
-        //try { targetInc = double.Parse(targetIncStr); }
-        //catch { targetInc = 0; }
-
         // Set the UI
         if (interfaceEnabled)
         {
@@ -618,6 +607,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
+
     private void DrawButtonWithTextField(string entryName, ref bool button, ref string textEntry, string unit = "")
     {
         GUILayout.BeginHorizontal();
@@ -631,6 +621,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
+
     private void DrawButtonWithDualTextField(string entryName1, string entryName2, ref bool button, ref string textEntry1, ref string textEntry2, string unit = "")
     {
         GUILayout.BeginHorizontal();
@@ -648,55 +639,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.Space(spacingAfterEntry);
     }
 
-
     private void handleButtons()
     {
-        //if (currentNode == null)
-        //{
-        //    if (addNode)
-        //    {
-        //        // Add an empty maneuver node
-        //        Logger.LogInfo("Adding New Node");
-
-        //        // Define empty node data
-        //        burnParams = Vector3d.zero;
-        //        double UT = game.UniverseModel.UniversalTime;
-        //        if (activeVessel.Orbit.eccentricity < 1)
-        //        {
-        //            UT += activeVessel.Orbit.TimeToAp;
-        //        }
-
-        //        // Create the nodeData structure
-        //        ManeuverNodeData nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, game.UniverseModel.UniversalTime);
-
-        //        // Populate the nodeData structure
-        //        nodeData.BurnVector.x = 0;
-        //        nodeData.BurnVector.y = 0;
-        //        nodeData.BurnVector.z = 0;
-        //        nodeData.Time = UT;
-
-        //        // Add the new node to the vessel
-        //        GameManager.Instance.Game.SpaceSimulation.Maneuvers.AddNodeToVessel(nodeData);
-
-        //        // Update the map so the gizmo will be there
-        //        MapCore mapCore = null;
-        //        Game.Map.TryGetMapCore(out mapCore);
-
-        //        mapCore.map3D.ManeuverManager.GetNodeDataForVessels();
-        //        mapCore.map3D.ManeuverManager.UpdatePositionForGizmo(nodeData.NodeID);
-        //        mapCore.map3D.ManeuverManager.UpdateAll();
-
-        //        // Refresh stuff
-        //        activeVessel.SimulationObject.ManeuverPlan.UpdateChangeOnNode(nodeData, burnParams);
-        //        activeVessel.SimulationObject.ManeuverPlan.RefreshManeuverNodeState(0);
-
-        //        // Set teh currentNode to be the node we just added
-        //        currentNode = nodeData;
-        //        // addNode = false;
-        //    }
-        //    else return;
-        //}
-
         if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer)
         {
             Vector3d burnParams;
@@ -809,8 +753,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo("Match Planes at AN");
                 double burnUT;
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(activeVessel.Orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-                //if (burnUT < UT)
-                //    burnUT += activeVessel.Orbit.period;
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
@@ -821,8 +763,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo("Match Planes at DN");
                 double burnUT;
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(activeVessel.Orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-                //if (burnUT < UT)
-                //    burnUT += activeVessel.Orbit.period;
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
@@ -909,7 +849,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             {
                 Logger.LogInfo("Match Velocity with Target at Closest Approach");
                 var burnUT = UT + 30;
-                // double closestApproachTime = activeVessel.Orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
                 var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(activeVessel.Orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
@@ -925,71 +864,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT);
             }
-
-            //else if (snapToAp) // Snap the maneuver time to the next Ap
-            //{
-            //    currentNode.Time = game.UniverseModel.UniversalTime + game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID).Orbit.TimeToAp;
-            //}
-            //else if (snapToPe) // Snap the maneuver time to the next Pe
-            //{
-            //    currentNode.Time = game.UniverseModel.UniversalTime + game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID).Orbit.TimeToPe;
-            //}
-            //else if (snapToANe) // Snap the maneuver time to the AN relative to the equatorial plane
-            //{
-            //    Logger.LogInfo("Snapping Maneuver Time to TimeOfAscendingNodeEquatorial");
-            //    var UT = game.UniverseModel.UniversalTime;
-            //    var TAN = activeVessel.Orbit.TimeOfAscendingNodeEquatorial(UT);
-            //    var ANTA = activeVessel.Orbit.AscendingNodeEquatorialTrueAnomaly();
-            //    // var TAN = game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID).Orbit.TimeOfAscendingNodeEquatorial(UT);
-            //    currentNode.Time = TAN; // game.UniverseModel.UniversalTime + TAN;
-            //    Logger.LogInfo($"UT: {UT}");
-            //    Logger.LogInfo($"AscendingNodeEquatorialTrueAnomaly: {ANTA}");
-            //    Logger.LogInfo($"TimeOfAscendingNodeEquatorial: {TAN}");
-            //    // Logger.LogInfo($"UT + TimeOfAscendingNodeEquatorial: {TAN + UT}");
-            //}
-            //else if (snapToDNe) // Snap the maneuver time to the DN relative to the equatorial plane
-            //{
-            //    Logger.LogInfo("Snapping Maneuver Time to TimeOfDescendingNodeEquatorial");
-            //    var UT = game.UniverseModel.UniversalTime;
-            //    var TDN = activeVessel.Orbit.TimeOfDescendingNodeEquatorial(UT);
-            //    var DNTA = activeVessel.Orbit.DescendingNodeEquatorialTrueAnomaly();
-            //    // var TDN = game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID).Orbit.TimeOfDescendingNodeEquatorial(UT);
-            //    currentNode.Time = TDN; // game.UniverseModel.UniversalTime + TDN;
-            //    Logger.LogInfo($"UT: {UT}");
-            //    Logger.LogInfo($"DescendingNodeEquatorialTrueAnomaly: {DNTA}");
-            //    Logger.LogInfo($"TimeOfDescendingNodeEquatorial: {TDN}");
-            //    // Logger.LogInfo($"UT + TimeOfDescendingNodeEquatorial: {TDN + UT}");
-            //}
-            //else if (snapToANt) // Snap the maneuver time to the AN relative to selected target's orbit
-            //{
-            //    Logger.LogInfo("Snapping Maneuver Time to TimeOfAscendingNode");
-            //    var UT = game.UniverseModel.UniversalTime;
-            //    var TANt = activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT);
-            //    var ANTA = activeVessel.Orbit.AscendingNodeTrueAnomaly(currentTarget.Orbit);
-            //    // var TANt = game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID).Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT);
-            //    currentNode.Time = TANt; // game.UniverseModel.UniversalTime + TANt;
-            //    Logger.LogInfo($"UT: {UT}");
-            //    Logger.LogInfo($"AscendingNodeTrueAnomaly: {ANTA}");
-            //    Logger.LogInfo($"TimeOfAscendingNode: {TANt}");
-            //    // Logger.LogInfo($"UT + TimeOfAscendingNode: {TANt + UT}");
-            //}
-            //else if (snapToDNt) // Snap the maneuver time to the DN relative to selected target's orbit
-            //{
-            //    Logger.LogInfo("Snapping Maneuver Time to TimeOfDescendingNode");
-            //    var UT = game.UniverseModel.UniversalTime;
-            //    var TDNt = activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT);
-            //    var DNTA = activeVessel.Orbit.DescendingNodeTrueAnomaly(currentTarget.Orbit);
-            //    // var TDNt = game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID).Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT);
-            //    currentNode.Time = TDNt; // game.UniverseModel.UniversalTime + TDNt;
-            //    Logger.LogInfo($"UT: {UT}");
-            //    Logger.LogInfo($"DescendingNodeTrueAnomaly: {DNTA}");
-            //    Logger.LogInfo($"TimeOfDescendingNode: {TDNt}");
-            //    // Logger.LogInfo($"UT + TimeOfDescendingNode: {TDNt + UT}");
-            //}
-            //activeVessel.SimulationObject.ManeuverPlan.UpdateChangeOnNode(currentNode, burnParams);
-            //activeVessel.SimulationObject.ManeuverPlan.RefreshManeuverNodeState(0);
-            //// game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID)?.SimulationObject.FindComponent<ManeuverPlanComponent>().UpdateChangeOnNode(currentNode, burnParams);
-            //// game.UniverseModel.FindVesselComponent(currentNode.RelatedSimID)?.SimulationObject.FindComponent<ManeuverPlanComponent>().RefreshManeuverNodeState(0);
         }
     }
 
