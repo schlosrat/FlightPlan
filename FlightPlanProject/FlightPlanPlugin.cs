@@ -46,13 +46,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer;
 
     // Target Selection
-    private enum TargetOptions
-    {
-        Kerbin,
-        Mun,
-        Minmus,
-        Duna
-    }
+    //private enum TargetOptions
+    //{
+    //    Kerbin,
+    //    Mun,
+    //    Minmus,
+    //    Duna
+    //}
 
     // Body selection.
     private string selectedBody = "Kerbin";
@@ -60,11 +60,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
 
-    private TargetOptions selectedTargetOption = TargetOptions.Mun;
-    private readonly List<string> targetOptions = new List<string> { "Kerbin", "Mun", "Minmus", "Duna" };
-    private bool selectingTargetOption = false;
-    private static Vector2 scrollPositionTargetOptions;
-    private bool applyTargetOption;
+    //private TargetOptions selectedTargetOption = TargetOptions.Mun;
+    //private readonly List<string> targetOptions = new List<string> { "Kerbin", "Mun", "Minmus", "Duna" };
+    //private bool selectingTargetOption = false;
+    //private static Vector2 scrollPositionTargetOptions;
+    //private bool applyTargetOption;
 
     // mod-wide data
     private VesselComponent activeVessel;
@@ -800,7 +800,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo("Course Correction");
                 double burnUT;
                 Vector3d deltaV;
-                if (currentTarget.GetType() == typeof(CelestialBodyComponent)) // For a target that is a celestial
+                var tgtType = currentTarget.GetType();
+                Logger.LogInfo($"currentTarget.GetType() = {tgtType}");
+                if (tgtType == typeof(CelestialBodyComponent)) // For a target that is a celestial
                 {
                     Logger.LogInfo($"Seeking Solution for Celestial Target");
                     double finalPeR = currentTarget.Orbit.referenceBody.radius + 50000; // m (PeR at celestial target)                           
