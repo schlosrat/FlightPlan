@@ -139,13 +139,13 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] newApR {newApR} m");
 
             double GM = o.referenceBody.gravParameter;
-            double E = -GM / (newPeR + newApR); //total energy per unit mass of new orbit
-            double L = Math.Sqrt(Math.Abs((Math.Pow(E * (newApR - newPeR), 2) - GM * GM) / (2 * E))); //angular momentum per unit mass of new orbit
-            double kineticE = E + GM / radius; //kinetic energy (per unit mass) of new orbit at UT
-            double horizontalV = L / radius;   //horizontal velocity of new orbit at UT
+            double E = -GM / (newPeR + newApR); // total energy per unit mass of new orbit
+            double L = Math.Sqrt(Math.Abs((Math.Pow(E * (newApR - newPeR), 2) - GM * GM) / (2 * E))); // angular momentum per unit mass of new orbit
+            double kineticE = E + GM / radius; // kinetic energy (per unit mass) of new orbit at UT
+            double horizontalV = L / radius;   // horizontal velocity of new orbit at UT
             double verticalV = Math.Sqrt(Math.Abs(2 * kineticE - horizontalV * horizontalV)); //vertical velocity of new orbit at UT
 
-            Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT); // was o.SwappedOrbitalVelocityAtUT(UT); tried GetOrbitalVelocityAtUTZup
+            Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT); // tried GetOrbitalVelocityAtUTZup
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] horizontalV {horizontalV} m/s");
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] verticalV {verticalV} m/s");
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
@@ -154,7 +154,8 @@ namespace MuMech
             verticalV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize]: verticalV* {verticalV} m/s");
 
-            Vector3d desiredVelocity = horizontalV * o.Horizontal(UT) + verticalV * o.Up(UT);
+            Vector3d desiredVelocity = horizontalV * o.Horizontal(UT) + verticalV * o.Up(UT); // tried o.Prograde(UT) in place of o.Horizontal, tried o.RadialPlus(UT) in place of o.Up
+            FlightPlanPlugin.Logger.LogInfo($"[DeltaVToCircularize] Prograde Vec   [{o.Prograde(UT).x},{o.Prograde(UT).y}, {o.Prograde(UT).z}]");
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToCircularize] Horizontal Vec [{o.Horizontal(UT).x},{o.Horizontal(UT).y}, {o.Horizontal(UT).z}]");
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToCircularize] Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToEllipticize] desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
@@ -388,12 +389,13 @@ namespace MuMech
         public static Vector3d DeltaVToChangeInclination(PatchedConicsOrbit o, double UT, double newInclination)
         {
             double latitude, longitude, altitude, latDeg;
-            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT); // was: o.SwappedAbsolutePositionAtUT(UT), ISSUE all the o.*position*() values return Vector3d, need type Position
+            Vector3d thisPosition = o.GetRelativePositionAtUTZup(UT); //  SwappedAbsolutePositionAtUT(UT); // was: o.SwappedAbsolutePositionAtUT(UT), ISSUE all the o.*position*() values return Vector3d, need type Position
             KSP.Sim.Position position = new KSP.Sim.Position // SOLUTION: Make a new KSP.Sim.Position variable, tried = o.GetTruePositionAtUT(UT)
             {
                 localPosition = thisPosition              // and populate the localPosition component - hope that's all we need!
             };
             o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
+            // double latitude = o.referenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
             latDeg = latitude * UtilMath.Rad2Deg;
             FlightPlanPlugin.Logger.LogInfo($"[DeltaVToChangeInclination] latitude {latitude} = {latDeg}°, newInclination {newInclination}°");
             double desiredHeading = HeadingForInclination(newInclination, latDeg);
@@ -425,7 +427,7 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeToMatchPlanesAscending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
         {
             burnUT = o.TimeOfAscendingNode(target, UT);
-            if (burnUT < UT) { burnUT += o.period; }
+            // if (burnUT < UT) { burnUT += o.period; }
             Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT)); // was target.SwappedOrbitNormal(), tried target.NormalPlus(burnUT)
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(burnUT), o.SwappedOrbitalVelocityAtUT(burnUT));
             Vector3d desiredHorizontalVelocity = actualHorizontalVelocity.magnitude * desiredHorizontal;
@@ -438,7 +440,7 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeToMatchPlanesDescending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
         {
             burnUT = o.TimeOfDescendingNode(target, UT);
-            if (burnUT < UT) { burnUT += o.period; }
+            // if (burnUT < UT) { burnUT += o.period; }
             Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT));
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(burnUT), o.SwappedOrbitalVelocityAtUT(burnUT));
             Vector3d desiredHorizontalVelocity = actualHorizontalVelocity.magnitude * desiredHorizontal;
