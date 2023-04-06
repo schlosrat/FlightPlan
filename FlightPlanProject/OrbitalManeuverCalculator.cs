@@ -62,8 +62,8 @@ namespace MuMech
         //Computes the speed of a circular orbit of a given radius for a given body.
         public static double CircularOrbitSpeed(CelestialBodyComponent body, double radius)
         {
-            FlightPlanPlugin.Logger.LogInfo($"CircularOrbitSpeed: GM  {body.gravParameter}");
-            FlightPlanPlugin.Logger.LogInfo($"CircularOrbitSpeed: SMA {radius} m");
+            // FlightPlanPlugin.Logger.LogInfo($"CircularOrbitSpeed: GM  {body.gravParameter}");
+            // FlightPlanPlugin.Logger.LogInfo($"CircularOrbitSpeed: SMA {radius} m");
 
             //v = sqrt(GM/r)
             return Math.Sqrt(body.gravParameter / radius);
@@ -79,21 +79,21 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Delta-v {circSpeed1 - circSpeed2} m/s");
             Vector3d horizontal = o.Horizontal(UT); // = Vector3d.Exclude(o.Up(UT), o.Prograde(UT)).normalized;
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Horizontal Vec [{horizontal.x},{horizontal.y}, {horizontal.z}]");
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: RadialPlus Vec [{o.RadialPlus(UT).x},{o.RadialPlus(UT).y}, {o.RadialPlus(UT).z}]");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: NormalPlus Vec [{o.NormalPlus(UT).x},{o.NormalPlus(UT).y}, {o.NormalPlus(UT).z}]");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x},{o.Prograde(UT).y}, {o.Prograde(UT).z}]");
             Vector3d prograde = o.Prograde(UT); // = o.SwappedOrbitalVelocityAtUT(UT).normalized
             // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Prograde Vec   [{prograde.x},{prograde.y}, {prograde.z}]");
-            //Vector3d newPrograde = Vector3d.Cross(o.Up(UT), o.RadialPlus(UT)).normalized;
-            //FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
+            // Vector3d newPrograde = Vector3d.Cross(o.Up(UT), o.RadialPlus(UT)).normalized;
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
             Vector3d newPrograde = Vector3d.Cross(o.NormalPlus(UT), o.RadialPlus(UT)).normalized;
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
             // o.RadialPlut(UT) = Vector3d.Exclude(o.Prograde(UT), o.Up(UT)).normalized;
             // o.NormalPlus = o.SwappedOrbitNormal();
             // o.Up(UT) = o.SwappedRelativePositionAtUT(UT).normalized;
-            newPrograde = Vector3d.Exclude(o.RadialPlus(UT), o.Horizontal(UT)).normalized;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
+            // newPrograde = Vector3d.Exclude(o.RadialPlus(UT), o.Horizontal(UT)).normalized;
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
             Vector3d desiredVelocity = circSpeed1 * newPrograde;
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: desiredVelocity [{desiredVelocity.x},{desiredVelocity.y}, {desiredVelocity.z}] m/s");
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
@@ -199,7 +199,7 @@ namespace MuMech
             else
             {
                 //when lowering periapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
-                maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection)); // was o.SwappedOrbitalVelocityAtUT(UT) tried GetOrbitalVelocityAtUTZup
+                maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection)); // tried GetOrbitalVelocityAtUTZup
             }
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: maxDeltaV {maxDeltaV} m/s");
 
@@ -427,8 +427,7 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeToMatchPlanesAscending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
         {
             burnUT = o.TimeOfAscendingNode(target, UT);
-            // if (burnUT < UT) { burnUT += o.period; }
-            Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT)); // was target.SwappedOrbitNormal(), tried target.NormalPlus(burnUT)
+            Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT)); // tried target.NormalPlus(burnUT)
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(burnUT), o.SwappedOrbitalVelocityAtUT(burnUT));
             Vector3d desiredHorizontalVelocity = actualHorizontalVelocity.magnitude * desiredHorizontal;
             return desiredHorizontalVelocity - actualHorizontalVelocity;
@@ -440,7 +439,6 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeToMatchPlanesDescending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
         {
             burnUT = o.TimeOfDescendingNode(target, UT);
-            // if (burnUT < UT) { burnUT += o.period; }
             Vector3d desiredHorizontal = Vector3d.Cross(target.SwappedOrbitNormal(), o.Up(burnUT));
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(burnUT), o.SwappedOrbitalVelocityAtUT(burnUT));
             Vector3d desiredHorizontalVelocity = actualHorizontalVelocity.magnitude * desiredHorizontal;
@@ -835,7 +833,7 @@ namespace MuMech
                 alglib.minlmsetlc(state, C, CT);
             alglib.minlmsetcond(state, eps, maxIter);
 
-            LambertProblem prob = new LambertProblem
+            LambertProblem prob = new LambertProblem // Check this vs. old code!
             {
                 pos = pos,
                 vel = vel,
@@ -879,7 +877,7 @@ namespace MuMech
         //
         // FIXME: there's some very confusing nomenclature between DeltaVAndTimeForBiImpulsiveTransfer and this
         //        the minUT/maxUT values here are zero-centered on this methods UT.  the minUT/maxUT parameters to
-        //        the other method are proper UT times and not zero centered at all.\
+        //        the other method are proper UT times and not zero centered at all.
         // NEEDS: CalculateNextOrbit() from OrbitExtensions.cs - which needs PatchedConics.CalculatePatch (see that code for assumptions!)
         public static Vector3d DeltaVAndTimeForBiImpulsiveAnnealed(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double bestUT, double minDT = 0.0, double maxDT = Double.PositiveInfinity, bool intercept_only = false, bool fixed_ut = false)
         {
@@ -918,8 +916,8 @@ namespace MuMech
                 maxDT = 1.5 * o.SynodicPeriod(target);
 
             // figure the max transfer time of a Hohmann orbit using the SMAs of the two orbits instead of the radius (as a guess), multiplied by 2
-            double a = (Math.Abs(o.semiMajorAxis) + Math.Abs(target.semiMajorAxis)) / 2;
-            double maxTT = Math.PI * Math.Sqrt(a * a * a / o.referenceBody.gravParameter);   // FIXME: allow tweaking
+            double a = ( Math.Abs(o.semiMajorAxis) + Math.Abs(target.semiMajorAxis) ) / 2;
+            double maxTT = Math.PI * Math.Sqrt( a * a * a / o.referenceBody.gravParameter );   // FIXME: allow tweaking
 
             FlightPlanPlugin.Logger.LogInfo("DeltaVAndTimeForBiImpulsiveAnnealed: Check1: minDT = " + minDT + " maxDT = " + maxDT + " maxTT = " + maxTT + " maxDTplusT = " + maxDTplusT);
             FlightPlanPlugin.Logger.LogInfo("DeltaVAndTimeForBiImpulsiveAnnealed: target.patchEndTransition = " + target.PatchEndTransition);
@@ -960,13 +958,13 @@ namespace MuMech
             int n = 0;
 
             stopwatch.Start();
-            while (temp > 1000)
+            while( temp > 1000 )
             {
                 double burnDT, burnTT, burnCost;
 
                 // shrink the neighborhood based on temp
-                double windowDT = temp / MAXTEMP * (maxDT - minDT);
-                double windowTT = temp / MAXTEMP * (maxTT - minTT);
+                double windowDT = temp / MAXTEMP * ( maxDT - minDT );
+                double windowTT = temp / MAXTEMP * ( maxTT - minTT );
                 double windowminDT = currentDT - windowDT;
                 windowminDT = windowminDT < minDT ? minDT : windowminDT;
                 double windowmaxDT = currentDT + windowDT;
@@ -989,7 +987,7 @@ namespace MuMech
 
                 //FlightPlanPlugin.Logger.LogInfo("DeltaVAndTimeForBiImpulsiveAnnealed: burnDT = " + burnDT + " burnTT = " + burnTT + " cost = " + burnCost + " bestCost = " + bestCost);
 
-                if (burnCost < bestCost)
+                if ( burnCost < bestCost )
                 {
                     bestDT = burnDT;
                     bestTT = burnTT;
@@ -1000,7 +998,7 @@ namespace MuMech
                     currentTT = bestTT;
                     currentCost = bestCost;
                 }
-                else if (acceptanceProbabilityForBiImpulsive(currentCost, burnCost, temp) > random.NextDouble())
+                else if ( acceptanceProbabilityForBiImpulsive(currentCost, burnCost, temp) > random.NextDouble() )
                 {
                     currentDT = burnDT;
                     currentTT = burnTT;
