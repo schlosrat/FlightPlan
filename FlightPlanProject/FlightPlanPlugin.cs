@@ -36,6 +36,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     static bool loaded = false;
     private bool interfaceEnabled = false;
+    private bool GUIenabled = true;
     // private bool _isWindowOpen;
     private Rect _windowRect;
     private int windowWidth = Screen.width / 6; //384px on 1920x1080
@@ -127,6 +128,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         base.OnInitialized();
         game = GameManager.Instance.Game;
         Logger = base.Logger;
+
+        // Subscribe to messages that indicate it's OK to raise the GUI
+        // StateChanges.FlightViewEntered += message => GUIenabled = true;
+        // StateChanges.Map3DViewEntered += message => GUIenabled = true;
+
+        // Subscribe to messages that indicate it's not OK to raise the GUI
+        // StateChanges.FlightViewLeft += message => GUIenabled = false;
+        // StateChanges.Map3DViewLeft += message => GUIenabled = false;
+        // StateChanges.VehicleAssemblyBuilderEntered += message => GUIenabled = false;
+        // StateChanges.KerbalSpaceCenterStateEntered += message => GUIenabled = false;
+        //StateChanges.BaseAssemblyEditorEntered += message => GUIenabled = false;
+        //StateChanges.MainMenuStateEntered += message => GUIenabled = false;
+        //StateChanges.ColonyViewEntered += message => GUIenabled = false;
+        // StateChanges.TrainingCenterEntered += message => GUIenabled = false;
+        //StateChanges.MissionControlEntered += message => GUIenabled = false;
+        // StateChanges.TrackingStationEntered += message => GUIenabled = false;
+        //StateChanges.ResearchAndDevelopmentEntered += message => GUIenabled = false;
+        //StateChanges.LaunchpadEntered += message => GUIenabled = false;
+        //StateChanges.RunwayEntered += message => GUIenabled = false;
 
         // Setup the list of input field names (most are the same as the entry string text displayed in the GUI window)
         inputFields.Add("New Pe");
@@ -310,12 +330,24 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     /// </summary>
     private void OnGUI()
     {
+        GUIenabled = false;
+        var gameState = Game.GlobalGameState.GetState();
+        if (gameState == GameState.Map3DView) GUIenabled = true;
+        if (gameState == GameState.FlightView) GUIenabled = true;
+        //if (Game.GlobalGameState.GetState() == GameState.TrainingCenter) GUIenabled = false;
+        //if (Game.GlobalGameState.GetState() == GameState.TrackingStation) GUIenabled = false;
+        //if (Game.GlobalGameState.GetState() == GameState.VehicleAssemblyBuilder) GUIenabled = false;
+        //// if (Game.GlobalGameState.GetState() == GameState.MissionControl) GUIenabled = false;
+        //if (Game.GlobalGameState.GetState() == GameState.Loading) GUIenabled = false;
+        //if (Game.GlobalGameState.GetState() == GameState.KerbalSpaceCenter) GUIenabled = false;
+        //if (Game.GlobalGameState.GetState() == GameState.Launchpad) GUIenabled = false;
+        //if (Game.GlobalGameState.GetState() == GameState.Runway) GUIenabled = false;
         // activeVessel = Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
         activeVessel = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
         currentTarget = activeVessel?.TargetObject;
 
         // Set the UI
-        if (interfaceEnabled)
+        if (interfaceEnabled && GUIenabled && activeVessel != null)
         {
             GUI.skin = Skins.ConsoleSkin;
 
