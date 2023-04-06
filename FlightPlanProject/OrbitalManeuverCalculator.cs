@@ -33,6 +33,7 @@ using FlightPlan;
 using BepInEx.Logging;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.ParticleSystem;
+using KSP.Rendering.Planets;
 // using SpaceWarp;
 
 namespace MuMech
@@ -57,6 +58,42 @@ namespace MuMech
             return burnVec.x * o.RadialPlus(UT) + burnVec.y * o.NormalPlus(UT) - burnVec.z * o.Prograde(UT);
         }
 
+        // A stand in for the KSP1 function o.referenceBody.GetLatitude(Vector3d pos)
+        // KSP2 doesn't appear to have such a function, but does have GetLatLonAltFromRadius
+        // ISSUE all the o.*position*() values return Vector3d, need type Position
+        // SOLUTION: Make a new KSP.Sim.Position variable and populate the localPosition component
+        public static double GetLatitude(this PatchedConicsOrbit o, double UT)
+        {
+            double latitude, longitude, altitude;
+            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT);
+            Position position = new Position(o.referenceBody.coordinateSystem, thisPosition);
+            o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
+
+            return latitude * UtilMath.Rad2Deg;
+        }
+
+        public static double GetLatLon(this PatchedConicsOrbit o, double UT, out double longitude)
+        {
+            double latitude, altitude;
+            longitude = 0;
+            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT);
+            Position position = new Position(o.referenceBody.coordinateSystem, thisPosition);
+            o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
+            longitude *= UtilMath.Rad2Deg;
+
+            return latitude * UtilMath.Rad2Deg;
+        }
+
+        public static double GetLongitude(this PatchedConicsOrbit o, double UT)
+        {
+            double latitude, longitude, altitude;
+            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT);
+            Position position = new Position(o.referenceBody.coordinateSystem, thisPosition);
+            o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
+
+            return longitude * UtilMath.Rad2Deg;
+        }
+        
         //ManualLogSource logger;
         //logger = BepInEx.Logging.Logger.CreateLogSource("MuMech");
         //Computes the speed of a circular orbit of a given radius for a given body.
@@ -72,34 +109,36 @@ namespace MuMech
         //Computes the deltaV of the burn needed to circularize an orbit at a given UT.
         public static Vector3d DeltaVToCircularize(PatchedConicsOrbit o, double UT)
         {
-            double circSpeed1 = CircularOrbitSpeed(o.referenceBody, o.Radius(UT));
-            double circSpeed2 = o.SwappedOrbitalVelocityAtUT(UT).magnitude;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: circSpeed1 {circSpeed1} m/s");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: circSpeed2 {circSpeed2} m/s");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Delta-v {circSpeed1 - circSpeed2} m/s");
-            Vector3d horizontal = o.Horizontal(UT); // = Vector3d.Exclude(o.Up(UT), o.Prograde(UT)).normalized;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Horizontal Vec [{horizontal.x},{horizontal.y}, {horizontal.z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: RadialPlus Vec [{o.RadialPlus(UT).x},{o.RadialPlus(UT).y}, {o.RadialPlus(UT).z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: NormalPlus Vec [{o.NormalPlus(UT).x},{o.NormalPlus(UT).y}, {o.NormalPlus(UT).z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x},{o.Prograde(UT).y}, {o.Prograde(UT).z}]");
-            Vector3d prograde = o.Prograde(UT); // = o.SwappedOrbitalVelocityAtUT(UT).normalized
+            // double circSpeed1 = CircularOrbitSpeed(o.referenceBody, o.Radius(UT));
+            // double circSpeed2 = o.SwappedOrbitalVelocityAtUT(UT).magnitude;
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: circSpeed1 {circSpeed1} m/s");
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: circSpeed2 {circSpeed2} m/s");
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Delta-v {circSpeed1 - circSpeed2} m/s");
+            // Vector3d horizontal = o.Horizontal(UT); // = Vector3d.Exclude(o.Up(UT), o.Prograde(UT)).normalized;
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Horizontal Vec [{horizontal.x},{horizontal.y}, {horizontal.z}]");
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: RadialPlus Vec [{o.RadialPlus(UT).x},{o.RadialPlus(UT).y}, {o.RadialPlus(UT).z}]");
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: NormalPlus Vec [{o.NormalPlus(UT).x},{o.NormalPlus(UT).y}, {o.NormalPlus(UT).z}]");
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x},{o.Prograde(UT).y}, {o.Prograde(UT).z}]");
+            // Vector3d prograde = o.Prograde(UT); // = o.SwappedOrbitalVelocityAtUT(UT).normalized
             // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Prograde Vec   [{prograde.x},{prograde.y}, {prograde.z}]");
             // Vector3d newPrograde = Vector3d.Cross(o.Up(UT), o.RadialPlus(UT)).normalized;
             // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
-            Vector3d newPrograde = Vector3d.Cross(o.NormalPlus(UT), o.RadialPlus(UT)).normalized;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
+            // Vector3d newPrograde = Vector3d.Cross(o.NormalPlus(UT), o.RadialPlus(UT)).normalized;
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
             // o.RadialPlut(UT) = Vector3d.Exclude(o.Prograde(UT), o.Up(UT)).normalized;
             // o.NormalPlus = o.SwappedOrbitNormal();
             // o.Up(UT) = o.SwappedRelativePositionAtUT(UT).normalized;
             // newPrograde = Vector3d.Exclude(o.RadialPlus(UT), o.Horizontal(UT)).normalized;
             // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
-            Vector3d desiredVelocity = circSpeed1 * newPrograde;
+
+
+            Vector3d desiredVelocity = CircularOrbitSpeed(o.referenceBody, o.Radius(UT)) * o.Horizontal(UT);
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: desiredVelocity [{desiredVelocity.x},{desiredVelocity.y}, {desiredVelocity.z}] m/s");
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: actualVelocity  [{actualVelocity.x},{actualVelocity.y}, {actualVelocity.z}] m/s");
-            var dummy = o.GetOrbitalVelocityAtUTZup(UT);
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: actualVelocity* [{dummy.x},{dummy.y}, {dummy.z}] m/s");
+            // var dummy = o.GetOrbitalVelocityAtUTZup(UT);
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: actualVelocity* [{dummy.x},{dummy.y}, {dummy.z}] m/s");
             var deltaV = actualVelocity - desiredVelocity;
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: deltaV  [{deltaV.x},{deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s");
             return deltaV;
@@ -388,17 +427,9 @@ namespace MuMech
         //   - if newInclination < 0, do the more expensive burn to set that inclination
         public static Vector3d DeltaVToChangeInclination(PatchedConicsOrbit o, double UT, double newInclination)
         {
-            double latitude, longitude, altitude, latDeg;
-            Vector3d thisPosition = o.GetRelativePositionAtUTZup(UT); //  SwappedAbsolutePositionAtUT(UT); // was: o.SwappedAbsolutePositionAtUT(UT), ISSUE all the o.*position*() values return Vector3d, need type Position
-            KSP.Sim.Position position = new KSP.Sim.Position // SOLUTION: Make a new KSP.Sim.Position variable, tried = o.GetTruePositionAtUT(UT)
-            {
-                localPosition = thisPosition              // and populate the localPosition component - hope that's all we need!
-            };
-            o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
-            // double latitude = o.referenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
-            latDeg = latitude * UtilMath.Rad2Deg;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: latitude {latitude} = {latDeg}°, newInclination {newInclination}°");
-            double desiredHeading = HeadingForInclination(newInclination, latDeg);
+            double latitude = GetLatitude(o, UT); // was o.referenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: latitude {latitude}°, newInclination {newInclination}°");
+            double desiredHeading = HeadingForInclination(newInclination, latitude);
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: desiredHeading {desiredHeading}°");
             //Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.SwappedOrbitalVelocityAtUT(UT));  // tried: GetOrbitalVelocityAtUTZup(UT)
             //FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination] actualHorizontalVelocity* [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
@@ -1249,12 +1280,13 @@ namespace MuMech
         //Computes the deltaV of the burn needed to set a given LAN at a given UT.
         public static Vector3d DeltaVToShiftLAN(PatchedConicsOrbit o, double UT, double newLAN)
         {
-            Vector3d pos = o.SwappedAbsolutePositionAtUT(UT);
-            // Burn position in the same reference frame as LAN
-            double latitude, longitude, altitude;
-            KSP.Sim.Position position = new KSP.Sim.Position(o.referenceBody.coordinateSystem, pos);
-            o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
-            double burn_latitude = latitude;
+            //Vector3d pos = o.SwappedAbsolutePositionAtUT(UT);
+            //// Burn position in the same reference frame as LAN
+            //double latitude, longitude, altitude;
+            //KSP.Sim.Position position = new KSP.Sim.Position(o.referenceBody.coordinateSystem, pos);
+            //o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
+            double longitude;
+            double burn_latitude = GetLatLon(o, UT, out longitude); // was o.referenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
             double burn_longitude = longitude + o.referenceBody.rotationAngle;
 
             const double target_latitude = 0; // Equator
@@ -1330,10 +1362,10 @@ namespace MuMech
 
             // Back out the rotation of the body to calculate the longitude of the apoapsis when the vessel reaches the node
             double degreeRotationToNode = (UT - GameManager.Instance.Game.UniverseModel.UniversalTime) * 360 / o.referenceBody.rotationPeriod;
-            double latitude, longitude, altitude;
-            KSP.Sim.Position position = new KSP.Sim.Position(o.referenceBody.coordinateSystem, pos);
-            o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
-            double NodeLongitude = longitude - degreeRotationToNode;
+            //double latitude, longitude, altitude;
+            //KSP.Sim.Position position = new KSP.Sim.Position(o.referenceBody.coordinateSystem, pos);
+            //o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
+            double NodeLongitude = GetLongitude(o, UT) - degreeRotationToNode;
 
             double LongitudeOffset = NodeLongitude - newNodeLong; // Amount we need to shift the Ap's longitude
 
