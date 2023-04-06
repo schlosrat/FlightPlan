@@ -41,7 +41,7 @@ namespace MuMech
         //position in world space
         public static Vector3d SwappedAbsolutePositionAtUT(this PatchedConicsOrbit o, double UT)
         {
-            return o.localPosition + o.SwappedRelativePositionAtUT(UT); // was: o.referenceBody.position
+            return o.referenceBody.Position.localPosition + o.SwappedRelativePositionAtUT(UT); // was: o.referenceBody.position
         }
 
         //normalized vector perpendicular to the orbital plane
@@ -300,7 +300,7 @@ namespace MuMech
         //Gives the true anomaly (in a's orbit) at which a crosses its ascending node
         //with b's orbit.
         //The returned value is always between 0 and 2 * PI.
-        public static double AscendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)
+        public static double AscendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)  // was Orbit as type for b
         {
             Vector3d vectorToAN = Vector3d.Cross(a.SwappedOrbitNormal(), b.SwappedOrbitNormal()); // tried: GetRelativeOrbitNormal()
             return a.TrueAnomalyFromVector(vectorToAN);
@@ -309,7 +309,7 @@ namespace MuMech
         //Gives the true anomaly (in a's orbit) at which a crosses its descending node
         //with b's orbit.
         //The returned value is always between 0 and 2 * PI.
-        public static double DescendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)
+        public static double DescendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b) // was Orbit as type for b
         {
             return MuUtils.ClampDegrees360(a.AscendingNodeTrueAnomaly(b) + 180.0);
         }
@@ -381,7 +381,7 @@ namespace MuMech
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
             Vector3d vectorToAN = QuaternionD.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
             Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
-            return o.Periapsis * vectorToPe; // was: o.PeR -> Periapsis, should this be o.PeriapsisArl?
+            return o.Periapsis * vectorToPe; // was: o.PeR
         }
 
         //Returns the vector from the primary to the orbiting body at apoapsis
@@ -604,8 +604,8 @@ namespace MuMech
         //about which of the two times in the past will be returned.
         public static double NextTimeOfRadius(this PatchedConicsOrbit o, double UT, double radius)
         {
-            // was o.PeR -> Periapsis, should this be PeriapsisArl?
-            // was o.ApR -> Apoapsis, should this be ApoapsisArl?
+            // was o.PeR -> o.Periapsis
+            // was o.ApR -> o.Apoapsis
             if (radius < o.Periapsis || (o.eccentricity < 1 && radius > o.Apoapsis)) throw new ArgumentException("OrbitExtensions.NextTimeOfRadius: given radius of " + radius + " is never achieved: o.Periapsis = " + o.Periapsis + " and o.Apoapsis = " + o.Apoapsis);
 
             double trueAnomaly1 = UtilMath.Rad2Deg * o.TrueAnomalyAtRadius(radius);
