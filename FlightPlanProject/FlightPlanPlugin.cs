@@ -364,14 +364,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             {
                 // Logger.LogInfo($"[Flight Plan]: Disabling Game Input: Focused Item '{GUI.GetNameOfFocusedControl()}'");
                 gameInputState = false;
-                // game.Input.Flight.Disable();
                 GameManager.Instance.Game.Input.Disable();
             }
             else if (!gameInputState && !inputFields.Contains(GUI.GetNameOfFocusedControl()))
             {
                 // Logger.LogInfo($"[Flight Plan]: Enabling Game Input: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
                 gameInputState = true;
-                // game.Input.Flight.Enable();
                 GameManager.Instance.Game.Input.Enable();
             }
             if (selectingBody)
@@ -793,9 +791,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 double burnUT;
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(activeVessel.Orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
+                deltaV.z *= -1;
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(deltaV, burnUT);
             }
             else if (matchPlanesD) // Seems OK
             {
@@ -805,7 +804,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(deltaV, burnUT);
             }
             else if (hohmannT) // Untested
             {
