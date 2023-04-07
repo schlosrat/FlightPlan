@@ -6,10 +6,8 @@
  * This work is relaesed under the same license(s) inherited from the originating version.
  */
 
-using System;
 using MechJebLib.Primitives;
 using UnityEngine;
-// using FlightPlan;
 
 namespace MuMech
 {

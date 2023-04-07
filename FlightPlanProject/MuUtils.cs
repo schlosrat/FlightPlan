@@ -8,13 +8,7 @@
 
 using KSP.Game;
 using KSP.Sim.impl;
-// using System;
-// using System.Collections.Generic;
-// using System.IO;
-// using System.Reflection;
 using UnityEngine;
-// using FlightPlan;
-using KSP.Sim;
 
 namespace MuMech
 {

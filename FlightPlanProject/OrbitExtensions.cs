@@ -11,7 +11,6 @@ using KSP.Sim;
 using KSP.Sim.impl;
 using FlightPlan;
 
-
 namespace MuMech
 {
     public static class OrbitExtensions

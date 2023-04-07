@@ -13,8 +13,6 @@
  * This work is relaesed under the same licenses noted above from the originating version.
  */
 
-using System;
-using System.Collections.Generic;
 using MechJebLib.Primitives;
 using static MechJebLib.Utils.Statics;
 

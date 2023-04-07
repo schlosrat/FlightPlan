@@ -12,7 +12,6 @@
  * This work is relaesed under the same licenses noted above from the originating version.
  */
 
-using System;
 using System.Globalization;
 using static MechJebLib.Utils.Statics;
 

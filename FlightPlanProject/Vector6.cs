@@ -6,13 +6,6 @@
  * This work is relaesed under the same license(s) inherited from the originating version.
  */
 
-using System;
-using KSP.Sim.impl;
-using KSP.Sim;
-using KSP.Sim.State;
-using KSP.Game;
-// using FlightPlan;
-using KSP.IO;
 
 namespace MuMech
 {

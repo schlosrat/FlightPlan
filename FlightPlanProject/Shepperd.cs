@@ -14,7 +14,6 @@
 
 #nullable enable
 
-using System;
 using MechJebLib.Primitives;
 
 namespace MechJebLib.Maths

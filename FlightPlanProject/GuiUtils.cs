@@ -5,20 +5,14 @@
  * 
  * This work is relaesed under the same license(s) inherited from the originating version.
  */
-using System;
-using System.Collections.Generic;
+
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Profiling;
 using Object = UnityEngine.Object;
-using I2.Loc; // For localization
 using SpaceWarp.API.UI;
 using KSP.Game;
-using KSP.Sim;
 using KSP.Sim.impl;
-using KSP.Rendering.impl;
-using KSP.Rendering.Planets;
-using KSP.Map;
 
 namespace MuMech
 {

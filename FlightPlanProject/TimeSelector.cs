@@ -7,9 +7,7 @@
  */
 
 using UnityEngine;
-using I2.Loc; // KSP.Localization;
 using KSP.Sim.impl;
-using System;
 
 namespace MuMech
 {

@@ -6,8 +6,6 @@
 
 #nullable enable
 
-using System;
-using System.Threading;
 using MechJebLib.Primitives;
 
 namespace MechJebLib.Maths.FunctionImpls

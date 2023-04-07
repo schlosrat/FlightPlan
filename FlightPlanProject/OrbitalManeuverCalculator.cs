@@ -6,14 +6,6 @@
  * This work is relaesed under the same license(s) inherited from the originating version.
  */
 
-//using System;
-//using BepInEx;
-//using KSP.UI.Binding;
-//using SpaceWarp;
-//using SpaceWarp.API.Assets;
-//using SpaceWarp.API.Mods;
-//using SpaceWarp.API.UI;
-//using SpaceWarp.API.UI.Appbar;
 using KSP.Game;
 using KSP.Sim.impl;
 using KSP.Sim.State;
@@ -22,8 +14,6 @@ using FlightPlan;
 using MechJebLib.Maths;
 using MechJebLib.Primitives;
 using UnityEngine;
-using UnityEngine.VFX;
-using KSP.Networking.MP.Utils;
 // using Smooth.Pools;
 
 namespace MuMech
