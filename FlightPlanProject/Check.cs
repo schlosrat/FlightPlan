@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using MechJebLib.Primitives;
 using static MechJebLib.Utils.Statics;
+using FlightPlan;
 
 #nullable enable
 
@@ -27,6 +28,7 @@ namespace MechJebLib.Utils
         private static void DoCheck(bool b)
         {
             if (!b) throw new FailedCheck("check failed");
+            FlightPlanPlugin.Logger.LogError("check failed");
         }
 
         public class FailedCheck : Exception
