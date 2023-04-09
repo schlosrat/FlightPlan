@@ -31,8 +31,9 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 ### Create Moon Specific Maneuver Nodes (only available when in orbit about a moon)
 * Return from a Moon
 
-![Flight Plan: Circularize at Next Ap](https://i.imgur.com/3dQ6LBS.png)
-![Flight Plan: Circularize at Next Pe](https://i.imgur.com/by0kbUF.png)
+![Flight Plan: Circularize at Next Ap](https://i.imgur.com/by0kbUF.png)
+![Flight Plan: Circularize at Next Pe](https://i.imgur.com/3dQ6LBS.png)
+
 
 ## Planned Improvements
 To see what improvements and new features are planned for this mod, you can visit the Issues page on the project's GitHub.
