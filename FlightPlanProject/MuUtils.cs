@@ -7,6 +7,7 @@
  */
 
 using KSP.Game;
+using KSP.Sim;
 using KSP.Sim.impl;
 using UnityEngine;
 
@@ -83,7 +84,6 @@ namespace MuMech
             return Math.Log(x + Math.Sqrt(x * x + 1));
         }
 
-        // Need this in OrbitExtensions
         //acosh(x) = log(x + sqrt(x^2 - 1))
         public static double Acosh(double x)
         {
@@ -96,7 +96,6 @@ namespace MuMech
             return 0.5 * (Math.Log(1 + x) - Math.Log(1 - x));
         }
 
-        // Need this in OrbitExtensions:
         //since there doesn't seem to be a Math.Clamp?
         public static double Clamp(double x, double min, double max)
         {
@@ -111,7 +110,6 @@ namespace MuMech
             return Clamp(x, 0, 1);
         }
 
-        // Need this in OrbitExtensions:
         //keeps angles in the range 0 to 360
         public static double ClampDegrees360(double angle)
         {
@@ -128,7 +126,6 @@ namespace MuMech
             return angle;
         }
 
-        // Need this in OrbitExtensions:
         public static double ClampRadiansTwoPi(double angle)
         {
             angle = angle % (2 * Math.PI);
@@ -136,7 +133,6 @@ namespace MuMech
             else return angle;
         }
 
-        // Need this in OrbitExtensions:
         public static double ClampRadiansPi(double angle)
         {
             angle = ClampRadiansTwoPi(angle);
@@ -157,32 +153,32 @@ namespace MuMech
             return result;
         }
 
-        public static PatchedConicsOrbit OrbitFromStateVectors(Vector3d pos, Vector3d vel, CelestialBodyComponent body, double UT) // was: CelestialBody
+        // Suspect this is malfuntioning. Of all the MuUtils code, this required the most modification to run (by far!)
+        // In particular UpdateFromStateVectors requires type Position and type Velocity vs the MJ KSP1 call that takes Vector3d args for pos and vel.
+        // For constructing position: tried Orbit.coordinateSystem - fails when body is Kerbol
+        // For constructing velocity: tried body.relativeToMotion
+        // was: body.position ->  body.Position.localPosition
+        // was: ret.LAN -> longitudeOfAscendingNode
+        // was: Planetarium.up ->  body.Orbit.ReferenceFrame.up.vector
+        // was: Planetarium.right -> body.Orbit.ReferenceFrame.right.vector
+        public static PatchedConicsOrbit OrbitFromStateVectors(Position pos, Velocity vel, CelestialBodyComponent body, double UT)
         {
             PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
-            KSP.Sim.Position position = new KSP.Sim.Position(body.coordinateSystem , OrbitExtensions.SwapYZ(pos - body.Position.localPosition)); // tried Orbit.coordinateSystem - fails when body is Kerbol
-            KSP.Sim.Velocity velocity = new KSP.Sim.Velocity(body.celestialMotionFrame , OrbitExtensions.SwapYZ(vel)); // tried body.relativeToMotion
-            ret.UpdateFromStateVectors(position, velocity, body, UT); // was: body.position
+            //Position position = new(body.coordinateSystem , OrbitExtensions.SwapYZ(pos - body.Position.localPosition)); 
+            //Velocity velocity = new(body.celestialMotionFrame , OrbitExtensions.SwapYZ(vel));
+            ret.UpdateFromStateVectors(pos, vel, body, UT);
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
             if (double.IsNaN(ret.argumentOfPeriapsis))
             {
-                // was: ret.LAN -> longitudeOfAscendingNode
-                // was: Planetarium.up ->  body.Orbit.ReferenceFrame.up.vector
-                // was: Planetarium.right -> body.Orbit.ReferenceFrame.right.vector
                 Vector3d vectorToAN = Quaternion.AngleAxis(-(float)ret.longitudeOfAscendingNode, body.Orbit.ReferenceFrame.up.vector) * body.Orbit.ReferenceFrame.right.vector;
                 Vector3d vectorToPe = OrbitExtensions.SwapYZ(ret.eccVec);
                 double cosArgumentOfPeriapsis = Vector3d.Dot(vectorToAN, vectorToPe) / (vectorToAN.magnitude * vectorToPe.magnitude);
                 //Squad's UpdateFromStateVectors is missing these checks, which are needed due to finite precision arithmetic:
-                if (cosArgumentOfPeriapsis > 1)
-                {
+                if(cosArgumentOfPeriapsis > 1) {
                     ret.argumentOfPeriapsis = 0;
-                }
-                else if (cosArgumentOfPeriapsis < -1)
-                {
+                } else if(cosArgumentOfPeriapsis < -1) {
                     ret.argumentOfPeriapsis = 180;
-                }
-                else
-                {
+                } else {
                     ret.argumentOfPeriapsis = Math.Acos(cosArgumentOfPeriapsis);
                 }
             }

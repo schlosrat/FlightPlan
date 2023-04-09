@@ -112,7 +112,6 @@ namespace MuMech
             // newPrograde = Vector3d.Exclude(o.RadialPlus(UT), o.Horizontal(UT)).normalized;
             // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
 
-
             Vector3d desiredVelocity = CircularOrbitSpeed(o.referenceBody, o.Radius(UT)) * o.Horizontal(UT);
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
             var deltaV = actualVelocity - desiredVelocity;
@@ -198,10 +197,16 @@ namespace MuMech
                 maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection));
             }
 
+
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: radius {radius}");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: newPeR {newPeR}");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: raising {raising}");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: burnDirection [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: maxDeltaV {maxDeltaV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: minDeltaV  {minDeltaV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: maxDeltaV  {maxDeltaV} m/s");
+            
+            minDeltaV = 0;
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: minDeltaV* {minDeltaV} m/s");
 
             Func<double, object, double> f = delegate (double testDeltaV, object ign)
             {
@@ -214,7 +219,7 @@ namespace MuMech
 
             var deltaV = dV * burnDirection;
 
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: finalDv [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
 
             return deltaV;
         }
@@ -246,9 +251,11 @@ namespace MuMech
             // 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
             double maxDeltaV = raising ? 10000 : o.SwappedOrbitalVelocityAtUT(UT).magnitude;
 
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: radius {radius} m");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: newApR {newApR}");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: raising {raising}");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: burnDirection [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: minDeltaV {minDeltaV} m/s");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: maxDeltaV {maxDeltaV}");
 
             // solve for the reciprocal of the ApR which is a continuous function that avoids the parabolic singularity and
@@ -264,7 +271,7 @@ namespace MuMech
 
             var deltaV = dV * burnDirection;
 
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: finalDv [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeApoapsis: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
 
             return deltaV;
         }
@@ -378,14 +385,16 @@ namespace MuMech
         {
             double latitude = GetLatitude(o, UT); // was o.referenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
             double desiredHeading = HeadingForInclination(newInclination, latitude);
+            var north = o.North(UT);
+            var east = o.East(UT);
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.SwappedOrbitalVelocityAtUT(UT));
             Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: latitude {latitude}°, newInclination {newInclination}°");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: desiredHeading {desiredHeading}°");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
-            // eastComponent *= -1;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: o.North(UT)               [{north.x}, {north.y}, {north.z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: o.East(UT)                [{east.x}, {east.y}, {east.z}]");
             Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeading) * o.North(UT);
             if (Vector3d.Dot(actualHorizontalVelocity, northComponent) < 0) northComponent *= -1;
             if (MuUtils.ClampDegrees180(newInclination) < 0) northComponent *= -1;
@@ -719,8 +728,13 @@ namespace MuMech
 
             //construct a sample ejection orbit
             Vector3d ejectionOrbitInitialVelocity = ejectionSpeed * (Vector3d)o.referenceBody.transform.right.vector;
-            Vector3d ejectionOrbitInitialPosition = o.referenceBody.Position.localPosition + ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
-            PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(ejectionOrbitInitialPosition, ejectionOrbitInitialVelocity, o.referenceBody, 0);
+            // Vector3d ejectionOrbitInitialPosition = o.referenceBody.Position.localPosition + ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
+            Vector3d ejectionOrbitInitialPosition = ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
+            // Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(ejectionOrbitInitialPosition - o.referenceBody.Position.localPosition));
+            Position position = new(o.coordinateSystem, ejectionOrbitInitialPosition); // want position in KSP2 coordinates
+            // Velocity velocity = new(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(ejectionOrbitInitialVelocity)); // body.celestialMotionFrame
+            Velocity velocity = new(o.referenceBody.celestialMotionFrame, ejectionOrbitInitialVelocity); // want velocity in KSP2 coordinates
+            PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, 0);
             double ejectionOrbitDuration = sampleEjectionOrbit.NextTimeOfRadius(0, o.referenceBody.sphereOfInfluence);
             Vector3d ejectionOrbitFinalVelocity = sampleEjectionOrbit.SwappedOrbitalVelocityAtUT(ejectionOrbitDuration);
 
@@ -1105,8 +1119,13 @@ namespace MuMech
 
             //construct a sample ejection orbit
             Vector3d ejectionOrbitInitialVelocity = ejectionSpeed * (Vector3d)o.referenceBody.transform.right.vector;
-            Vector3d ejectionOrbitInitialPosition = o.referenceBody.Position.localPosition + ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
-            PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(ejectionOrbitInitialPosition, ejectionOrbitInitialVelocity, o.referenceBody, 0);
+            // Vector3d ejectionOrbitInitialPosition = o.referenceBody.Position.localPosition + ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
+            Vector3d ejectionOrbitInitialPosition = ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
+            // Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(ejectionOrbitInitialPosition - o.referenceBody.Position.localPosition));
+            Position position = new(o.coordinateSystem, ejectionOrbitInitialPosition); // want position in KSP2 coordinates
+            // Velocity velocity = new(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(ejectionOrbitInitialVelocity)); // body.celestialMotionFrame
+            Velocity velocity = new(o.referenceBody.celestialMotionFrame, ejectionOrbitInitialVelocity); // want velocity in KSP2 coordinates
+            PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, 0);
             double ejectionOrbitDuration = sampleEjectionOrbit.NextTimeOfRadius(0, o.referenceBody.sphereOfInfluence);
             Vector3d ejectionOrbitFinalVelocity = sampleEjectionOrbit.SwappedOrbitalVelocityAtUT(ejectionOrbitDuration);
 

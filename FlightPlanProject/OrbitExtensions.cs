@@ -40,7 +40,8 @@ namespace MuMech
         //position in world space
         public static Vector3d SwappedAbsolutePositionAtUT(this PatchedConicsOrbit o, double UT)
         {
-            return o.referenceBody.Position.localPosition + o.SwappedRelativePositionAtUT(UT); // was: o.referenceBody.position
+            // was: o.referenceBody.position -> o.referenceBody.Position.localPosition
+            return o.referenceBody.Position.localPosition + o.SwappedRelativePositionAtUT(UT);
         }
 
         //normalized vector perpendicular to the orbital plane
@@ -123,7 +124,13 @@ namespace MuMech
         //returns a new PatchedConicsOrbit object that represents the result of applying a given dV to o at UT
         public static PatchedConicsOrbit PerturbedOrbit(this PatchedConicsOrbit o, double UT, Vector3d dV)
         {
-            return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.referenceBody, UT);
+            //Vector3d initialPosition = o.referenceBody.Position.localPosition + o.Radius(UT) * (Vector3d)o.referenceBody.transform.up.vector;
+            //Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(initialPosition - o.referenceBody.Position.localPosition));
+            // Assuming o.Up(UT) gives a SwapYZ version of the orbit up vetor at time UT, so the SwapYZ in position puts us back in the KSP2 coordiantes
+            Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.Radius(UT) * (Vector3d)o.Up(UT))); // was: referenceBody.transform.up.vector
+            // Assuming dV is a MJ computed dV, so needs a SwapYZ to be added to o.GetOrbitalVelocityAtUTZup(UT) and put us in the KSP2 coordinates
+            Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.GetOrbitalVelocityAtUTZup(UT) +OrbitExtensions.SwapYZ(dV)); // body.celestialMotionFrame
+            return MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, UT);
         }
 
         // returns a new orbit that is identical to the current one (although the epoch will change)
@@ -138,8 +145,8 @@ namespace MuMech
 
             PatchedConicsOrbit newOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
             o.GetOrbitalStateVectorsAtUT(UT, out pos, out vel);
-            KSP.Sim.Position position = new KSP.Sim.Position(o.referenceBody.coordinateSystem, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
-            KSP.Sim.Velocity velocity = new KSP.Sim.Velocity(o.referenceBody.relativeToMotion, OrbitExtensions.SwapYZ(vel));
+            Position position = new Position(o.referenceBody.coordinateSystem, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
+            Velocity velocity = new Velocity(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(vel));
             newOrbit.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
 
             return newOrbit;
@@ -503,7 +510,7 @@ namespace MuMech
         //large enough that it never attains the given true anomaly
         public static double TimeOfTrueAnomaly(this PatchedConicsOrbit o, double trueAnomaly, double UT)
         {
-            FlightPlanPlugin.Logger.LogWarning($"ManeuverNodeController.OrbitExtensions: trueAnomaly: {trueAnomaly*UtilMath.Deg2Rad}");
+            //FlightPlanPlugin.Logger.LogInfo($"OrbitExtensions: trueAnomaly: {trueAnomaly}° = {trueAnomaly*UtilMath.Deg2Rad} radians");
             return o.GetUTforTrueAnomaly(trueAnomaly*UtilMath.Deg2Rad, o.period);
             //return o.UTAtMeanAnomaly(o.GetMeanAnomalyAtEccentricAnomaly(o.GetEccentricAnomalyAtTrueAnomaly(trueAnomaly)), UT);
         }
