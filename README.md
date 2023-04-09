@@ -34,7 +34,7 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 ## Circularize at the Next Ap
 ![Flight Plan: Circularize at Next Ap](https://i.imgur.com/by0kbUF.png)
 
-## Circularize at teh Next Pe
+## Circularize at the Next Pe
 ![Flight Plan: Circularize at Next Pe](https://i.imgur.com/3dQ6LBS.png)
 
 
