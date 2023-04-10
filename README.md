@@ -43,6 +43,9 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 ## Match Planes with Minmus at AN (from 20 deg inclined orbit)
 ![Flight Plan: Match Planes with Target at AN Example](https://i.imgur.com/tJ1muhG.png)
 
+## Match Planes with Minmus at DN (from 20 deg inclined orbit)
+![Flight Plan: Match Planes with Target at DN Example](https://i.imgur.com/G4D3tiF.png)
+
 ## Hohmann Transfer to Minmus (from coplanar orbit)
 ![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/tIH5hkD.png)
 
