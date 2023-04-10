@@ -40,6 +40,9 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 ## Set Inclination to 0
 ![Flight Plan: Set Inclination to 0](https://i.imgur.com/LXN40KN.png)
 
+## Match Planes with Minmus at AN (from 20 deg inclined orbit)
+![Flight Plan: Match Planes with Minmus at AN](https://i.imgur.com/tJ1muhG.png)
+
 ## Planned Improvements
 To see what improvements and new features are planned for this mod, you can visit the Issues page on the project's GitHub.
 ## Installation
