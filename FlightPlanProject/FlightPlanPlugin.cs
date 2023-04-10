@@ -56,7 +56,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     //}
 
     // Body selection.
-    private string selectedBody = "Kerbin";
+    private string selectedBody = null;
     private List<string> bodies;
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
@@ -94,6 +94,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private GameInstance game;
     private GUIStyle horizontalDivider = new GUIStyle();
     private GUISkin _spaceWarpUISkin;
+    private GUIStyle tgtBtnStyle;
     private GUIStyle ctrlBtnStyle;
     private GUIStyle bigBtnStyle;
     private GUIStyle smallBtnStyle;
@@ -189,6 +190,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             padding = new RectOffset(10, 10, 0, 0),
             contentOffset = new Vector2(0, 2),
             fixedHeight = 20,
+            clipping = TextClipping.Overflow,
+            margin = new RectOffset(0, 0, 10, 0)
+        };
+
+        tgtBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            padding = new RectOffset(0, 0, 0, 3),
+            contentOffset = new Vector2(0, 2),
+            fixedHeight = 25, // 16,
+            // fixedWidth = (int)(windowWidth * 0.6),
+            fontSize = 16,
             clipping = TextClipping.Overflow,
             margin = new RectOffset(0, 0, 10, 0)
         };
@@ -430,36 +443,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         else
             tgtName = currentTarget.Name;
         DrawSectionHeader("Target", tgtName);
-
-        //GUILayout.BeginHorizontal();
-        //GUILayout.Label("New Target:");
-        //GUILayout.FlexibleSpace();
-        //if (!selectingTargetOption)
-        //{
-        //    if (GUILayout.Button(Enum.GetName(typeof(TargetOptions), selectedTargetOption)))
-        //        selectingTargetOption = true;
-        //}
-        //else
-        //{
-        //    GUILayout.BeginVertical(GUI.skin.GetStyle("Box"), GUILayout.Width(windowWidth / 4));
-        //    scrollPositionTargetOptions = GUILayout.BeginScrollView(scrollPositionTargetOptions, false, true, GUILayout.Height(70));
-
-        //    foreach (string snapOption in Enum.GetNames(typeof(TargetOptions)).ToList())
-        //    {
-        //        if (GUILayout.Button(snapOption))
-        //        {
-        //            Enum.TryParse(snapOption, out selectedTargetOption);
-        //            selectingTargetOption = false;
-        //        }
-        //    }
-
-        //    GUILayout.EndScrollView();
-        //    GUILayout.EndVertical();
-        //}
         BodySelectionGUI();
-
-        //applyTargetOption = GUILayout.Button("Select", GUILayout.Width(windowWidth / 5));
-        //GUILayout.EndHorizontal();
 
         DrawSectionHeader("Ownship Maneuvers");
         if (activeVessel.Orbit.eccentricity < 1)
@@ -492,26 +476,31 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (currentTarget != null)
         {
-            DrawSectionHeader("Maneuvers Relative to Target");
-            DrawButton("Match Planes at AN", ref matchPlanesA);
-            DrawButton("Match Planes at DN", ref matchPlanesD);
-            DrawButton("Hohmann Xfer", ref hohmannT);
+            // If the activeVessel and the currentTarget are both orbiting the same body
+            if (currentTarget.Orbit.referenceBody.Name == activeVessel.Orbit.referenceBody.Name)
+            {
+                DrawSectionHeader("Maneuvers Relative to Target");
+                DrawButton("Match Planes at AN", ref matchPlanesA);
+                DrawButton("Match Planes at DN", ref matchPlanesD);
 
-            DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
-            try { interceptT = double.Parse(interceptTStr); }
-            catch { interceptT = 100; }
+                DrawButton("Hohmann Xfer", ref hohmannT);
+                DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
+                try { interceptT = double.Parse(interceptTStr); }
+                catch { interceptT = 100; }
 
-            DrawButton("Course Correction", ref courseCorrection);
-            DrawButton("Match Velocity @CA", ref matchVCA);
-            DrawButton("Match Velocity Now", ref matchVNow);
+                DrawButton("Course Correction", ref courseCorrection);
+                DrawButton("Match Velocity @CA", ref matchVCA);
+                DrawButton("Match Velocity Now", ref matchVNow);
+            }
 
-            //if (currentTarget.Orbit.referenceBody.GlobalId == activeVessel.Orbit.referenceBody.Orbit.referenceBody.GlobalId)
-            if (currentTarget.Orbit.referenceBody.Name == activeVessel.Orbit.referenceBody.Orbit.referenceBody.Name)
+            //if the currentTarget is a celestial body and it's in orbit around the same body that the activeVessel's parent body is orbiting
+            if ((currentTarget.Name != activeVessel.Orbit.referenceBody.Name) && (currentTarget.Orbit.referenceBody.Name == activeVessel.Orbit.referenceBody.Orbit.referenceBody.Name))
             {
                 DrawSectionHeader("Interplanetary Maneuvers");
                 DrawButton("Interplanetary Transfer", ref planetaryXfer);
             }
         }
+        // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
         var referenceBody = activeVessel.Orbit.referenceBody;
         if (!referenceBody.referenceBody.IsStar)
         {
@@ -550,11 +539,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
         string baseName = "Select Target";
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Target Celestial Body: ", GUILayout.Width(windowWidth / 2));
+        GUILayout.Label("Target Celestial Body: ", GUILayout.Width((float)(windowWidth*0.6)));
         if (!selectingBody)
         {
             GUI.SetNextControlName(baseName);
-            if (GUILayout.Button(selectedBody))
+            if (GUILayout.Button(selectedBody, tgtBtnStyle))
                 selectingBody = true;
         }
         else
@@ -568,10 +557,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 var thisName = baseName + index.ToString("d2");
                 if (!inputFields.Contains(thisName)) inputFields.Add(thisName);
                 GUI.SetNextControlName(thisName);
-                if (GUILayout.Button(body))
+                if (GUILayout.Button(body, tgtBtnStyle))
                 {
                     selectedBody = body;
                     selectingBody = false;
+                    activeVessel.SetTargetByID(game.UniverseModel.FindCelestialBodyByName(body).GlobalId);
+                    currentTarget = activeVessel.TargetObject;
                 }
                 index++;
             }
@@ -692,7 +683,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (circPe) // Working
             {
@@ -703,7 +694,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (circNow) // Not Working - Getting burn component in normal direction and we shouldn't be
             {
@@ -713,7 +704,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (newPe) // Working
             {
@@ -729,7 +720,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams.z *= -1; // Why do we need this?
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (newAp) // Working
             {
@@ -745,7 +736,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams.z *= -1; // Why do we need this?
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (newPeAp) // Sorta almost works, but this is a kludge!
             {
@@ -759,7 +750,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams.y = 0; // Why do we need this?
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (newInc) // Working except for slight error in application of burnUT!
             {
@@ -793,7 +784,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"BurnVecToDv Test: deltaV - deltaVTest [{deltaV.x - deltaVTest.x}, {deltaV.y - deltaVTest.y}, {deltaV.z - deltaVTest.z}] m/s");
-                CreateManeuverNodeAtUT(deltaV, burnUT, 1.0);
+                CreateManeuverNodeAtUT(deltaV, burnUT, -0.5);
+                if (currentNode.Time < UT)
+                    currentNode.Time += activeVessel.Orbit.period;
             }
             else if (matchPlanesA) // Working except for slight error in application of burnUT!
             {
@@ -804,7 +797,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 deltaV.z *= -1; // why?
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(deltaV, burnUT, 1.0);
+                CreateManeuverNodeAtUT(deltaV, burnUT, -0.5);
             }
             else if (matchPlanesD) // Working except for slight error in application of burnUT!
             {
@@ -814,7 +807,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(deltaV, burnUT, 1.0);
+                CreateManeuverNodeAtUT(deltaV, burnUT, -0.5);
             }
             else if (hohmannT) // Seems to work, but comes up a little low... 
             {
@@ -826,7 +819,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams.z *= -1; // why?
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (interceptAtTime) // Not Working
             // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
@@ -845,7 +838,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {interceptUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (courseCorrection) // Works at least some times...
             {
@@ -867,7 +860,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (moonReturn) // Works at least sometimes...
             {
@@ -888,7 +881,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     burnParams.z *= -1;
                     Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                     Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                    CreateManeuverNodeAtUT(burnParams, burnUT);
+                    CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
             }
             else if (matchVCA) // untested
@@ -899,7 +892,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, closestApproachTime);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {closestApproachTime - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {closestApproachTime - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, closestApproachTime);
+                CreateManeuverNodeAtUT(burnParams, closestApproachTime, -0.5);
             }
             else if (matchVNow) // untested
             {
@@ -909,7 +902,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams = OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
             else if (planetaryXfer) // Not Working. At minimum, this will not work until DeltaVToChangeApoapsis works, which is failing on calls to solve with BrentRoot
             {
@@ -921,7 +914,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams.z *= -1;
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT);
+                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
             }
         }
     }
@@ -945,7 +938,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         return orbit;
     }
 
-    private void CreateManeuverNodeAtTA(Vector3d burnVector, double TrueAnomalyRad, double burnDurationOffsetFactor = 0.5)
+    private void CreateManeuverNodeAtTA(Vector3d burnVector, double TrueAnomalyRad, double burnDurationOffsetFactor = -0.5)
     {
         // Logger.LogInfo("CreateManeuverNodeAtTA");
         PatchedConicsOrbit referencedOrbit = GetLastOrbit() as PatchedConicsOrbit;
@@ -960,7 +953,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         CreateManeuverNodeAtUT(burnVector, UT, burnDurationOffsetFactor);
     }
 
-    private void CreateManeuverNodeAtUT(Vector3d burnVector, double UT, double burnDurationOffsetFactor = 0.5)
+    private void CreateManeuverNodeAtUT(Vector3d burnVector, double UT, double burnDurationOffsetFactor = -0.5)
     {
         // Logger.LogInfo("CreateManeuverNodeAtUT");
 
