@@ -32,16 +32,19 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 * Return from a Moon
 
 ## Circularize at the Next Ap
-![Flight Plan: Circularize at Next Ap](https://i.imgur.com/by0kbUF.png)
+![Flight Plan: Circularize at Next Ap Example](https://i.imgur.com/by0kbUF.png)
 
 ## Circularize at the Next Pe
-![Flight Plan: Circularize at Next Pe](https://i.imgur.com/3dQ6LBS.png)
+![Flight Plan: Circularize at Next Pe Example](https://i.imgur.com/3dQ6LBS.png)
 
 ## Set Inclination to 0
-![Flight Plan: Set Inclination to 0](https://i.imgur.com/LXN40KN.png)
+![Flight Plan: Set Inclination to 0 Example](https://i.imgur.com/LXN40KN.png)
 
 ## Match Planes with Minmus at AN (from 20 deg inclined orbit)
-![Flight Plan: Match Planes with Minmus at AN](https://i.imgur.com/tJ1muhG.png)
+![Flight Plan: Match Planes with Target at AN Example](https://i.imgur.com/tJ1muhG.png)
+
+## Hohmann Transfer to Minmus (from coplanar orbit)
+![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/tIH5hkD.png)
 
 ## Planned Improvements
 To see what improvements and new features are planned for this mod, you can visit the Issues page on the project's GitHub.
