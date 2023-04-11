@@ -20,16 +20,40 @@ namespace MuMech
 {
     public static class OrbitalManeuverCalculator
     {
-        // NOTE:
+        // NOTE: KSP2 needs burn vectors defined like this:
         // Prograde is Vector3d.z
         // Normal   is Vector3d.y
         // Radial   is Vector3d.x
+
+        // MechJeb deltaV appears to be defined as:
+        // o.orbitFrame which is Type CelestialFrame (private data defined for PatchedConicsOrbit class)
+        // World coordinate system is that associated with universeModel
+        // Local coordinate system is that associated with the orbit?
+
         public static Vector3d DvToBurnVec(PatchedConicsOrbit o, Vector3d dV, double UT)
         {
             Vector3d burnVec;
-            burnVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));
-            burnVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));
-            burnVec.z = Vector3d.Dot(dV, -1 * o.Prograde(UT));
+            burnVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
+            burnVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
+            burnVec.z = Vector3d.Dot(dV, o.Prograde(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
+            FlightPlanPlugin.Logger.LogInfo($"burnVec [{burnVec.x}, {burnVec.y}, {burnVec.z}] = {burnVec.magnitude} m/s");
+            
+            Vector3d testVec;
+            //testVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
+            //testVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
+            //testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
+            //FlightPlanPlugin.Logger.LogInfo($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
+            
+            testVec.x = Vector3d.Dot(dV, o.Up(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
+            testVec.y = Vector3d.Dot(dV, o.North(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
+            testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
+            FlightPlanPlugin.Logger.LogInfo($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
+            
+            // odeSubStage.ResetExhaustVelocityDirection(o.referenceBody.transform.celestialFrame, odeManeuverNode.DeltaV);
+            // ICoordinateSystem coordinateSystem => (ICoordinateSystem) this.ReferenceFrame;
+            // ITransformFrame ReferenceFrame => this.referenceBody != null ? this.referenceBody.SimulationObject.transform.celestialFrame : (ITransformFrame) null;
+            // Vector3d relativeVelocityZup => this.relativeVelocity.vector.SwapYAndZ;
+
             return burnVec;
         }
 
@@ -79,9 +103,6 @@ namespace MuMech
         //Computes the speed of a circular orbit of a given radius for a given body.
         public static double CircularOrbitSpeed(CelestialBodyComponent body, double radius)
         {
-            // FlightPlanPlugin.Logger.LogInfo($"CircularOrbitSpeed: GM  {body.gravParameter}");
-            // FlightPlanPlugin.Logger.LogInfo($"CircularOrbitSpeed: SMA {radius} m");
-
             //v = sqrt(GM/r)
             return Math.Sqrt(body.gravParameter / radius);
         }
@@ -89,35 +110,12 @@ namespace MuMech
         //Computes the deltaV of the burn needed to circularize an orbit at a given UT.
         public static Vector3d DeltaVToCircularize(PatchedConicsOrbit o, double UT)
         {
-            // double circSpeed1 = CircularOrbitSpeed(o.referenceBody, o.Radius(UT));
-            // double circSpeed2 = o.SwappedOrbitalVelocityAtUT(UT).magnitude;
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: circSpeed1 {circSpeed1} m/s");
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: circSpeed2 {circSpeed2} m/s");
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Delta-v {circSpeed1 - circSpeed2} m/s");
-            // Vector3d horizontal = o.Horizontal(UT); // = Vector3d.Exclude(o.Up(UT), o.Prograde(UT)).normalized;
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Horizontal Vec [{horizontal.x},{horizontal.y}, {horizontal.z}]");
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: RadialPlus Vec [{o.RadialPlus(UT).x},{o.RadialPlus(UT).y}, {o.RadialPlus(UT).z}]");
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: NormalPlus Vec [{o.NormalPlus(UT).x},{o.NormalPlus(UT).y}, {o.NormalPlus(UT).z}]");
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x},{o.Prograde(UT).y}, {o.Prograde(UT).z}]");
-            // Vector3d prograde = o.Prograde(UT); // = o.SwappedOrbitalVelocityAtUT(UT).normalized
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] Prograde Vec   [{prograde.x},{prograde.y}, {prograde.z}]");
-            // Vector3d newPrograde = Vector3d.Cross(o.Up(UT), o.RadialPlus(UT)).normalized;
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize] New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
-            // Vector3d newPrograde = Vector3d.Cross(o.NormalPlus(UT), o.RadialPlus(UT)).normalized;
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
-            // o.RadialPlut(UT) = Vector3d.Exclude(o.Prograde(UT), o.Up(UT)).normalized;
-            // o.NormalPlus = o.SwappedOrbitNormal();
-            // o.Up(UT) = o.SwappedRelativePositionAtUT(UT).normalized;
-            // newPrograde = Vector3d.Exclude(o.RadialPlus(UT), o.Horizontal(UT)).normalized;
-            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: New Prograde   [{newPrograde.x},{newPrograde.y}, {newPrograde.z}]");
-
             Vector3d desiredVelocity = CircularOrbitSpeed(o.referenceBody, o.Radius(UT)) * o.Horizontal(UT);
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
             var deltaV = actualVelocity - desiredVelocity;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: desiredVelocity [{desiredVelocity.x},{desiredVelocity.y}, {desiredVelocity.z}] m/s");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: actualVelocity  [{actualVelocity.x},{actualVelocity.y}, {actualVelocity.z}] m/s");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: deltaV  [{deltaV.x},{deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: actualVelocity  [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: deltaV          [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s");
             return deltaV;
         }
 
@@ -134,32 +132,44 @@ namespace MuMech
             double E = -GM / (newPeR + newApR); // total energy per unit mass of new orbit
             double L = Math.Sqrt(Math.Abs((Math.Pow(E * (newApR - newPeR), 2) - GM * GM) / (2 * E))); // angular momentum per unit mass of new orbit
             double kineticE = E + GM / radius; // kinetic energy (per unit mass) of new orbit at UT
-            double horizontalV = L / radius;   // horizontal velocity of new orbit at UT
-            double verticalV = Math.Sqrt(Math.Abs(2 * kineticE - horizontalV * horizontalV)); //vertical velocity of new orbit at UT
-
-            Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
-
-            //untested:
-            verticalV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
+            double newHorizontalV = L / radius;   // horizontal velocity of new orbit at UT
+            double newUpV = Math.Sqrt(Math.Abs(2 * kineticE - newHorizontalV * newHorizontalV)); //vertical velocity of new orbit at UT
 
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: radius {radius} m");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: newPeR {newPeR} m");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: newApR {newApR} m");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: horizontalV    {horizontalV} m/s");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: verticalV      {verticalV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: newHorizontalV {newHorizontalV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: newUpV         {newUpV} m/s");
+
+            Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
+            var northV = Vector3d.Dot(actualVelocity, o.North(UT));
+            var eastV = Vector3d.Dot(actualVelocity, o.East(UT));  // tried Prograde, but that could include some of all three axes!
+            var upV = Vector3d.Dot(actualVelocity, o.Up(UT));
+            var newEastV = Math.Sqrt(newHorizontalV * newHorizontalV - northV * northV);
+
+            //untested:
+            newUpV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
+
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: newUpV*        {newUpV} m/s");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: verticalV*     {verticalV} m/s");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x},{o.Prograde(UT).y}, {o.Prograde(UT).z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Horizontal Vec [{o.Horizontal(UT).x},{o.Horizontal(UT).y}, {o.Horizontal(UT).z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Up Vec         [{o.Up(UT).x},{o.Up(UT).y}, {o.Up(UT).z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: upV            {upV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: northV         {northV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: eastV          {eastV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: newEastV       {newEastV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: newUpV         {newUpV} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x}, {o.Prograde(UT).y}, {o.Prograde(UT).z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Horizontal Vec [{o.Horizontal(UT).x}, {o.Horizontal(UT).y}, {o.Horizontal(UT).z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: Up Vec         [{o.Up(UT).x}, {o.Up(UT).y}, {o.Up(UT).z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: North Vec      [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: East Vec       [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
 
             // tried o.Prograde(UT) in place of o.Horizontal, tried o.RadialPlus(UT) in place of o.Up
-            Vector3d desiredVelocity = horizontalV * o.Horizontal(UT) + verticalV * o.Up(UT);
+            Vector3d desiredVelocity = newEastV * o.East(UT) + northV * o.North(UT) + newUpV * o.Up(UT);
 
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
 
             var deltaV = desiredVelocity - actualVelocity;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: finalDeltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
             return deltaV;
         }
 
@@ -245,7 +255,7 @@ namespace MuMech
             bool raising = ApoapsisIsHigher(newApR, o.Apoapsis);
 
             // Why do we use o.Prograde here and o.Horizontal for DeltaVToChangePeriapsis?
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT);
+            Vector3d burnDirection = (raising ? 1 : -1) * o.Horizontal(UT); // was o.Prograde(UT)
 
             double minDeltaV = 0;
             // 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
@@ -730,10 +740,15 @@ namespace MuMech
             Vector3d ejectionOrbitInitialVelocity = ejectionSpeed * (Vector3d)o.referenceBody.transform.right.vector;
             // Vector3d ejectionOrbitInitialPosition = o.referenceBody.Position.localPosition + ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
             Vector3d ejectionOrbitInitialPosition = ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
+
             // Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(ejectionOrbitInitialPosition - o.referenceBody.Position.localPosition));
             Position position = new(o.coordinateSystem, ejectionOrbitInitialPosition); // want position in KSP2 coordinates
+            // var pos = MathDP.AsPosition(o.coordinateSystem, ejectionOrbitInitialPosition);
+           
             // Velocity velocity = new(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(ejectionOrbitInitialVelocity)); // body.celestialMotionFrame
             Velocity velocity = new(o.referenceBody.celestialMotionFrame, ejectionOrbitInitialVelocity); // want velocity in KSP2 coordinates
+            // var vel = MathDP.AsVelocity(o.relativeToMotion, MathDP.AsVector(o.coordinateSystem, ejectionOrbitInitialVelocity));
+            
             PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, 0);
             double ejectionOrbitDuration = sampleEjectionOrbit.NextTimeOfRadius(0, o.referenceBody.sphereOfInfluence);
             Vector3d ejectionOrbitFinalVelocity = sampleEjectionOrbit.SwappedOrbitalVelocityAtUT(ejectionOrbitDuration);
