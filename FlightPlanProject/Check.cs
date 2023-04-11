@@ -27,8 +27,12 @@ namespace MechJebLib.Utils
     {
         private static void DoCheck(bool b)
         {
-            if (!b) throw new FailedCheck("check failed");
-            FlightPlanPlugin.Logger.LogError("check failed");
+            if (!b)
+            {
+                FlightPlanPlugin.Logger.LogError("check failed");
+                throw new FailedCheck("check failed");
+            }
+
         }
 
         public class FailedCheck : Exception
