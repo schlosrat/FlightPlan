@@ -28,12 +28,16 @@ namespace MuMech
         //
         public static Vector3d SwappedOrbitalVelocityAtUT(this PatchedConicsOrbit o, double UT)
         {
+            // Vector3d GetOrbitalVelocityAtUTZup(double UT) => this.GetOrbitalVelocityAtObTZup(this.GetObtAtUT(UT));
+            // Vector3d GetOrbitalVelocityAtObTZup(double obT) => this.GetOrbitalVelocityAtTrueAnomaly(this.TrueAnomalyAtObT(obT));
             return SwapYZ(o.GetOrbitalVelocityAtUTZup(UT)); // was: o.getOrbitalVelocityAtUT(UT)
         }
 
         //position relative to the primary
         public static Vector3d SwappedRelativePositionAtUT(this PatchedConicsOrbit o, double UT)
         {
+            // Vector3d GetRelativePositionAtUT(double UT) => this.GetRelativePositionAtObTZup(this.GetObtAtUT(UT)).SwapYAndZ;
+            // Vector3d GetRelativePositionAtObTZup(double obT) => this.GetRelativePositionFromTrueAnomalyZup(this.GetTrueAnomaly(this.SolveEccentricAnomaly(obT * this.meanMotion, this.OrbitalElements.Eccentricity)));
             return SwapYZ(o.GetRelativePositionAtUT(UT)); // was: o.getRelativePositionAtUT(UT)
         }
 
@@ -48,6 +52,7 @@ namespace MuMech
         //convention: as you look down along the orbit normal, the satellite revolves counterclockwise
         public static Vector3d SwappedOrbitNormal(this PatchedConicsOrbit o)
         {
+            // Vector3d GetRelativeOrbitNormal() => this.universeModel.Zup.WorldToLocal(this.orbitFrame.Z);
             return -SwapYZ(o.GetRelativeOrbitNormal()).normalized; // was: o.GetOrbitNormal()
         }
 
@@ -55,6 +60,7 @@ namespace MuMech
         //convention: as you look down along the orbit normal, the satellite revolves counterclockwise
         public static Vector3d SwappedOrbitNormal(this IKeplerOrbit o)
         {
+            // Vector3d GetRelativeOrbitNormal() => this.universeModel.Zup.WorldToLocal(this.orbitFrame.Z);
             return -SwapYZ(o.GetRelativeOrbitNormal()).normalized; // was: o.GetOrbitNormal()
         }
 
@@ -129,6 +135,7 @@ namespace MuMech
             // Assuming o.Up(UT) gives a SwapYZ version of the orbit up vetor at time UT, so the SwapYZ in position puts us back in the KSP2 coordiantes
             Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.Radius(UT) * (Vector3d)o.Up(UT))); // was: referenceBody.transform.up.vector
             // Assuming dV is a MJ computed dV, so needs a SwapYZ to be added to o.GetOrbitalVelocityAtUTZup(UT) and put us in the KSP2 coordinates
+            // Vector3d GetOrbitalVelocityAtUTZup(double UT) => this.GetOrbitalVelocityAtObTZup(this.GetObtAtUT(UT));
             Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.GetOrbitalVelocityAtUTZup(UT) +OrbitExtensions.SwapYZ(dV)); // body.celestialMotionFrame
             return MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, UT);
         }
@@ -172,17 +179,19 @@ namespace MuMech
         }
 
         // This does not allocate a new orbit object and the caller should call new PatchedConicsOrbit if/when required
-        //public static void MutatedOrbit(this PatchedConicsOrbit o, double periodOffset = Double.NegativeInfinity)
-        //{
-        //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        public static void MutatedOrbit(this PatchedConicsOrbit o, double periodOffset = Double.NegativeInfinity)
+        {
+            double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
 
-        //    if (periodOffset.IsFinite())
-        //    {
-        //        Vector3d pos, vel;
-        //        o.GetOrbitalStateVectorsAtUT(UT + o.period * periodOffset, out pos, out vel);
-        //        o.UpdateFromStateVectors(pos, vel, o.referenceBody, UT);
-        //    }
-        //}
+            if (periodOffset.IsFinite())
+            {
+                Vector3d pos, vel;
+                o.GetOrbitalStateVectorsAtUT(UT + o.period * periodOffset, out pos, out vel);
+                Position position = new Position(o.referenceBody.coordinateSystem, pos);
+                Velocity velocity = new Velocity(o.referenceBody.celestialMotionFrame, vel);
+                o.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
+            }
+        }
 
         //mean motion is rate of increase of the mean anomaly
         public static double MeanMotion(this PatchedConicsOrbit o)
@@ -308,7 +317,7 @@ namespace MuMech
         //The returned value is always between 0 and 2 * PI.
         public static double AscendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)  // was Orbit as type for b
         {
-            Vector3d vectorToAN = Vector3d.Cross(a.SwappedOrbitNormal(), b.SwappedOrbitNormal()); // tried: GetRelativeOrbitNormal()
+            Vector3d vectorToAN = Vector3d.Cross(a.SwappedOrbitNormal(), b.SwappedOrbitNormal());
             return a.TrueAnomalyFromVector(vectorToAN);
         }
 
@@ -326,7 +335,10 @@ namespace MuMech
         public static double AscendingNodeEquatorialTrueAnomaly(this PatchedConicsOrbit o)
         {
             // was: o.referenceBody.transform.up -> o.referenceBody.transform.up.vector
-            Vector3d vectorToAN = Vector3d.Cross(o.referenceBody.transform.up.vector, o.SwappedOrbitNormal()); // tried: GetRelativeOrbitNormal()
+            Vector3d vectorToAN = Vector3d.Cross(o.referenceBody.transform.up.vector, o.SwappedOrbitNormal());
+            //Vector3d an = Vector3d.Cross(Vector3d.forward, a.orbitFrame.Z);
+            //if (Math.Abs(an.sqrMagnitude) < double.Epsilon)
+            //    an = Vector3d.right;
             return o.TrueAnomalyFromVector(vectorToAN);
         }
 
@@ -407,7 +419,7 @@ namespace MuMech
                 FlightPlanPlugin.Logger.LogError("o.LAN = " + o.longitudeOfAscendingNode); // was: o.LAN -> longitudeOfAscendingNode
                 FlightPlanPlugin.Logger.LogError("o.inclination = " + o.inclination);
                 FlightPlanPlugin.Logger.LogError("o.argumentOfPeriapsis = " + o.argumentOfPeriapsis);
-                FlightPlanPlugin.Logger.LogError("o.GetRelativeOrbitNormal() = " + o.SwappedOrbitNormal()); // tried: GetRelativeOrbitNormal()
+                FlightPlanPlugin.Logger.LogError("o.GetRelativeOrbitNormal() = " + o.SwappedOrbitNormal());
             }
             return ret;
         }
