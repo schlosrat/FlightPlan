@@ -85,7 +85,8 @@ namespace MuMech
         //another name for the orbit normal; this form makes it look like the other directions
         public static Vector3d NormalPlus(this PatchedConicsOrbit o, double UT)
         {
-            return o.SwappedOrbitNormal(); // tried: GetRelativeOrbitNormal()
+            return Vector3d.Cross(o.RadialPlus(UT), o.Prograde(UT));
+            // return o.SwappedOrbitNormal(); // tried: GetRelativeOrbitNormal()
         }
 
         //normalized vector parallel to the planet's surface, and pointing in the same general direction as the orbital velocity
@@ -130,13 +131,10 @@ namespace MuMech
         //returns a new PatchedConicsOrbit object that represents the result of applying a given dV to o at UT
         public static PatchedConicsOrbit PerturbedOrbit(this PatchedConicsOrbit o, double UT, Vector3d dV)
         {
-            //Vector3d initialPosition = o.referenceBody.Position.localPosition + o.Radius(UT) * (Vector3d)o.referenceBody.transform.up.vector;
-            //Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(initialPosition - o.referenceBody.Position.localPosition));
-            // Assuming o.Up(UT) gives a SwapYZ version of the orbit up vetor at time UT, so the SwapYZ in position puts us back in the KSP2 coordiantes
-            Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.Radius(UT) * (Vector3d)o.Up(UT))); // was: referenceBody.transform.up.vector
-            // Assuming dV is a MJ computed dV, so needs a SwapYZ to be added to o.GetOrbitalVelocityAtUTZup(UT) and put us in the KSP2 coordinates
-            // Vector3d GetOrbitalVelocityAtUTZup(double UT) => this.GetOrbitalVelocityAtObTZup(this.GetObtAtUT(UT));
-            Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.GetOrbitalVelocityAtUTZup(UT) +OrbitExtensions.SwapYZ(dV)); // body.celestialMotionFrame
+            // Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.Radius(UT) * (Vector3d)o.Up(UT)));
+            Position position = new(o.coordinateSystem, o.GetRelativePositionAtUT(UT)); // was: SwappedRelativePositionAtUT(UT), o.SwappedAbsolutePositionAtUT(UT)
+            Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.GetOrbitalVelocityAtUTZup(UT) + OrbitExtensions.SwapYZ(dV));
+            // Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.SwappedOrbitalVelocityAtUT(UT) + dV);
             return MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, UT);
         }
 
