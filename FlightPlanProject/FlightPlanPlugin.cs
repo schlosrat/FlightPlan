@@ -329,7 +329,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void OnGUI()
     {
         GUIenabled = false;
-        var gameState = Game.GlobalGameState?.GetState();
+        var gameState = Game?.GlobalGameState?.GetState();
         if (gameState == GameState.Map3DView) GUIenabled = true;
         if (gameState == GameState.FlightView) GUIenabled = true;
         //if (Game.GlobalGameState.GetState() == GameState.TrainingCenter) GUIenabled = false;
