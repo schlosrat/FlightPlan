@@ -153,10 +153,6 @@ namespace MuMech
             return result;
         }
 
-        // Suspect this is malfuntioning. Of all the MuUtils code, this required the most modification to run (by far!)
-        // In particular UpdateFromStateVectors requires type Position and type Velocity vs the MJ KSP1 call that takes Vector3d args for pos and vel.
-        // For constructing position: tried Orbit.coordinateSystem - fails when body is Kerbol
-        // For constructing velocity: tried body.relativeToMotion
         // was: body.position ->  body.Position.localPosition
         // was: ret.LAN -> longitudeOfAscendingNode
         // was: Planetarium.up ->  body.Orbit.ReferenceFrame.up.vector
@@ -164,8 +160,6 @@ namespace MuMech
         public static PatchedConicsOrbit OrbitFromStateVectors(Position pos, Velocity vel, CelestialBodyComponent body, double UT)
         {
             PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
-            //Position position = new(body.coordinateSystem , OrbitExtensions.SwapYZ(pos - body.Position.localPosition)); 
-            //Velocity velocity = new(body.celestialMotionFrame , OrbitExtensions.SwapYZ(vel));
             ret.UpdateFromStateVectors(pos, vel, body, UT);
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
             if (double.IsNaN(ret.argumentOfPeriapsis))
