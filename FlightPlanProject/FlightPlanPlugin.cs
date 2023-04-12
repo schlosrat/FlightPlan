@@ -697,7 +697,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 else
                     Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                currentNode = getCurrentNode();
+                // currentNode = getCurrentNode();
                 var nodeTimeAdj = -currentNode.BurnDuration / 2;
                 var burnStartTime = currentNode.Time + nodeTimeAdj;
                 Logger.LogInfo($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
@@ -731,7 +731,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 else
                     Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                currentNode = getCurrentNode();
+                // currentNode = getCurrentNode();
                 var nodeTimeAdj = -currentNode.BurnDuration / 2;
                 var burnStartTime = currentNode.Time + nodeTimeAdj;
                 Logger.LogInfo($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
@@ -762,7 +762,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 burnParams.z *= -1;
                 Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                currentNode = getCurrentNode();
+                // currentNode = getCurrentNode();
                 var nodeTimeAdj = currentNode.BurnDuration / 2;
                 var burnStartTime = currentNode.Time + nodeTimeAdj;
                 Logger.LogInfo($"BurnDuration: {currentNode.BurnDuration}, Recalculating burn to be centered at {nodeTimeAdj + startTimeOffset} s from now ");
@@ -788,6 +788,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (newAp) // Working
             {
@@ -804,6 +805,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (newPeAp) // Sorta almost works, but this is a kludge!
             {
@@ -818,6 +820,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (newInc) // Working except for slight error in application of burnUT!
             {
@@ -854,6 +857,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
                 burnParams = activeVessel.Orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV2, burnUT);
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
 
                 // var deltaVTest = OrbitalManeuverCalculator.BurnVecToDv(activeVessel.Orbit, burnParams, burnUT);
                 // Logger.LogInfo($"BurnVecToDv Test: deltaV - deltaVTest [{deltaV.x - deltaVTest.x}, {deltaV.y - deltaVTest.y}, {deltaV.z - deltaVTest.z}] m/s");
@@ -870,6 +874,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT (prograde flipped)");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (matchPlanesD) // Working except for slight error in application of burnUT!
             {
@@ -880,6 +885,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (hohmannT) // Seems to work, but comes up a little low... 
             {
@@ -892,6 +898,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (interceptAtTime) // Not Working
             // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
@@ -911,6 +918,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {interceptUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (courseCorrection) // Works at least some times...
             {
@@ -933,6 +941,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (moonReturn) // Works at least sometimes...
             {
@@ -954,6 +963,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                    // currentNode = getCurrentNode();
                 }
             }
             else if (matchVCA) // untested
@@ -965,6 +975,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {closestApproachTime - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {closestApproachTime - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, closestApproachTime, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (matchVNow) // untested
             {
@@ -975,6 +986,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
             else if (planetaryXfer) // Not Working. At minimum, this will not work until DeltaVToChangeApoapsis works, which is failing on calls to solve with BrentRoot
             {
@@ -987,6 +999,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                 Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                 CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                // currentNode = getCurrentNode();
             }
         }
     }
@@ -1071,6 +1084,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Logger.LogInfo($"AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
         //Logger.LogInfo($"AddManeuverNode: Burn Time    {nodeData.Time}");
 
+        // Refersh the currentNode with what we've produced here in prep for calling UpdateNode
+        currentNode = getCurrentNode();
+
         StartCoroutine(UpdateNode(nodeData, nodeTimeAdj));
 
         //Logger.LogInfo("AddManeuverNode Done");
@@ -1082,20 +1098,36 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Game.Map.TryGetMapCore(out mapCore);
         var m3d = mapCore.map3D;
         var maneuverManager = m3d.ManeuverManager;
+        IGGuid simID;
+        SimulationObjectModel simObject;
 
         // Get the ManeuverPlanComponent for the active vessel
         var universeModel = game.UniverseModel;
         VesselComponent vesselComponent;
+        ManeuverPlanComponent maneuverPlanComponent;
         if (currentNode != null)
         {
-            vesselComponent = universeModel.FindVesselComponent(currentNode.RelatedSimID);
+            simID = currentNode.RelatedSimID;
+            // vc1 = universeModel.FindVesselComponent(simID);
+            // vesselComponent = vc1;
+            simObject = universeModel.FindSimObject(simID);
         }
         else
         {
+            // vc2 = activeVessel;
             vesselComponent = activeVessel;
+            simObject = vesselComponent?.SimulationObject;
         }
-        var simObject = vesselComponent.SimulationObject;
-        var maneuverPlanComponent = simObject.FindComponent<ManeuverPlanComponent>();
+
+        if (simObject != null)
+        {
+            maneuverPlanComponent = simObject.FindComponent<ManeuverPlanComponent>();
+        }
+        else
+        {
+            simObject = universeModel.FindSimObject(simID);
+            maneuverPlanComponent = simObject.FindComponent<ManeuverPlanComponent>();
+        }
 
         if (nodeTimeAdj != 0)
         {
@@ -1108,20 +1140,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Wait a tick for things to get created
         yield return new WaitForFixedUpdate();
 
-        // Manage the maneuver on the map
-        maneuverManager.RemoveAll();
-        try { maneuverManager?.GetNodeDataForVessels(); }
-        catch { Logger.LogError("UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.GetNodeDataForVessels()"); }
-        try { maneuverManager.UpdateAll(); }
-        catch { Logger.LogError("UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.UpdateAll()"); }
-        try { maneuverManager.UpdatePositionForGizmo(nodeData.NodeID); }
-        catch { Logger.LogError("UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.UpdatePositionForGizmo()"); }
+        try { maneuverPlanComponent.RefreshManeuverNodeState(0); } // Occasionally getting NREs here...
+        catch (NullReferenceException e) { Logger.LogError($"UpdateNode: caught NRE on call to maneuverPlanComponent.RefreshManeuverNodeState(0): {e}"); }
 
         // Wait a tick for things to get created
         yield return new WaitForFixedUpdate();
 
-        try { maneuverPlanComponent.RefreshManeuverNodeState(0); } // Occasionally getting NREs here...
-        catch (NullReferenceException e) { Logger.LogError($"UpdateNode: caught NRE on call to maneuverPlanComponent.RefreshManeuverNodeState(0): {e}"); }
+        // Manage the maneuver on the map
+        maneuverManager.RemoveAll();
+        try { maneuverManager?.GetNodeDataForVessels(); }
+        catch (Exception e) { Logger.LogError($"UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.GetNodeDataForVessels(): {e}"); }
+        try { maneuverManager.UpdateAll(); }
+        catch (Exception e) { Logger.LogError($"UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.UpdateAll(): {e}"); }
+        try { maneuverManager.UpdatePositionForGizmo(nodeData.NodeID); }
+        catch (Exception e) { Logger.LogError($"UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.UpdatePositionForGizmo(): {e}"); }
 
         // Set the currentNode  to the node we just created and added to the vessel
         // currentNode = nodeData;
