@@ -4,7 +4,7 @@
   "name": "Flight Plan",
   "description": "Plan your (Space) Flight! Set up useful maneuver nodes to get you where you want to be",
   "source": "https://github.com/schlosrat/FlightPlan",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "version_check": "",
   "dependencies": [
     {
