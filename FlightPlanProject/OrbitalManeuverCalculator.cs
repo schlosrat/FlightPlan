@@ -783,7 +783,7 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogInfo($"deltaV:              [{deltaV.x}, {deltaV.y}, {deltaV.z}] = {deltaV.magnitude} m/s");
             FlightPlanPlugin.Logger.LogInfo($"burnUT:              {burnUT - UT} s from now");
 
-            return detalV;
+            return deltaV;
         }
 
         public struct LambertProblem
