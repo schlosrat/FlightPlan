@@ -41,7 +41,7 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 ### Circularize at the Next Ap
 ![Flight Plan: Circularize at Next Ap Example](https://i.imgur.com/by0kbUF.png)
 
-### Burn Timeing Detail (burn brackets effective point: Ap)
+### Burn Timing Detail (burn brackets effective point: Ap)
 ![Flight Plan: Circularize at Next Ap Burn Detail](https://i.imgur.com/pDkXeBM.png)
 
 ### Circularize at the Next Pe
