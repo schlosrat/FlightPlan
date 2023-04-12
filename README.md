@@ -73,4 +73,5 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 
 ## Installation
 1. Download and extract SpaceWarp into your game folder.
-1. Download and extract this mod into the game folder. If done correctly, you should have the following folder structure: < KSP Folder >/BepInEx/plugins/flight_plan.
+1. Download and extract this mod into the game folder. If done correctly, you should have the following folder structure:
+< KSP Folder >/BepInEx/plugins/flight_plan.
