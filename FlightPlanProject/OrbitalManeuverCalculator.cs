@@ -692,6 +692,7 @@ namespace MuMech
         //DeltaVForCourseCorrection (a function that has been removed due to being unused).
         public static Vector3d DeltaVAndTimeForInterplanetaryTransferEjection(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target, bool syncPhaseAngle, out double burnUT)
         {
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVAndTimeForInterplanetaryTransferEjection: Target {target.referenceBody.Name}");
             PatchedConicsOrbit planetOrbit = o.referenceBody.Orbit;
 
             //Compute the time and dV for a Hohmann transfer where we pretend that we are the planet we are orbiting.
@@ -712,6 +713,7 @@ namespace MuMech
                 if (target.semiMajorAxis < planetOrbit.semiMajorAxis) idealDeltaV = DeltaVToChangePeriapsis(planetOrbit, idealBurnUT, target.semiMajorAxis);
                 else idealDeltaV = DeltaVToChangeApoapsis(planetOrbit, idealBurnUT, target.semiMajorAxis);
             }
+            FlightPlanPlugin.Logger.LogInfo($"idealDeltaV: [{idealDeltaV.x}, {idealDeltaV.y}, {idealDeltaV.z}] = {idealDeltaV.magnitude} m/s");
 
             //Compute the actual transfer orbit this ideal burn would lead to.
             PatchedConicsOrbit transferOrbit = planetOrbit.PerturbedOrbit(idealBurnUT, idealDeltaV);
@@ -774,7 +776,14 @@ namespace MuMech
 
             Vector3d preEjectionVelocity = o.SwappedOrbitalVelocityAtUT(burnUT);
 
-            return ejectionVelocity - preEjectionVelocity;
+            var deltaV = ejectionVelocity - preEjectionVelocity;
+
+            FlightPlanPlugin.Logger.LogInfo($"ejectionVelocity:    [{ejectionVelocity.x}, {ejectionVelocity.y}, {ejectionVelocity.z}] = {ejectionVelocity.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"preEjectionVelocity: [{preEjectionVelocity.x}, {preEjectionVelocity.y}, {preEjectionVelocity.z}] = {preEjectionVelocity.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"deltaV:              [{deltaV.x}, {deltaV.y}, {deltaV.z}] = {deltaV.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogInfo($"burnUT:              {burnUT - UT} s from now");
+
+            return detalV;
         }
 
         public struct LambertProblem
