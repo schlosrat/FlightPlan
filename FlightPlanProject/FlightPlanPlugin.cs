@@ -116,7 +116,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // private const string ToolbarOABButtonID = "BTN-FlightPlanOAB";
 
     // Hot Key config setting
-    private string hotKey;
+    private bool experimental;
 
     //public ManualLogSource logger;
     public new static ManualLogSource Logger { get; set; }
@@ -293,28 +293,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Register all Harmony patches in the project
         Harmony.CreateAndPatchAll(typeof(FlightPlanPlugin).Assembly);
 
-        // Try to get the currently active vessel, set its throttle to 100% and toggle on the landing gear
-        //try
-        //{
-        //    var currentVessel = Vehicle.ActiveVesselVehicle;
-        //    if (currentVessel != null)
-        //    {
-        //        currentVessel.SetMainThrottle(1.0f);
-        //        currentVessel.SetGearState(true);
-        //    }
-        //}
-        //catch (Exception e) {}
-
         // Fetch a configuration value or create a default one if it does not exist
-        // var defaultValue = "LeftAlt P";
-        // hotKey = Config.Bind<string>("Settings section", "Hot Key", defaultValue, "Keyboard shortcut key to launch mod").Value;
+        var defaultValue = false;
+        experimental = Config.Bind<bool>("Settings section", "Experimental Features", defaultValue, "Enable/Disable experimental features for testing - Warrantee Void if Enabled!").Value;
 
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
-        // Logger.LogInfo($"Hot Key: {hotKey}");
+        Logger.LogInfo($"Experimental Features: {experimental}");
 
-        // activeVessel = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
-        // targetPeR = double.Parse(targetPeAStr) + activeVessel.Orbit.referenceBody.radius;
-        // targetApR = double.Parse(targetApAStr) + activeVessel.Orbit.referenceBody.radius;
     }
 
     private void ToggleButton(bool toggle)
@@ -451,7 +436,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             DrawButton("Circularize at Ap", ref circAp);
         }
         DrawButton("Circularize at Pe", ref circPe);
-        DrawButton("Circularize Now", ref circNow);
+
+        if (experimental)
+            DrawButton("Circularize Now", ref circNow);
 
         DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
         try { targetPeR = double.Parse(targetPeAStr) + activeVessel.Orbit.referenceBody.radius; }
@@ -463,11 +450,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             try { targetApR = double.Parse(targetApAStr) + activeVessel.Orbit.referenceBody.radius; }
             catch { targetApR = 0; }
 
-            DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
-            try { targetPeR1 = double.Parse(targetPeAStr1) + activeVessel.Orbit.referenceBody.radius; }
-            catch { targetPeR1 = 0; };
-            try { targetApR1 = double.Parse(targetApAStr1) + activeVessel.Orbit.referenceBody.radius; }
-            catch { targetApR1 = 0; }
+            if (experimental)
+            {
+                DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
+                try { targetPeR1 = double.Parse(targetPeAStr1) + activeVessel.Orbit.referenceBody.radius; }
+                catch { targetPeR1 = 0; };
+                try { targetApR1 = double.Parse(targetApAStr1) + activeVessel.Orbit.referenceBody.radius; }
+                catch { targetApR1 = 0; }
+            }
         }
 
         DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
@@ -484,29 +474,40 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 DrawButton("Match Planes at DN", ref matchPlanesD);
 
                 DrawButton("Hohmann Xfer", ref hohmannT);
-                DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
-                try { interceptT = double.Parse(interceptTStr); }
-                catch { interceptT = 100; }
 
-                DrawButton("Course Correction", ref courseCorrection);
-                DrawButton("Match Velocity @CA", ref matchVCA);
-                DrawButton("Match Velocity Now", ref matchVNow);
+                if (experimental)
+                {
+                    DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
+                    try { interceptT = double.Parse(interceptTStr); }
+                    catch { interceptT = 100; }
+                    DrawButton("Course Correction", ref courseCorrection);
+                    DrawButton("Match Velocity @CA", ref matchVCA);
+                    DrawButton("Match Velocity Now", ref matchVNow);
+                }
+
             }
 
-            //if the currentTarget is a celestial body and it's in orbit around the same body that the activeVessel's parent body is orbiting
-            if ((currentTarget.Name != activeVessel.Orbit.referenceBody.Name) && (currentTarget.Orbit.referenceBody.Name == activeVessel.Orbit.referenceBody.Orbit.referenceBody.Name))
+            if (experimental)
             {
-                DrawSectionHeader("Interplanetary Maneuvers");
-                DrawButton("Interplanetary Transfer", ref planetaryXfer);
+                //if the currentTarget is a celestial body and it's in orbit around the same body that the activeVessel's parent body is orbiting
+                if ((currentTarget.Name != activeVessel.Orbit.referenceBody.Name) && (currentTarget.Orbit.referenceBody.Name == activeVessel.Orbit.referenceBody.Orbit.referenceBody.Name))
+                {
+                    DrawSectionHeader("Interplanetary Maneuvers");
+                    DrawButton("Interplanetary Transfer", ref planetaryXfer);
+                }
             }
         }
-        // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
-        var referenceBody = activeVessel.Orbit.referenceBody;
-        if (!referenceBody.referenceBody.IsStar)
+        if (experimental)
         {
-            DrawSectionHeader("Moon Specific Maneuvers");
-            DrawButton("Moon Return", ref moonReturn);
+            // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
+            var referenceBody = activeVessel.Orbit.referenceBody;
+            if (!referenceBody.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1)
+            {
+                DrawSectionHeader("Moon Specific Maneuvers");
+                DrawButton("Moon Return", ref moonReturn);
+            }
         }
+
 
         // Indication to User that its safe to type, or why vessel controls aren't working
         GUILayout.BeginHorizontal();
