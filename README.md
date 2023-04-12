@@ -19,8 +19,8 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 * New Ap (for user specified value) - planned for next Pe
 * New Inclination (for user specified value) - if e < 0: Planned for cheapest AN/DN, otherwise planned for ASAP
 ### Create Maneuver Nodes for Maneuvers Relative to the Selected Target (only available if a target is selected)
-* Match planes at AN
-* Match Planed at DN
+* Match planes with Target at AN
+* Match Planed with Target at DN 
 * Hohmann Transfer to Target
 
 ## Planned Improvement
