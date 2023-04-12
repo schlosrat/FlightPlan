@@ -11,6 +11,7 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 
 ## Features
 ### Display Current Target Selection
+* Drop Down Menu for easy target selection from list of celestial objects
 ### Create Maneuver Nodes for Own Ship Maneuvers
 * Circularize at Ap
 * Circularize at Pe
