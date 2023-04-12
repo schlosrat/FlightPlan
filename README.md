@@ -81,7 +81,7 @@ Work In Progress developmental features may be enabled by switching on the Exper
 ![Flight Plan: Circularize at Next Pe Example - Munar Flyby](https://i.imgur.com/gFuZRau.png)
 
 ### Hohmann Transfer to Mun (from non-coplanar orbit: Inclined 20 degrees from target plane)
-![Flight Plan: Hohmann Transfer Example]([https://i.imgur.com/ymKTLyT.png](https://i.imgur.com/iliH2bY.png))
+![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/ymKTLyT.png](https://i.imgur.com/iliH2bY.png)
 
 ## Installation
 1. Download and extract SpaceWarp into your game folder.
