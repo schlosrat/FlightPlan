@@ -95,8 +95,6 @@ namespace MuMech
             return longitude; // * UtilMath.Rad2Deg;
         }
         
-        //ManualLogSource logger;
-        //logger = BepInEx.Logging.Logger.CreateLogSource("MuMech");
         //Computes the speed of a circular orbit of a given radius for a given body.
         public static double CircularOrbitSpeed(CelestialBodyComponent body, double radius)
         {
