@@ -30,37 +30,38 @@ namespace MuMech
         // World coordinate system is that associated with universeModel
         // Local coordinate system is that associated with the orbit?
 
-        public static Vector3d DvToBurnVec(PatchedConicsOrbit o, Vector3d dV, double UT)
-        {
-            Vector3d burnVec;
-            burnVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
-            burnVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
-            burnVec.z = Vector3d.Dot(dV, o.Prograde(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
-            FlightPlanPlugin.Logger.LogInfo($"burnVec [{burnVec.x}, {burnVec.y}, {burnVec.z}] = {burnVec.magnitude} m/s");
+        // NOT NEEDED: See OrbitExtensions DeltaVToManeuverNodeCoordinates method
+        //public static Vector3d DvToBurnVec(PatchedConicsOrbit o, Vector3d dV, double UT)
+        //{
+        //    Vector3d burnVec;
+        //    burnVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));
+        //    burnVec.y = Vector3d.Dot(dV, -o.NormalPlus(UT));
+        //    burnVec.z = Vector3d.Dot(dV, o.Prograde(UT));
+        //    FlightPlanPlugin.Logger.LogInfo($"burnVec [{burnVec.x}, {burnVec.y}, {burnVec.z}] = {burnVec.magnitude} m/s");
             
-            Vector3d testVec;
-            //testVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
-            //testVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
-            //testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
-            //FlightPlanPlugin.Logger.LogInfo($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
+        //    Vector3d testVec;
+        //    //testVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
+        //    //testVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
+        //    //testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
+        //    //FlightPlanPlugin.Logger.LogInfo($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
             
-            testVec.x = Vector3d.Dot(dV, o.Up(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
-            testVec.y = Vector3d.Dot(dV, o.North(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
-            testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
-            FlightPlanPlugin.Logger.LogInfo($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
+        //    // testVec.x = Vector3d.Dot(dV, o.Up(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
+        //    // testVec.y = Vector3d.Dot(dV, o.North(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
+        //    // testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
+        //    // FlightPlanPlugin.Logger.LogInfo($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
             
-            // odeSubStage.ResetExhaustVelocityDirection(o.referenceBody.transform.celestialFrame, odeManeuverNode.DeltaV);
-            // ICoordinateSystem coordinateSystem => (ICoordinateSystem) this.ReferenceFrame;
-            // ITransformFrame ReferenceFrame => this.referenceBody != null ? this.referenceBody.SimulationObject.transform.celestialFrame : (ITransformFrame) null;
-            // Vector3d relativeVelocityZup => this.relativeVelocity.vector.SwapYAndZ;
+        //    // odeSubStage.ResetExhaustVelocityDirection(o.referenceBody.transform.celestialFrame, odeManeuverNode.DeltaV);
+        //    // ICoordinateSystem coordinateSystem => (ICoordinateSystem) this.ReferenceFrame;
+        //    // ITransformFrame ReferenceFrame => this.referenceBody != null ? this.referenceBody.SimulationObject.transform.celestialFrame : (ITransformFrame) null;
+        //    // Vector3d relativeVelocityZup => this.relativeVelocity.vector.SwapYAndZ;
 
-            return burnVec;
-        }
+        //    return burnVec;
+        //}
 
-        public static Vector3d BurnVecToDv(PatchedConicsOrbit o, Vector3d burnVec, double UT)
-        {
-            return burnVec.x * o.RadialPlus(UT) + burnVec.y * o.NormalPlus(UT) - burnVec.z * o.Prograde(UT);
-        }
+        //public static Vector3d BurnVecToDv(PatchedConicsOrbit o, Vector3d burnVec, double UT)
+        //{
+        //    return burnVec.x * o.RadialPlus(UT) + burnVec.y * o.NormalPlus(UT) - burnVec.z * o.Prograde(UT);
+        //}
 
         // A stand in for the KSP1 function o.referenceBody.GetLatitude(Vector3d pos)
         // KSP2 doesn't appear to have such a function, but does have GetLatLonAltFromRadius
@@ -69,33 +70,29 @@ namespace MuMech
         public static double GetLatitude(this PatchedConicsOrbit o, double UT)
         {
             double latitude, longitude, altitude;
-            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT);
-            Position position = new Position(o.referenceBody.coordinateSystem, thisPosition);
+            Position position = new Position(o.referenceBody.coordinateSystem, o.SwappedAbsolutePositionAtUT(UT));
             o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
 
-            return latitude * UtilMath.Rad2Deg;
+            return latitude; // * UtilMath.Rad2Deg;
         }
 
         public static double GetLatLon(this PatchedConicsOrbit o, double UT, out double longitude)
         {
             double latitude, altitude;
-            longitude = 0;
-            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT);
-            Position position = new Position(o.referenceBody.coordinateSystem, thisPosition);
+            Position position = new Position(o.referenceBody.coordinateSystem, o.SwappedAbsolutePositionAtUT(UT));
             o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
-            longitude *= UtilMath.Rad2Deg;
+            // longitude *= UtilMath.Rad2Deg;
 
-            return latitude * UtilMath.Rad2Deg;
+            return latitude; // * UtilMath.Rad2Deg;
         }
 
         public static double GetLongitude(this PatchedConicsOrbit o, double UT)
         {
             double latitude, longitude, altitude;
-            Vector3d thisPosition = o.SwappedAbsolutePositionAtUT(UT);
-            Position position = new Position(o.referenceBody.coordinateSystem, thisPosition);
+            Position position = new Position(o.referenceBody.coordinateSystem, o.SwappedAbsolutePositionAtUT(UT));
             o.referenceBody.GetLatLonAltFromRadius(position, out latitude, out longitude, out altitude);
 
-            return longitude * UtilMath.Rad2Deg;
+            return longitude; // * UtilMath.Rad2Deg;
         }
         
         //ManualLogSource logger;
@@ -164,7 +161,8 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToCircularize: East Vec       [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
 
             // tried o.Prograde(UT) in place of o.Horizontal, tried o.RadialPlus(UT) in place of o.Up
-            Vector3d desiredVelocity = newEastV * o.East(UT) + northV * o.North(UT) + newUpV * o.Up(UT);
+            // Vector3d desiredVelocity = newEastV * o.East(UT) + northV * o.North(UT) + newUpV * o.Up(UT);
+            Vector3d desiredVelocity = newHorizontalV * o.Horizontal(UT) + newUpV * o.Up(UT);
 
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToEllipticize: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
 
@@ -215,8 +213,8 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: minDeltaV  {minDeltaV} m/s");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: maxDeltaV  {maxDeltaV} m/s");
             
-            minDeltaV = 0;
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: minDeltaV* {minDeltaV} m/s");
+            // minDeltaV = 0;
+            // FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: minDeltaV* {minDeltaV} m/s");
 
             Func<double, object, double> f = delegate (double testDeltaV, object ign)
             {
@@ -255,7 +253,7 @@ namespace MuMech
             bool raising = ApoapsisIsHigher(newApR, o.Apoapsis);
 
             // Why do we use o.Prograde here and o.Horizontal for DeltaVToChangePeriapsis?
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Horizontal(UT); // was o.Prograde(UT)
+            Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT);
 
             double minDeltaV = 0;
             // 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
@@ -328,6 +326,8 @@ namespace MuMech
         {
             CelestialBodyComponent body = vessel.mainBody;
             double lat, lon, alt;
+            var latitude = vessel.Latitude;
+            var altitude = vessel.AltitudeFromRadius;
             vessel.mainBody.GetLatLonAltFromRadius(vessel.mainBody.Position, out lat, out lon, out alt); //   Latitude; // was: vesselState.latitude;
             double latitudeDegrees = lat * UtilMath.Deg2Rad;
             double orbVel = OrbitalManeuverCalculator.CircularOrbitSpeed(body, alt + body.radius); // was: vesselState.altitudeASL 
@@ -336,8 +336,8 @@ namespace MuMech
             double now = GameManager.Instance.Game.UniverseModel.UniversalTime;
             PatchedConicsOrbit o = vessel.Orbit;
 
-            Vector3d north = vessel._telemetryComponent.HorizonNorth.vector; // vesselState.north; // IFlightTelemetry has a North Vector, can we use that?
-            Vector3d east = vessel._telemetryComponent.HorizonEast.vector; //  vesselState.east;   // IFlightTelemetry has a East Vector, can we use that?
+            Vector3d north = vessel._telemetryComponent.HorizonNorth.vector; // vesselState.north; // (from VesselState.cs) north = vessel.north; // IFlightTelemetry has a North Vector, can we use that?
+            Vector3d east = vessel._telemetryComponent.HorizonEast.vector; //  vesselState.east;   // (from VesselState.cs) east = vessel.east;   // IFlightTelemetry has a East Vector, can we use that?
 
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(now), o.SwappedOrbitalVelocityAtUT(now));
             Vector3d desiredHorizontalVelocityOne = orbVel * ( Math.Sin(headingOne) * east + Math.Cos(headingOne) * north );
@@ -395,16 +395,16 @@ namespace MuMech
         {
             double latitude = GetLatitude(o, UT); // was o.referenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
             double desiredHeading = HeadingForInclination(newInclination, latitude);
-            var north = o.North(UT);
-            var east = o.East(UT);
+            // var north = o.North(UT);
+            // var east = o.East(UT);
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.SwappedOrbitalVelocityAtUT(UT));
             Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: latitude {latitude}°, newInclination {newInclination}°");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: desiredHeading {desiredHeading}°");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: o.North(UT)               [{north.x}, {north.y}, {north.z}]");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: o.East(UT)                [{east.x}, {east.y}, {east.z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: o.North(UT)               [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangeInclination: o.East(UT)                [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
             Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeading) * o.North(UT);
             if (Vector3d.Dot(actualHorizontalVelocity, northComponent) < 0) northComponent *= -1;
             if (MuUtils.ClampDegrees180(newInclination) < 0) northComponent *= -1;
