@@ -11,7 +11,7 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 
 ## Installation
 1. Download and extract SpaceWarp into your game folder. If you've installed the game via Steam, then this is probably here: *C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2*. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
-1. Download and extract this mod into the game folder. The mod's ZIP file contains a single BepInEx folder. You can drag that right onto your KSP2 folder to install the mod. If done correctly, you should have the following folder structure within your KSP2 game folder: < KSP2GameFolder >**/BepInEx/plugins/flight_plan**.
+1. Download and extract this mod into the game folder. The mod's ZIP file contains a single BepInEx folder. You can drag that right onto your KSP2 folder to install the mod. If done correctly, you should have the following folder structure within your KSP2 game folder: *KSP2GameFolder*/**BepInEx/plugins/flight_plan**.
 
 ## Features
 ### Display Current Target Selection
