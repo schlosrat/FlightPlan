@@ -203,11 +203,13 @@ namespace MuMech
                 maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection));
             }
 
+            var burDirn = o.DeltaVToManeuverNodeCoordinates(UT, burnDirection);  // test code - delete
 
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: radius {radius}");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: newPeR {newPeR}");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: raising {raising}");
-            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: burnDirection [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: deltaV  [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
+            FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: burnDir [{burDirn.x}, {burDirn.y}, {burDirn.z}]");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: minDeltaV  {minDeltaV} m/s");
             FlightPlanPlugin.Logger.LogInfo($"DeltaVToChangePeriapsis: maxDeltaV  {maxDeltaV} m/s");
             
