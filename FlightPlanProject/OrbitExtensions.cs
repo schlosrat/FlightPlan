@@ -10,6 +10,7 @@ using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using FlightPlan;
+using UnityEngine;
 
 namespace MuMech
 {
@@ -131,11 +132,13 @@ namespace MuMech
         //returns a new PatchedConicsOrbit object that represents the result of applying a given dV to o at UT
         public static PatchedConicsOrbit PerturbedOrbit(this PatchedConicsOrbit o, double UT, Vector3d dV)
         {
-            // Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.Radius(UT) * (Vector3d)o.Up(UT)));
-            Position position = new(o.coordinateSystem, o.GetRelativePositionAtUT(UT)); // was: SwappedRelativePositionAtUT(UT), o.SwappedAbsolutePositionAtUT(UT)
-            Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.GetOrbitalVelocityAtUTZup(UT) + OrbitExtensions.SwapYZ(dV));
-            // Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.SwappedOrbitalVelocityAtUT(UT) + dV);
+            Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.SwappedAbsolutePositionAtUT(UT) - o.referenceBody.Position.localPosition));
+            Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.SwappedOrbitalVelocityAtUT(UT) + dV);
             return MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, UT);
+            // return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.referenceBody, UT);
+            // pos = o.SwappedAbsolutePositionAtUT(UT);
+            // vel = o.SwappedOrbitalVelocityAtUT(UT) + dV;
+            // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
         }
 
         // returns a new orbit that is identical to the current one (although the epoch will change)
@@ -150,7 +153,7 @@ namespace MuMech
 
             PatchedConicsOrbit newOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
             o.GetOrbitalStateVectorsAtUT(UT, out pos, out vel);
-            Position position = new Position(o.referenceBody.coordinateSystem, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
+            Position position = new Position(o.coordinateSystem, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
             Velocity velocity = new Velocity(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(vel));
             newOrbit.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
 
@@ -169,8 +172,8 @@ namespace MuMech
             o.StartUT = UT;
             o.EndUT = o.eccentricity >= 1.0 ? o.period : UT + o.period;
             PatchedConicsOrbit nextOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+            // PatchedConics.CalculatePatch(o, nextOrbit, UT, solverParameters, null); // Maybe this need to be CalculatePatchConicList, or CalculatePatchList ???
             // Assuming nextOrbit can be obtained from o.NextPatch
-            //PatchedConics.CalculatePatch(o, nextOrbit, UT, solverParameters, null); // Maybe this need to be CalculatePatchConicList, or CalculatePatchList ???
             nextOrbit = o.NextPatch as PatchedConicsOrbit;
 
             return nextOrbit;
@@ -185,8 +188,8 @@ namespace MuMech
             {
                 Vector3d pos, vel;
                 o.GetOrbitalStateVectorsAtUT(UT + o.period * periodOffset, out pos, out vel);
-                Position position = new Position(o.referenceBody.coordinateSystem, pos);
-                Velocity velocity = new Velocity(o.referenceBody.celestialMotionFrame, vel);
+                Position position = new Position(o.coordinateSystem, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
+                Velocity velocity = new Velocity(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(vel));
                 o.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
             }
         }
@@ -250,10 +253,10 @@ namespace MuMech
         }
 
         //Distance between a and b at the closest approach found by NextClosestApproachTime
-        //public static double NextClosestApproachDistance(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
-        //{
-        //    return a.Separation(b, a.NextClosestApproachTime(b, UT));
-        //}
+        public static double NextClosestApproachDistance(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
+        {
+            return a.Separation(b, a.NextClosestApproachTime(b, UT));
+        }
 
         //The mean anomaly of the orbit.
         //For elliptical orbits, the value return is always between 0 and 2pi
@@ -392,29 +395,32 @@ namespace MuMech
         //Better than using PatchedConicsOrbit.eccVec because that is zero for circular orbits
         public static Vector3d SwappedRelativePositionAtPeriapsis(this PatchedConicsOrbit o)
         {
-            // was: (float)o.LAN -> longitudeOfAscendingNode
+            // was: o.PeR -> o.Periapsis
+            // was: o.LAN -> longitudeOfAscendingNode
             // was: Planetarium.up -> o.ReferenceFrame.up.vector
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
-            Vector3d vectorToAN = QuaternionD.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
-            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
-            return o.Periapsis * vectorToPe; // was: o.PeR
+            // was: Quaternion -> QuaternionD
+            Vector3d vectorToAN = Quaternion.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
+            Vector3d vectorToPe = Quaternion.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
+            return o.Periapsis * vectorToPe;
         }
 
         //Returns the vector from the primary to the orbiting body at apoapsis
         //Better than using -PatchedConicsOrbit.eccVec because that is zero for circular orbits
         public static Vector3d SwappedRelativePositionAtApoapsis(this PatchedConicsOrbit o)
         {
-            // was (float)o.LAN -> longitudeOfAscendingNode
+            // was: o.Apr -> o.Apoapsis
+            // was: o.LAN -> longitudeOfAscendingNode
             // was: Planetarium.up -> o.ReferenceFrame.up.vector
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
             // was: Quaternion -> QuaternionD
-            Vector3d vectorToAN = QuaternionD.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
-            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
-            Vector3d ret = -o.Apoapsis * vectorToPe; // was: o.Apr - Apoapsis, should this be o.ApoapsisArl?
+            Vector3d vectorToAN = Quaternion.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
+            Vector3d vectorToPe = Quaternion.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
+            Vector3d ret = -o.Apoapsis * vectorToPe;
             if (double.IsNaN(ret.x))
             {
                 FlightPlanPlugin.Logger.LogError("OrbitExtensions.SwappedRelativePositionAtApoapsis got a NaN result!");
-                FlightPlanPlugin.Logger.LogError("o.LAN = " + o.longitudeOfAscendingNode); // was: o.LAN -> longitudeOfAscendingNode
+                FlightPlanPlugin.Logger.LogError("o.LAN = " + o.longitudeOfAscendingNode);
                 FlightPlanPlugin.Logger.LogError("o.inclination = " + o.inclination);
                 FlightPlanPlugin.Logger.LogError("o.argumentOfPeriapsis = " + o.argumentOfPeriapsis);
                 FlightPlanPlugin.Logger.LogError("o.GetRelativeOrbitNormal() = " + o.SwappedOrbitNormal());
@@ -659,7 +665,8 @@ namespace MuMech
             return "PeriapsisArl:" + o.PeriapsisArl + " ApoapsisArl:" + o.ApoapsisArl + " SMA:" + o.semiMajorAxis + " ECC:" + o.eccentricity + " INC:" + o.inclination + " LAN:" + o.longitudeOfAscendingNode + " ArgP:" + o.argumentOfPeriapsis + " TA:" + o.TrueAnomaly;
         }
 
-        //public static double SuicideBurnCountdown(PatchedConicsOrbit orbit, VesselState vesselState, VesselComponent vessel)
+        // used to be SuicideBurnCountdown(Orbit orbit, VesselState vesselState, Vessel vessel)
+        //public static double SuicideBurnCountdown(PatchedConicsOrbit orbit, VesselComponent vessel)
         //{
         //    if (vessel.mainBody == null) return 0;
         //    if (orbit.PeriapsisArl > 0) return Double.PositiveInfinity;
@@ -675,7 +682,8 @@ namespace MuMech
         //    double decelTime = vessel.SrfSpeedMagnitude / effectiveDecel;
 
         //    Vector3d estimatedLandingSite = vessel.CenterOfMass.localPosition + 0.5 * decelTime * vessel.SurfaceVelocity.vector;
-        //    double terrainRadius = vessel.mainBody.Radius + vessel.mainBody.TerrainAltitude(estimatedLandingSite);
+        //    Position position = new(orbit.coordinateSystem, estimatedLandingSite);
+        //    double terrainRadius = vessel.mainBody.radius + vessel.mainBody.GetAltitudeFromRadius(position); // was: vessel.mainBody.TerrainAltitude(estimatedLandingSite)
         //    double impactTime = 0;
         //    try
         //    {
