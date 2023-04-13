@@ -778,16 +778,31 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogInfo("Set New Pe");
                 Debug.Log("Set New Pe");
                 var TimeToAp = activeVessel.Orbit.TimeToAp;
-                var burnUT = UT + TimeToAp;
+                double burnUT, e;
+                e = activeVessel.Orbit.eccentricity;
+                if (e < 1)
+                    burnUT = UT + TimeToAp;
+                else
+                    burnUT = UT + 30;
                 Logger.LogInfo($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {activeVessel.Orbit.Periapsis} m, body.radius {activeVessel.Orbit.referenceBody.radius} m");
                 Debug.Log($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {activeVessel.Orbit.Periapsis} m, body.radius {activeVessel.Orbit.referenceBody.radius} m");
                 var deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(activeVessel.Orbit, burnUT, targetPeR);
                 // var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(activeVessel.Orbit, burnUT, targetPeR, activeVessel.Orbit.Apoapsis);
                 burnParams = activeVessel.Orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                // burnParams.z *= -1; // Why do we need this?
-                Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                if ((e >= 1) && (targetPeR < activeVessel.Orbit.Periapsis))
+                {
+                    burnParams.z *= -1; // Why do we need this?
+                    Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
+                    CreateManeuverNodeAtUT(burnParams, burnUT, 0);
+                }
+                else
+                {
+                    Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+                }
+
+
                 // currentNode = getCurrentNode();
             }
             else if (newAp) // Working
