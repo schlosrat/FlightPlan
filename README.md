@@ -1,5 +1,6 @@
 # Flight Plan
 ![Flight Plan GUI](https://i.imgur.com/wxBhwf2.png)
+
 Plan your (Space) Flight! Fly your Plan! Handy tools to help you set up maneuver nodes that will get you where you want to be.
 Making spaceflight planning easier for Kerbal Space Program 2 one mission at a time.
 
@@ -36,6 +37,7 @@ In addition to the basic UI screen above the UI qill automatically asjust to off
 
 ## Planned Improvement
 ![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
+
 Work In Progress developmental features may be enabled by switching on the Experimental Features in the mod's configuration screen. You will need to restart the game for this setting to take effect, but it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the Experimental Features setting.
 ### Create Maneuver Nodes for Own Ship Maneuvers
 * Circularize Now
