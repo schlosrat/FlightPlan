@@ -46,6 +46,7 @@ In addition to the basic UI screen above the UI will automatically asjust to off
 
 ## Configuration Parameters
 ![Flight Plan Configuration Parameters](https://i.imgur.com/8LRSdtU.png)
+
 This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press Alt + M to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
 Using the configuration parameters you can change a variety of things such as how long a staus message sticks around before it start to fade, and also how long it will take to fade.
 **NOTE:** Changing settings for mods requires the game to be exited and restarted for the new settings to take effect.
