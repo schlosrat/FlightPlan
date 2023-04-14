@@ -800,15 +800,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (circNow) // Not Working - Getting burn component in normal direction and we shouldn't be
+            else if (circNow) // Experimental - Burn components are comeing back flipped in prograde and radial. Even then they're a bit wrong.
             {
                 Logger.LogDebug("Circularize Now");
                 var startTimeOffset = 60;
                 var burnUT = UT + startTimeOffset;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
 
-                status = Status.OK;
-                statusText = "Ready to Circularize";
+                status = Status.WARNING;
+                statusText = "Experimental Circularize Ready"; // "Ready to Circularize Now"
                 statusTime = UT + statusPersistence;
 
                 if (deltaV != Vector3d.zero)
@@ -910,12 +910,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (newPeAp) // Sorta almost works, but this is a kludge!
+            else if (newPeAp) // Experimental: Sorta almost works, but poor results are being generated
             {
                 Logger.LogDebug("Set New Pe and Ap");
 
-                status = Status.OK;
-                statusText = "Ready to Ellipticize";
+                status = Status.WARNING;
+                statusText = "Experimental Ellipticize Ready"; // "Ready to Ellipticize";
                 statusTime = UT + statusPersistence;
 
                 if (targetPeR1 > targetApR1)
@@ -943,7 +943,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (newInc) // Working except for slight error in application of burnUT!
+            else if (newInc) // Working
             {
                 Logger.LogDebug("Set New Inclination");
                 Logger.LogDebug($"Seeking Solution: targetInc {targetInc}°");
@@ -995,21 +995,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (matchPlanesA) // Working except for slight error in application of burnUT!
+            else if (matchPlanesA) // Working
             {
                 Logger.LogDebug($"Match Planes  with {currentTarget.Name} at AN");
                 double burnUT;
  
                 status = Status.OK;
-                statusText = $"Ready to Match Planes with {currentTarget.Name}";
+                statusText = $"Ready to Match Planes with {currentTarget.Name} at AN";
                 statusTime = UT + statusPersistence;
 
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    deltaV.z *= -1; // why?
-                    Logger.LogDebug($"Solution Found: deltaV*    [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT (prograde flipped)");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
 
@@ -1022,13 +1021,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (matchPlanesD) // Working except for slight error in application of burnUT!
+            else if (matchPlanesD) // Working
             {
                 Logger.LogDebug($"Match Planes with {currentTarget.Name} at DN");
                 double burnUT;
 
                 status = Status.OK;
-                statusText = $"Ready to Match Planes with {currentTarget.Name}";
+                statusText = $"Ready to Match Planes with {currentTarget.Name} at DN";
                 statusTime = UT + statusPersistence;
 
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
@@ -1073,7 +1072,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (interceptAtTime) // Not Working
+            else if (interceptAtTime) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
             // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
             // Similar to code in MechJebModuleRendezvousGuidance.cs for "Get Closer" button code.
             {
@@ -1082,8 +1081,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 var interceptUT = UT + interceptT;
                 double offsetDistance;
 
-                status = Status.OK;
-                statusText = $"Ready to Intercept {currentTarget.Name}";
+                status = Status.WARNING;
+                statusText = $"Experimental Intercept of {currentTarget.Name} Ready"; // $"Ready to Intercept {currentTarget.Name}";
                 statusTime = UT + statusPersistence;
 
                 Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
@@ -1107,14 +1106,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (courseCorrection) // Works at least some times...
+            else if (courseCorrection) // Experimental Works at least some times...
             {
                 Logger.LogDebug($"Course Correction for tragetory to {currentTarget.Name}");
                 double burnUT;
                 Vector3d deltaV;
 
-                status = Status.OK;
-                statusText = "Ready for Course Correction Burn";
+                status = Status.WARNING;
+                statusText = "Experimental Course Correction Ready"; // "Ready for Course Correction Burn";
                 statusTime = UT + statusPersistence;
 
                 if (currentTarget.IsCelestialBody) // For a target that is a celestial
@@ -1149,8 +1148,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogDebug("Moon Return");
                 var e = orbit.eccentricity;
 
-                status = Status.OK;
-                statusText = $"Ready to Return from {orbit.referenceBody.Name}";
+                status = Status.WARNING;
+                statusText = $"Experimental Return from {orbit.referenceBody.Name} Ready"; // $"Ready to Return from {orbit.referenceBody.Name}";
                 statusTime = UT + statusPersistence;
 
                 if (e > 0.2)
@@ -1183,12 +1182,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     }
                 }
             }
-            else if (matchVCA) // untested
+            else if (matchVCA) // Experimental
             {
                 Logger.LogDebug($"Match Velocity with {currentTarget.Name} at Closest Approach");
 
-                status = Status.OK;
-                statusText = $"Ready to Match Velocity with {currentTarget.Name}";
+                status = Status.WARNING;
+                statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
                 statusTime = UT + statusPersistence;
 
                 double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
@@ -1208,13 +1207,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (matchVNow) // untested
+            else if (matchVNow) // Experimental
             {
                 Logger.LogDebug($"Match Velocity with {currentTarget.Name} Now");
                 var burnUT = UT + 30;
 
-                status = Status.OK;
-                statusText = $"Ready to Match Velocity with {currentTarget.Name}";
+                status = Status.WARNING;
+                statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
                 statusTime = UT + statusPersistence;
 
                 var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
@@ -1233,14 +1232,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug(statusText);
                 }
             }
-            else if (planetaryXfer) // Not Working. At minimum, this will not work until DeltaVToChangeApoapsis works, which is failing on calls to solve with BrentRoot
+            else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
             {
                 Logger.LogDebug($"Planetary Transfer to {currentTarget.Name}");
                 double burnUT;
                 bool syncPhaseAngle = true;
 
-                status = Status.OK;
-                statusText = $"Ready to depart for {currentTarget.Name}";
+                status = Status.WARNING;
+                statusText = $"Experimental Transfer to {currentTarget.Name} Ready"; // $"Ready to depart for {currentTarget.Name}";
                 statusTime = UT + statusPersistence;
 
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT);
