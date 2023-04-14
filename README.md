@@ -16,22 +16,23 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 
 ## Features
 ### Display Current Target Selection
-* Drop Down Menu for easy target selection from list of celestial objects
-### Create Maneuver Nodes for Own Ship Maneuvers
+* Drop Down Menu for easy selection of celestial targets
+### Own Ship Maneuvers
 * Circularize at Ap
 * Circularize at Pe
 * New Pe (for user specified value) - planned for next Ap
 * New Ap (for user specified value) - planned for next Pe
 * New Inclination (for user specified value) - if e < 0: Planned for cheapest AN/DN, otherwise planned for ASAP
-### Create Maneuver Nodes for Maneuvers Relative to the Selected Target (only available if a target is selected)
+### Maneuvers Relative to the Selected Target (only available if a target is selected)
 * Match planes with Target at AN
 * Match Planes with Target at DN 
 * Hohmann Transfer to Target
 
 ## UI Screens
-In addition to the basic UI screen above the UI qill automatically asjust to offer capabilities relevant to the current orbit and selected target.
+In addition to the basic UI screen above the UI will automatically asjust to offer capabilities relevant to the current orbit and selected target.
 ### Selecting a Celestial Target with the Drop Down Menu
 ![Flight Plan Target Selection GUI](https://i.imgur.com/NyhCARt.png)
+
 ### With a Local Object Selected (selected target is orbiting the same body your vessel is)
 ![Flight Plan Target Selected GUI - Moon](https://i.imgur.com/givkRgG.png)
 
@@ -39,10 +40,10 @@ In addition to the basic UI screen above the UI qill automatically asjust to off
 ![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
 
 Work In Progress developmental features may be enabled by switching on the Experimental Features in the mod's configuration screen. You will need to restart the game for this setting to take effect, but it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the Experimental Features setting.
-### Create Maneuver Nodes for Own Ship Maneuvers
+### Own Ship Maneuvers
 * Circularize Now
 * New Pe & Ap (for user specified values) - Burn ASAP
-### Create Maneuver Nodes for Maneuvers Relative to the Selected Target (only available if a target is selected)
+### Maneuvers Relative to the Selected Target (only available if a target is selected)
 * Intercept Target (for user specified time from now)
 * Course Correction (requires being on an intercept trajectory)
 * Match Velocity at Closest Approach (requires being on an intercept trajectory)
