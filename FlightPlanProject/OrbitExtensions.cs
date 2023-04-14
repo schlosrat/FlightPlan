@@ -132,12 +132,20 @@ namespace MuMech
         //returns a new PatchedConicsOrbit object that represents the result of applying a given dV to o at UT
         public static PatchedConicsOrbit PerturbedOrbit(this PatchedConicsOrbit o, double UT, Vector3d dV)
         {
-            Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.SwappedAbsolutePositionAtUT(UT) - o.referenceBody.Position.localPosition));
-            Velocity velocity = new(o.referenceBody.celestialMotionFrame, o.SwappedOrbitalVelocityAtUT(UT) + dV);
-            return MuUtils.OrbitFromStateVectors(position, velocity, o.referenceBody, UT);
+            // Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.SwappedAbsolutePositionAtUT(UT) - o.referenceBody.Position.localPosition));
+            // Position pos = new(o.coordinateSystem, o.SwappedAbsolutePositionAtUT(UT));
+            // Velocity vel = new(o.referenceBody.celestialMotionFrame, o.SwappedOrbitalVelocityAtUT(UT) + dV);
+            return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.coordinateSystem, o.referenceBody, UT);
+
+            // MJ version is one line:
             // return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.referenceBody, UT);
+
+            // MuUtils.OrbitFromStateVectors calls the KSP2 method UpdateFromStateVectors. The KSP1 version took pos and vel as Vector3d, but the
+            // KSP2 version requires these to be type Position and Velocity.
             // pos = o.SwappedAbsolutePositionAtUT(UT);
             // vel = o.SwappedOrbitalVelocityAtUT(UT) + dV;
+            // The MJ version of OrbitFromStateVectors peroforms a SwapYZ on (pos - body position), and a SwapYZ on vel before passing them into
+            // the KSP1 version of UpdateFromStateVectors.
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
         }
 
@@ -399,7 +407,6 @@ namespace MuMech
             // was: o.LAN -> longitudeOfAscendingNode
             // was: Planetarium.up -> o.ReferenceFrame.up.vector
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
-            // was: Quaternion -> QuaternionD
             Vector3d vectorToAN = Quaternion.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
             Vector3d vectorToPe = Quaternion.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
             return o.Periapsis * vectorToPe;
@@ -413,7 +420,6 @@ namespace MuMech
             // was: o.LAN -> longitudeOfAscendingNode
             // was: Planetarium.up -> o.ReferenceFrame.up.vector
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
-            // was: Quaternion -> QuaternionD
             Vector3d vectorToAN = Quaternion.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
             Vector3d vectorToPe = Quaternion.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
             Vector3d ret = -o.Apoapsis * vectorToPe;
