@@ -171,7 +171,7 @@ namespace MuMech
         // calculate the next patch, which makes patchEndTransition be valid
         public static PatchedConicsOrbit CalculateNextOrbit(this PatchedConicsOrbit o, double UT = Double.NegativeInfinity)
         {
-            PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
+            // PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
 
             // hack up a dynamic default value to the current time
             if (UT == Double.NegativeInfinity)
@@ -179,10 +179,10 @@ namespace MuMech
 
             o.StartUT = UT;
             o.EndUT = o.eccentricity >= 1.0 ? o.period : UT + o.period;
-            PatchedConicsOrbit nextOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+            // PatchedConicsOrbit nextOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
             // PatchedConics.CalculatePatch(o, nextOrbit, UT, solverParameters, null); // Maybe this need to be CalculatePatchConicList, or CalculatePatchList ???
             // Assuming nextOrbit can be obtained from o.NextPatch
-            nextOrbit = o.NextPatch as PatchedConicsOrbit;
+            PatchedConicsOrbit nextOrbit = o.NextPatch as PatchedConicsOrbit;
 
             return nextOrbit;
         }
