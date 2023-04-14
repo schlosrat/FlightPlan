@@ -25,11 +25,14 @@ namespace MechJebLib.Utils
 {
     public static class Check
     {
-        private static void DoCheck(bool b)
+        private static void DoCheck(bool b, string info = "")
         {
             if (!b)
             {
-                FlightPlanPlugin.Logger.LogError("check failed");
+                if (info.Length > 0)
+                    FlightPlanPlugin.Logger.LogError($"check failed: {info}");
+                else
+                    FlightPlanPlugin.Logger.LogError("check failed");
                 throw new FailedCheck("check failed");
             }
 
@@ -54,13 +57,13 @@ namespace MechJebLib.Utils
         [Conditional("DEBUG")]
         public static void True(bool b)
         {
-            DoCheck(b);
+            DoCheck(b, "Test for True");
         }
 
         [Conditional("DEBUG")]
         public static void False(bool b)
         {
-            DoCheck(!b);
+            DoCheck(!b, "Test for False");
         }
 
         /*
@@ -70,13 +73,13 @@ namespace MechJebLib.Utils
         [Conditional("DEBUG")]
         public static void NotNull<T>(T? obj) where T : class
         {
-            DoCheck(obj != null);
+            DoCheck(obj != null, "Test for null");
         }
 
         [Conditional("DEBUG")]
         public static void NotNull<T>(T? obj) where T : struct
         {
-            DoCheck(obj != null);
+            DoCheck(obj != null, "Test for not null");
         }
 
         /*
@@ -86,7 +89,7 @@ namespace MechJebLib.Utils
         [Conditional("DEBUG")]
         public static void Finite(double d)
         {
-            DoCheck(IsFinite(d));
+            DoCheck(IsFinite(d), "Test for Finite");
         }
 
         [Conditional("DEBUG")]
@@ -98,40 +101,40 @@ namespace MechJebLib.Utils
         [Conditional("DEBUG")]
         public static void PositiveFinite(double d)
         {
-            DoCheck(d > 0);
-            DoCheck(IsFinite(d));
+            DoCheck(d > 0, "Test for positive");
+            DoCheck(IsFinite(d), "Test for Finite");
         }
 
         [Conditional("DEBUG")]
         public static void Negative(double d)
         {
-            DoCheck(d < 0);
+            DoCheck(d < 0, "Test for negative");
         }
         
         [Conditional("DEBUG")]
         public static void NegativeFinite(double d)
         {
-            DoCheck(d < 0);
-            DoCheck(IsFinite(d));
+            DoCheck(d < 0, "Test for negative");
+            DoCheck(IsFinite(d), "Test for Finite");
         }
 
         [Conditional("DEBUG")]
         public static void Zero(double d)
         {
-            DoCheck(d == 0);
+            DoCheck(d == 0, "Test for zero");
         }
 
         [Conditional("DEBUG")]
         public static void NonZero(double d)
         {
-            DoCheck(d != 0);
+            DoCheck(d != 0, "Test for non-zero");
         }
         
         [Conditional("DEBUG")]
         public static void NonZeroFinite(double d)
         {
-            DoCheck(d != 0);
-            DoCheck(IsFinite(d));
+            DoCheck(d != 0, "Test for non-zero");
+            DoCheck(IsFinite(d), "Test for Finite");
         }
 
         /*
@@ -141,26 +144,26 @@ namespace MechJebLib.Utils
         [Conditional("DEBUG")]
         public static void Finite(Vector3d v)
         {
-            DoCheck(IsFinite(v));
+            DoCheck(IsFinite(v), "Test for Finite Vector3d");
         }
 
         [Conditional("DEBUG")]
         public static void Finite(V3 v)
         {
-            DoCheck(IsFinite(v));
+            DoCheck(IsFinite(v), "Test for Finite V3");
         }
 
         [Conditional("DEBUG")]
         public static void NonZero(V3 v)
         {
-            DoCheck(v != V3.zero);
+            DoCheck(v != V3.zero, "Test for non-zero V3");
         }
         
         [Conditional("DEBUG")]
         public static void NonZeroFinite(V3 v)
         {
-            DoCheck(v != V3.zero);
-            DoCheck(IsFinite(v));
+            DoCheck(v != V3.zero, "Test for non-zero V3");
+            DoCheck(IsFinite(v), "Test for Finite V3");
         }
 
         /*
@@ -170,13 +173,13 @@ namespace MechJebLib.Utils
         [Conditional("DEBUG")]
         public static void CanContain(double[] arry, int len)
         {
-            DoCheck(arry.Length >= len);
+            DoCheck(arry.Length >= len, $"Test for array size (length) >= {len}");
         }
 
         [Conditional("DEBUG")]
         public static void CanContain(IReadOnlyList<double> arry, int len)
         {
-            DoCheck(arry.Count >= len);
+            DoCheck(arry.Count >= len, $"Test for array size (count) >= {len}");
         }
     }
 }
