@@ -407,8 +407,9 @@ namespace MuMech
             // was: o.LAN -> longitudeOfAscendingNode
             // was: Planetarium.up -> o.ReferenceFrame.up.vector
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
-            Vector3d vectorToAN = Quaternion.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
-            Vector3d vectorToPe = Quaternion.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
+            // was: Quaternion -> QuaternionD
+            Vector3d vectorToAN = QuaternionD.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
+            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
             return o.Periapsis * vectorToPe;
         }
 
@@ -420,8 +421,9 @@ namespace MuMech
             // was: o.LAN -> longitudeOfAscendingNode
             // was: Planetarium.up -> o.ReferenceFrame.up.vector
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
-            Vector3d vectorToAN = Quaternion.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
-            Vector3d vectorToPe = Quaternion.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
+            // was: Quaternion -> QuaternionD
+            Vector3d vectorToAN = QuaternionD.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
+            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
             Vector3d ret = -o.Apoapsis * vectorToPe;
             if (double.IsNaN(ret.x))
             {
