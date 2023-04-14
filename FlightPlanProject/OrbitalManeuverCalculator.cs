@@ -1514,7 +1514,7 @@ namespace MuMech
         private static PatchedConicsOrbit createOrbit() { return new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel); }
         private static void resetOrbit(PatchedConicsOrbit o) { }
 
-        private static readonly PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
+        // private static readonly PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
 
         // Runs the PatchedConicSolver to do initial value "shooting" given an initial orbit, a maneuver dV and UT to execute, to a target Celestial's SOI
         //
