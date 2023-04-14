@@ -41,27 +41,27 @@ namespace MechJebLib.Maths
         public static double Solve(Func<double, object?, double> f, double a, double b, object? o, int maxiter = 100, double rtol = EPS,
             int sign = 0)
         {
-            double fa = f(a, o);
-            double fb = f(b, o);
+            double fa = f(a, o); // Evaluate function f at a (the minimum point)
+            double fb = f(b, o); // Evaluate function f at b (the maximum point)
 
-            Check.Finite(a);
-            Check.Finite(fa);
-            Check.Finite(b);
-            Check.Finite(fb);
+            Check.Finite(a);  // Check that a is finite - should we do this before calling f with it?
+            Check.Finite(fa); // Check that the results of f(a, o) is also finite
+            Check.Finite(b);  // Check that b is finite - should we do this before calling f with it?
+            Check.Finite(fb); // Check that the results of f(a, o) is also finite
 
-            if (fa == 0)
+            if (fa == 0) // If true, we nailed the solution at a
                 return a;
 
-            if (fb == 0)
+            if (fb == 0) // If true, we nailed the solution at b
                 return b;
 
-            if (fa * fb > 0)
+            if (fa * fb > 0) // If true, then fa and fb have the same sign and so we haven't brakedted the solution
                 throw new ArgumentException("Brent's rootfinding method: guess does not bracket the root");
 
-            if (Math.Abs(fa) < Math.Abs(fb))
+            if (Math.Abs(fa) < Math.Abs(fb)) // If the solution at a was closer to zero than the solution at b
             {
-                (a, b)   = (b, a);
-                (fa, fb) = (fb, fa);
+                (a, b)   = (b, a);   // swap a and b
+                (fa, fb) = (fb, fa); // swap fa and fb
             }
 
             return InternalSolve(f, a, b, fa, fb, o, maxiter, rtol, sign);
