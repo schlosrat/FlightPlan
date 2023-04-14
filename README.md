@@ -4,7 +4,7 @@
 Plan your (Space) Flight! Fly your Plan! Handy tools to help you set up maneuver nodes that will get you where you want to be.
 Making spaceflight planning easier for Kerbal Space Program 2 one mission at a time.
 
-NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/MechJeb2) code that has been adapted to work in KSP2, and would not be possible without the kind and generous contributions of Sarbian and the MechJeb development team! It is not the intent to replicate all MechJeb2 features and functions in this mod, but merely to make some handy maneuver planning tools available for KSP2 players. While you may be able to create some useful nodes with this mod, you'll still need to execute them accurately! Also, understanding some basic mission planning will be very usful for those employing the tools in this toolbox.
+**NOTE:** This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/MechJeb2) code that has been adapted to work in KSP2, and would not be possible without the kind and generous contributions of Sarbian and the MechJeb development team! It is not the intent to replicate all MechJeb2 features and functions in this mod, but merely to make some handy maneuver planning tools available for KSP2 players. While you may be able to create some useful nodes with this mod, you'll still need to execute them accurately! Also, understanding some basic mission planning will be very usful for those employing the tools in this toolbox.
 
 ## Compatibility
 * Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
@@ -22,7 +22,7 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 * Circularize at Pe
 * New Pe (user specified value) - planned for next Ap
 * New Ap (user specified value) - planned for next Pe
-* New Inclination (for user specified value) - if e < 0: Planned for cheapest AN/DN, otherwise planned for ASAP
+* New Inclination (user specified value) - if e < 0: Planned for cheapest AN/DN, otherwise planned for ASAP
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
 * Match planes with Target at AN
 * Match Planes with Target at DN 
@@ -34,7 +34,7 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 ### Game Input Enable/Disable Status
 * To prevent the things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your timewarp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full funtionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
 
-**NOTE:** At this time *Flight Plan has no capability to execute nodes* - it just helps you plan them. Getting a Good result in the status does not mean your craft is pointed in the right direction or is otherwise ready to execute the node, but rather that the node is ready for you!
+**NOTE:** At this time *Flight Plan has no capability to execute nodes* - it just helps you plan them. Getting a *Good* result in the status does not mean your craft is pointed in the right direction or is otherwise ready to execute the node, but rather that the node is ready for you!
 
 ## UI Screens
 In addition to the basic UI screen above the UI will automatically asjust to offer capabilities relevant to the current orbit and selected target.
@@ -50,6 +50,7 @@ In addition to the basic UI screen above the UI will automatically asjust to off
 This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press Alt + M to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
 Using the configuration parameters you can change a variety of things such as how long a staus message sticks around before it start to fade, and also how long it will take to fade.
 **NOTE:** Changing settings for mods requires the game to be exited and restarted for the new settings to take effect.
+
 ## Planned Improvement
 ![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
 
@@ -58,13 +59,13 @@ Work In Progress developmental features may be enabled by switching on the Exper
 * Circularize Now
 * New Pe & Ap (for user specified values) - Burn ASAP
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
-* Intercept Target (for user specified time from now)
+* Intercept Target (at user specified time from now)
 * Course Correction (requires being on an intercept trajectory)
 * Match Velocity at Closest Approach (requires being on an intercept trajectory)
 * Match Velocity Now
-### Create Interplanetary Transfer Maneuver Nodes (only available if a planet is the selected target)
+### Interplanetary Transfer Maneuvers (only available if a planet is the selected target)
 * Interplanetary Transfer
-### Create Moon Specific Maneuver Nodes (only available when in orbit about a moon)
+### Moon Specific Maneuvers (only available when in orbit about a moon)
 * Return from a Moon
 
 ## Example Images
