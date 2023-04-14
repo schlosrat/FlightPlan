@@ -36,35 +36,33 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     static bool loaded = false;
     private bool interfaceEnabled = false;
     private bool GUIenabled = true;
-    // private bool _isWindowOpen;
+
     private Rect _windowRect;
     private int windowWidth = Screen.width / 6; //384px on 1920x1080
     private int windowHeight = Screen.height / 3; //360px on 1920x1080
     private Rect closeBtnRect;
 
+    // Status of last Flight Plan function
+    private enum Status
+    {
+        OK,
+        WARNING,
+        ERROR
+    }
+    private Status status = Status.OK;
+    private string statusText = "Virgin";
+    private double statusTime;
+    private double statusPersistence;
+    private double statusFadeTime;
+
     // Button bools
     private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer;
-
-    // Target Selection
-    //private enum TargetOptions
-    //{
-    //    Kerbin,
-    //    Mun,
-    //    Minmus,
-    //    Duna
-    //}
 
     // Body selection.
     private string selectedBody = null;
     private List<string> bodies;
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
-
-    //private TargetOptions selectedTargetOption = TargetOptions.Mun;
-    //private readonly List<string> targetOptions = new List<string> { "Kerbin", "Mun", "Minmus", "Duna" };
-    //private bool selectingTargetOption = false;
-    //private static Vector2 scrollPositionTargetOptions;
-    //private bool applyTargetOption;
 
     // mod-wide data
     private VesselComponent activeVessel;
@@ -74,9 +72,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private Vector3d burnParams;
 
     // Text Inputs
-    private string targetPeAStr  =  "20000"; // m
+    private string targetPeAStr  =  "80000"; // m
     private string targetApAStr  = "250000"; // m
-    private string targetPeAStr1 =  "20000"; // m
+    private string targetPeAStr1 =  "80000"; // m
     private string targetApAStr1 = "250000"; // m
     private string targetIncStr  =      "0"; // degrees
     private string interceptTStr =    "100"; // s
@@ -104,8 +102,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private GUIStyle nameLabelStyle;
     private GUIStyle valueLabelStyle;
     private GUIStyle unitLabelStyle;
+    private GUIStyle statusStyle;
     private static GUIStyle boxStyle;
     private string unitColorHex;
+    private string badStatusColorHex;
+    private string goodStatusColorHex;
     private int spacingAfterHeader = -12;
     private int spacingAfterEntry = -5;
     private int spacingAfterSection = 5;
@@ -246,6 +247,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             padding = new RectOffset(14, 0, 3, 3)
         };
 
+        statusStyle = new GUIStyle(_spaceWarpUISkin.label);
+
         nameLabelStyle = new GUIStyle(_spaceWarpUISkin.label);
         nameLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
 
@@ -263,6 +266,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         unitLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
         unitColorHex = ColorUtility.ToHtmlStringRGBA(unitLabelStyle.normal.textColor);
 
+        // badStatusColorHex = ColorUtility.ToHtmlStringRGBA(new Color(1, 0, 0, 1));
+        // goodStatusColorHex = ColorUtility.ToHtmlStringRGBA(new Color(0, 1, 0, 1));
+
         closeBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
         {
             fontSize = 12
@@ -277,28 +283,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/icon.png"),
             ToggleButton);
 
-        // Register OAB AppBar Button
-        //Appbar.RegisterOABAppButton(
-        //    "BTN-FlightPlan",
-        //    ToolbarOABButtonID,
-        //    AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/icon.png"),
-        //    isOpen =>
-        //    {
-        //        _isWindowOpen = isOpen;
-        //        GameObject.Find(ToolbarOABButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(isOpen);
-        //    }
-        //);
-
         // Register all Harmony patches in the project
         Harmony.CreateAndPatchAll(typeof(FlightPlanPlugin).Assembly);
 
         // Fetch a configuration value or create a default one if it does not exist
-        var defaultValue = false;
-        experimental = Config.Bind<bool>("Settings section", "Experimental Features", defaultValue, "Enable/Disable experimental features for testing - Warrantee Void if Enabled!").Value;
+        statusPersistence = Config.Bind<double>("Settings section", "Satus Hold Time", 20, "Controls time delay (in seconds) before status beings to fade").Value;
+        statusFadeTime = Config.Bind<double>("Settings section", "Satus Fade Time", 20, "Controls the time (in seconds) it takes for status to fade").Value;
+        experimental = Config.Bind<bool>("Settings section", "Experimental Features", false, "Enable/Disable experimental features for testing - Warrantee Void if Enabled!").Value;
 
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental}");
-
     }
 
     private void ToggleButton(bool toggle)
@@ -446,28 +440,27 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             DrawButton("Circularize Now", ref circNow);
 
         DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
-        try { targetPeR = double.Parse(targetPeAStr) + activeVessel.Orbit.referenceBody.radius; }
-        catch { targetPeR = 0; }
+        if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += activeVessel.Orbit.referenceBody.radius;
+        else targetPeR = 0;
 
         if (activeVessel.Orbit.eccentricity < 1)
         {
             DrawButtonWithTextField("New Ap", ref newAp, ref targetApAStr, "m");
-            try { targetApR = double.Parse(targetApAStr) + activeVessel.Orbit.referenceBody.radius; }
-            catch { targetApR = 0; }
+            if (double.TryParse(targetApAStr, out targetApR)) targetApR += activeVessel.Orbit.referenceBody.radius;
+            else targetApR = 0;
 
             if (experimental)
             {
                 DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
-                try { targetPeR1 = double.Parse(targetPeAStr1) + activeVessel.Orbit.referenceBody.radius; }
-                catch { targetPeR1 = 0; };
-                try { targetApR1 = double.Parse(targetApAStr1) + activeVessel.Orbit.referenceBody.radius; }
-                catch { targetApR1 = 0; }
+                if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += activeVessel.Orbit.referenceBody.radius;
+                else targetPeR1 = 0;
+                if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += activeVessel.Orbit.referenceBody.radius;
+                else targetApR1 = 0;
             }
         }
 
         DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
-        try { targetInc = double.Parse(targetIncStr); }
-        catch { targetInc = 0; }
+        if (!double.TryParse(targetIncStr, out targetInc)) targetInc = 0;
 
         if (currentTarget != null)
         {
@@ -513,12 +506,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
         }
 
+        var UT = game.UniverseModel.UniversalTime;
+        if (statusText == "Virgin") statusTime = UT;
+        DrawGUIStatus(UT);
 
-        // Indication to User that its safe to type, or why vessel controls aren't working
-        GUILayout.BeginHorizontal();
-        string inputStateString = gameInputState ? "Enabled" : "Disabled";
-        GUILayout.Label($"Game Input: {inputStateString}");
-        GUILayout.EndHorizontal();
 
         handleButtons();
 
@@ -578,15 +569,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.EndHorizontal();
     }
 
-    private void DrawSectionHeader(string sectionName, string value = "") // was (string sectionName, ref bool isPopout, string value = "")
+    private void DrawSectionHeader(string sectionName, string value = "", GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
+        if (valueStyle == null) valueStyle = valueLabelStyle;
         GUILayout.BeginHorizontal();
         // Don't need popout buttons for ROC
         // isPopout = isPopout ? !CloseButton() : GUILayout.Button("⇖", popoutBtnStyle);
 
-        GUILayout.Label($"<b>{sectionName}</b>");
+        GUILayout.Label($"<b>{sectionName}</b> ");
         GUILayout.FlexibleSpace();
-        GUILayout.Label(value, valueLabelStyle);
+        GUILayout.Label(value, valueStyle);
         GUILayout.Space(5);
         // GUILayout.Label("", unitLabelStyle);
         GUILayout.EndHorizontal();
@@ -673,7 +665,34 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.Space(spacingAfterEntry);
     }
 
-    private void handleButtons()
+    private void DrawGUIStatus(double UT)
+    {
+        // Indicate status of last GUI function
+        float transparency = 1;
+        if (UT > statusTime) transparency = (float)MuUtils.Clamp(1 - (UT - statusTime) / statusFadeTime, 0, 1);
+        if (status == Status.OK)
+            statusStyle.normal.textColor = new Color(0,1,0, transparency);
+        if (status == Status.WARNING)
+            statusStyle.normal.textColor = new Color(1, 1, 0, transparency);
+        if (status == Status.ERROR)
+            statusStyle.normal.textColor = new Color(1, 0, 0, transparency);
+        GUILayout.Box("", horizontalDivider);
+        DrawSectionHeader("Status:", statusText, statusStyle);
+
+        // Indication to User that its safe to type, or why vessel controls aren't working
+        GUILayout.BeginHorizontal();
+        string inputStateString = gameInputState ? "<b>Enabled</b>" : "<b>Disabled</b>";
+        GUILayout.Label("Game Input: ", labelStyle);
+        if (gameInputState)
+            GUILayout.Label(inputStateString, labelStyle);
+        else
+            GUILayout.Label(inputStateString, warnStyle);
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+        GUILayout.Space(spacingAfterEntry);
+    }
+
+        private void handleButtons()
     {
         if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer)
         {
@@ -688,6 +707,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 var TimeToAp = orbit.TimeToAp; // activeVessel.Orbit.TimeToAp;
                 var burnUT = UT + TimeToAp;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT); // activeVessel.Orbit
+
+                status = Status.OK;
+                statusText = "Ready to Circularize at Ap";
+                statusTime = UT + statusPersistence;
+
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
@@ -719,7 +743,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     UpdateNode(currentNode);
                 }
                 else
-                    Logger.LogDebug("Circularize at Ap: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = "Circularize at Ap: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (circPe) // Working
             {
@@ -727,6 +756,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 var TimeToPe = orbit.TimeToPe; // activeVessel.Orbit
                 var burnUT = UT + TimeToPe;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT); // activeVessel.Orbit
+                
+                status = Status.OK;
+                statusText = "Ready to Circularize at Pe";
+                statusTime = UT + statusPersistence;
+
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
@@ -759,7 +793,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     UpdateNode(currentNode);
                 }
                 else
-                    Logger.LogDebug("Circularize at Pe: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = "Circularize at Pe: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (circNow) // Not Working - Getting burn component in normal direction and we shouldn't be
             {
@@ -767,6 +806,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 var startTimeOffset = 60;
                 var burnUT = UT + startTimeOffset;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT); // activeVessel.Orbit
+
+                status = Status.OK;
+                statusText = "Ready to Circularize";
+                statusTime = UT + statusPersistence;
+
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
@@ -789,7 +833,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     UpdateNode(currentNode);
                 }
                 else
-                    Logger.LogDebug("Circularize Now: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = "Circularize Now: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (newPe) // Working
             {
@@ -802,6 +851,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     burnUT = UT + TimeToAp;
                 else
                     burnUT = UT + 30;
+
+                status = Status.OK;
+                statusText = "Ready to Change Ap";
+                statusTime = UT + statusPersistence;
+                
                 Logger.LogDebug($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
                 Debug.Log($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
                 var deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(orbit, burnUT, targetPeR); // activeVessel.Orbit
@@ -823,7 +877,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     }
                 }
                 else
-                    Logger.LogDebug("Set New Pe: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = "Set New Pe: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (newAp) // Working
             {
@@ -831,8 +890,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Debug.Log("Set New Ap");
                 var TimeToPe = orbit.TimeToPe; // activeVessel.Orbit
                 var burnUT = UT + TimeToPe;
+
+                status = Status.OK;
+                statusText = "Ready to Change Ap";
+                statusTime = UT + statusPersistence;
+
                 Logger.LogDebug($"Seeking Solution: targetApR {targetApR} m, currentApR {orbit.Apoapsis} m"); // activeVessel.Orbit
-                Debug.Log($"Seeking Solution: targetApR {targetApR} m, currentApR {orbit.Apoapsis} m"); // activeVessel.Orbit
                 var deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(orbit, burnUT, targetApR); // activeVessel.Orbit
                 // var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(activeVessel.Orbit, burnUT, activeVessel.Orbit.Periapsis, targetApR);
                 if (deltaV != Vector3d.zero)
@@ -842,15 +905,31 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+
                 }
                 else
-                    Logger.LogDebug("Set New Ap: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = "Set New Ap: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (newPeAp) // Sorta almost works, but this is a kludge!
             {
                 Logger.LogDebug("Set New Pe and Ap");
+
+                status = Status.OK;
+                statusText = "Ready to Ellipticize";
+                statusTime = UT + statusPersistence;
+
                 if (targetPeR1 > targetApR1)
+                {
                     (targetPeR1, targetApR1) = (targetApR1, targetPeR1);
+                    status = Status.WARNING;
+                    statusText = "Pe Setting > Ap Setting";
+                }
+
                 Logger.LogDebug($"Seeking Solution: targetPeR {targetPeR1} m, targetApR {targetApR1} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
                 var burnUT = UT + 30;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(orbit, burnUT, targetPeR1, targetApR1); // activeVessel.Orbit
@@ -865,7 +944,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug("Set New Pe and Ap: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = "Set New Pe and Ap: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (newInc) // Working except for slight error in application of burnUT!
             {
@@ -873,6 +957,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 Logger.LogDebug($"Seeking Solution: targetInc {targetInc}°");
                 double burnUT, TAN, TDN;
                 Vector3d deltaV, deltaV1, deltaV2;
+
+                status = Status.OK;
+                statusText = "Ready to Change Inclination";
+                statusTime = UT + statusPersistence;
+
                 if (orbit.eccentricity < 1) // Eliptical orbit: Pick cheapest deltaV between AN and DN // activeVessel.Orbit
                 {
                     TAN = orbit.TimeOfAscendingNodeEquatorial(UT); // activeVessel.Orbit
@@ -907,12 +996,22 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug("Set New Inclination: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = "Set New Inclination: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (matchPlanesA) // Working except for slight error in application of burnUT!
             {
                 Logger.LogDebug($"Match Planes  with {currentTarget.Name} at AN");
                 double burnUT;
+ 
+                status = Status.OK;
+                statusText = $"Ready to Match Planes with {currentTarget.Name}";
+                statusTime = UT + statusPersistence;
+
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
@@ -921,14 +1020,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     Logger.LogDebug($"Solution Found: deltaV*    [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT (prograde flipped)");
                     Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
+
                 }
                 else
-                    Logger.LogDebug($"Match Planes with {currentTarget.Name} at AN: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Match Planes with {currentTarget.Name} at AN: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (matchPlanesD) // Working except for slight error in application of burnUT!
             {
                 Logger.LogDebug($"Match Planes with {currentTarget.Name} at DN");
                 double burnUT;
+
+                status = Status.OK;
+                statusText = $"Ready to Match Planes with {currentTarget.Name}";
+                statusTime = UT + statusPersistence;
+
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT); // activeVessel.Orbit
                 burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
@@ -938,13 +1048,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug($"Match Planes with {currentTarget.Name} at DN: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Match Planes with {currentTarget.Name} at DN: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
             {
                 Logger.LogDebug($"Hohmann Transfer to {currentTarget.Name}");
                 Debug.Log("Hohmann Transfer");
                 double burnUT;
+
+                status = Status.OK;
+                statusText = $"Ready to Transfer to {currentTarget.Name}";
+                statusTime = UT + statusPersistence;
+
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
@@ -954,7 +1074,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug($"Hohmann Transfer to {currentTarget.Name}: Solution Not Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Hohmann Transfer to {currentTarget.Name}: Solution Not Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (interceptAtTime) // Not Working
             // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
@@ -964,6 +1089,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 var burnUT = UT + 30;
                 var interceptUT = UT + interceptT;
                 double offsetDistance;
+
+                status = Status.OK;
+                statusText = $"Ready to Intercept {currentTarget.Name}";
+                statusTime = UT + statusPersistence;
+
                 Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
                 if (currentTarget.IsCelestialBody) // For a target that is a celestial
                     offsetDistance = currentTarget.Orbit.referenceBody.radius + 50000;
@@ -978,13 +1108,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug($"Intercept {currentTarget.Name} at Time: No Solution Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Intercept {currentTarget.Name}: No Solution Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (courseCorrection) // Works at least some times...
             {
                 Logger.LogDebug($"Course Correction for tragetory to {currentTarget.Name}");
                 double burnUT;
                 Vector3d deltaV;
+
+                status = Status.OK;
+                statusText = "Ready for Course Correction Burn";
+                statusTime = UT + statusPersistence;
+
                 if (currentTarget.IsCelestialBody) // For a target that is a celestial
                 {
                     Logger.LogDebug($"Seeking Solution for Celestial Target");
@@ -1005,16 +1145,29 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug($"Course Correction for tragetory to {currentTarget.Name}: No Solution Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Course Correction for tragetory to {currentTarget.Name}: No Solution Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (moonReturn) // Works at least sometimes...
             {
                 Logger.LogDebug("Moon Return");
                 var e = orbit.eccentricity; // activeVessel.Orbit
+
+                status = Status.OK;
+                statusText = $"Ready to Return from {orbit.referenceBody.Name}";
+                statusTime = UT + statusPersistence;
+
                 if (e > 0.2)
                 {
-                    Logger.LogDebug($"Moon Return Error: Starting Orbit Eccentrity Too Large");
-                    Logger.LogError($"Moon Return starting orbit eccentricty {e.ToString("F2")} is > 0.2");
+                    status = Status.WARNING;
+                    statusText = "Moon Return: Starting Orbit Eccentrity Too Large";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                    Logger.LogError($"Moon Return: Starting orbit eccentricty {e.ToString("F2")} is > 0.2");
                 }
                 else
                 {
@@ -1031,12 +1184,22 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                         CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                     }
                     else
-                        Logger.LogDebug("Moon Return: No Solution Found!");
+                    {
+                        status = Status.ERROR;
+                        statusText = "Moon Return: No Solution Found!";
+                        statusTime = UT + statusPersistence;
+                        Logger.LogDebug(statusText);
+                    }
                 }
             }
             else if (matchVCA) // untested
             {
                 Logger.LogDebug($"Match Velocity with {currentTarget.Name} at Closest Approach");
+
+                status = Status.OK;
+                statusText = $"Ready to Match Velocity with {currentTarget.Name}";
+                statusTime = UT + statusPersistence;
+
                 double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT // activeVessel.Orbit
                 var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, closestApproachTime, currentTarget.Orbit as PatchedConicsOrbit); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
@@ -1047,12 +1210,22 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, closestApproachTime, -0.5);
                 }
                 else
-                    Logger.LogDebug($"Match Velocity with {currentTarget.Name} at Closest Approach: No Solution Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Match Velocity with {currentTarget.Name} at Closest Approach: No Solution Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (matchVNow) // untested
             {
                 Logger.LogDebug($"Match Velocity with {currentTarget.Name} Now");
                 var burnUT = UT + 30;
+
+                status = Status.OK;
+                statusText = $"Ready to Match Velocity with {currentTarget.Name}";
+                statusTime = UT + statusPersistence;
+
                 var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
@@ -1062,13 +1235,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug($"Match Velocity with {currentTarget.Name} Now: No Solution Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Match Velocity with {currentTarget.Name} Now: No Solution Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
             else if (planetaryXfer) // Not Working. At minimum, this will not work until DeltaVToChangeApoapsis works, which is failing on calls to solve with BrentRoot
             {
                 Logger.LogDebug($"Planetary Transfer to {currentTarget.Name}");
                 double burnUT;
                 bool syncPhaseAngle = true;
+
+                status = Status.OK;
+                statusText = $"Ready to depart for {currentTarget.Name}";
+                statusTime = UT + statusPersistence;
+
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
@@ -1079,7 +1262,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogDebug($"Planetary Transfer to {currentTarget.Name}: No Solution Found!");
+                {
+                    status = Status.ERROR;
+                    statusText = $"Planetary Transfer to {currentTarget.Name}: No Solution Found!";
+                    statusTime = UT + statusPersistence;
+                    Logger.LogDebug(statusText);
+                }
             }
         }
     }
