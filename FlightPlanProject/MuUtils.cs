@@ -6,6 +6,7 @@
  * This work is relaesed under the same license(s) inherited from the originating version.
  */
 
+using KSP.Api;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
@@ -157,11 +158,21 @@ namespace MuMech
         // was: ret.LAN -> longitudeOfAscendingNode
         // was: Planetarium.up ->  body.Orbit.ReferenceFrame.up.vector
         // was: Planetarium.right -> body.Orbit.ReferenceFrame.right.vector
-        public static PatchedConicsOrbit OrbitFromStateVectors(Position pos, Velocity vel, CelestialBodyComponent body, double UT)
+        // OrbitFromStateVectors calls the KSP2 method UpdateFromStateVectors. The KSP1 version took pos and vel as Vector3d, but the
+        // KSP2 version requires these to be type Position and Velocity.
+        // pos = o.SwappedAbsolutePositionAtUT(UT);
+        // vel = o.SwappedOrbitalVelocityAtUT(UT) + dV;
+        // The MJ version of OrbitFromStateVectors peroforms a SwapYZ on (pos - body position), and a SwapYZ on vel before passing them into
+        // the KSP1 version of UpdateFromStateVectors.
+        // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
+        public static PatchedConicsOrbit OrbitFromStateVectors(Vector3d pos, Vector3d vel, ICoordinateSystem coordinateSystem, CelestialBodyComponent body, double UT)
         {
             PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
-            ret.UpdateFromStateVectors(pos, vel, body, UT);
+            // Create the type Position and Velocty inputs needed for KSP2's UpdateFromStateVectors
+            Position position = new(coordinateSystem, OrbitExtensions.SwapYZ(pos - body.Position.localPosition));
+            Velocity velocity = new(body.celestialMotionFrame, OrbitExtensions.SwapYZ(vel));
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
+            ret.UpdateFromStateVectors(position, velocity, body, UT);
             if (double.IsNaN(ret.argumentOfPeriapsis))
             {
                 Vector3d vectorToAN = Quaternion.AngleAxis(-(float)ret.longitudeOfAscendingNode, body.Orbit.ReferenceFrame.up.vector) * body.Orbit.ReferenceFrame.right.vector;
