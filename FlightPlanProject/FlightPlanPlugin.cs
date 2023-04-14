@@ -705,7 +705,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     var nodeTimeAdj = -currentNode.BurnDuration / 2;
                     var burnStartTime = currentNode.Time + nodeTimeAdj;
                     Logger.LogInfo($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
-                    deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime);  // activeVessel.Orbit
+                    deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime); // activeVessel.Orbit
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                     Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     if (burnParams.z < 0)
@@ -921,7 +921,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     deltaV.z *= -1; // why?
                     Logger.LogInfo($"Solution Found: deltaV*    [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT (prograde flipped)");
                     Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    CreateManeuverNodeAtUT(deltaV, burnUT, -0.5);
+                    CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
                     Logger.LogInfo($"Match Planes with {currentTarget.Name} at AN: Solution Not Found!");
@@ -936,7 +936,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 {
                     Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    CreateManeuverNodeAtUT(deltaV, burnUT, -0.5);
+                    CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
                     Logger.LogInfo($"Match Planes with {currentTarget.Name} at DN: Solution Not Found!");
