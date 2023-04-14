@@ -1,5 +1,5 @@
 # Flight Plan
-![Flight Plan GUI](https://i.imgur.com/9j1taG5.png)
+![Flight Plan GUI](https://i.imgur.com/UI0BWGY.png)
 
 Plan your (Space) Flight! Fly your Plan! Handy tools to help you set up maneuver nodes that will get you where you want to be.
 Making spaceflight planning easier for Kerbal Space Program 2 one mission at a time.
@@ -16,25 +16,25 @@ NOTE: This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/M
 
 ## Features
 ### Display Current Target Selection
-* Drop Down Menu for easy selection of celestial targets
+* Drop Down Menu for easy selection of *Celestial Targets*
 ### Own Ship Maneuvers
 * Circularize at Ap
 * Circularize at Pe
-* New Pe (for user specified value) - planned for next Ap
-* New Ap (for user specified value) - planned for next Pe
+* New Pe (user specified value) - planned for next Ap
+* New Ap (user specified value) - planned for next Pe
 * New Inclination (for user specified value) - if e < 0: Planned for cheapest AN/DN, otherwise planned for ASAP
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
 * Match planes with Target at AN
 * Match Planes with Target at DN 
 * Hohmann Transfer to Target
 ### Display Status of Last Command
-* Normal/Good results are shown in $${\color{green}Green\ text}$$ indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
-* Warnings and Cautions are shown in Yellow indicating a node was generated, but you should inspect it carefully first and may need to modify it.
-* Failures are shown in Red indicating no node has been generated with some clue as to why.
-### Game Input Enable/Disable Staus
-* To prevent the things you may type into a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a text input field. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Including a "." as part of a decimal number will not accelerate your timewarp setting, and using the 1 or 2 keys on your number pad will not mute the game. To restore full funtionality for keyboard and mouse simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
+* Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
+* Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
+* Failures are shown in **Red** indicating no node has been generated with some clue as to why.
+### Game Input Enable/Disable Status
+* To prevent the things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your timewarp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full funtionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
 
-**NOTE:** At this time Flight Plan has no capability to execute nodes - it just helps you plan them. Getting a Good result in the status does not mean your craft is pointed in the right direction or is otherwise ready to execute the node, but rather that the node is ready for you!
+**NOTE:** At this time *Flight Plan has no capability to execute nodes* - it just helps you plan them. Getting a Good result in the status does not mean your craft is pointed in the right direction or is otherwise ready to execute the node, but rather that the node is ready for you!
 
 ## UI Screens
 In addition to the basic UI screen above the UI will automatically asjust to offer capabilities relevant to the current orbit and selected target.
@@ -46,8 +46,9 @@ In addition to the basic UI screen above the UI will automatically asjust to off
 
 ## Configuration Parameters
 ![Flight Plan Configuration Parameters](https://i.imgur.com/8LRSdtU.png)
-This mod includes a number of user configurable parameters which can be accessed through the SpaceWarp configuration screen. Press Alt + M to pull up the SpaceWarp Mod dialog, and select the Configuration button at the bottom to display the list of mods you have installed which support configuration settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which inform the user about what each setting does.
-*NOTE:* Changing settings for mods requires the game to be exited and restarted for the new settings to take effect.
+This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press Alt + M to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
+Using the configuration parameters you can change a variety of things such as how long a staus message sticks around before it start to fade, and also how long it will take to fade.
+**NOTE:** Changing settings for mods requires the game to be exited and restarted for the new settings to take effect.
 ## Planned Improvement
 ![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
 
