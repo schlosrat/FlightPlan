@@ -39,19 +39,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private Rect _windowRect;
     private int windowWidth = Screen.width / 6; //384px on 1920x1080
-    private int windowHeight = Screen.height / 3; //360px on 1920x1080
+    private int windowHeight = Screen.height / 4; //360px on 1920x1080
     private Rect closeBtnRect;
 
     // Status of last Flight Plan function
     private enum Status
     {
+        VIRGIN,
         OK,
         WARNING,
         ERROR
     }
-    private Status status = Status.OK;
-    private string statusText = "Virgin";
-    private double statusTime;
+    private Status status = Status.VIRGIN;
+    private string statusText;
+    private double statusTime = 0;
     private double statusPersistence;
     private double statusFadeTime;
 
@@ -276,13 +277,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Harmony.CreateAndPatchAll(typeof(FlightPlanPlugin).Assembly);
 
         // Fetch a configuration value or create a default one if it does not exist
-        statusPersistence = Config.Bind<double>("Settings section", "Satus Hold Time",      20, "Controls time delay (in seconds) before status beings to fade").Value;
-        statusFadeTime    = Config.Bind<double>("Settings section", "Satus Fade Time",      20, "Controls the time (in seconds) it takes for status to fade").Value;
-        experimental  = Config.Bind<bool>("Settings section", "Experimental Features",   false, "Enable/Disable experimental features for testing - Warrantee Void if Enabled!").Value;
-        targetPeAStr  = Config.Bind<string>("Defualts section", "Target Pe Alt",       "80000", "Default Pe input (in meters) used to pre-populate text input field").Value;
-        targetApAStr  = Config.Bind<string>("Defualts section", "Target Ap Alt",      "250000", "Default Ap input (in meters) used to pre-populate text input field").Value;
-        targetIncStr  = Config.Bind<string>("Defualts section", "Target Inclination",      "0", "Default inclination input (in degrees) used to pre-populate text input field").Value;
-        interceptTStr = Config.Bind<string>("Defualts section", "Target Intercept Time", "100", "Default intercept time (in seconds) used to pre-populate text input field").Value;
+        statusPersistence = Config.Bind<double>("Status Settings Section", "Satus Hold Time",      20, "Controls time delay (in seconds) before status beings to fade").Value;
+        statusFadeTime    = Config.Bind<double>("Status Settings Section", "Satus Fade Time",      20, "Controls the time (in seconds) it takes for status to fade").Value;
+        statusText        = Config.Bind<string>("Status Settings Section", "Initial Status", "Virgin", "Controls the status reported at startup prior to the first command").Value;
+        experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable experimental features for testing - Warrantee Void if Enabled!").Value;
+        targetPeAStr  = Config.Bind<string>("Defualt Inputs Section", "Target Pe Alt",        "80000", "Default Pe input (in meters) used to pre-populate text input field at startup").Value;
+        targetApAStr  = Config.Bind<string>("Defualt Inputs Section", "Target Ap Alt",       "250000", "Default Ap input (in meters) used to pre-populate text input field at startup").Value;
+        targetIncStr  = Config.Bind<string>("Defualt Inputs Section", "Target Inclination",       "0", "Default inclination input (in degrees) used to pre-populate text input field at startup").Value;
+        interceptTStr = Config.Bind<string>("Defualt Inputs Section", "Target Intercept Time",  "100", "Default intercept time (in seconds) used to pre-populate text input field at startup").Value;
+
         targetPeAStr1 = targetPeAStr;
         targetApAStr1 = targetApAStr;
 
@@ -501,13 +504,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
         }
 
-        if (currentNode == null)
+
+        var UT = game.UniverseModel.UniversalTime;
+        // if (statusText == "Virgin") statusTime = UT;
+        if (currentNode == null && status != Status.VIRGIN)
         {
             status = Status.OK;
             statusText = "";
         }
-        var UT = game.UniverseModel.UniversalTime;
-        if (statusText == "Virgin") statusTime = UT;
         DrawGUIStatus(UT);
 
         handleButtons();
@@ -668,8 +672,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Indicate status of last GUI function
         float transparency = 1;
         if (UT > statusTime) transparency = (float)MuUtils.Clamp(1 - (UT - statusTime) / statusFadeTime, 0, 1);
+        if (status == Status.VIRGIN)
+            statusStyle.normal.textColor = new Color(1, 1, 1, 1);
         if (status == Status.OK)
-            statusStyle.normal.textColor = new Color(0,1,0, transparency);
+            statusStyle.normal.textColor = new Color(0, 1, 0, transparency);
         if (status == Status.WARNING)
             statusStyle.normal.textColor = new Color(1, 1, 0, transparency);
         if (status == Status.ERROR)
@@ -1264,18 +1270,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             Game.SpaceSimulation.Maneuvers.GetNodesForVessel(activeVessel.SimulationObject.GlobalId);
 
         if (!silent)
-            Logger.LogMessage($"GetLastOrbit: patchList.Count = {patchList.Count}");
+            Logger.LogDebug($"GetLastOrbit: patchList.Count = {patchList.Count}");
 
         if (patchList.Count == 0)
         {
             if (!silent)
-                Logger.LogMessage($"GetLastOrbit: last orbit is activeVessel.Orbit: {activeVessel.Orbit}");
+                Logger.LogDebug($"GetLastOrbit: last orbit is activeVessel.Orbit: {activeVessel.Orbit}");
             return activeVessel.Orbit;
         }
-        // Logger.LogMessage($"GetLastOrbit: ManeuverTrajectoryPatch = {patchList[patchList.Count - 1].ManeuverTrajectoryPatch}");
+        // Logger.LogDebug($"GetLastOrbit: ManeuverTrajectoryPatch = {patchList[patchList.Count - 1].ManeuverTrajectoryPatch}");
         IPatchedOrbit lastOrbit = patchList[patchList.Count - 1].ManeuverTrajectoryPatch;
         if (!silent)
-            Logger.LogMessage($"GetLastOrbit: last orbit is patch {patchList.Count - 1}: {lastOrbit}");
+            Logger.LogDebug($"GetLastOrbit: last orbit is patch {patchList.Count - 1}: {lastOrbit}");
 
         return lastOrbit;
     }
@@ -1337,9 +1343,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // For KSP2, We want the to start burns early to make them centered on the node
         var nodeTimeAdj = nodeData.BurnDuration * burnDurationOffsetFactor;
 
-        //Logger.LogDebug($"AddManeuverNode: BurnVector   [{nodeData.BurnVector.x}, {nodeData.BurnVector.y}, {nodeData.BurnVector.z}] m/s");
         Logger.LogDebug($"AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
-        //Logger.LogDebug($"AddManeuverNode: Burn Time    {nodeData.Time}");
 
         // Refersh the currentNode with what we've produced here in prep for calling UpdateNode
         currentNode = getCurrentNode();
@@ -1365,8 +1369,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (currentNode != null)
         {
             simID = currentNode.RelatedSimID;
-            // vc1 = universeModel.FindVesselComponent(simID);
-            // vesselComponent = vc1;
             simObject = universeModel.FindSimObject(simID);
         }
         else
@@ -1403,7 +1405,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Wait a tick for things to get created
         yield return new WaitForFixedUpdate();
 
-        if (getCurrentNode() != null)
+        if (currentNode != null)
         {
             // Manage the maneuver on the map
             maneuverManager.RemoveAll();
