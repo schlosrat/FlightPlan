@@ -31,7 +31,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     // Control click through to the game
     private bool gameInputState = true;
-    // public readonly string vesselNameInput = "VesselRenamer.Input";
     public List<String> inputFields = new List<String>();
 
     static bool loaded = false;
@@ -360,13 +359,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
             if (gameInputState && inputFields.Contains(GUI.GetNameOfFocusedControl()))
             {
-                // Logger.LogInfo($"[Flight Plan]: Disabling Game Input: Focused Item '{GUI.GetNameOfFocusedControl()}'");
+                // Logger.LogDebug($"[Flight Plan]: Disabling Game Input: Focused Item '{GUI.GetNameOfFocusedControl()}'");
                 gameInputState = false;
                 GameManager.Instance.Game.Input.Disable();
             }
             else if (!gameInputState && !inputFields.Contains(GUI.GetNameOfFocusedControl()))
             {
-                // Logger.LogInfo($"[Flight Plan]: Enabling Game Input: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
+                // Logger.LogDebug($"[Flight Plan]: Enabling Game Input: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
                 gameInputState = true;
                 GameManager.Instance.Game.Input.Enable();
             }
@@ -386,7 +385,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             if (!gameInputState)
             {
-                // Logger.LogInfo($"[Flight Plan]: Enabling Game Input due to GUI disabled: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
+                // Logger.LogDebug($"[Flight Plan]: Enabling Game Input due to GUI disabled: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
                 gameInputState = true;
                 // game.Input.Flight.Enable();
                 GameManager.Instance.Game.Input.Enable();
@@ -535,7 +534,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         GameObject.Find(ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(false);
         interfaceEnabled = false;
-        Logger.LogInfo("[Flight Plan]: Restoring game.Input.Flight on window close.");
+        Logger.LogDebug("[Flight Plan]: Restoring game.Input.Flight on window close.");
         // game.Input.Flight.Enable();
         GameManager.Instance.Game.Input.Enable();
         ToggleButton(interfaceEnabled);
@@ -685,102 +684,102 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
             if (circAp) // Working
             {
-                Logger.LogInfo("Circularize at Ap");
+                Logger.LogDebug("Circularize at Ap");
                 var TimeToAp = orbit.TimeToAp; // activeVessel.Orbit.TimeToAp;
                 var burnUT = UT + TimeToAp;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     if (burnParams.z < 0)
                     {
                         burnParams.z *= -1;
-                        Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
+                        Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
                     }
                     else
-                        Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                        Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                     // currentNode = getCurrentNode();
                     var nodeTimeAdj = -currentNode.BurnDuration / 2;
                     var burnStartTime = currentNode.Time + nodeTimeAdj;
-                    Logger.LogInfo($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
+                    Logger.LogDebug($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
                     deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime); // activeVessel.Orbit
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     if (burnParams.z < 0)
                     {
                         burnParams.z *= -1;
-                        Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
+                        Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
                     }
                     else
-                        Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                        Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     currentNode.BurnVector = burnParams;
                     // currentNode.Time = burnStartTime;
                     UpdateNode(currentNode);
                 }
                 else
-                    Logger.LogInfo("Circularize at Ap: Solution Not Found!");
+                    Logger.LogDebug("Circularize at Ap: Solution Not Found!");
             }
             else if (circPe) // Working
             {
-                Logger.LogInfo("Circularize at Pe");
+                Logger.LogDebug("Circularize at Pe");
                 var TimeToPe = orbit.TimeToPe; // activeVessel.Orbit
                 var burnUT = UT + TimeToPe;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     if (burnParams.z > 0)
                     {
                         burnParams.z *= -1;
-                        Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
+                        Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
                     }
                     else
-                        Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                        Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                     // currentNode = getCurrentNode();
                     var nodeTimeAdj = -currentNode.BurnDuration / 2;
                     var burnStartTime = currentNode.Time + nodeTimeAdj;
-                    Logger.LogInfo($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
+                    Logger.LogDebug($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
                     deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime); // activeVessel.Orbit
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     if (burnParams.z > 0)
                     {
                         burnParams.z *= -1;
                         burnParams.x *= -1;
-                        Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* radial & prograde flipped)");
+                        Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* radial & prograde flipped)");
                     }
                     else
-                        Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                        Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     currentNode.BurnVector = burnParams;
                     // currentNode.Time = burnStartTime;
                     UpdateNode(currentNode);
                 }
                 else
-                    Logger.LogInfo("Circularize at Pe: Solution Not Found!");
+                    Logger.LogDebug("Circularize at Pe: Solution Not Found!");
             }
             else if (circNow) // Not Working - Getting burn component in normal direction and we shouldn't be
             {
-                Logger.LogInfo("Circularize Now");
+                Logger.LogDebug("Circularize Now");
                 var startTimeOffset = 60;
                 var burnUT = UT + startTimeOffset;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     burnParams.z *= -1;
                     burnParams.x *= -1;
-                    Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
+                    Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                     // currentNode = getCurrentNode();
                     var nodeTimeAdj = currentNode.BurnDuration / 2;
                     var burnStartTime = currentNode.Time + nodeTimeAdj;
-                    Logger.LogInfo($"BurnDuration: {currentNode.BurnDuration}, Recalculating burn to be centered at {nodeTimeAdj + startTimeOffset} s from now ");
+                    Logger.LogDebug($"BurnDuration: {currentNode.BurnDuration}, Recalculating burn to be centered at {nodeTimeAdj + startTimeOffset} s from now ");
                     deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime); // activeVessel.Orbit
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                     burnParams.z *= -1;
@@ -790,11 +789,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     UpdateNode(currentNode);
                 }
                 else
-                    Logger.LogInfo("Circularize Now: Solution Not Found!");
+                    Logger.LogDebug("Circularize Now: Solution Not Found!");
             }
             else if (newPe) // Working
             {
-                Logger.LogInfo("Set New Pe");
+                Logger.LogDebug("Set New Pe");
                 Debug.Log("Set New Pe");
                 var TimeToAp = orbit.TimeToAp; // activeVessel.Orbit
                 double burnUT, e;
@@ -803,36 +802,36 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     burnUT = UT + TimeToAp;
                 else
                     burnUT = UT + 30;
-                Logger.LogInfo($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
+                Logger.LogDebug($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
                 Debug.Log($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
                 var deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(orbit, burnUT, targetPeR); // activeVessel.Orbit
                 // var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(activeVessel.Orbit, burnUT, targetPeR, activeVessel.Orbit.Apoapsis);
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
                     if ((e >= 1) && (targetPeR < orbit.Periapsis)) // activeVessel.Orbit
                     {
                         burnParams.z *= -1; // Why do we need this?
-                        Logger.LogInfo($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
+                        Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
                         CreateManeuverNodeAtUT(burnParams, burnUT, 0);
                     }
                     else
                     {
-                        Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                        Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                         CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                     }
                 }
                 else
-                    Logger.LogInfo("Set New Pe: Solution Not Found!");
+                    Logger.LogDebug("Set New Pe: Solution Not Found!");
             }
             else if (newAp) // Working
             {
-                Logger.LogInfo("Set New Ap");
+                Logger.LogDebug("Set New Ap");
                 Debug.Log("Set New Ap");
                 var TimeToPe = orbit.TimeToPe; // activeVessel.Orbit
                 var burnUT = UT + TimeToPe;
-                Logger.LogInfo($"Seeking Solution: targetApR {targetApR} m, currentApR {orbit.Apoapsis} m"); // activeVessel.Orbit
+                Logger.LogDebug($"Seeking Solution: targetApR {targetApR} m, currentApR {orbit.Apoapsis} m"); // activeVessel.Orbit
                 Debug.Log($"Seeking Solution: targetApR {targetApR} m, currentApR {orbit.Apoapsis} m"); // activeVessel.Orbit
                 var deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(orbit, burnUT, targetApR); // activeVessel.Orbit
                 // var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(activeVessel.Orbit, burnUT, activeVessel.Orbit.Periapsis, targetApR);
@@ -840,38 +839,38 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                     // burnParams.z *= -1; // Why do we need this?
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo("Set New Ap: Solution Not Found!");
+                    Logger.LogDebug("Set New Ap: Solution Not Found!");
             }
             else if (newPeAp) // Sorta almost works, but this is a kludge!
             {
-                Logger.LogInfo("Set New Pe and Ap");
+                Logger.LogDebug("Set New Pe and Ap");
                 if (targetPeR1 > targetApR1)
                     (targetPeR1, targetApR1) = (targetApR1, targetPeR1);
-                Logger.LogInfo($"Seeking Solution: targetPeR {targetPeR1} m, targetApR {targetApR1} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
+                Logger.LogDebug($"Seeking Solution: targetPeR {targetPeR1} m, targetApR {targetApR1} m, body.radius {orbit.referenceBody.radius} m"); // activeVessel.Orbit
                 var burnUT = UT + 30;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(orbit, burnUT, targetPeR1, targetApR1); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    // Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
+                    // Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
                     // burnParams.z *= -1; // Why do we need this?
                     // burnParams.y = 0; // Why do we need this?
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo("Set New Pe and Ap: Solution Not Found!");
+                    Logger.LogDebug("Set New Pe and Ap: Solution Not Found!");
             }
             else if (newInc) // Working except for slight error in application of burnUT!
             {
-                Logger.LogInfo("Set New Inclination");
-                Logger.LogInfo($"Seeking Solution: targetInc {targetInc}°");
+                Logger.LogDebug("Set New Inclination");
+                Logger.LogDebug($"Seeking Solution: targetInc {targetInc}°");
                 double burnUT, TAN, TDN;
                 Vector3d deltaV, deltaV1, deltaV2;
                 if (orbit.eccentricity < 1) // Eliptical orbit: Pick cheapest deltaV between AN and DN // activeVessel.Orbit
@@ -882,18 +881,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     deltaV2 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TDN, targetInc); // activeVessel.Orbit
                     if (deltaV1.magnitude < deltaV2.magnitude)
                     {
-                        Logger.LogInfo($"Selecting maneuver at Ascending Node");
+                        Logger.LogDebug($"Selecting maneuver at Ascending Node");
                         burnUT = TAN;
                         deltaV = deltaV1;
                     }
                     else
                     {
-                        Logger.LogInfo($"Selecting maneuver at Descending Node");
+                        Logger.LogDebug($"Selecting maneuver at Descending Node");
                         burnUT = TDN;
                         deltaV = deltaV2;
                     }
-                    Logger.LogInfo($"deltaV1 (AN) [{deltaV1.x}, {deltaV1.y}, {deltaV1.z}] = {deltaV1.magnitude} m/s {TAN - UT} s from UT");
-                    Logger.LogInfo($"deltaV2 (DN) [{deltaV2.x}, {deltaV2.y}, {deltaV2.z}] = {deltaV2.magnitude} m/s {TDN - UT} s from UT");
+                    Logger.LogDebug($"deltaV1 (AN) [{deltaV1.x}, {deltaV1.y}, {deltaV1.z}] = {deltaV1.magnitude} m/s {TAN - UT} s from UT");
+                    Logger.LogDebug($"deltaV2 (DN) [{deltaV2.x}, {deltaV2.y}, {deltaV2.z}] = {deltaV2.magnitude} m/s {TDN - UT} s from UT");
                 }
                 else // parabolic or hyperbolic orbit: Do it now!
                 {
@@ -903,69 +902,69 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV2, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo("Set New Inclination: Solution Not Found!");
+                    Logger.LogDebug("Set New Inclination: Solution Not Found!");
             }
             else if (matchPlanesA) // Working except for slight error in application of burnUT!
             {
-                Logger.LogInfo($"Match Planes  with {currentTarget.Name} at AN");
+                Logger.LogDebug($"Match Planes  with {currentTarget.Name} at AN");
                 double burnUT;
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                     deltaV.z *= -1; // why?
-                    Logger.LogInfo($"Solution Found: deltaV*    [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT (prograde flipped)");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV*    [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT (prograde flipped)");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Match Planes with {currentTarget.Name} at AN: Solution Not Found!");
+                    Logger.LogDebug($"Match Planes with {currentTarget.Name} at AN: Solution Not Found!");
             }
             else if (matchPlanesD) // Working except for slight error in application of burnUT!
             {
-                Logger.LogInfo($"Match Planes with {currentTarget.Name} at DN");
+                Logger.LogDebug($"Match Planes with {currentTarget.Name} at DN");
                 double burnUT;
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT); // activeVessel.Orbit
                 burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Match Planes with {currentTarget.Name} at DN: Solution Not Found!");
+                    Logger.LogDebug($"Match Planes with {currentTarget.Name} at DN: Solution Not Found!");
             }
             else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
             {
-                Logger.LogInfo($"Hohmann Transfer to {currentTarget.Name}");
+                Logger.LogDebug($"Hohmann Transfer to {currentTarget.Name}");
                 Debug.Log("Hohmann Transfer");
                 double burnUT;
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Hohmann Transfer to {currentTarget.Name}: Solution Not Found!");
+                    Logger.LogDebug($"Hohmann Transfer to {currentTarget.Name}: Solution Not Found!");
             }
             else if (interceptAtTime) // Not Working
             // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
             // Similar to code in MechJebModuleRendezvousGuidance.cs for "Get Closer" button code.
             {
-                Logger.LogInfo($"Intercept {currentTarget.Name} at Time");
+                Logger.LogDebug($"Intercept {currentTarget.Name} at Time");
                 var burnUT = UT + 30;
                 var interceptUT = UT + interceptT;
                 double offsetDistance;
-                Logger.LogInfo($"Seeking Solution: interceptT {interceptT} s");
+                Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
                 if (currentTarget.IsCelestialBody) // For a target that is a celestial
                     offsetDistance = currentTarget.Orbit.referenceBody.radius + 50000;
                 else
@@ -974,100 +973,100 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {interceptUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {interceptUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Intercept {currentTarget.Name} at Time: No Solution Found!");
+                    Logger.LogDebug($"Intercept {currentTarget.Name} at Time: No Solution Found!");
             }
             else if (courseCorrection) // Works at least some times...
             {
-                Logger.LogInfo($"Course Correction for tragetory to {currentTarget.Name}");
+                Logger.LogDebug($"Course Correction for tragetory to {currentTarget.Name}");
                 double burnUT;
                 Vector3d deltaV;
                 if (currentTarget.IsCelestialBody) // For a target that is a celestial
                 {
-                    Logger.LogInfo($"Seeking Solution for Celestial Target");
+                    Logger.LogDebug($"Seeking Solution for Celestial Target");
                     double finalPeR = currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
                     deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, currentTarget.Orbit.referenceBody, finalPeR, out burnUT); // activeVessel.Orbit
                 }
                 else // For a tartget that is not a celestial
                 {
-                    Logger.LogInfo($"Seeking Solution for Non-Celestial Target");
+                    Logger.LogDebug($"Seeking Solution for Non-Celestial Target");
                     double caDistance = 100; // m (closest approach to non-celestial target)
                     deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, caDistance, out burnUT); // activeVessel.Orbit
                 }
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Course Correction for tragetory to {currentTarget.Name}: No Solution Found!");
+                    Logger.LogDebug($"Course Correction for tragetory to {currentTarget.Name}: No Solution Found!");
             }
             else if (moonReturn) // Works at least sometimes...
             {
-                Logger.LogInfo("Moon Return");
+                Logger.LogDebug("Moon Return");
                 var e = orbit.eccentricity; // activeVessel.Orbit
                 if (e > 0.2)
                 {
-                    Logger.LogInfo($"Moon Return Error: Starting Orbit Eccentrity Too Large");
+                    Logger.LogDebug($"Moon Return Error: Starting Orbit Eccentrity Too Large");
                     Logger.LogError($"Moon Return starting orbit eccentricty {e.ToString("F2")} is > 0.2");
                 }
                 else
                 {
                     double burnUT;
                     double primaryRaidus = orbit.referenceBody.Orbit.referenceBody.radius + 100000; // m // activeVessel.Orbit
-                    Logger.LogInfo($"Moon Return Attempting to Solve...");
+                    Logger.LogDebug($"Moon Return Attempting to Solve...");
                     var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, primaryRaidus, out burnUT); // activeVessel.Orbit
                     if (deltaV != Vector3d.zero)
                     {
                         burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                         // burnParams.z *= -1;
-                        Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                        Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                        Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                        Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                         CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                     }
                     else
-                        Logger.LogInfo("Moon Return: No Solution Found!");
+                        Logger.LogDebug("Moon Return: No Solution Found!");
                 }
             }
             else if (matchVCA) // untested
             {
-                Logger.LogInfo($"Match Velocity with {currentTarget.Name} at Closest Approach");
+                Logger.LogDebug($"Match Velocity with {currentTarget.Name} at Closest Approach");
                 double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT // activeVessel.Orbit
                 var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, closestApproachTime, currentTarget.Orbit as PatchedConicsOrbit); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(closestApproachTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, closestApproachTime); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {closestApproachTime - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {closestApproachTime - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {closestApproachTime - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {closestApproachTime - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, closestApproachTime, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Match Velocity with {currentTarget.Name} at Closest Approach: No Solution Found!");
+                    Logger.LogDebug($"Match Velocity with {currentTarget.Name} at Closest Approach: No Solution Found!");
             }
             else if (matchVNow) // untested
             {
-                Logger.LogInfo($"Match Velocity with {currentTarget.Name} Now");
+                Logger.LogDebug($"Match Velocity with {currentTarget.Name} Now");
                 var burnUT = UT + 30;
                 var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit); // activeVessel.Orbit
                 if (deltaV != Vector3d.zero)
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Match Velocity with {currentTarget.Name} Now: No Solution Found!");
+                    Logger.LogDebug($"Match Velocity with {currentTarget.Name} Now: No Solution Found!");
             }
             else if (planetaryXfer) // Not Working. At minimum, this will not work until DeltaVToChangeApoapsis works, which is failing on calls to solve with BrentRoot
             {
-                Logger.LogInfo($"Planetary Transfer to {currentTarget.Name}");
+                Logger.LogDebug($"Planetary Transfer to {currentTarget.Name}");
                 double burnUT;
                 bool syncPhaseAngle = true;
                 var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT); // activeVessel.Orbit
@@ -1075,19 +1074,19 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 {
                     burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT); // activeVessel.Orbit
                     // burnParams.z *= -1;
-                    Logger.LogInfo($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogInfo($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
                     CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
                 }
                 else
-                    Logger.LogInfo($"Planetary Transfer to {currentTarget.Name}: No Solution Found!");
+                    Logger.LogDebug($"Planetary Transfer to {currentTarget.Name}: No Solution Found!");
             }
         }
     }
 
     private IPatchedOrbit GetLastOrbit(bool silent = true)
     {
-        // Logger.LogInfo("GetLastOrbit");
+        // Logger.LogDebug("GetLastOrbit");
         List<ManeuverNodeData> patchList =
             Game.SpaceSimulation.Maneuvers.GetNodesForVessel(activeVessel.SimulationObject.GlobalId);
 
@@ -1110,7 +1109,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void CreateManeuverNodeAtTA(Vector3d burnVector, double TrueAnomalyRad, double burnDurationOffsetFactor = -0.5)
     {
-        // Logger.LogInfo("CreateManeuverNodeAtTA");
+        // Logger.LogDebug("CreateManeuverNodeAtTA");
         PatchedConicsOrbit referencedOrbit = GetLastOrbit(false) as PatchedConicsOrbit;
         if (referencedOrbit == null)
         {
@@ -1125,7 +1124,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void CreateManeuverNodeAtUT(Vector3d burnVector, double UT, double burnDurationOffsetFactor = -0.5)
     {
-        // Logger.LogInfo("CreateManeuverNodeAtUT");
+        // Logger.LogDebug("CreateManeuverNodeAtUT");
 
         //PatchedConicsOrbit referencedOrbit = GetLastOrbit(false) as PatchedConicsOrbit;
         //if (referencedOrbit == null)
@@ -1148,16 +1147,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         nodeData.BurnVector = burnVector;
 
-        //Logger.LogInfo($"CreateManeuverNodeAtUT: BurnVector [{burnVector.x}, {burnVector.y}, {burnVector.z}] m/s");
-        //Logger.LogInfo($"CreateManeuverNodeAtUT: BurnDuration {nodeData.BurnDuration} s");
-        //Logger.LogInfo($"CreateManeuverNodeAtUT: Burn Time {nodeData.Time} s");
+        //Logger.LogDebug($"CreateManeuverNodeAtUT: BurnVector [{burnVector.x}, {burnVector.y}, {burnVector.z}] m/s");
+        //Logger.LogDebug($"CreateManeuverNodeAtUT: BurnDuration {nodeData.BurnDuration} s");
+        //Logger.LogDebug($"CreateManeuverNodeAtUT: Burn Time {nodeData.Time} s");
 
         AddManeuverNode(nodeData, burnDurationOffsetFactor);
     }
 
     private void AddManeuverNode(ManeuverNodeData nodeData, double burnDurationOffsetFactor)
     {
-        //Logger.LogInfo("AddManeuverNode");
+        //Logger.LogDebug("AddManeuverNode");
 
         // Add the node to the vessel's orbit
         GameManager.Instance.Game.SpaceSimulation.Maneuvers.AddNodeToVessel(nodeData);
@@ -1165,16 +1164,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // For KSP2, We want the to start burns early to make them centered on the node
         var nodeTimeAdj = nodeData.BurnDuration * burnDurationOffsetFactor;
 
-        //Logger.LogInfo($"AddManeuverNode: BurnVector   [{nodeData.BurnVector.x}, {nodeData.BurnVector.y}, {nodeData.BurnVector.z}] m/s");
-        Logger.LogInfo($"AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
-        //Logger.LogInfo($"AddManeuverNode: Burn Time    {nodeData.Time}");
+        //Logger.LogDebug($"AddManeuverNode: BurnVector   [{nodeData.BurnVector.x}, {nodeData.BurnVector.y}, {nodeData.BurnVector.z}] m/s");
+        Logger.LogDebug($"AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
+        //Logger.LogDebug($"AddManeuverNode: Burn Time    {nodeData.Time}");
 
         // Refersh the currentNode with what we've produced here in prep for calling UpdateNode
         currentNode = getCurrentNode();
 
         StartCoroutine(UpdateNode(nodeData, nodeTimeAdj));
 
-        //Logger.LogInfo("AddManeuverNode Done");
+        //Logger.LogDebug("AddManeuverNode Done");
     }
 
     private IEnumerator UpdateNode(ManeuverNodeData nodeData, double nodeTimeAdj = 0)

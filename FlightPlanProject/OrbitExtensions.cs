@@ -534,7 +534,7 @@ namespace MuMech
         //large enough that it never attains the given true anomaly
         public static double TimeOfTrueAnomaly(this PatchedConicsOrbit o, double trueAnomaly, double UT)
         {
-            //FlightPlanPlugin.Logger.LogInfo($"OrbitExtensions: trueAnomaly: {trueAnomaly}° = {trueAnomaly*UtilMath.Deg2Rad} radians");
+            //FlightPlanPlugin.Logger.LogDebug($"OrbitExtensions: trueAnomaly: {trueAnomaly}° = {trueAnomaly*UtilMath.Deg2Rad} radians");
             return o.GetUTforTrueAnomaly(trueAnomaly*UtilMath.Deg2Rad, o.period);
             //return o.UTAtMeanAnomaly(o.GetMeanAnomalyAtEccentricAnomaly(o.GetEccentricAnomalyAtTrueAnomaly(trueAnomaly)), UT);
         }
