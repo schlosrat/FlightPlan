@@ -21,7 +21,11 @@
             <Publicize>true</Publicize>
             <Private>false</Private>
         </Reference>
-    </ItemGroup>
+		<Reference Include="maneuver_node_controller">
+			<HintPath>..\external_dlls\maneuver_node_controller.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
     <ItemGroup>
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.0" PrivateAssets="all" />
@@ -32,6 +36,6 @@
         <PackageReference Include="UnityEngine.Modules" Version="2020.3.33" IncludeAssets="compile" />
     </ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="echo d | xcopy /y /s &quot;$(ProjectDir)..\$(ModId)\&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).dll&quot;&#xA;if $(ConfigurationName) == Debug echo f | xcopy /y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot;&#xA;xcopy /y &quot;$(ProjectDir)..\license.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(ProjectDir)..\README.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\README.txt&quot;&#xD;&#xA;&#xD;&#xA;echo Copying output .dll to &quot;..Kerbal Space Program 2 Debug\BepInEx\plugins\flight_plan&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).dll&quot; &quot;C:\Kerbal Space Program 2 Debug\BepInEx\plugins\flight_plan&quot;&#xD;&#xA;&#xD;&#xA;echo Copying output .pdb to &quot;..Kerbal Space Program 2 Debug\BepInEx\plugins\flight_plan&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot; &quot;C:\Kerbal Space Program 2 Debug\BepInEx\plugins\flight_plan&quot;&#xD;&#xA;&#xD;&#xA;echo Starting KSP2_x64.exe&#xD;&#xA;powershell &quot;start-process &quot;&quot;C:\Kerbal Space Program 2 Debug\KSP2_x64.exe&quot;&quot;&quot;" />
+        <Exec Command="echo d | xcopy /y /s &quot;$(ProjectDir)..\$(ModId)\&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).dll&quot;&#xA;if $(ConfigurationName) == Debug echo f | xcopy /y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot;&#xA;xcopy /y &quot;$(ProjectDir)..\license.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(ProjectDir)..\README.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\README.txt&quot;&#xD;&#xA;&#xD;&#xA;echo Copying output .dll to &quot;..Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).dll&quot; &quot;C:\Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;&#xD;&#xA;echo Copying output .pdb to &quot;..Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot; &quot;C:\Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;&#xD;&#xA;echo Starting KSP2_x64.exe&#xD;&#xA;powershell &quot;start-process &quot;&quot;C:\Kerbal Space Program 2 Debug\KSP2_x64.exe&quot;&quot;&quot;" />
     </Target>
 </Project>
