@@ -4,11 +4,11 @@
   "name": "Flight Plan",
   "description": "Plan your (Space) Flight! Set up useful maneuver nodes to get you where you want to be",
   "source": "https://github.com/schlosrat/FlightPlan",
-  "version": "0.6.4",
-  "version_check": "",
+  "version": "0.7.0",
+  "version_check": "https://github.com/schlosrat/FlightPlan/blob/master/flight_plan/swinfo.json",
   "dependencies": [
     {
-      "id":  "SpaceWarp",
+      "id": "SpaceWarp",
       "version": {
         "min": "1.0.1",
         "max": "*"
