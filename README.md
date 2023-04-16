@@ -11,6 +11,11 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * Requires SpaceWarp 1.0.1
 * Optional, but highly recommended: [Maneuver Node Controller](https://spacedock.info/mod/3270/Maneuver%20Node%20Controller). See capabilites described below.
 
+## Links
+* [Space Dock](https://spacedock.info/mod/3359/Flight%20Plan)
+* [Forum](https://forum.kerbalspaceprogram.com/index.php?/topic/216393-flight-plan/)
+* [Must Have Mods Video](https://youtu.be/zaXk8t07KW4)
+
 ## Installation
 1. Download and extract SpaceWarp into your game folder. If you've installed the game via Steam, then this is probably here: *C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2*. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
 1. Download and extract this mod into the game folder. The mod's ZIP file contains a single BepInEx folder. You can drag that right onto your KSP2 folder to install the mod. If done correctly, you should have the following folder structure within your KSP2 game folder: *KSP2GameFolder*/**BepInEx/plugins/flight_plan**.
