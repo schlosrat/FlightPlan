@@ -9,6 +9,12 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 ## Compatibility
 * Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
 * Requires SpaceWarp 1.0.1
+* Optional, but highly recommended: [Maneuver Node Controller](https://spacedock.info/mod/3270/Maneuver%20Node%20Controller). See capabilites described below.
+
+## Links
+* [Space Dock](https://spacedock.info/mod/3359/Flight%20Plan)
+* [Forum](https://forum.kerbalspaceprogram.com/index.php?/topic/216393-flight-plan/)
+* [Must Have Mods Video](https://youtu.be/zaXk8t07KW4)
 
 ## Installation
 1. Download and extract SpaceWarp into your game folder. If you've installed the game via Steam, then this is probably here: *C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2*. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
@@ -33,6 +39,8 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * Failures are shown in **Red** indicating no node has been generated with some clue as to why.
 ### Game Input Enable/Disable Status
 * To prevent the things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your time warp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full functionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
+### Integration with Maneuver Node Controller, v0.8.3+
+* *If* Maneuver Node Controller (v0.8.3 or later) is installed, and *if* the Launch Maneuver Node Controller configuration setting is Enabled, then when you activate an *experimental* node creation function the Maneuver Node Controller mod will automatically be brought up if it is not already up. This can make it easier to evaluate and adjust nodes constructed using experimental functions (those listed under Planned Improvement below)
 
 **NOTE:** At this time *Flight Plan has no capability to execute nodes* - it just helps you plan them. Getting a *Good* result in the status does not mean your craft is pointed in the right direction or is otherwise ready to execute the node, but rather that the node is ready for you!
 
@@ -45,14 +53,18 @@ In addition to the basic UI screen above the UI will automatically asjust to off
 ![Flight Plan Target Selected GUI - Moon](https://i.imgur.com/givkRgG.png)
 
 ## Configuration Parameters
-![Flight Plan Configuration Parameters](https://i.imgur.com/8LRSdtU.png)
+![Flight Plan Configuration Parameters](https://i.imgur.com/BcJsRLP.png)
 
 This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press Alt + M to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
 Using the configuration parameters you can change a variety of things such as how long a status message sticks around before it start to fade, and also how long it will take to fade.
 
-**NOTE:** Changing settings for mods requires the game to be exited and restarted for the new settings to take effect.
+**NOTE:** The following settings are dyanically managed and may be usted by the user while the game is running. All others will require exiting and restart to take effect.
+* Experimental Features: Enable/Disable
+* Launch Maneuver Node Controller: Enable/Disable
+* Status Fade Time: Seconds
+* Status Hold Time: Seconds
 
-## Planned Improvement
+## Planned Improvement / Experimental Functions
 ![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
 
 Work In Progress developmental features may be enabled by switching on the Experimental Features in the mod's configuration screen. You will need to restart the game for this setting to take effect, but it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the Experimental Features setting.
