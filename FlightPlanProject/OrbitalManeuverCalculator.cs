@@ -41,12 +41,12 @@ namespace MuMech
             
         //    Vector3d testVec;
         //    //testVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
-        //    //testVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
+        //    //testVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried o.North(UT), was o.NormalPlus(UT)
         //    //testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
         //    //FlightPlanPlugin.Logger.LogDebug($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
             
         //    // testVec.x = Vector3d.Dot(dV, o.Up(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
-        //    // testVec.y = Vector3d.Dot(dV, o.North(UT));  // Tried 0.North(UT), was o.NormalPlus(UT)
+        //    // testVec.y = Vector3d.Dot(dV, o.North(UT));  // Tried o.North(UT), was o.NormalPlus(UT)
         //    // testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
         //    // FlightPlanPlugin.Logger.LogDebug($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
             
@@ -137,42 +137,41 @@ namespace MuMech
             double newHorizontalV = L / radius;   // horizontal velocity of new orbit at UT
             double newUpV = Math.Sqrt(Math.Abs(2 * kineticE - newHorizontalV * newHorizontalV)); //vertical velocity of new orbit at UT
 
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: radius {radius} m");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newPeR {newPeR} m");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newApR {newApR} m");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newHorizontalV {newHorizontalV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newUpV         {newUpV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: radius {radius} m");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newPeR {newPeR} m");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newApR {newApR} m");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newHorizontalV {newHorizontalV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newUpV         {newUpV} m/s");
 
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
-            var northV = Vector3d.Dot(actualVelocity, o.North(UT));
-            var eastV = Vector3d.Dot(actualVelocity, o.East(UT));  // tried Prograde, but that could include some of all three axes!
-            var upV = Vector3d.Dot(actualVelocity, o.Up(UT));
-            var newEastV = Math.Sqrt(newHorizontalV * newHorizontalV - northV * northV);
+            //var northV = Vector3d.Dot(actualVelocity, o.North(UT));
+            //var eastV = Vector3d.Dot(actualVelocity, o.East(UT));  // tried Prograde, but that could include some of all three axes!
+            //var upV = Vector3d.Dot(actualVelocity, o.Up(UT));
+            //var newEastV = Math.Sqrt(newHorizontalV * newHorizontalV - northV * northV);
 
             //untested:
             newUpV *= Math.Sign(Vector3d.Dot(o.Up(UT), actualVelocity));
 
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newUpV*        {newUpV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: upV            {upV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: northV         {northV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: eastV          {eastV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newEastV       {newEastV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newUpV         {newUpV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x}, {o.Prograde(UT).y}, {o.Prograde(UT).z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: Horizontal Vec [{o.Horizontal(UT).x}, {o.Horizontal(UT).y}, {o.Horizontal(UT).z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: Up Vec         [{o.Up(UT).x}, {o.Up(UT).y}, {o.Up(UT).z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: North Vec      [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: East Vec       [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newUpV*        {newUpV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: actualVelocity [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: upV            {upV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: northV         {northV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: eastV          {eastV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newEastV       {newEastV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newUpV         {newUpV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: Prograde Vec   [{o.Prograde(UT).x}, {o.Prograde(UT).y}, {o.Prograde(UT).z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: Horizontal Vec [{o.Horizontal(UT).x}, {o.Horizontal(UT).y}, {o.Horizontal(UT).z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: Up Vec         [{o.Up(UT).x}, {o.Up(UT).y}, {o.Up(UT).z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: North Vec      [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: East Vec       [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
 
             // tried o.Prograde(UT) in place of o.Horizontal, tried o.RadialPlus(UT) in place of o.Up
             // Vector3d desiredVelocity = newEastV * o.East(UT) + northV * o.North(UT) + newUpV * o.Up(UT);
             Vector3d desiredVelocity = newHorizontalV * o.Horizontal(UT) + newUpV * o.Up(UT);
-
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
-
             var deltaV = desiredVelocity - actualVelocity;
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
             return deltaV;
         }
 
@@ -519,20 +518,20 @@ namespace MuMech
             // var east = o.East(UT);
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.SwappedOrbitalVelocityAtUT(UT));
             Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: latitude {latitude}°, newInclination {newInclination}°");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHeading {desiredHeading}°");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.North(UT)               [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.East(UT)                [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: latitude {latitude}°, newInclination {newInclination}°");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHeading {desiredHeading}°");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.North(UT)               [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.East(UT)                [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
             Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeading) * o.North(UT);
             if (Vector3d.Dot(actualHorizontalVelocity, northComponent) < 0) northComponent *= -1;
             if (MuUtils.ClampDegrees180(newInclination) < 0) northComponent *= -1;
             Vector3d desiredHorizontalVelocity = eastComponent + northComponent;
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
             var deltaV = desiredHorizontalVelocity - actualHorizontalVelocity;
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
             return deltaV;
         }
 
