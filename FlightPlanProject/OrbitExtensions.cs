@@ -11,6 +11,7 @@ using KSP.Sim;
 using KSP.Sim.impl;
 using FlightPlan;
 using UnityEngine;
+using static VehiclePhysics.TelemetryTemplateBase;
 
 namespace MuMech
 {
@@ -27,19 +28,22 @@ namespace MuMech
         // space. For some reason, Orbit class functions seem to use a coordinate system
         // in which the Y and Z coordinates are swapped.
         //
-        public static Vector3d SwappedOrbitalVelocityAtUT(this PatchedConicsOrbit o, double UT)
+        public static Vector3d SwappedOrbitalVelocityAtUT(this PatchedConicsOrbit o, double UT) // KS2: OrbitalVelocity
         {
             // Vector3d GetOrbitalVelocityAtUTZup(double UT) => this.GetOrbitalVelocityAtObTZup(this.GetObtAtUT(UT));
             // Vector3d GetOrbitalVelocityAtObTZup(double obT) => this.GetOrbitalVelocityAtTrueAnomaly(this.TrueAnomalyAtObT(obT));
-            return SwapYZ(o.GetOrbitalVelocityAtUTZup(UT)); // was: o.getOrbitalVelocityAtUT(UT)
+            // return SwapYZ(o.GetOrbitalVelocityAtUTZup(UT)); // was: o.getOrbitalVelocityAtUT(UT)
+            return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetOrbitalVelocityAtUTZup(UT).SwapYAndZ);
         }
 
         //position relative to the primary
-        public static Vector3d SwappedRelativePositionAtUT(this PatchedConicsOrbit o, double UT)
+        public static Vector3d SwappedRelativePositionAtUT(this PatchedConicsOrbit o, double UT) // KS2: RelativePosition
         {
             // Vector3d GetRelativePositionAtUT(double UT) => this.GetRelativePositionAtObTZup(this.GetObtAtUT(UT)).SwapYAndZ;
             // Vector3d GetRelativePositionAtObTZup(double obT) => this.GetRelativePositionFromTrueAnomalyZup(this.GetTrueAnomaly(this.SolveEccentricAnomaly(obT * this.meanMotion, this.OrbitalElements.Eccentricity)));
-            return SwapYZ(o.GetRelativePositionAtUT(UT)); // was: o.getRelativePositionAtUT(UT)
+            // return SwapYZ(o.GetRelativePositionAtUT(UT)); // was: o.getRelativePositionAtUT(UT)
+            // From KontrolSystem2:
+            return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativePositionAtUTZup(UT).SwapYAndZ);
         }
 
         //position in world space
@@ -49,51 +53,85 @@ namespace MuMech
             return o.referenceBody.Position.localPosition + o.SwappedRelativePositionAtUT(UT);
         }
 
+        // ReferenceFrame (from KS2)
+        public static ITransformFrame ReferenceFrame(this PatchedConicsOrbit o)
+        {
+            return o.ReferenceFrame;
+        }
+
+        // ReferenceBody
+        //public static KSPOrbitModule.IBody ReferenceBody(this PatchedConicsOrbit o)
+        //{
+        //    return new BodyWrapper(context, o.referenceBody);
+        //}
+
+        // GlobalPosition (from KS2)
+        //public static Position GlobalPosition(this PatchedConicsOrbit o, double UT)
+        //{
+        //    return new Position(ReferenceFrame, o.GetRelativePositionAtUTZup(UT).SwapYAndZ);
+        //}
+
+        // GlobalVelocity (from KS2)
+        //public static VelocityAtPosition GlobalVelocity(this PatchedConicsOrbit o, double UT)
+        //{
+        //    return new VelocityAtPosition(new Velocity(ReferenceFrame.motionFrame, o.GetOrbitalVelocityAtUTZup(UT).SwapYAndZ), GlobalPosition(UT)); ;
+        //}
+
         //normalized vector perpendicular to the orbital plane
         //convention: as you look down along the orbit normal, the satellite revolves counterclockwise
-        public static Vector3d SwappedOrbitNormal(this PatchedConicsOrbit o)
+        public static Vector3d SwappedOrbitNormal(this PatchedConicsOrbit o) // KS2: OrbitNormal
         {
             // Vector3d GetRelativeOrbitNormal() => this.universeModel.Zup.WorldToLocal(this.orbitFrame.Z);
-            return -SwapYZ(o.GetRelativeOrbitNormal()).normalized; // was: o.GetOrbitNormal()
+            // return -SwapYZ(o.GetRelativeOrbitNormal()).normalized; // was: o.GetOrbitNormal()
+            // From KontrolSystem2:
+            return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, -o.GetRelativeOrbitNormal().SwapYAndZ);
         }
 
         //normalized vector perpendicular to the orbital plane
         //convention: as you look down along the orbit normal, the satellite revolves counterclockwise
-        public static Vector3d SwappedOrbitNormal(this IKeplerOrbit o)
+        public static Vector3d SwappedOrbitNormal(this IKeplerOrbit o) // KS2: OrbitNormal
         {
             // Vector3d GetRelativeOrbitNormal() => this.universeModel.Zup.WorldToLocal(this.orbitFrame.Z);
-            return -SwapYZ(o.GetRelativeOrbitNormal()).normalized; // was: o.GetOrbitNormal()
+            // return -SwapYZ(o.GetRelativeOrbitNormal()).normalized; // was: o.GetOrbitNormal()
+            // From KontrolSystem2:
+            return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, -o.GetRelativeOrbitNormal().SwapYAndZ);
         }
 
         //normalized vector along the orbital velocity
         public static Vector3d Prograde(this PatchedConicsOrbit o, double UT)
         {
+            // Agrees with KS2
             return o.SwappedOrbitalVelocityAtUT(UT).normalized;
         }
 
         //normalized vector pointing radially outward from the planet
         public static Vector3d Up(this PatchedConicsOrbit o, double UT)
         {
+            // Agrees with KS2
             return o.SwappedRelativePositionAtUT(UT).normalized;
         }
 
         //normalized vector pointing radially outward and perpendicular to prograde
         public static Vector3d RadialPlus(this PatchedConicsOrbit o, double UT)
         {
+            // Agrees with KS2
             return Vector3d.Exclude(o.Prograde(UT), o.Up(UT)).normalized;
         }
 
         //another name for the orbit normal; this form makes it look like the other directions
         public static Vector3d NormalPlus(this PatchedConicsOrbit o, double UT)
         {
-            return Vector3d.Cross(o.RadialPlus(UT), o.Prograde(UT));
+            // return Vector3d.Cross(o.RadialPlus(UT), o.Prograde(UT));
             // return o.SwappedOrbitNormal(); // tried: GetRelativeOrbitNormal()
+            // From KontrolSystem2:
+            return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativeOrbitNormal().SwapYAndZ.normalized);
         }
 
         //normalized vector parallel to the planet's surface, and pointing in the same general direction as the orbital velocity
         //(parallel to an ideally spherical planet's surface, anyway)
         public static Vector3d Horizontal(this PatchedConicsOrbit o, double UT)
         {
+            // Agrees with KS2
             return Vector3d.Exclude(o.Up(UT), o.Prograde(UT)).normalized;
         }
 
@@ -126,6 +164,7 @@ namespace MuMech
         //distance from the center of the planet
         public static double Radius(this PatchedConicsOrbit o, double UT)
         {
+            // Agrees with KS2
             return o.SwappedRelativePositionAtUT(UT).magnitude;
         }
 
@@ -147,6 +186,9 @@ namespace MuMech
             // The MJ version of OrbitFromStateVectors peroforms a SwapYZ on (pos - body position), and a SwapYZ on vel before passing them into
             // the KSP1 version of UpdateFromStateVectors.
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
+
+            // From KS2
+            // return ReferenceBody.CreateOrbit(SwappedRelativePositionAtUT(UT), SwappedOrbitalVelocityAtUT(UT) + dV, UT);
         }
 
         // returns a new orbit that is identical to the current one (although the epoch will change)
