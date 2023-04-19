@@ -691,20 +691,20 @@ namespace MuMech
         public static Vector3d DeltaVToManeuverNodeCoordinates(this PatchedConicsOrbit o, double UT, Vector3d dV)
         {
             return new Vector3d(Vector3d.Dot(o.RadialPlus(UT), dV),
-                                Vector3d.Dot(-o.NormalPlus(UT), dV),
+                                Vector3d.Dot(o.NormalPlus(UT), dV), // was -o.NormalPlus(UT). This aligns with KS2
                                 Vector3d.Dot(o.Prograde(UT), dV));
         }
 
         // Sadly, this does not work... Maybe with more work it could? It doesn't actually use UT, so to test it you need to get close to
         // the burn point you want, then call both this one and the one above and compare those results to eachother and whatever kludge
         // (flip prograde, flip radial, etc.) to see if this get's you to the answer the kludge provides without needing the kludge.
-        public static Vector3d DeltaVToManeuverNodeCoordinates(this PatchedConicsOrbit o, double UT, VesselComponent vessel, Vector3d dV)
-        {
-            var frame = vessel.transform.coordinateSystem;
-            Vector deltaV = new(o.coordinateSystem, dV);
-            Vector3d burnVec = frame.ToLocalVector(deltaV);
-            return burnVec;
-        }
+        //public static Vector3d DeltaVToManeuverNodeCoordinates(this PatchedConicsOrbit o, double UT, VesselComponent vessel, Vector3d dV)
+        //{
+        //    var frame = vessel.transform.coordinateSystem;
+        //    Vector deltaV = new(o.coordinateSystem, dV);
+        //    Vector3d burnVec = frame.ToLocalVector(deltaV);
+        //    return burnVec;
+        //}
 
         // Return the orbit of the parent body orbiting the sun
         //public static PatchedConicsOrbit TopParentOrbit(this PatchedConicsOrbit orbit)
