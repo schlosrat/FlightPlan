@@ -169,9 +169,15 @@ namespace MuMech
         {
             PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
             // Create the type Position and Velocty inputs needed for KSP2's UpdateFromStateVectors
-            Position position = new(coordinateSystem, OrbitExtensions.SwapYZ(pos - body.Position.localPosition));
-            Velocity velocity = new(body.celestialMotionFrame, OrbitExtensions.SwapYZ(vel));
+            Position position = new(body.SimulationObject.transform.celestialFrame, OrbitExtensions.SwapYZ(pos - body.Position.localPosition));
+            Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, OrbitExtensions.SwapYZ(vel));
+
+            // Position position = new(body.SimulationObject.transform.celestialFrame, pos);
+            // Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, vel);
+
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
+            // orbit.UpdateFromStateVectors(new Position(o.referenceBody.SimulationObject.transform.celestialFrame, position), new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.referenceBody, UT);
+
             ret.UpdateFromStateVectors(position, velocity, body, UT);
             if (double.IsNaN(ret.argumentOfPeriapsis))
             {
