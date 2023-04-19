@@ -10,8 +10,9 @@ using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using FlightPlan;
-using UnityEngine;
-using static VehiclePhysics.TelemetryTemplateBase;
+//using UnityEngine;
+//using static VehiclePhysics.TelemetryTemplateBase;
+//using static MuMech.KSPOrbitModule;
 
 namespace MuMech
 {
@@ -20,7 +21,8 @@ namespace MuMech
         //can probably be replaced with Vector3d.xzy?
         public static Vector3d SwapYZ(Vector3d v)
         {
-            return v.Reorder(132);
+            return v.SwapYAndZ; // It's built into KSP2 now. No need to call Reorder (unless it's faster)
+            // return v.Reorder(132);
         }
 
         //
@@ -54,15 +56,21 @@ namespace MuMech
         }
 
         // ReferenceFrame (from KS2)
-        public static ITransformFrame ReferenceFrame(this PatchedConicsOrbit o)
-        {
-            return o.ReferenceFrame;
-        }
+        //public static ITransformFrame ReferenceFrame(this PatchedConicsOrbit o)
+        //{
+        //    return o.ReferenceFrame;
+        //}
 
-        // ReferenceBody
+        // ReferenceBody KS2 Way
         //public static KSPOrbitModule.IBody ReferenceBody(this PatchedConicsOrbit o)
         //{
         //    return new BodyWrapper(context, o.referenceBody);
+        //}
+
+        // ReferenceBody FP Shortcut
+        //public static CelestialBodyComponent ReferenceBody(this PatchedConicsOrbit o)
+        //{
+        //    return o.referenceBody;
         //}
 
         // GlobalPosition (from KS2)
@@ -174,7 +182,22 @@ namespace MuMech
             // Position position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(o.SwappedAbsolutePositionAtUT(UT) - o.referenceBody.Position.localPosition));
             // Position pos = new(o.coordinateSystem, o.SwappedAbsolutePositionAtUT(UT));
             // Velocity vel = new(o.referenceBody.celestialMotionFrame, o.SwappedOrbitalVelocityAtUT(UT) + dV);
-            return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.coordinateSystem, o.referenceBody, UT);
+            // return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.coordinateSystem, o.referenceBody, UT);
+
+            // From KS2
+            // Actual KS2 returns: ReferenceBody.CreateOrbit(RelativePosition(ut), OrbitalVelocity(ut) + dV, ut);
+            return o.CreateOrbit(o.SwappedRelativePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, UT);
+
+            // KS2 RelativePosition(ut) matches code in SwappedRelativePositionAtUT(UT)
+            // KS2 OrbitalVelocity(ut) matches code in SwappedOrbitalVelocityAtUT(UT)
+
+            // If CreateOrbit were embedded here:
+            //Vector3d pos = o.SwappedRelativePositionAtUT(UT); // o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativePositionAtUTZup(UT).SwapYAndZ)
+            //Vector3d vel = o.SwappedOrbitalVelocityAtUT(UT) + dV; // o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetOrbitalVelocityAtUTZup(UT).SwapYAndZ);
+            //PatchedConicsOrbit orbit = new PatchedConicsOrbit(o.referenceBody.universeModel);
+            //orbit.UpdateFromStateVectors(new Position(o.referenceBody.SimulationObject.transform.celestialFrame, pos), new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel), o.referenceBody, UT);
+
+            //return orbit;
 
             // MJ version is one line:
             // return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.referenceBody, UT);
@@ -191,6 +214,17 @@ namespace MuMech
             // return ReferenceBody.CreateOrbit(SwappedRelativePositionAtUT(UT), SwappedOrbitalVelocityAtUT(UT) + dV, UT);
         }
 
+        // Adapted from KS2
+        public static PatchedConicsOrbit CreateOrbit(this PatchedConicsOrbit o, Vector3d position, Vector3d velocity, double UT)
+        {
+            PatchedConicsOrbit orbit = new PatchedConicsOrbit(o.referenceBody.universeModel);
+
+            // Actual KS2 returns: orbit.UpdateFromStateVectors(new Position(body.SimulationObject.transform.celestialFrame, position), new Velocity(body.SimulationObject.transform.celestialFrame.motionFrame, velocity), body, ut);
+            orbit.UpdateFromStateVectors(new Position(o.referenceBody.SimulationObject.transform.celestialFrame, position), new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.referenceBody, UT);
+
+            return orbit;
+        }
+
         // returns a new orbit that is identical to the current one (although the epoch will change)
         // (i tried many different APIs in the orbit class, but the GetOrbitalStateVectors/UpdateFromStateVectors route was the only one that worked)
         public static PatchedConicsOrbit Clone(this PatchedConicsOrbit o, double UT = Double.NegativeInfinity)
@@ -203,8 +237,8 @@ namespace MuMech
 
             PatchedConicsOrbit newOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
             o.GetOrbitalStateVectorsAtUT(UT, out pos, out vel);
-            Position position = new Position(o.coordinateSystem, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
-            Velocity velocity = new Velocity(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(vel));
+            Position position = new Position(o.referenceBody.SimulationObject.transform.celestialFrame, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
+            Velocity velocity = new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, OrbitExtensions.SwapYZ(vel));
             newOrbit.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
 
             return newOrbit;
@@ -238,8 +272,8 @@ namespace MuMech
             {
                 Vector3d pos, vel;
                 o.GetOrbitalStateVectorsAtUT(UT + o.period * periodOffset, out pos, out vel);
-                Position position = new Position(o.coordinateSystem, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
-                Velocity velocity = new Velocity(o.referenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(vel));
+                Position position = new Position(o.referenceBody.SimulationObject.transform.celestialFrame, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
+                Velocity velocity = new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, OrbitExtensions.SwapYZ(vel));
                 o.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
             }
         }
