@@ -729,6 +729,11 @@ namespace MuMech
                                 Vector3d.Dot(o.Prograde(UT), dV));
         }
 
+        public static Vector3d BurnVecToDv(this PatchedConicsOrbit o, double UT, Vector3d burnVec)
+        {
+            return burnVec.x * o.RadialPlus(UT) + burnVec.y * o.NormalPlus(UT) + burnVec.z * o.Prograde(UT);
+        }
+
         // Sadly, this does not work... Maybe with more work it could? It doesn't actually use UT, so to test it you need to get close to
         // the burn point you want, then call both this one and the one above and compare those results to eachother and whatever kludge
         // (flip prograde, flip radial, etc.) to see if this get's you to the answer the kludge provides without needing the kludge.
