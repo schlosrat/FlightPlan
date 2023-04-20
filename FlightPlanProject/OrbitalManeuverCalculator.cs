@@ -20,49 +20,6 @@ namespace MuMech
 {
     public static class OrbitalManeuverCalculator
     {
-        // NOTE: KSP2 needs burn vectors defined like this:
-        // Prograde is Vector3d.z
-        // Normal   is Vector3d.y
-        // Radial   is Vector3d.x
-
-        // MechJeb deltaV appears to be defined as:
-        // o.orbitFrame which is Type CelestialFrame (private data defined for PatchedConicsOrbit class)
-        // World coordinate system is that associated with universeModel
-        // Local coordinate system is that associated with the orbit?
-
-        // NOT NEEDED: See OrbitExtensions DeltaVToManeuverNodeCoordinates method
-        //public static Vector3d DvToBurnVec(PatchedConicsOrbit o, Vector3d dV, double UT)
-        //{
-        //    Vector3d burnVec;
-        //    burnVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));
-        //    burnVec.y = Vector3d.Dot(dV, -o.NormalPlus(UT));
-        //    burnVec.z = Vector3d.Dot(dV, o.Prograde(UT));
-        //    FlightPlanPlugin.Logger.LogDebug($"burnVec [{burnVec.x}, {burnVec.y}, {burnVec.z}] = {burnVec.magnitude} m/s");
-            
-        //    Vector3d testVec;
-        //    //testVec.x = Vector3d.Dot(dV, o.RadialPlus(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
-        //    //testVec.y = Vector3d.Dot(dV, o.NormalPlus(UT));  // Tried o.North(UT), was o.NormalPlus(UT)
-        //    //testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
-        //    //FlightPlanPlugin.Logger.LogDebug($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
-            
-        //    // testVec.x = Vector3d.Dot(dV, o.Up(UT));  // Tried o.Up(UT), was o.RadialPlus(UT)
-        //    // testVec.y = Vector3d.Dot(dV, o.North(UT));  // Tried o.North(UT), was o.NormalPlus(UT)
-        //    // testVec.z = Vector3d.Dot(dV, o.East(UT));    // Tried o.East(UT), -1 * o.Prograde(UT)
-        //    // FlightPlanPlugin.Logger.LogDebug($"testVec [{testVec.x}, {testVec.y}, {testVec.z}] = {testVec.magnitude} m/s");
-            
-        //    // odeSubStage.ResetExhaustVelocityDirection(o.referenceBody.transform.celestialFrame, odeManeuverNode.DeltaV);
-        //    // ICoordinateSystem coordinateSystem => (ICoordinateSystem) this.ReferenceFrame;
-        //    // ITransformFrame ReferenceFrame => this.referenceBody != null ? this.referenceBody.SimulationObject.transform.celestialFrame : (ITransformFrame) null;
-        //    // Vector3d relativeVelocityZup => this.relativeVelocity.vector.SwapYAndZ;
-
-        //    return burnVec;
-        //}
-
-        //public static Vector3d BurnVecToDv(PatchedConicsOrbit o, Vector3d burnVec, double UT)
-        //{
-        //    return burnVec.x * o.RadialPlus(UT) + burnVec.y * o.NormalPlus(UT) - burnVec.z * o.Prograde(UT);
-        //}
-
         // A stand in for the KSP1 function o.referenceBody.GetLatitude(Vector3d pos)
         // KSP2 doesn't appear to have such a function, but does have GetLatLonAltFromRadius
         // ISSUE all the o.*position*() values return Vector3d, need type Position
@@ -114,7 +71,7 @@ namespace MuMech
         {
             Vector3d desiredVelocity = CircularOrbitSpeed(o.referenceBody, o.Radius(UT)) * o.Horizontal(UT);
             Vector3d actualVelocity = o.SwappedOrbitalVelocityAtUT(UT);
-            var deltaV = actualVelocity - desiredVelocity;
+            var deltaV =  desiredVelocity - actualVelocity;
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: desiredVelocity [{desiredVelocity.x}, {desiredVelocity.y}, {desiredVelocity.z}] m/s");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: actualVelocity  [{actualVelocity.x}, {actualVelocity.y}, {actualVelocity.z}] m/s");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToCircularize: deltaV          [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s");
