@@ -25,6 +25,10 @@
 			<HintPath>..\external_dlls\maneuver_node_controller.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
+		<Reference Include="node_manager">
+			<HintPath>..\external_dlls\node_manager.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
 	</ItemGroup>
     <ItemGroup>
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />

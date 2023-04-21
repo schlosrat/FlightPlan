@@ -16,11 +16,14 @@ using KSP.Map;
 using BepInEx.Logging;
 using BepInEx.Bootstrap;
 using ManeuverNodeController;
+using NodeManager;
 using BepInEx.Configuration;
 using System.Reflection;
 // using FPNodeControls;
 using FPUtilities;
 using System.Collections;
+using static UnityEngine.ParticleSystem;
+using System.Collections.Generic;
 
 namespace FlightPlan;
 
@@ -133,8 +136,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public new static ManualLogSource Logger { get; set; }
 
     // Access control bool for launching MNC
-    private bool MNCLoaded;
-    PluginInfo MNC;
+    private bool MNCLoaded, NMLoaded;
+    PluginInfo MNC, NM;
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
     /// <summary>
@@ -169,14 +172,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //StateChanges.RunwayEntered += message => GUIenabled = false;
         
         Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
-        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out var MNC))
+        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out MNC))
         {
             MNCLoaded = true;
             Logger.LogInfo("Maneuver Node Controller installed and available");
             Logger.LogInfo($"MNC = {MNC}");
         }
         else MNCLoaded = false;
+
         Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
+
+        Logger.LogInfo($"NMLoaded = {NMLoaded}");
+        if (Chainloader.PluginInfos.TryGetValue(NodeManagerPlugin.ModGuid, out NM))
+        {
+            NMLoaded = true;
+            Logger.LogInfo("Node Manager installed and available");
+            Logger.LogInfo($"MNC = {NM}");
+        }
+        else NMLoaded = false;
+        Logger.LogInfo($"NMLoaded = {NMLoaded}");
 
         // Setup the list of input field names (most are the same as the entry string text displayed in the GUI window)
         inputFields.Add("New Pe");
@@ -761,16 +775,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         if (MNCLoaded && autoLaunchMNC.Value)
         {
-            // try/catch block around a call to yet another function to do what we want. Hacky,
-            // but lets us call MNC when it's available and trashes the exceptions otherwise
-            //try
-            //{
-            //    OpenMNCIfLoaded();
-            //}
-            //catch (Exception)
-            //{ }
             // Reflections method to attempt the same thing more cleanly
-            //var mncType = Type.GetType("ManeuverNodeController.ManueverNodeControllerMod");
             var mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
             // Logger.LogDebug($"Type name: {mncType!.Name}");
             var instanceProperty = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
@@ -781,10 +786,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    private void OpenMNCIfLoaded()
+    private void CreateNodeAtUt(Vector3d burnVector, double UT, double burnDurationOffsetFactor = -0.5)
     {
-        ManeuverNodeControllerMod.Instance.LaunchMNC();
+        if (NMLoaded)
+        {
+            // Reflections method to attempt the same thing more cleanly
+            var nmType = Type.GetType($"NodeManager.NodeManagerPlugin, {NodeManagerPlugin.ModGuid}");
+            Logger.LogDebug($"Type name: {nmType!.Name}");
+            var instanceProperty = nmType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            Logger.LogDebug($"Property name: {instanceProperty!.Name}");
+            var methodInfo = instanceProperty!.PropertyType.GetMethod("CreateManeuverNodeAtUT");
+            Logger.LogDebug($"Method name: {methodInfo!.Name}");
+            methodInfo!.Invoke(instanceProperty.GetValue(null), new object[] { burnVector, UT, burnDurationOffsetFactor });
+        }
     }
+
+    //private void OpenMNCIfLoaded()
+    //{
+    //    ManeuverNodeControllerMod.Instance.LaunchMNC();
+    //}
 
     private void handleButtons()
     {
@@ -1496,7 +1516,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         CreateManeuverNodeAtUT(burnVector, UT, burnDurationOffsetFactor);
     }
 
-    private void CreateManeuverNodeAtUT(Vector3d burnVector, double UT, double burnDurationOffsetFactor = -0.5)
+    private void CreateManeuverNodeAtUT(Vector3d burnVector, double burnUT, double burnDurationOffsetFactor = -0.5)
     {
         // Logger.LogDebug("CreateManeuverNodeAtUT");
 
@@ -1507,10 +1527,64 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //    return;
         //}
 
-        if (UT < game.UniverseModel.UniversalTime + 1) // Don't set node to now or in the past
-            UT = game.UniverseModel.UniversalTime + 1;
+        double UT = game.UniverseModel.UniversalTime;
+        if (burnUT < UT + 1) // Don't set node to now or in the past
+            burnUT = UT + 1;
 
-        ManeuverNodeData nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, UT);
+        // KSPOrbitModule.IOrbit orbit = new OrbitWrapper(vesselAdapter.context, vesselAdapter.vessel.Orbiter.PatchedConicSolver.FindPatchContainingUT(ut) ?? vesselAdapter.vessel.Orbit);
+
+        // Get the current list of nodes
+        ManeuverPlanComponent activeVesselPlan = activeVessel?.SimulationObject?.FindComponent<ManeuverPlanComponent>();
+        List<ManeuverNodeData> Nodes = new();
+        if (activeVesselPlan != null)
+        {
+            Nodes = activeVesselPlan.GetNodes();
+        }
+
+
+        // Get the patch to put this node on
+        ManeuverPlanSolver maneuverPlanSolver = activeVessel.Orbiter?.ManeuverPlanSolver;
+        IPatchedOrbit orbit = activeVessel.Orbit;
+        // maneuverPlanSolver.FindPatchContainingUt(UT, maneuverPlanSolver.ManeuverTrajectory, out orbit, out int _);
+        // var selectedNode = -1;
+        for (int i = 0; i < Nodes.Count - 1; i++)
+        {
+            if (burnUT > Nodes[i].Time && burnUT < Nodes[i + 1].Time)
+            {
+                orbit = Nodes[i + 1].ManeuverTrajectoryPatch;
+                // selectedNode = i;
+                Logger.LogDebug($"CreateManeuverNodeAtUT: Attaching node to Node[{i + 1}]'s ManeuverTrajectoryPatch");
+            }
+        }
+
+        // Build the node data
+        // ManeuverNodeData nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, UT);
+        ManeuverNodeData nodeData;
+        if (Nodes.Count == 0) // There are no nodes
+        {
+            nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, burnUT);
+        }
+        else
+        {
+            if (UT < Nodes[0].Time) // request time is before the first node
+            {
+                nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, burnUT);
+                orbit.PatchEndTransition = PatchTransitionType.Maneuver;
+            }
+            else if (UT > Nodes[Nodes.Count - 1].Time) // requested time is after the last node
+            {
+                nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, true, burnUT);
+                orbit.PatchEndTransition = PatchTransitionType.Final;
+            }
+            else // request time is between existing nodes
+            {
+                nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, true, burnUT);
+                orbit.PatchEndTransition = PatchTransitionType.Maneuver;
+            }
+            orbit.PatchStartTransition = PatchTransitionType.EndThrust;
+
+            nodeData.SetManeuverState((PatchedConicsOrbit)orbit);
+        }
 
         //IPatchedOrbit orbit = referencedOrbit;
 
@@ -1532,12 +1606,31 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         //Logger.LogDebug("AddManeuverNode");
 
-        // Add the node to the vessel's orbit the KS2 way
-        // GameManager.Instance.Game.SpaceSimulation.Maneuvers.AddNodeToVessel(nodeData);
+        // Working this was we need to call maneuverPlan.AddNode & ManeuverPlanSolver.UpdateManeuverTrajectory
         ManeuverPlanComponent maneuverPlan;
         maneuverPlan = activeVessel.SimulationObject.ManeuverPlan;
         maneuverPlan.AddNode(nodeData, true);
         activeVessel.Orbiter.ManeuverPlanSolver.UpdateManeuverTrajectory();
+
+        // For KSP2, We want the to start burns early to make them centered on the node
+        var nodeTimeAdj = nodeData.BurnDuration * burnDurationOffsetFactor;
+
+        Logger.LogDebug($"AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
+
+        // Refersh the currentNode with what we've produced here in prep for calling UpdateNode
+        currentNode = getCurrentNode();
+
+        UpdateNode(nodeData, nodeTimeAdj);
+
+        //Logger.LogDebug("AddManeuverNode Done");
+    }
+
+    private void AddManeuverNodeToVessel(ManeuverNodeData nodeData, double burnDurationOffsetFactor)
+    {
+        //Logger.LogDebug("AddManeuverNode");
+
+        // Working this was we only need to call Maneuvers.AddNodeToVessel
+        GameManager.Instance.Game.SpaceSimulation.Maneuvers.AddNodeToVessel(nodeData);
 
         // For KSP2, We want the to start burns early to make them centered on the node
         var nodeTimeAdj = nodeData.BurnDuration * burnDurationOffsetFactor;
