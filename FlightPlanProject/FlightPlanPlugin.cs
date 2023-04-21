@@ -489,8 +489,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         DrawButton("Circularize at Pe", ref circPe);
 
-        if (experimental.Value)
-            DrawButton("Circularize Now", ref circNow);
+        DrawButton("Circularize Now", ref circNow);
 
         DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
         if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += activeVessel.Orbit.referenceBody.radius;
@@ -502,14 +501,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (double.TryParse(targetApAStr, out targetApR)) targetApR += activeVessel.Orbit.referenceBody.radius;
             else targetApR = 0;
 
-            if (experimental.Value)
-            {
-                DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
-                if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += activeVessel.Orbit.referenceBody.radius;
-                else targetPeR1 = 0;
-                if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += activeVessel.Orbit.referenceBody.radius;
-                else targetApR1 = 0;
-            }
+            DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
+            if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += activeVessel.Orbit.referenceBody.radius;
+            else targetPeR1 = 0;
+            if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += activeVessel.Orbit.referenceBody.radius;
+            else targetApR1 = 0;
         }
 
         DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
@@ -535,7 +531,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     DrawButton("Match Velocity @CA", ref matchVCA);
                     DrawButton("Match Velocity Now", ref matchVNow);
                 }
-
             }
 
             if (experimental.Value)
@@ -548,15 +543,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 }
             }
         }
-        if (experimental.Value)
+
+        // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
+        var referenceBody = activeVessel.Orbit.referenceBody;
+        if (!referenceBody.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1)
         {
-            // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
-            var referenceBody = activeVessel.Orbit.referenceBody;
-            if (!referenceBody.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1)
-            {
-                DrawSectionHeader("Moon Specific Maneuvers");
-                DrawButton("Moon Return", ref moonReturn);
-            }
+            DrawSectionHeader("Moon Specific Maneuvers");
+            DrawButton("Moon Return", ref moonReturn);
         }
 
         var UT = game.UniverseModel.UniversalTime;
