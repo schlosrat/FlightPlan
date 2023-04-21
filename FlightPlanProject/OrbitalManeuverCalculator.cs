@@ -221,10 +221,10 @@ namespace MuMech
 
             var initialTestOrbitMin = o.PerturbedOrbit(UT, minDeltaV * burnDirection);
             var initialTestOrbitMax = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMin {initialTestOrbitMin}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Periapsis}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax {initialTestOrbitMax}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Periapsis}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMin {initialTestOrbitMin}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Periapsis}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax {initialTestOrbitMax}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Periapsis}");
             
             // minDeltaV = 0;
             // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: minDeltaV* {minDeltaV} m/s");
@@ -575,9 +575,11 @@ namespace MuMech
             //We do a binary search for the burn time that zeros out the phase angle between the
             //transferring vessel and the target at the apsis of the transfer orbit.
             double synodicPeriod = o.SynodicPeriod(target);
+            FlightPlanPlugin.Logger.LogDebug($"synodicPeriod: {synodicPeriod}");
 
             double lastApsisPhaseAngle;
             Vector3d immediateBurnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, UT, out lastApsisPhaseAngle);
+            FlightPlanPlugin.Logger.LogDebug($"lastApsisPhaseAngle: {lastApsisPhaseAngle}");
 
             double minTime = UT;
             double maxTime = UT + 1.5 * synodicPeriod;
@@ -591,11 +593,13 @@ namespace MuMech
 
                 double apsisPhaseAngle;
                 DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, t, out apsisPhaseAngle);
+                FlightPlanPlugin.Logger.LogDebug($"apsisPhaseAngle: {apsisPhaseAngle}");
 
                 if ((Math.Abs(apsisPhaseAngle) < 90) && (Math.Sign(lastApsisPhaseAngle) != Math.Sign(apsisPhaseAngle)))
                 {
                     minTime = t - dt;
                     maxTime = t;
+                    FlightPlanPlugin.Logger.LogDebug($"Found transfer window between {minTime - UT} and {maxTime - UT} from now (test {i})");
                     break;
                 }
 
@@ -626,6 +630,7 @@ namespace MuMech
             catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVAndTimeForHohmannTransfer: Brents method threw an argument exception error (supressed): {e.Message}"); }
 
             Vector3d burnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, burnUT, out _);
+            FlightPlanPlugin.Logger.LogDebug($"Optimal Time for Transfer: {burnUT - UT} from now");
 
             return burnDV;
         }
