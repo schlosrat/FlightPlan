@@ -129,8 +129,6 @@ namespace MuMech
         //another name for the orbit normal; this form makes it look like the other directions
         public static Vector3d NormalPlus(this PatchedConicsOrbit o, double UT)
         {
-            // return Vector3d.Cross(o.RadialPlus(UT), o.Prograde(UT));
-            // return o.SwappedOrbitNormal(); // tried: GetRelativeOrbitNormal()
             // From KontrolSystem2:
             return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativeOrbitNormal().SwapYAndZ.normalized);
         }
@@ -485,7 +483,7 @@ namespace MuMech
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
             // was: Quaternion -> QuaternionD
             Vector3d vectorToAN = QuaternionD.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
-            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
+            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN;
             return o.Periapsis * vectorToPe;
         }
 
@@ -499,7 +497,7 @@ namespace MuMech
             // was: Planetarium.right -> o.ReferenceFrame.right.vector
             // was: Quaternion -> QuaternionD
             Vector3d vectorToAN = QuaternionD.AngleAxis(-(float)o.longitudeOfAscendingNode, o.ReferenceFrame.up.vector) * o.ReferenceFrame.right.vector;
-            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN; // tried: GetRelativeOrbitNormal()
+            Vector3d vectorToPe = QuaternionD.AngleAxis((float)o.argumentOfPeriapsis, o.SwappedOrbitNormal()) * vectorToAN;
             Vector3d ret = -o.Apoapsis * vectorToPe;
             if (double.IsNaN(ret.x))
             {
@@ -520,7 +518,7 @@ namespace MuMech
         //The returned value is always between 0 and 360.
         public static double TrueAnomalyFromVector(this PatchedConicsOrbit o, Vector3d vec)
         {
-            Vector3d oNormal = o.SwappedOrbitNormal(); // tried: GetRelativeOrbitNormal()
+            Vector3d oNormal = o.SwappedOrbitNormal();
             Vector3d projected = Vector3d.Exclude(oNormal, vec);
             Vector3d vectorToPe = o.SwappedRelativePositionAtPeriapsis();
             double angleFromPe = Vector3d.Angle(vectorToPe, projected);
@@ -672,7 +670,6 @@ namespace MuMech
         //not really periodic at all.
         public static double SynodicPeriod(this PatchedConicsOrbit a, PatchedConicsOrbit b)
         {
-            // tried: GetRelativeOrbitNormal()
             int sign = (Vector3d.Dot(a.SwappedOrbitNormal(), b.SwappedOrbitNormal()) > 0 ? 1 : -1); //detect relative retrograde motion
             return Math.Abs(1.0 / (1.0 / a.period - sign * 1.0 / b.period)); //period after which the phase angle repeats
         }
@@ -681,7 +678,7 @@ namespace MuMech
         //This only makes sence if a.referenceBody == b.referenceBody.
         public static double PhaseAngle(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
         {
-            Vector3d normalA = a.SwappedOrbitNormal(); // tried: GetRelativeOrbitNormal()
+            Vector3d normalA = a.SwappedOrbitNormal();
             Vector3d posA = a.SwappedRelativePositionAtUT(UT);
             Vector3d projectedB = Vector3d.Exclude(normalA, b.SwappedRelativePositionAtUT(UT));
             double angle = Vector3d.Angle(posA, projectedB);
@@ -697,7 +694,7 @@ namespace MuMech
         //opposite directions have a relative inclination of 180 degrees.
         public static double RelativeInclination(this PatchedConicsOrbit a, PatchedConicsOrbit b)
         {
-            return Math.Abs(Vector3d.Angle(a.SwappedOrbitNormal(), b.SwappedOrbitNormal())); // tried: GetRelativeOrbitNormal()
+            return Math.Abs(Vector3d.Angle(a.SwappedOrbitNormal(), b.SwappedOrbitNormal()));
         }
 
         //Finds the next time at which the orbiting object will achieve a given radius
