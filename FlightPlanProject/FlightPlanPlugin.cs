@@ -12,18 +12,13 @@ using KSP.Game;
 using KSP.Sim.impl;
 using KSP.Sim.Maneuver;
 using KSP.Sim;
-using KSP.Map;
 using BepInEx.Logging;
 using BepInEx.Bootstrap;
 using ManeuverNodeController;
 using NodeManager;
 using BepInEx.Configuration;
 using System.Reflection;
-// using FPNodeControls;
 using FPUtilities;
-using System.Collections;
-using static UnityEngine.ParticleSystem;
-using System.Collections.Generic;
 
 namespace FlightPlan;
 
@@ -68,6 +63,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<string> initialStatusText;
     private ConfigEntry<string> defaultTargetPeAStr;
     private ConfigEntry<string> defaultTargetApAStr;
+    private ConfigEntry<string> defaultTargetMRPeAStr;
     private ConfigEntry<string> defaultTargetIncStr;
     private ConfigEntry<string> defaultInterceptTStr;
     private ConfigEntry<double> statusPersistence;
@@ -91,18 +87,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     List<ManeuverNodeData> activeNodes;
 
     // Text Inputs
-    private string targetPeAStr;  // m - This is a Configurable Parameter
-    private string targetApAStr;  // m - This is a Configurable Parameter
-    private string targetPeAStr1; // m - This is initially set = targetPeAStr
-    private string targetApAStr1; // m - This is initially set = targetApAStr
-    private string targetIncStr;  // degrees - Default 0
-    private string interceptTStr; // s - This is a Configurable Parameter
+    private string targetPeAStr;   // m - This is a Configurable Parameter
+    private string targetApAStr;   // m - This is a Configurable Parameter
+    private string targetPeAStr1;  // m - This is initially set = targetPeAStr
+    private string targetApAStr1;  // m - This is initially set = targetApAStr
+    private string targetMRPeAStr; // m - This is initially set = targetApAStr
+    private string targetIncStr;   // degrees - Default 0
+    private string interceptTStr;  // s - This is a Configurable Parameter
 
     // Values from Text Inputs
     private double targetPeR;
     private double targetApR;
     private double targetPeR1;
     private double targetApR1;
+    private double targetMRPeR;
     private double targetInc;
     private double interceptT;
 
@@ -346,15 +344,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         defaultTargetApAStr = Config.Bind<string>("Defualt Inputs Section", "Target Ap Alt",       "250000", "Default Ap input (in meters) used to pre-populate text input field at startup");
         defaultTargetIncStr = Config.Bind<string>("Defualt Inputs Section", "Target Inclination",       "0", "Default inclination input (in degrees) used to pre-populate text input field at startup");
         defaultInterceptTStr = Config.Bind<string>("Defualt Inputs Section", "Target Intercept Time",  "100", "Default intercept time (in seconds) used to pre-populate text input field at startup");
+        defaultTargetMRPeAStr = Config.Bind<string>("Defualt Inputs Section", "Target Moon Return Pe Alt", "100000", "Default Moon Return Target Pe input (in meters) used to pre-populate text input field at startup");
 
         // Set the initial and defualt values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
-        statusText    = initialStatusText.Value;
-        targetPeAStr  = defaultTargetPeAStr.Value;
-        targetApAStr  = defaultTargetApAStr.Value;
-        targetPeAStr1 = defaultTargetPeAStr.Value;
-        targetApAStr1 = defaultTargetApAStr.Value;
-        targetIncStr  = defaultTargetIncStr.Value;
-        interceptTStr = defaultInterceptTStr.Value;
+        statusText     = initialStatusText.Value;
+        targetPeAStr   = defaultTargetPeAStr.Value;
+        targetApAStr   = defaultTargetApAStr.Value;
+        targetPeAStr1  = defaultTargetPeAStr.Value;
+        targetApAStr1  = defaultTargetApAStr.Value;
+        targetMRPeAStr = defaultTargetMRPeAStr.Value;
+        targetIncStr   = defaultTargetIncStr.Value;
+        interceptTStr  = defaultInterceptTStr.Value;
 
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental.Value}");
@@ -550,7 +550,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (!referenceBody.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1)
         {
             DrawSectionHeader("Moon Specific Maneuvers");
-            DrawButton("Moon Return", ref moonReturn);
+            // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
+            DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAStr, "m");
+            if (double.TryParse(targetMRPeAStr, out targetMRPeR)) targetMRPeR += activeVessel.Orbit.referenceBody.radius;
+            else targetMRPeR = 0;
         }
 
         var UT = game.UniverseModel.UniversalTime;
@@ -1280,9 +1283,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 else
                 {
                     double burnUT;
-                    double primaryRaidus = orbit.referenceBody.Orbit.referenceBody.radius + 100000; // m
+                    // double primaryRaidus = orbit.referenceBody.Orbit.referenceBody.radius + 100000; // m
                     Logger.LogDebug($"Moon Return Attempting to Solve...");
-                    var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, primaryRaidus, out burnUT);
+                    var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, targetMRPeR, out burnUT);
                     if (deltaV != Vector3d.zero)
                     {
                         burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
