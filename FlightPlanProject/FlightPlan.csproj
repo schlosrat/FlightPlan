@@ -10,8 +10,7 @@
         <Description>Plan your (Space) Flight! Fly your Plan! Set up useful maneuver nodes to get you where you want to go</Description>
         <Version>0.7.3</Version>
         <RestoreAdditionalProjectSources>
-			https://nuget.spacewarp.org/v3/index.json;
-			../../NodeManager/nuget/
+			https://nuget.spacewarp.org/v3/index.json
 		</RestoreAdditionalProjectSources>
         <RootNamespace>FlightPlan</RootNamespace>
         <ModId Condition="'$(ModId)'==''">flight_plan</ModId>
