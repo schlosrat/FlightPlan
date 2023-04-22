@@ -8,7 +8,8 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 
 ## Compatibility
 * Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
-* Requires SpaceWarp 1.0.1
+* Requires [SpaceWarp 1.0.1+](https://spacedock.info/mod/3277/Space%20Warp%20+%20BepInEx)
+* Requires [Node Manager 0.5.2+](https://spacedock.info/mod/3366/Node%20Manager)
 * Optional, but highly recommended: [Maneuver Node Controller](https://spacedock.info/mod/3270/Maneuver%20Node%20Controller). See capabilites described below.
 
 ## Links
@@ -17,8 +18,9 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * [Must Have Mods Video](https://youtu.be/zaXk8t07KW4)
 
 ## Installation
-1. Download and extract SpaceWarp into your game folder. If you've installed the game via Steam, then this is probably here: *C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2*. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
-1. Download and extract this mod into the game folder. The mod's ZIP file contains a single BepInEx folder. You can drag that right onto your KSP2 folder to install the mod. If done correctly, you should have the following folder structure within your KSP2 game folder: *KSP2GameFolder*/**BepInEx/plugins/flight_plan**.
+1. Download and extract BepInEx mod loader with SpaceWarp 1.0.1 or later (see link above) into your game folder and run the game, then close it. If you've done this before, you can skip this step. If you've installed the game via Steam, then this is probably here: *C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2*. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
+1.. Install Node Manager 0.5.2 or later (see link above). From the NodeManager-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\node_manager`.
+1. Download and extract this mod into the game folder. From the FlightPlan-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: ...\Kerbal Space Program 2\BepInEx\plugins\flight_plan.
 
 ## Features
 ### Display Current Target Selection
