@@ -112,7 +112,10 @@ Work In Progress developmental features may be enabled by switching on the Exper
 ### Hohmann Transfer to Mun (from coplanar orbit)
 ![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/ymKTLyT.png)
 
-### Circularize at P3 for Munar Fly By
+### Set Inclination on Munar Flyby
+![Flight Plan: Set Incination to 87 in Hyperbolic Orbit](https://i.imgur.com/nBFNtm5.png)
+
+### Circularize at Pe for Munar Fly By
 ![Flight Plan: Circularize at Next Pe Example - Munar Flyby](https://i.imgur.com/gFuZRau.png)
 
 ### Hohmann Transfer to Mun (from non-coplanar orbit: Inclined 20 degrees from target plane)
