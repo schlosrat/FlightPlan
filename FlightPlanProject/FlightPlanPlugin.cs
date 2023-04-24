@@ -1,24 +1,26 @@
 ﻿using BepInEx;
+using BepInEx.Bootstrap;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using FPUtilities;
 using HarmonyLib;
+using KSP.Game;
+using KSP.Sim;
+using KSP.Sim.impl;
+using KSP.Sim.Maneuver;
 using KSP.UI.Binding;
+using ManeuverNodeController;
+using MuMech;
+using NodeManager;
 using SpaceWarp;
 using SpaceWarp.API.Assets;
 using SpaceWarp.API.Mods;
 using SpaceWarp.API.UI;
 using SpaceWarp.API.UI.Appbar;
-using UnityEngine;
-using MuMech;
-using KSP.Game;
-using KSP.Sim.impl;
-using KSP.Sim.Maneuver;
-using KSP.Sim;
-using BepInEx.Logging;
-using BepInEx.Bootstrap;
-using ManeuverNodeController;
-using NodeManager;
-using BepInEx.Configuration;
+using System.Collections;
 using System.Reflection;
-using FPUtilities;
+using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 namespace FlightPlan;
 
@@ -72,7 +74,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<bool> autoLaunchMNC;
 
     // Button bools
-    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer;
+    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer, launchMNC;
 
     // Body selection.
     private string selectedBody = null;
@@ -522,13 +524,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 DrawButton("Match Planes at DN", ref matchPlanesD);
 
                 DrawButton("Hohmann Xfer", ref hohmannT);
+                DrawButton("Course Correction", ref courseCorrection);
 
                 if (experimental.Value)
                 {
                     DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
                     try { interceptT = double.Parse(interceptTStr); }
                     catch { interceptT = 100; }
-                    DrawButton("Course Correction", ref courseCorrection);
                     DrawButton("Match Velocity @CA", ref matchVCA);
                     DrawButton("Match Velocity Now", ref matchVNow);
                 }
@@ -585,7 +587,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         ToggleButton(interfaceEnabled);
     }
 
-    void BodySelectionGUI()
+    private void BodySelectionGUI()
     {
         bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
         string baseName = "Select Target";
@@ -764,6 +766,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         else
             GUILayout.Label(inputStateString, warnStyle);
         GUILayout.FlexibleSpace();
+        if (MNCLoaded)
+        {
+            launchMNC = GUILayout.Button("MNC", smallBtnStyle);
+        }
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
@@ -783,614 +789,666 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    //private void CreateNodeAtUt(Vector3d burnVector, double UT, double burnDurationOffsetFactor = -0.5)
-    //{
-    //    if (NMLoaded)
-    //    {
-    //        // Reflections method to attempt the same thing more cleanly
-    //        var nmType = Type.GetType($"NodeManager.NodeManagerPlugin, {NodeManagerPlugin.Instance.ModGuid}");
-    //        Logger.LogDebug($"Type name: {nmType!.Name}");
-    //        var instanceProperty = nmType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-    //        Logger.LogDebug($"Property name: {instanceProperty!.Name}");
-    //        var methodInfo = instanceProperty!.PropertyType.GetMethod("CreateManeuverNodeAtUT");
-    //        Logger.LogDebug($"Method name: {methodInfo!.Name}");
-    //        methodInfo!.Invoke(instanceProperty.GetValue(null), new object[] { burnVector, UT, burnDurationOffsetFactor });
-    //    }
-    //}
-
-    //private void OpenMNCIfLoaded()
-    //{
-    //    ManeuverNodeControllerMod.Instance.LaunchMNC();
-    //}
-
-    private void handleButtons()
+    private void CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
     {
-        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer)
+        Vector3d burnParams;
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
+        Logger.LogDebug($"CreateManeuverNod: Solution Found: deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from UT");
+        Logger.LogDebug($"CreateManeuverNod: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from UT");
+        NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, burnOffsetFactor);
+        // StartCoroutine(TestPerturbedOrbit(orbit, burnUT, deltaV));
+
+        // Recalculate node based on the offset time
+        //var nodeTimeAdj = -currentNode.BurnDuration / 2;
+        //var burnStartTime = currentNode.Time + nodeTimeAdj;
+        //Logger.LogDebug($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
+        //deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime);
+        //burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
+        ////var burnParamsT1 = orbit.DeltaVToManeuverNodeCoordinates(UT, deltaV);
+        ////var burnParamsT2 = orbit.DeltaVToManeuverNodeCoordinates(UT, activeVessel, deltaV);
+        ////Logger.LogDebug($"OG burnParams               [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+        ////Logger.LogDebug($"Test: burnParamsT1          [{burnParamsT1.x}, {burnParamsT1.y}, {burnParamsT1.z}] m/s = {burnParamsT1.magnitude} m/s");
+        ////Logger.LogDebug($"Test: burnParamsT2          [{burnParamsT2.x}, {burnParamsT2.y}, {burnParamsT2.z}] m/s = {burnParamsT2.magnitude} m/s");
+        //Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
+        //Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
+        //currentNode.BurnVector = burnParams;
+        //UpdateNode(currentNode);
+
+    }
+
+    // Flight Plan API Methods
+    public bool CircularizeAtAP(double burnOffsetFactor = -0.5)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("CircularizeAtAP");
+        var TimeToAp = orbit.TimeToAp;
+        var burnUT = UT + TimeToAp;
+        var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
+
+        status = Status.OK;
+        statusText = "Ready to Circularize at Ap";
+        statusTime = UT + statusPersistence.Value;
+
+        if (deltaV != Vector3d.zero)
         {
-            Vector3d burnParams;
-            double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-            // var orbit = GetLastOrbit() as PatchedConicsOrbit;
-            var orbit = activeVessel.Orbit;
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Circularize at Ap: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
 
-            if (circAp) // Working
+    public bool CircularizeAtPe(double burnOffsetFactor = -0.5)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("CircularizeAtPe");
+        var TimeToPe = orbit.TimeToPe;
+        var burnUT = UT + TimeToPe;
+        var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
+
+        status = Status.OK;
+        statusText = "Ready to Circularize at Pe";
+        statusTime = UT + statusPersistence.Value;
+
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Circularize at Pe: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool CircularizeNow(double burnOffsetFactor = -0.5)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("CircularizeNow");
+        var startTimeOffset = 60;
+        var burnUT = UT + startTimeOffset;
+        var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
+
+        status = Status.OK;
+        statusText = "Ready to Circularize Now"; // "Ready to Circularize Now"
+        statusTime = UT + statusPersistence.Value;
+
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Circularize Now: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool SetNewPe(double newPe, double burnOffsetFactor = -0.5)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("SetNewPe");
+        // Debug.Log("Set New Pe");
+        var TimeToAp = orbit.TimeToAp;
+        double burnUT, e;
+        e = orbit.eccentricity;
+        if (e < 1)
+            burnUT = UT + TimeToAp;
+        else
+            burnUT = UT + 30;
+
+        status = Status.OK;
+        statusText = "Ready to Change Pe";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: targetPeR {newPe} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
+        // Debug.Log($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(orbit, burnUT, newPe);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New Pe: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool SetNewAp(double newAp, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("SetNewAp");
+        // Debug.Log("Set New Ap");
+        var TimeToPe = orbit.TimeToPe;
+        var burnUT = UT + TimeToPe;
+
+        status = Status.OK;
+        statusText = "Ready to Change Ap";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(orbit, burnUT, newAp);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New Ap: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool Ellipticize(double newAp, double newPe, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("Ellipticize: Set New Pe and Ap");
+
+        status = Status.OK;
+        statusText = "Ready to Ellipticize"; // "Ready to Ellipticize";
+        statusTime = UT + statusPersistence.Value;
+
+        if (newPe > newAp)
+        {
+            (newPe, newAp) = (newAp, newPe);
+            status = Status.WARNING;
+            statusText = "Pe Setting > Ap Setting";
+        }
+
+        Logger.LogDebug($"Seeking Solution: targetPeR {newPe} m, targetApR {newAp} m, body.radius {orbit.referenceBody.radius} m");
+        var burnUT = UT + 30;
+        var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(orbit, burnUT, newPe, newAp);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New Pe and Ap: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool SetInclination(double inclination, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("SetInclination: Set New Inclination");
+        Logger.LogDebug($"Seeking Solution: targetInc {inclination}°");
+        double burnUT, TAN, TDN;
+        Vector3d deltaV, deltaV1, deltaV2;
+
+        status = Status.OK;
+        statusText = "Ready to Change Inclination";
+        statusTime = UT + statusPersistence.Value;
+
+        if (orbit.eccentricity < 1) // Eliptical orbit: Pick cheapest deltaV between AN and DN
+        {
+            TAN = orbit.TimeOfAscendingNodeEquatorial(UT);
+            TDN = orbit.TimeOfDescendingNodeEquatorial(UT);
+            deltaV1 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TAN, inclination);
+            deltaV2 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TDN, inclination);
+            if (deltaV1.magnitude < deltaV2.magnitude)
             {
-                Logger.LogDebug("Circularize at Ap");
-                var TimeToAp = orbit.TimeToAp;
-                var burnUT = UT + TimeToAp;
-                var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-                status = Status.OK;
-                statusText = "Ready to Circularize at Ap";
-                statusTime = UT + statusPersistence.Value;
-
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-
-                    // Recalculate node based on the offset time
-                    //var nodeTimeAdj = -currentNode.BurnDuration / 2;
-                    //var burnStartTime = currentNode.Time + nodeTimeAdj;
-                    //Logger.LogDebug($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
-                    //deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime);
-                    //burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    ////var burnParamsT1 = orbit.DeltaVToManeuverNodeCoordinates(UT, deltaV);
-                    ////var burnParamsT2 = orbit.DeltaVToManeuverNodeCoordinates(UT, activeVessel, deltaV);
-                    ////Logger.LogDebug($"OG burnParams               [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    ////Logger.LogDebug($"Test: burnParamsT1          [{burnParamsT1.x}, {burnParamsT1.y}, {burnParamsT1.z}] m/s = {burnParamsT1.magnitude} m/s");
-                    ////Logger.LogDebug($"Test: burnParamsT2          [{burnParamsT2.x}, {burnParamsT2.y}, {burnParamsT2.z}] m/s = {burnParamsT2.magnitude} m/s");
-                    //Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    //if (burnParams.z < 0)
-                    //{
-                    //    burnParams.z *= -1;
-                    //    Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde flipped)");
-                    //}
-                    //else
-                    //    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    //currentNode.BurnVector = burnParams;
-                    //UpdateNode(currentNode);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = "Circularize at Ap: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
+                Logger.LogDebug($"Selecting maneuver at Ascending Node");
+                burnUT = TAN;
+                deltaV = deltaV1;
             }
-            else if (circPe) // Working
+            else
             {
-                Logger.LogDebug("Circularize at Pe");
-                var TimeToPe = orbit.TimeToPe;
-                var burnUT = UT + TimeToPe;
-                var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-                
-                status = Status.OK;
-                statusText = "Ready to Circularize at Pe";
-                statusTime = UT + statusPersistence.Value;
-
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-
-                    // Recalculate node based on the offset time
-                    //var nodeTimeAdj = -currentNode.BurnDuration / 2;
-                    //var burnStartTime = currentNode.Time + nodeTimeAdj;
-                    //Logger.LogDebug($"BurnDuration: {currentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
-                    //deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime);
-                    //burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    ////var burnParamsT1 = orbit.DeltaVToManeuverNodeCoordinates(UT, deltaV);
-                    ////var burnParamsT2 = orbit.DeltaVToManeuverNodeCoordinates(UT, activeVessel, deltaV);
-                    ////Logger.LogDebug($"OG burnParams               [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    ////Logger.LogDebug($"Test: burnParamsT1          [{burnParamsT1.x}, {burnParamsT1.y}, {burnParamsT1.z}] m/s = {burnParamsT1.magnitude} m/s");
-                    ////Logger.LogDebug($"Test: burnParamsT2          [{burnParamsT2.x}, {burnParamsT2.y}, {burnParamsT2.z}] m/s = {burnParamsT2.magnitude} m/s");
-                    //Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    //if (burnParams.z > 0)
-                    //{
-                    //    burnParams.z *= -1;
-                    //    burnParams.x *= -1;
-                    //    Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* radial & prograde flipped)");
-                    //}
-                    //else
-                    //    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    //currentNode.BurnVector = burnParams;
-                    //UpdateNode(currentNode);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = "Circularize at Pe: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
+                Logger.LogDebug($"Selecting maneuver at Descending Node");
+                burnUT = TDN;
+                deltaV = deltaV2;
             }
-            else if (circNow) // Working
+            Logger.LogDebug($"deltaV1 (AN) [{deltaV1.x}, {deltaV1.y}, {deltaV1.z}] = {deltaV1.magnitude} m/s {TAN - UT} s from UT");
+            Logger.LogDebug($"deltaV2 (DN) [{deltaV2.x}, {deltaV2.y}, {deltaV2.z}] = {deltaV2.magnitude} m/s {TDN - UT} s from UT");
+        }
+        else // parabolic or hyperbolic orbit: Do it now!
+        {
+            burnUT = UT + 30;
+            deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, inclination);
+        }
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New Inclination: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool MatchPlanesAtAN(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"MatchPlanesAtAN: Match Planes  with {currentTarget.Name} at AN");
+        double burnUT;
+
+        status = Status.OK;
+        statusText = $"Ready to Match Planes with {currentTarget.Name} at AN";
+        statusTime = UT + statusPersistence.Value;
+
+        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Match Planes with {currentTarget.Name} at AN: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool MatchPlanesAtDN(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"MatchPlanesAtDN: Match Planes with {currentTarget.Name} at DN");
+        double burnUT;
+
+        status = Status.OK;
+        statusText = $"Ready to Match Planes with {currentTarget.Name} at DN";
+        statusTime = UT + statusPersistence.Value;
+
+        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Match Planes with {currentTarget.Name} at DN: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool HohmannTransfer(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name}");
+        // Debug.Log("Hohmann Transfer");
+        double burnUT;
+
+        status = Status.WARNING;
+        statusText = $"Ready to Transfer to {currentTarget.Name}?";
+        statusTime = UT + statusPersistence.Value;
+
+        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Hohmann Transfer to {currentTarget.Name}: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool InterceptTgtAtUT(double tgtUT, double burnOffsetFactor)
+    {
+        // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
+        // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
+        // Similar to code in MechJebModuleRendezvousGuidance.cs for "Get Closer" button code.
+
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"InterceptTgtAtUT: Intercept {currentTarget.Name} at Time");
+        var burnUT = UT + 30;
+        var interceptUT = UT + tgtUT;
+        double offsetDistance;
+
+        status = Status.WARNING;
+        statusText = $"Experimental Intercept of {currentTarget.Name} Ready"; // $"Ready to Intercept {currentTarget.Name}";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
+        if (currentTarget.IsCelestialBody) // For a target that is a celestial
+            offsetDistance = currentTarget.Orbit.referenceBody.radius + 50000;
+        else
+            offsetDistance = 100;
+        var deltaV = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit, interceptUT, offsetDistance);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Intercept {currentTarget.Name}: No Solution Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool CourseCorrection(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name}");
+        double burnUT;
+        Vector3d deltaV;
+
+        status = Status.OK;
+        statusText = "Course Correction Ready"; // "Ready for Course Correction Burn";
+        statusTime = UT + statusPersistence.Value;
+
+        if (currentTarget.IsCelestialBody) // For a target that is a celestial
+        {
+            Logger.LogDebug($"Seeking Solution for Celestial Target");
+            double finalPeR = currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, currentTarget.Orbit.referenceBody, finalPeR, out burnUT);
+        }
+        else // For a tartget that is not a celestial
+        {
+            Logger.LogDebug($"Seeking Solution for Non-Celestial Target");
+            double caDistance = 100; // m (closest approach to non-celestial target)
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, caDistance, out burnUT);
+        }
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Course Correction for tragetory to {currentTarget.Name}: No Solution Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool MoonReturn(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name}");
+        var e = orbit.eccentricity;
+
+        status = Status.WARNING;
+        statusText = $"Ready to Return from {orbit.referenceBody.Name}?"; // $"Ready to Return from {orbit.referenceBody.Name}";
+        statusTime = UT + statusPersistence.Value;
+
+        if (e > 0.2)
+        {
+            status = Status.WARNING;
+            statusText = "Moon Return: Starting Orbit Eccentrity Too Large";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            Logger.LogError($"Moon Return: Starting orbit eccentricty {e.ToString("F2")} is > 0.2");
+            return false;
+        }
+        else
+        {
+            double burnUT;
+            // double primaryRaidus = orbit.referenceBody.Orbit.referenceBody.radius + 100000; // m
+            Logger.LogDebug($"Moon Return Attempting to Solve...");
+            var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, targetMRPeR, out burnUT);
+            if (deltaV != Vector3d.zero)
             {
-                Logger.LogDebug("Circularize Now");
-                var startTimeOffset = 60;
-                var burnUT = UT + startTimeOffset;
-                var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-                status = Status.OK;
-                statusText = "Ready to Circularize Now"; // "Ready to Circularize Now"
-                statusTime = UT + statusPersistence.Value;
-
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-                    // callMNC();
-
-                    // Recalculate node based on the offset time
-                    //var nodeTimeAdj = currentNode.BurnDuration / 2;
-                    //var burnStartTime = currentNode.Time + nodeTimeAdj;
-                    //Logger.LogDebug($"BurnDuration: {currentNode.BurnDuration}, Recalculating burn to be centered at {nodeTimeAdj + startTimeOffset} s from now ");
-                    //deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime);
-                    //burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    ////var burnParamsT1 = orbit.DeltaVToManeuverNodeCoordinates(UT, deltaV);
-                    ////var burnParamsT2 = orbit.DeltaVToManeuverNodeCoordinates(UT, activeVessel, deltaV);
-                    ////Logger.LogDebug($"OG burnParams               [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    ////Logger.LogDebug($"Test: burnParamsT1          [{burnParamsT1.x}, {burnParamsT1.y}, {burnParamsT1.z}] m/s = {burnParamsT1.magnitude} m/s");
-                    ////Logger.LogDebug($"Test: burnParamsT2          [{burnParamsT2.x}, {burnParamsT2.y}, {burnParamsT2.z}] m/s = {burnParamsT2.magnitude} m/s");
-                    //burnParams.z *= -1;
-                    //burnParams.x *= -1;
-                    //Logger.LogDebug($"Solution Found: burnParams* [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT (* prograde and radial flipped)");
-                    //currentNode.BurnVector = burnParams;
-                    //UpdateNode(currentNode);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = "Circularize Now: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
+                CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+                return true;
             }
-            else if (newPe) // Working
+            else
             {
-                Logger.LogDebug("Set New Pe");
-                Debug.Log("Set New Pe");
-                var TimeToAp = orbit.TimeToAp;
-                double burnUT, e;
-                e = orbit.eccentricity;
-                if (e < 1)
-                    burnUT = UT + TimeToAp;
-                else
-                    burnUT = UT + 30;
-
-                status = Status.OK;
-                statusText = "Ready to Change Ap";
+                status = Status.ERROR;
+                statusText = "Moon Return: No Solution Found!";
                 statusTime = UT + statusPersistence.Value;
-                
-                Logger.LogDebug($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
-                Debug.Log($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
-                var deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(orbit, burnUT, targetPeR);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = "Set New Pe: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (newAp) // Working
-            {
-                Logger.LogDebug("Set New Ap");
-                Debug.Log("Set New Ap");
-                var TimeToPe = orbit.TimeToPe;
-                var burnUT = UT + TimeToPe;
-
-                status = Status.OK;
-                statusText = "Ready to Change Ap";
-                statusTime = UT + statusPersistence.Value;
-
-                Logger.LogDebug($"Seeking Solution: targetApR {targetApR} m, currentApR {orbit.Apoapsis} m");
-                var deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(orbit, burnUT, targetApR);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = "Set New Ap: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
-            {
-                Logger.LogDebug("Set New Pe and Ap");
-
-                status = Status.OK;
-                statusText = "Experimental Ellipticize Ready"; // "Ready to Ellipticize";
-                statusTime = UT + statusPersistence.Value;
-
-                if (targetPeR1 > targetApR1)
-                {
-                    (targetPeR1, targetApR1) = (targetApR1, targetPeR1);
-                    status = Status.WARNING;
-                    statusText = "Pe Setting > Ap Setting";
-                }
-
-                Logger.LogDebug($"Seeking Solution: targetPeR {targetPeR1} m, targetApR {targetApR1} m, body.radius {orbit.referenceBody.radius} m");
-                var burnUT = UT + 30;
-                var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(orbit, burnUT, targetPeR1, targetApR1);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-                    callMNC();
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = "Set New Pe and Ap: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (newInc) // Working
-            {
-                Logger.LogDebug("Set New Inclination");
-                Logger.LogDebug($"Seeking Solution: targetInc {targetInc}°");
-                double burnUT, TAN, TDN;
-                Vector3d deltaV, deltaV1, deltaV2;
-
-                status = Status.OK;
-                statusText = "Ready to Change Inclination";
-                statusTime = UT + statusPersistence.Value;
-
-                if (orbit.eccentricity < 1) // Eliptical orbit: Pick cheapest deltaV between AN and DN
-                {
-                    TAN = orbit.TimeOfAscendingNodeEquatorial(UT);
-                    TDN = orbit.TimeOfDescendingNodeEquatorial(UT);
-                    deltaV1 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TAN, targetInc);
-                    deltaV2 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TDN, targetInc);
-                    if (deltaV1.magnitude < deltaV2.magnitude)
-                    {
-                        Logger.LogDebug($"Selecting maneuver at Ascending Node");
-                        burnUT = TAN;
-                        deltaV = deltaV1;
-                    }
-                    else
-                    {
-                        Logger.LogDebug($"Selecting maneuver at Descending Node");
-                        burnUT = TDN;
-                        deltaV = deltaV2;
-                    }
-                    Logger.LogDebug($"deltaV1 (AN) [{deltaV1.x}, {deltaV1.y}, {deltaV1.z}] = {deltaV1.magnitude} m/s {TAN - UT} s from UT");
-                    Logger.LogDebug($"deltaV2 (DN) [{deltaV2.x}, {deltaV2.y}, {deltaV2.z}] = {deltaV2.magnitude} m/s {TDN - UT} s from UT");
-                }
-                else // parabolic or hyperbolic orbit: Do it now!
-                {
-                    burnUT = game.UniverseModel.UniversalTime + 30;
-                    deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, targetInc);
-                }
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV2, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV      [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams  [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = "Set New Inclination: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (matchPlanesA) // Working
-            {
-                Logger.LogDebug($"Match Planes  with {currentTarget.Name} at AN");
-                double burnUT;
- 
-                status = Status.OK;
-                statusText = $"Ready to Match Planes with {currentTarget.Name} at AN";
-                statusTime = UT + statusPersistence.Value;
-
-                var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Match Planes with {currentTarget.Name} at AN: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (matchPlanesD) // Working
-            {
-                Logger.LogDebug($"Match Planes with {currentTarget.Name} at DN");
-                double burnUT;
-
-                status = Status.OK;
-                statusText = $"Ready to Match Planes with {currentTarget.Name} at DN";
-                statusTime = UT + statusPersistence.Value;
-
-                var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-                burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                if (deltaV != Vector3d.zero)
-                {
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    // TestPerturbedOrbit(orbit, burnUT, deltaV);
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Match Planes with {currentTarget.Name} at DN: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
-            {
-                Logger.LogDebug($"Hohmann Transfer to {currentTarget.Name}");
-                Debug.Log("Hohmann Transfer");
-                double burnUT;
-
-                status = Status.WARNING;
-                statusText = $"Ready to Transfer to {currentTarget.Name}";
-                statusTime = UT + statusPersistence.Value;
-
-                var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    TestPerturbedOrbit(orbit, burnUT, deltaV);
-                    callMNC();
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Hohmann Transfer to {currentTarget.Name}: Solution Not Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (interceptAtTime) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-            // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
-            // Similar to code in MechJebModuleRendezvousGuidance.cs for "Get Closer" button code.
-            {
-                Logger.LogDebug($"Intercept {currentTarget.Name} at Time");
-                var burnUT = UT + 30;
-                var interceptUT = UT + interceptT;
-                double offsetDistance;
-
-                status = Status.WARNING;
-                statusText = $"Experimental Intercept of {currentTarget.Name} Ready"; // $"Ready to Intercept {currentTarget.Name}";
-                statusTime = UT + statusPersistence.Value;
-
-                Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
-                if (currentTarget.IsCelestialBody) // For a target that is a celestial
-                    offsetDistance = currentTarget.Orbit.referenceBody.radius + 50000;
-                else
-                    offsetDistance = 100;
-                var deltaV = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit, interceptUT, offsetDistance);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {interceptUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    TestPerturbedOrbit(orbit, burnUT, deltaV);
-                    callMNC();
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Intercept {currentTarget.Name}: No Solution Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (courseCorrection) // Experimental Works at least some times...
-            {
-                Logger.LogDebug($"Course Correction for tragetory to {currentTarget.Name}");
-                double burnUT;
-                Vector3d deltaV;
-
-                status = Status.WARNING;
-                statusText = "Experimental Course Correction Ready"; // "Ready for Course Correction Burn";
-                statusTime = UT + statusPersistence.Value;
-
-                if (currentTarget.IsCelestialBody) // For a target that is a celestial
-                {
-                    Logger.LogDebug($"Seeking Solution for Celestial Target");
-                    double finalPeR = currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
-                    deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, currentTarget.Orbit.referenceBody, finalPeR, out burnUT);
-                }
-                else // For a tartget that is not a celestial
-                {
-                    Logger.LogDebug($"Seeking Solution for Non-Celestial Target");
-                    double caDistance = 100; // m (closest approach to non-celestial target)
-                    deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, caDistance, out burnUT);
-                }
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    TestPerturbedOrbit(orbit, burnUT, deltaV);
-                    callMNC();
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Course Correction for tragetory to {currentTarget.Name}: No Solution Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (moonReturn) // Works at least sometimes...
-            {
-                Logger.LogDebug("Moon Return");
-                var e = orbit.eccentricity;
-
-                status = Status.WARNING;
-                statusText = $"Experimental Return from {orbit.referenceBody.Name} Ready"; // $"Ready to Return from {orbit.referenceBody.Name}";
-                statusTime = UT + statusPersistence.Value;
-
-                if (e > 0.2)
-                {
-                    status = Status.WARNING;
-                    statusText = "Moon Return: Starting Orbit Eccentrity Too Large";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                    Logger.LogError($"Moon Return: Starting orbit eccentricty {e.ToString("F2")} is > 0.2");
-                }
-                else
-                {
-                    double burnUT;
-                    // double primaryRaidus = orbit.referenceBody.Orbit.referenceBody.radius + 100000; // m
-                    Logger.LogDebug($"Moon Return Attempting to Solve...");
-                    var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, targetMRPeR, out burnUT);
-                    if (deltaV != Vector3d.zero)
-                    {
-                        burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                        Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                        Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                        NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                        TestPerturbedOrbit(orbit, burnUT, deltaV);
-                        callMNC();
-                    }
-                    else
-                    {
-                        status = Status.ERROR;
-                        statusText = "Moon Return: No Solution Found!";
-                        statusTime = UT + statusPersistence.Value;
-                        Logger.LogDebug(statusText);
-                    }
-                }
-            }
-            else if (matchVCA) // Experimental
-            {
-                Logger.LogDebug($"Match Velocity with {currentTarget.Name} at Closest Approach");
-
-                status = Status.WARNING;
-                statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
-                statusTime = UT + statusPersistence.Value;
-
-                double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
-                var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, closestApproachTime, currentTarget.Orbit as PatchedConicsOrbit);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(closestApproachTime, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, closestApproachTime);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s {closestApproachTime - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s {closestApproachTime - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, closestApproachTime, -0.5);
-                    TestPerturbedOrbit(orbit, closestApproachTime, deltaV);
-                    callMNC();
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Match Velocity with {currentTarget.Name} at Closest Approach: No Solution Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (matchVNow) // Experimental
-            {
-                Logger.LogDebug($"Match Velocity with {currentTarget.Name} Now");
-                var burnUT = UT + 30;
-
-                status = Status.WARNING;
-                statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
-                statusTime = UT + statusPersistence.Value;
-
-                var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    TestPerturbedOrbit(orbit, burnUT, deltaV);
-                    callMNC();
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Match Velocity with {currentTarget.Name} Now: No Solution Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
-            }
-            else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-            {
-                Logger.LogDebug($"Planetary Transfer to {currentTarget.Name}");
-                double burnUT;
-                bool syncPhaseAngle = true;
-
-                status = Status.WARNING;
-                statusText = $"Experimental Transfer to {currentTarget.Name} Ready"; // $"Ready to depart for {currentTarget.Name}";
-                statusTime = UT + statusPersistence.Value;
-
-                var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT);
-                if (deltaV != Vector3d.zero)
-                {
-                    burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(activeVessel.Orbit, deltaV, burnUT);
-                    // burnParams.z *= -1;
-                    Logger.LogDebug($"Solution Found: deltaV     [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s = {deltaV.magnitude} m/s {burnUT - UT} s from UT");
-                    Logger.LogDebug($"Solution Found: burnParams [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - UT} s from UT");
-                    NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, -0.5);
-                    TestPerturbedOrbit(orbit, burnUT, deltaV);
-                    callMNC();
-                }
-                else
-                {
-                    status = Status.ERROR;
-                    statusText = $"Planetary Transfer to {currentTarget.Name}: No Solution Found!";
-                    statusTime = UT + statusPersistence.Value;
-                    Logger.LogDebug(statusText);
-                }
+                Logger.LogDebug(statusText);
+                return false;
             }
         }
     }
 
-    private void TestPerturbedOrbit(PatchedConicsOrbit o, double burnUT, Vector3d dV)
+    public bool MatchVelocityAtCA(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"MatchVelocityAtCA: Match Velocity with {currentTarget.Name} at Closest Approach");
+
+        status = Status.WARNING;
+        statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
+        statusTime = UT + statusPersistence.Value;
+
+        double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
+        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, closestApproachTime, currentTarget.Orbit as PatchedConicsOrbit);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, closestApproachTime, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Match Velocity with {currentTarget.Name} at Closest Approach: No Solution Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool MatchVelocityNow(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"MatchVelocityNow: Match Velocity with {currentTarget.Name} Now");
+        var burnUT = UT + 30;
+
+        status = Status.WARNING;
+        statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
+        statusTime = UT + statusPersistence.Value;
+
+        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Match Velocity with {currentTarget.Name} Now: No Solution Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool PlanetaryXfer(double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name}");
+        double burnUT;
+        bool syncPhaseAngle = true;
+
+        status = Status.WARNING;
+        statusText = $"Experimental Transfer to {currentTarget.Name} Ready"; // $"Ready to depart for {currentTarget.Name}";
+        statusTime = UT + statusPersistence.Value;
+
+        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = $"Planetary Transfer to {currentTarget.Name}: No Solution Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    private void handleButtons()
+    {
+        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer || launchMNC)
+        {
+            bool pass;
+
+            if (circAp) // Working
+            {
+                pass = CircularizeAtAP(-0.5);
+                // if (pass) callMNC();
+            }
+            else if (circPe) // Working
+            {
+                pass = CircularizeAtPe(-0.5);
+                // if (pass) callMNC();
+            }
+            else if (circNow) // Working
+            {
+                pass = CircularizeNow(-0.5);
+                // if (pass) callMNC();
+            }
+            else if (newPe) // Working
+            {
+                pass = SetNewPe(targetPeR, - 0.5);
+                // if (pass) callMNC();
+            }
+            else if (newAp) // Working
+            {
+                pass = SetNewAp(targetApR, - 0.5);
+                // if (pass) callMNC();
+            }
+            else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
+            {
+                pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
+                // if (pass) callMNC();
+            }
+            else if (newInc) // Working
+            {
+                pass = SetInclination(targetInc, -0.5);
+                // if (pass) callMNC();
+            }
+            else if (matchPlanesA) // Working
+            {
+                pass = MatchPlanesAtAN(-0.5);
+                // if (pass) callMNC();
+            }
+            else if (matchPlanesD) // Working
+            {
+                pass = MatchPlanesAtDN(-0.5);
+                // if (pass) callMNC();
+            }
+            else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
+            {
+                pass = HohmannTransfer(-0.5);
+                if (pass) callMNC();
+            }
+            else if (interceptAtTime) // Experimental
+            {
+                pass = InterceptTgtAtUT(interceptT, -0.5);
+                if (pass) callMNC();
+            }
+            else if (courseCorrection) // Experimental Works at least some times...
+            {
+                pass = CourseCorrection(-0.5);
+                if (pass) callMNC();
+            }
+            else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
+            {
+                pass = MoonReturn(-0.5);
+                if (pass) callMNC();
+            }
+            else if (matchVCA) // Experimental
+            {
+                pass = MatchVelocityAtCA(-0.5);
+                if (pass) callMNC();
+            }
+            else if (matchVNow) // Experimental
+            {
+                pass = MatchVelocityNow(-0.5);
+                if (pass) callMNC();
+            }
+            else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
+            {
+                pass = PlanetaryXfer(-0.5);
+                if (pass) callMNC();
+            }
+            else if (launchMNC) callMNC();
+        }
+    }
+
+    private IEnumerator TestPerturbedOrbit(PatchedConicsOrbit o, double burnUT, Vector3d dV)
     {
         // This code compares the orbit info returned from a PerturbedOrbit orbit call with the
         // info for the orbit in the next patch. It should be called after creating a maneuver
@@ -1398,309 +1456,39 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // make sure that PerturbedOrbit is correctly predicting the effect of delta V on the
         // current orbit.
 
-        List<ManeuverNodeData> patchList = 
-            Game.SpaceSimulation.Maneuvers.GetNodesForVessel(activeVessel.SimulationObject.GlobalId);
+        // NodeManagerPlugin.Instance.RefreshNodes();
+        yield return (object)new WaitForFixedUpdate();
 
-        Logger.LogDebug($"TestPerturbedOrbit: patchList.Count = {patchList.Count}");
+        //List<ManeuverNodeData> patchList = 
+        //    Game.SpaceSimulation.Maneuvers.GetNodesForVessel(activeVessel.SimulationObject.GlobalId);
 
-        if (patchList.Count == 0)
+        Logger.LogDebug($"TestPerturbedOrbit: patchList.Count = {NodeManagerPlugin.Instance.Nodes.Count}");
+
+        if (NodeManagerPlugin.Instance.Nodes.Count == 0)
         {
             Logger.LogDebug($"TestPerturbedOrbit: No future patches to compare to.");
-            return;
         }
+        else
+        {
+            PatchedConicsOrbit hypotheticalOrbit = o.PerturbedOrbit(burnUT, dV);
+            ManeuverPlanSolver maneuverPlanSolver = activeVessel.Orbiter?.ManeuverPlanSolver;
+            var PatchedConicsList = maneuverPlanSolver?.PatchedConicsList;
+            PatchedConicsOrbit nextOrbit; // = PatchedConicsList[0];
+            if (NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch != null) { nextOrbit = NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch; }
+            else { nextOrbit = maneuverPlanSolver.ManeuverTrajectory[0] as PatchedConicsOrbit; }
 
-        PatchedConicsOrbit hypotheticalOrbit = o.PerturbedOrbit(burnUT, dV);
-        IPatchedOrbit nextOrbit = patchList[0].ManeuverTrajectoryPatch;
 
-        Logger.LogDebug($"thisOrbit:{o}");
-        Logger.LogDebug($"nextOrbit:{nextOrbit}");
-        Logger.LogDebug($"hypotheticalOrbit:{hypotheticalOrbit}");
+            // IPatchedOrbit orbit = null;
+
+            Logger.LogDebug($"thisOrbit:{o}");
+            Logger.LogDebug($"nextOrbit:{nextOrbit}");
+            Logger.LogDebug($"nextOrbit: inc = {PatchedConicsList[0].inclination.ToString("n3")}");
+            Logger.LogDebug($"nextOrbit: ecc = {PatchedConicsList[0].eccentricity.ToString("n3")}");
+            Logger.LogDebug($"nextOrbit: sma = {PatchedConicsList[0].semiMajorAxis.ToString("n3")}");
+            Logger.LogDebug($"nextOrbit: lan = {PatchedConicsList[0].longitudeOfAscendingNode.ToString("n3")}");
+            Logger.LogDebug($"nextOrbit: ApA = {(PatchedConicsList[0].ApoapsisArl / 1000).ToString("n3")}");
+            Logger.LogDebug($"nextOrbit: PeA = {(PatchedConicsList[0].PeriapsisArl / 1000).ToString("n3")}");
+            Logger.LogDebug($"hypotheticalOrbit:{hypotheticalOrbit}");
+        }
     }
-
-    //private IEnumerator RefreshNodes(ManeuverPlanComponent maneuverPlanComponent)
-    //{
-    //    // yield return (object)new WaitForFixedUpdate();
-
-    //    for (int i = 0; i < Nodes.Count; i++) // was i = SelectedNodeIndex
-    //    {
-    //        // Logger.LogDebug($"RefreshNodes: Updateing Node {i}");
-    //        var node = Nodes[i];
-    //        // maneuverPlanComponent.UpdateTimeOnNode(node, node.Time);
-    //        maneuverPlanComponent.UpdateNodeDetails(node);
-    //        //yield return (object)new WaitForFixedUpdate();
-    //        //maneuverPlanComponent.RefreshManeuverNodeState(i);
-    //    }
-
-    //    for (int i = 0; i < Nodes.Count; i++) // was i = SelectedNodeIndex
-    //    {
-    //        // Logger.LogDebug($"RefreshNodes: Refreshing Node {i}");
-    //        try { maneuverPlanComponent.RefreshManeuverNodeState(i); }
-    //        catch (NullReferenceException e)
-    //        {
-    //            Logger.LogError($"RefreshNodes: Suppressed NRE for Node {i}: {e}");
-    //            Logger.LogError($"RefreshNodes: Node {i}: {FPNodeControl.Nodes[i]}");
-    //        }
-    //    }
-
-    //    yield return (object)new WaitForFixedUpdate();
-    //    // NodeControl.RefreshManeuverNodes();
-    //    // yield return (object)new WaitForFixedUpdate();
-
-    //    for (int i = 0; i < Nodes.Count; i++) // was i = SelectedNodeIndex
-    //    {
-    //        // Logger.LogDebug($"RefreshNodes: Updateing Node {i}");
-    //        var node = Nodes[i];
-    //        // maneuverPlanComponent.UpdateTimeOnNode(node, node.Time);
-    //        maneuverPlanComponent.UpdateNodeDetails(node);
-    //        //yield return (object)new WaitForFixedUpdate();
-    //        //maneuverPlanComponent.RefreshManeuverNodeState(i);
-    //    }
-
-    //    for (int i = 0; i < Nodes.Count; i++) // was i = SelectedNodeIndex
-    //    {
-    //        // Logger.LogDebug($"RefreshNodes: Refreshing Node {i}");
-    //        try { maneuverPlanComponent.RefreshManeuverNodeState(i); }
-    //        catch (NullReferenceException e)
-    //        {
-    //            Logger.LogError($"RefreshNodes: Suppressed NRE for Node {i}: {e}");
-    //            Logger.LogError($"RefreshNodes: Node {i}: {Nodes[i]}");
-    //        }
-    //    }
-
-    //    // yield return (object)new WaitForFixedUpdate();
-
-    //    // NodeControl.RefreshManeuverNodes();
-    //}
-
-    //private IPatchedOrbit GetLastOrbit(bool silent = true)
-    //{
-    //    // Logger.LogDebug("GetLastOrbit");
-    //    List<ManeuverNodeData> patchList =
-    //        Game.SpaceSimulation.Maneuvers.GetNodesForVessel(activeVessel.SimulationObject.GlobalId); // GetNodesForVessel(kspVessel.GetGlobalIDActiveVessel())
-
-    //    if (!silent)
-    //        Logger.LogDebug($"GetLastOrbit: patchList.Count = {patchList.Count}");
-
-    //    if (patchList.Count == 0)
-    //    {
-    //        if (!silent)
-    //            Logger.LogDebug($"GetLastOrbit: last orbit is activeVessel.Orbit: {activeVessel.Orbit}");
-    //        return activeVessel.Orbit;
-    //    }
-    //    IPatchedOrbit lastOrbit = patchList[patchList.Count - 1].ManeuverTrajectoryPatch;
-    //    if (!silent)
-    //    {
-    //        Logger.LogDebug($"GetLastOrbit: ManeuverTrajectoryPatch = {patchList[patchList.Count - 1].ManeuverTrajectoryPatch}");
-    //        Logger.LogDebug($"GetLastOrbit: last orbit is patch {patchList.Count - 1}: {lastOrbit}");
-    //    }
-
-
-    //    return lastOrbit;
-    //}
-
-    //private void CreateManeuverNodeAtTA(Vector3d burnVector, double TrueAnomalyRad, double burnDurationOffsetFactor = -0.5)
-    //{
-    //    // Logger.LogDebug("CreateManeuverNodeAtTA");
-    //    PatchedConicsOrbit referencedOrbit = GetLastOrbit(false) as PatchedConicsOrbit;
-    //    if (referencedOrbit == null)
-    //    {
-    //        Logger.LogError("CreateManeuverNode: referencedOrbit is null!");
-    //        return;
-    //    }
-
-    //    double UT = referencedOrbit.GetUTforTrueAnomaly(TrueAnomalyRad, 0);
-
-    //    CreateManeuverNodeAtUT(burnVector, UT, burnDurationOffsetFactor);
-    //}
-
-    //private void CreateManeuverNodeAtUT(Vector3d burnVector, double burnUT, double burnDurationOffsetFactor = -0.5)
-    //{
-    //    // Logger.LogDebug("CreateManeuverNodeAtUT");
-
-    //    //PatchedConicsOrbit referencedOrbit = GetLastOrbit(false) as PatchedConicsOrbit;
-    //    //if (referencedOrbit == null)
-    //    //{
-    //    //    Logger.LogError("CreateManeuverNode: referencedOrbit is null!");
-    //    //    return;
-    //    //}
-
-    //    double UT = game.UniverseModel.UniversalTime;
-    //    if (burnUT < UT + 1) // Don't set node to now or in the past
-    //        burnUT = UT + 1;
-
-    //    // KSPOrbitModule.IOrbit orbit = new OrbitWrapper(vesselAdapter.context, vesselAdapter.vessel.Orbiter.PatchedConicSolver.FindPatchContainingUT(ut) ?? vesselAdapter.vessel.Orbit);
-
-    //    // Get the current list of nodes
-    //    ManeuverPlanComponent activeVesselPlan = activeVessel?.SimulationObject?.FindComponent<ManeuverPlanComponent>();
-    //    List<ManeuverNodeData> Nodes = new();
-    //    if (activeVesselPlan != null)
-    //    {
-    //        Nodes = activeVesselPlan.GetNodes();
-    //    }
-
-
-    //    // Get the patch to put this node on
-    //    ManeuverPlanSolver maneuverPlanSolver = activeVessel.Orbiter?.ManeuverPlanSolver;
-    //    IPatchedOrbit orbit = activeVessel.Orbit;
-    //    // maneuverPlanSolver.FindPatchContainingUt(UT, maneuverPlanSolver.ManeuverTrajectory, out orbit, out int _);
-    //    // var selectedNode = -1;
-    //    for (int i = 0; i < Nodes.Count - 1; i++)
-    //    {
-    //        if (burnUT > Nodes[i].Time && burnUT < Nodes[i + 1].Time)
-    //        {
-    //            orbit = Nodes[i + 1].ManeuverTrajectoryPatch;
-    //            // selectedNode = i;
-    //            Logger.LogDebug($"CreateManeuverNodeAtUT: Attaching node to Node[{i + 1}]'s ManeuverTrajectoryPatch");
-    //        }
-    //    }
-
-    //    // Build the node data
-    //    // ManeuverNodeData nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, UT);
-    //    ManeuverNodeData nodeData;
-    //    if (Nodes.Count == 0) // There are no nodes
-    //    {
-    //        nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, burnUT);
-    //    }
-    //    else
-    //    {
-    //        if (UT < Nodes[0].Time) // request time is before the first node
-    //        {
-    //            nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, false, burnUT);
-    //            orbit.PatchEndTransition = PatchTransitionType.Maneuver;
-    //        }
-    //        else if (UT > Nodes[Nodes.Count - 1].Time) // requested time is after the last node
-    //        {
-    //            nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, true, burnUT);
-    //            orbit.PatchEndTransition = PatchTransitionType.Final;
-    //        }
-    //        else // request time is between existing nodes
-    //        {
-    //            nodeData = new ManeuverNodeData(activeVessel.SimulationObject.GlobalId, true, burnUT);
-    //            orbit.PatchEndTransition = PatchTransitionType.Maneuver;
-    //        }
-    //        orbit.PatchStartTransition = PatchTransitionType.EndThrust;
-
-    //        nodeData.SetManeuverState((PatchedConicsOrbit)orbit);
-    //    }
-
-    //    //IPatchedOrbit orbit = referencedOrbit;
-
-    //    //orbit.PatchStartTransition = PatchTransitionType.Maneuver;
-    //    //orbit.PatchEndTransition = PatchTransitionType.Final;
-
-    //    //nodeData.SetManeuverState((PatchedConicsOrbit)orbit);
-
-    //    nodeData.BurnVector = burnVector;
-
-    //    //Logger.LogDebug($"CreateManeuverNodeAtUT: BurnVector [{burnVector.x}, {burnVector.y}, {burnVector.z}] m/s");
-    //    //Logger.LogDebug($"CreateManeuverNodeAtUT: BurnDuration {nodeData.BurnDuration} s");
-    //    //Logger.LogDebug($"CreateManeuverNodeAtUT: Burn Time {nodeData.Time} s");
-
-    //    AddManeuverNode(nodeData, burnDurationOffsetFactor);
-    //}
-
-    //private void AddManeuverNode(ManeuverNodeData nodeData, double burnDurationOffsetFactor)
-    //{
-    //    //Logger.LogDebug("AddManeuverNode");
-
-    //    // Working this was we need to call maneuverPlan.AddNode & ManeuverPlanSolver.UpdateManeuverTrajectory
-    //    ManeuverPlanComponent maneuverPlan;
-    //    maneuverPlan = activeVessel.SimulationObject.ManeuverPlan;
-    //    maneuverPlan.AddNode(nodeData, true);
-    //    activeVessel.Orbiter.ManeuverPlanSolver.UpdateManeuverTrajectory();
-
-    //    // For KSP2, We want the to start burns early to make them centered on the node
-    //    var nodeTimeAdj = nodeData.BurnDuration * burnDurationOffsetFactor;
-
-    //    Logger.LogDebug($"AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
-
-    //    // Refersh the currentNode with what we've produced here in prep for calling UpdateNode
-    //    currentNode = getCurrentNode();
-
-    //    UpdateNode(nodeData, nodeTimeAdj);
-
-    //    //Logger.LogDebug("AddManeuverNode Done");
-    //}
-
-    //private void AddManeuverNodeToVessel(ManeuverNodeData nodeData, double burnDurationOffsetFactor)
-    //{
-    //    //Logger.LogDebug("AddManeuverNode");
-
-    //    // Working this was we only need to call Maneuvers.AddNodeToVessel
-    //    GameManager.Instance.Game.SpaceSimulation.Maneuvers.AddNodeToVessel(nodeData);
-
-    //    // For KSP2, We want the to start burns early to make them centered on the node
-    //    var nodeTimeAdj = nodeData.BurnDuration * burnDurationOffsetFactor;
-
-    //    Logger.LogDebug($"AddManeuverNode: BurnDuration {nodeData.BurnDuration} s");
-
-    //    // Refersh the currentNode with what we've produced here in prep for calling UpdateNode
-    //    currentNode = getCurrentNode();
-
-    //    UpdateNode(nodeData, nodeTimeAdj);
-
-    //    //Logger.LogDebug("AddManeuverNode Done");
-    //}
-
-    //private void UpdateNode(ManeuverNodeData nodeData, double nodeTimeAdj = 0) // was: return type IEnumerator
-    //{
-    //    MapCore mapCore = null;
-    //    Game.Map.TryGetMapCore(out mapCore);
-    //    var m3d = mapCore.map3D;
-    //    var maneuverManager = m3d.ManeuverManager;
-    //    IGGuid simID;
-    //    SimulationObjectModel simObject;
-
-    //    // Get the ManeuverPlanComponent for the active vessel
-    //    var universeModel = game.UniverseModel;
-    //    VesselComponent vesselComponent;
-    //    ManeuverPlanComponent maneuverPlanComponent;
-    //    if (currentNode != null)
-    //    {
-    //        simID = currentNode.RelatedSimID;
-    //        simObject = universeModel.FindSimObject(simID);
-    //    }
-    //    else
-    //    {
-    //        // vc2 = activeVessel;
-    //        vesselComponent = activeVessel;
-    //        simObject = vesselComponent?.SimulationObject;
-    //    }
-
-    //    if (simObject != null)
-    //    {
-    //        maneuverPlanComponent = simObject.FindComponent<ManeuverPlanComponent>();
-    //    }
-    //    else
-    //    {
-    //        simObject = universeModel.FindSimObject(simID);
-    //        maneuverPlanComponent = simObject.FindComponent<ManeuverPlanComponent>();
-    //    }
-
-    //    if (nodeTimeAdj != null) // was: 0
-    //    {
-    //        nodeData.Time += nodeTimeAdj;
-    //        if (nodeData.Time < game.UniverseModel.UniversalTime + 1) // Don't set node in the past
-    //            nodeData.Time = game.UniverseModel.UniversalTime + 1;
-    //        maneuverPlanComponent.UpdateTimeOnNode(nodeData, nodeData.Time); // This may not be necessary?
-    //    }
-
-    //    // Wait a tick for things to get created
-    //    // yield return new WaitForFixedUpdate();
-
-    //    try { maneuverPlanComponent.RefreshManeuverNodeState(0); }
-    //    catch (NullReferenceException e) { Logger.LogError($"UpdateNode: caught NRE on call to maneuverPlanComponent.RefreshManeuverNodeState(0): {e}"); }
-
-    //    if (currentNode != null) // just don't do it... was: if (currentNode != null)
-    //    {
-    //        // Manage the maneuver on the map
-    //        maneuverManager.RemoveAll();
-    //        try { maneuverManager?.GetNodeDataForVessels(); }
-    //        catch (Exception e) { Logger.LogError($"UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.GetNodeDataForVessels(): {e}"); }
-    //        try { maneuverManager.UpdateAll(); }
-    //        catch (Exception e) { Logger.LogError($"UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.UpdateAll(): {e}"); }
-    //        try { maneuverManager.UpdatePositionForGizmo(nodeData.NodeID); }
-    //        catch (Exception e) { Logger.LogError($"UpdateNode: caught exception on call to mapCore.map3D.ManeuverManager.UpdatePositionForGizmo(): {e}"); }
-    //    }
-    //}
 }
