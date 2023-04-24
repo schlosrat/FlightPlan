@@ -14,17 +14,19 @@
 		</RestoreAdditionalProjectSources>
         <RootNamespace>FlightPlan</RootNamespace>
         <ModId Condition="'$(ModId)'==''">flight_plan</ModId>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>schlosrat</Authors>
+		<PackageId>FlightPlan</PackageId>
+		<PackageLicenseUrl>https://raw.githubusercontent.com/schlosrat/FlightPlan/master/license.md</PackageLicenseUrl>
+		<PackageOutputPath>..\nuget</PackageOutputPath>
+		<PackageProjectUrl>https://github.com/schlosrat/FlightPlan</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>SpaceWarp;KSP2;modding;library;maneuvers</PackageTags>
+		<RepositoryUrl>https://github.com/schlosrat/FlightPlan</RepositoryUrl>
+		<Title>Flight Plan</Title>
     </PropertyGroup>
-    <ItemGroup>
-        <Reference Include="Assembly-CSharp">
-            <HintPath>..\external_dlls\Assembly-CSharp.dll</HintPath>
-            <Publicize>true</Publicize>
-            <Private>false</Private>
-        </Reference>
-		<Reference Include="maneuver_node_controller">
-			<HintPath>..\external_dlls\maneuver_node_controller.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
+	<ItemGroup>
+		<None Include="..\README.md" Pack="true" PackagePath="" />
 	</ItemGroup>
     <ItemGroup>
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
@@ -36,6 +38,17 @@
 		<PackageReference Include="NodeManager" Version="0.5.3" />
 		<PackageReference Include="UnityEngine.Modules" Version="2020.3.33" IncludeAssets="compile" />
     </ItemGroup>
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>..\external_dlls\Assembly-CSharp.dll</HintPath>
+            <Publicize>true</Publicize>
+            <Private>false</Private>
+        </Reference>
+		<Reference Include="maneuver_node_controller">
+			<HintPath>..\external_dlls\maneuver_node_controller.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <Exec Command="echo d | xcopy /y /s &quot;$(ProjectDir)..\$(ModId)\&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).dll&quot;&#xA;if $(ConfigurationName) == Debug echo f | xcopy /y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot;&#xA;xcopy /y &quot;$(ProjectDir)..\license.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(ProjectDir)..\README.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\README.txt&quot;&#xD;&#xA;&#xD;&#xA;echo Copying output .dll to &quot;..Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).dll&quot; &quot;C:\Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;&#xD;&#xA;echo Copying swinfo.json to &quot;..Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\swinfo.json&quot; &quot;C:\Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;&#xD;&#xA;echo Copying output .pdb to &quot;..Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot; &quot;C:\Kerbal Space Program 2 Debug\BepInEx\plugins\$(ModId)&quot;&#xD;&#xA;&#xD;&#xA;echo Starting KSP2_x64.exe&#xD;&#xA;powershell &quot;start-process &quot;&quot;C:\Kerbal Space Program 2 Debug\KSP2_x64.exe&quot;&quot;&quot;" />
     </Target>
