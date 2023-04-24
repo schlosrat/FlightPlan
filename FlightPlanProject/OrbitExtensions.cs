@@ -52,7 +52,8 @@ namespace MuMech
         public static Vector3d SwappedAbsolutePositionAtUT(this PatchedConicsOrbit o, double UT)
         {
             // was: o.referenceBody.position -> o.referenceBody.Position.localPosition
-            return o.referenceBody.Position.localPosition + o.SwappedRelativePositionAtUT(UT);
+            // return o.referenceBody.Position.localPosition + o.SwappedRelativePositionAtUT(UT);
+            return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.referenceBody.Position.localPosition + o.GetRelativePositionAtUTZup(UT).SwapYAndZ);
         }
 
         // ReferenceFrame (from KS2)
@@ -61,7 +62,7 @@ namespace MuMech
         //    return o.ReferenceFrame;
         //}
 
-        // ReferenceBody KS2 Way
+        // ReferenceBody (from KS2)
         //public static KSPOrbitModule.IBody ReferenceBody(this PatchedConicsOrbit o)
         //{
         //    return new BodyWrapper(context, o.referenceBody);
@@ -129,7 +130,7 @@ namespace MuMech
         //another name for the orbit normal; this form makes it look like the other directions
         public static Vector3d NormalPlus(this PatchedConicsOrbit o, double UT)
         {
-            // From KontrolSystem2:
+            // From KS2:
             return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativeOrbitNormal().SwapYAndZ.normalized);
         }
 
@@ -207,15 +208,12 @@ namespace MuMech
             // The MJ version of OrbitFromStateVectors peroforms a SwapYZ on (pos - body position), and a SwapYZ on vel before passing them into
             // the KSP1 version of UpdateFromStateVectors.
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
-
-            // From KS2
-            // return ReferenceBody.CreateOrbit(SwappedRelativePositionAtUT(UT), SwappedOrbitalVelocityAtUT(UT) + dV, UT);
         }
 
         // Adapted from KS2
         public static PatchedConicsOrbit CreateOrbit(this PatchedConicsOrbit o, Vector3d position, Vector3d velocity, double UT)
         {
-            PatchedConicsOrbit orbit = new PatchedConicsOrbit(o.referenceBody.universeModel);
+            PatchedConicsOrbit orbit = new(o.referenceBody.universeModel);
 
             // Actual KS2 returns: orbit.UpdateFromStateVectors(new Position(body.SimulationObject.transform.celestialFrame, position), new Velocity(body.SimulationObject.transform.celestialFrame.motionFrame, velocity), body, ut);
             orbit.UpdateFromStateVectors(new Position(o.referenceBody.SimulationObject.transform.celestialFrame, position), new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.referenceBody, UT);
@@ -235,8 +233,8 @@ namespace MuMech
 
             PatchedConicsOrbit newOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
             o.GetOrbitalStateVectorsAtUT(UT, out pos, out vel);
-            Position position = new Position(o.referenceBody.SimulationObject.transform.celestialFrame, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
-            Velocity velocity = new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, OrbitExtensions.SwapYZ(vel));
+            Position position = new Position(o.referenceBody.SimulationObject.transform.celestialFrame, (pos - o.referenceBody.Position.localPosition).SwapYAndZ); //  OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition)
+            Velocity velocity = new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel.SwapYAndZ); // OrbitExtensions.SwapYZ(vel)
             newOrbit.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
 
             return newOrbit;
@@ -270,8 +268,8 @@ namespace MuMech
             {
                 Vector3d pos, vel;
                 o.GetOrbitalStateVectorsAtUT(UT + o.period * periodOffset, out pos, out vel);
-                Position position = new Position(o.referenceBody.SimulationObject.transform.celestialFrame, OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition));
-                Velocity velocity = new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, OrbitExtensions.SwapYZ(vel));
+                Position position = new Position(o.referenceBody.SimulationObject.transform.celestialFrame, (pos - o.referenceBody.Position.localPosition).SwapYAndZ); // OrbitExtensions.SwapYZ(pos - o.referenceBody.Position.localPosition)
+                Velocity velocity = new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel.SwapYAndZ); // OrbitExtensions.SwapYZ(vel)
                 o.UpdateFromStateVectors(position, velocity, o.referenceBody, UT);
             }
         }

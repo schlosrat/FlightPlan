@@ -169,8 +169,8 @@ namespace MuMech
         {
             PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
             // Create the type Position and Velocty inputs needed for KSP2's UpdateFromStateVectors
-            Position position = new(body.SimulationObject.transform.celestialFrame, OrbitExtensions.SwapYZ(pos - body.Position.localPosition));
-            Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, OrbitExtensions.SwapYZ(vel));
+            Position position = new(body.SimulationObject.transform.celestialFrame, (pos - body.Position.localPosition).SwapYAndZ); // OrbitExtensions.SwapYZ(pos - body.Position.localPosition)
+            Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, vel.SwapYAndZ); // OrbitExtensions.SwapYZ(vel)
 
             // Position position = new(body.SimulationObject.transform.celestialFrame, pos);
             // Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, vel);
@@ -182,7 +182,7 @@ namespace MuMech
             if (double.IsNaN(ret.argumentOfPeriapsis))
             {
                 Vector3d vectorToAN = Quaternion.AngleAxis(-(float)ret.longitudeOfAscendingNode, body.Orbit.ReferenceFrame.up.vector) * body.Orbit.ReferenceFrame.right.vector;
-                Vector3d vectorToPe = OrbitExtensions.SwapYZ(ret.eccVec);
+                Vector3d vectorToPe = ret.eccVec.SwapYAndZ; //  OrbitExtensions.SwapYZ(ret.eccVec);
                 double cosArgumentOfPeriapsis = Vector3d.Dot(vectorToAN, vectorToPe) / (vectorToAN.magnitude * vectorToPe.magnitude);
                 //Squad's UpdateFromStateVectors is missing these checks, which are needed due to finite precision arithmetic:
                 if(cosArgumentOfPeriapsis > 1) {
