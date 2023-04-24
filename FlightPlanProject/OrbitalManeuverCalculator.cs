@@ -152,16 +152,21 @@ namespace MuMech
             double maxDeltaV;
             if (raising)
             {
-                // Max Delta-V based on escape velocity
-                var maxDeltaVCap = 0.99 * (EscapeVelocity(o.referenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude);
-                //put an upper bound on the required deltaV:
                 maxDeltaV = 0.25;
-                //while (o.PerturbedOrbit(UT, maxDeltaV * burnDirection).Periapsis < newPeR)
-                //{
-                //    minDeltaV = maxDeltaV; //narrow the range
-                //    maxDeltaV *= 2;
-                //    if (maxDeltaV > 100000) break; //a safety precaution
-                //}
+                /*
+                // Old Way: This can sometimes give Finite Check failures from BrentRoot due to poorly set max
+                //put an upper bound on the required deltaV:
+                while (o.PerturbedOrbit(UT, maxDeltaV * burnDirection).Periapsis < newPeR)
+                {
+                    minDeltaV = maxDeltaV; //narrow the range
+                    maxDeltaV *= 2;
+                    if (maxDeltaV > 100000) break; //a safety precaution
+                }
+                */
+
+                // New way: This prevents Finite Check failures from BrentRoot by finding a better max
+                // Max Delta-V based on escape velocity
+                var maxDeltaVCap = EscapeVelocity(o.referenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude - MuUtils.DBL_EPSILON;
 
                 double lastMax = maxDeltaV;
                 double riseFactor = 2;
@@ -182,7 +187,7 @@ namespace MuMech
                             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV Capped at {maxDeltaV} m/s");
                             break; // safety precaution
                         }
-                        FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
+                        // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
                         testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //if (testOrbit.eccentricity >= 1) // If we've shot too high
                         //{
@@ -208,9 +213,11 @@ namespace MuMech
             else
             {
                 //when lowering periapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
-                maxDeltaV = 0.9*Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection));
+                // maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection)) - MuUtils.DBL_EPSILON;
+                maxDeltaV = 0.999 * Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection));
             }
 
+            /*
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: radius    {radius}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: newPeR    {newPeR}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: raising   {raising}");
@@ -225,7 +232,8 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Periapsis}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax {initialTestOrbitMax}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Periapsis}");
-            
+            */
+
             // minDeltaV = 0;
             // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: minDeltaV* {minDeltaV} m/s");
 
@@ -275,12 +283,14 @@ namespace MuMech
             // goes negative due to hyperbolic orbit. In such a case the user has asked for an Apoapsis that is
             // not possible for this body. Perhaps we need a check to make sure newApR is within the SOI? In any
             // event, simply doubling the max each time can get to a spot where SMA is NaN and Apoapsis goes
-            // negative (discontinuity). Setting the max too high give finite check failures exceptions.
+            // negative (discontinuity). Setting the max too high results in finite check failure exceptions.
             double maxDeltaV = raising ? 10000 : o.SwappedOrbitalVelocityAtUT(UT).magnitude;
+            
+            // New Way to get maxDeltaV
             if (raising)
             {
                 // Max Delta-V based on escape velocity
-                var maxDeltaVCap = 0.99 * (EscapeVelocity(o.referenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude);
+                var maxDeltaVCap = EscapeVelocity(o.referenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude - MuUtils.DBL_EPSILON;
                 //put an upper bound on the required deltaV:
                 maxDeltaV = 0.25;
                 // double lastMax = maxDeltaV;
@@ -300,7 +310,7 @@ namespace MuMech
                             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV Capped at {maxDeltaV} m/s");
                             break; // safety precaution
                         }
-                        FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
+                        // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
                         testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //while (testOrbit.eccentricity >= 1 && maxDeltaV > minDeltaV) // If we've shot too high, back off
                         //{
@@ -324,9 +334,9 @@ namespace MuMech
             else
             {
                 //when lowering apoapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
-                maxDeltaV = 0.9*Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection));
+                maxDeltaV = 0.999 * Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection));
             }
-
+            /*
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: radius    {radius} m");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: newApR    {newApR}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: raising   {raising}");
@@ -341,7 +351,8 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Apoapsis}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax {initialTestOrbitMax}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Apoapsis}");
-
+            */
+            
             // solve for the reciprocal of the ApR which is a continuous function that avoids the parabolic singularity and
             // change of sign for hyperbolic orbits.
             Func<double, object, double> f = delegate(double testDeltaV, object ign)
