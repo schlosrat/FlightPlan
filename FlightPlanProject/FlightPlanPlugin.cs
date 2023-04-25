@@ -20,7 +20,8 @@ using SpaceWarp.API.UI.Appbar;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
+using K2D2;
+using K2D2.Controller;
 
 namespace FlightPlan;
 
@@ -137,8 +138,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public new static ManualLogSource Logger { get; set; }
 
     // Access control bool for launching MNC
-    private bool MNCLoaded;
-    PluginInfo MNC;
+    private bool MNCLoaded, K2D2Loaded;
+    PluginInfo MNC, K2D2;
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
     /// <summary>
@@ -172,7 +173,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //StateChanges.LaunchpadEntered += message => GUIenabled = false;
         //StateChanges.RunwayEntered += message => GUIenabled = false;
         
-        Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
+        // Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
         if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out MNC))
         {
             MNCLoaded = true;
@@ -180,8 +181,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             Logger.LogInfo($"MNC = {MNC}");
         }
         else MNCLoaded = false;
-
         Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
+
+        // Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
+        if (Chainloader.PluginInfos.TryGetValue(K2D2_Plugin.ModGuid, out K2D2))
+        {
+            K2D2Loaded = true;
+            Logger.LogInfo("K2-D2 installed and available");
+            Logger.LogInfo($"K2D2 = {K2D2}");
+        }
+        else K2D2Loaded = false;
+        Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
 
         //Logger.LogInfo($"NMLoaded = {NMLoaded}");
         //if (Chainloader.PluginInfos.TryGetValue(NodeManagerPlugin.Instance.ModGuid, out NM))
@@ -784,6 +794,21 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             var instanceProperty = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
             // Logger.LogDebug($"Property name: {instanceProperty!.Name}");
             var methodInfo = instanceProperty!.PropertyType.GetMethod("LaunchMNC");
+            // Logger.LogDebug($"Method name: {methodInfo!.Name}");
+            methodInfo!.Invoke(instanceProperty.GetValue(null), null);
+        }
+    }
+
+    private void callK2D2()
+    {
+        if (K2D2Loaded)
+        {
+            // Reflections method to attempt the same thing more cleanly
+            var k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
+            // Logger.LogDebug($"Type name: {mncType!.Name}");
+            var instanceProperty = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            // Logger.LogDebug($"Property name: {instanceProperty!.Name}");
+            var methodInfo = instanceProperty!.PropertyType.GetMethod("AutoExecuteManeuver.Instance.AutoExecuteManeuver");
             // Logger.LogDebug($"Method name: {methodInfo!.Name}");
             methodInfo!.Invoke(instanceProperty.GetValue(null), null);
         }
