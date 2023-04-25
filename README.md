@@ -134,8 +134,8 @@ This mod is primarily meant as a service provider to other mods, which can call 
 
 **NOTE 2:** All of the orbital maneuver node creation methods in Flight Plan return a boolean value which is true if the node creation was successful and false otherwise.
 
-* **CircularizeAtAP(burnOffsetFactor)**: Calling this method will create a maneuver node at the next Ap for the active vessel to circularize the vessel's orbit at that point.
-* **CircularizeAtAP(burnOffsetFactor)**: Calling this method will create a maneuver node at the next Pe for the active vessel to circularize the vessel's orbit at that point.
+* **CircularizeAtAP(burnOffsetFactor)**: Calling this method will create a maneuver node at the next Apoapsis for the active vessel to circularize the vessel's orbit at that point.
+* **CircularizeAtPe(burnOffsetFactor)**: Calling this method will create a maneuver node at the next Periapsis for the active vessel to circularize the vessel's orbit at that point.
 * **CircularizeNow(burnOffsetFactor)**: Calling this method will create a maneuver node to circularize the vessel's orbit at a time aproximately 30 seconds from now.
 * **SetNewPe(newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's Periapsis (measured from center of body, not altitude above serface) at the next Ap.
 * **SetNewAp(newApR, burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's Apoapsis (measured from center of body, not altitude above serface) at the next Pe.
