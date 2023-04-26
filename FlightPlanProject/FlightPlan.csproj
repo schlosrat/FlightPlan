@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <LangVersion>latest</LangVersion>
-        <ImplicitUsings>true</ImplicitUsings>
-        <AssemblyName>com.github.schlosrat.flight_plan</AssemblyName>
-        <Product>Flight Plan</Product>
-        <Description>Plan your (Space) Flight! Fly your Plan! Set up useful maneuver nodes to get you where you want to go</Description>
-        <Version>0.7.3</Version>
-        <RestoreAdditionalProjectSources>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>true</ImplicitUsings>
+		<AssemblyName>com.github.schlosrat.flight_plan</AssemblyName>
+		<Product>Flight Plan</Product>
+		<Description>Plan your (Space) Flight! Fly your Plan! Set up useful maneuver nodes to get you where you want to go</Description>
+		<Version>0.7.4</Version>
+		<RestoreAdditionalProjectSources>
 			https://nuget.spacewarp.org/v3/index.json
 		</RestoreAdditionalProjectSources>
-        <RootNamespace>FlightPlan</RootNamespace>
-        <ModId Condition="'$(ModId)'==''">flight_plan</ModId>
+		<RootNamespace>FlightPlan</RootNamespace>
+		<ModId Condition="'$(ModId)'==''">flight_plan</ModId>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>schlosrat</Authors>
 		<PackageId>FlightPlan</PackageId>
@@ -24,20 +24,20 @@
 		<PackageTags>SpaceWarp;KSP2;modding;library;maneuvers</PackageTags>
 		<RepositoryUrl>https://github.com/schlosrat/FlightPlan</RepositoryUrl>
 		<Title>Flight Plan</Title>
-    </PropertyGroup>
+	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\README.md" Pack="true" PackagePath="" />
 	</ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.0" PrivateAssets="all" />
-        <PackageReference Include="BepInEx.Core" Version="5.*" />
-        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-        <PackageReference Include="HarmonyX" Version="2.10.1" />
-        <PackageReference Include="SpaceWarp" Version="1.1.1" />
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.0" PrivateAssets="all" />
+		<PackageReference Include="BepInEx.Core" Version="5.*" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+		<PackageReference Include="HarmonyX" Version="2.10.1" />
+		<PackageReference Include="SpaceWarp" Version="1.1.1" />
 		<PackageReference Include="NodeManager" Version="0.5.3" />
 		<PackageReference Include="UnityEngine.Modules" Version="2020.3.33" IncludeAssets="compile" />
-    </ItemGroup>
+	</ItemGroup>
     <ItemGroup>
         <Reference Include="Assembly-CSharp">
             <HintPath>..\external_dlls\Assembly-CSharp.dll</HintPath>

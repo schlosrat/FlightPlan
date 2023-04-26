@@ -21,7 +21,6 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 using K2D2;
-using K2D2.Controller;
 
 namespace FlightPlan;
 
@@ -75,7 +74,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<bool> autoLaunchMNC;
 
     // Button bools
-    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer, launchMNC;
+    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer, launchMNC, executeNode;
 
     // Body selection.
     private string selectedBody = null;
@@ -139,7 +138,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     // Access control bool for launching MNC
     private bool MNCLoaded, K2D2Loaded;
-    PluginInfo MNC, K2D2;
+    private PluginInfo MNC, K2D2;
+    private Version mncMinVersion, k2d2MinVersion;
+    private int mncVerCheck, k2d2VerCheck;
+
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
     /// <summary>
@@ -172,23 +174,31 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //StateChanges.ResearchAndDevelopmentEntered += message => GUIenabled = false;
         //StateChanges.LaunchpadEntered += message => GUIenabled = false;
         //StateChanges.RunwayEntered += message => GUIenabled = false;
-        
-        // Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
+
+        Logger.LogInfo($"ManeuverNodeControllerMod.ModGuid = {ManeuverNodeControllerMod.ModGuid}");
         if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out MNC))
         {
             MNCLoaded = true;
             Logger.LogInfo("Maneuver Node Controller installed and available");
             Logger.LogInfo($"MNC = {MNC}");
+            // mncVersion = MNC.Metadata.Version;
+            mncMinVersion = new Version(0, 8, 3);
+            mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
+            Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
         }
         else MNCLoaded = false;
         Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
 
-        // Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
+        Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
         if (Chainloader.PluginInfos.TryGetValue(K2D2_Plugin.ModGuid, out K2D2))
         {
             K2D2Loaded = true;
             Logger.LogInfo("K2-D2 installed and available");
             Logger.LogInfo($"K2D2 = {K2D2}");
+            // k2d2Version = K2D2.Metadata.Version;
+            k2d2MinVersion = new Version(0, 8, 1);
+            k2d2VerCheck = K2D2.Metadata.Version.CompareTo(k2d2MinVersion);
+            Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
         }
         else K2D2Loaded = false;
         Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
@@ -495,6 +505,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         DrawSectionHeader("Target", tgtName);
         BodySelectionGUI();
 
+        var referenceBody = activeVessel.Orbit.referenceBody;
+
         DrawSectionHeader("Ownship Maneuvers");
         if (activeVessel.Orbit.eccentricity < 1)
         {
@@ -505,19 +517,19 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         DrawButton("Circularize Now", ref circNow);
 
         DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
-        if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += activeVessel.Orbit.referenceBody.radius;
+        if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += referenceBody.radius;
         else targetPeR = 0;
 
         if (activeVessel.Orbit.eccentricity < 1)
         {
             DrawButtonWithTextField("New Ap", ref newAp, ref targetApAStr, "m");
-            if (double.TryParse(targetApAStr, out targetApR)) targetApR += activeVessel.Orbit.referenceBody.radius;
+            if (double.TryParse(targetApAStr, out targetApR)) targetApR += referenceBody.radius;
             else targetApR = 0;
 
             DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
-            if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += activeVessel.Orbit.referenceBody.radius;
+            if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += referenceBody.radius;
             else targetPeR1 = 0;
-            if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += activeVessel.Orbit.referenceBody.radius;
+            if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += referenceBody.radius;
             else targetApR1 = 0;
         }
 
@@ -527,45 +539,58 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (currentTarget != null)
         {
             // If the activeVessel and the currentTarget are both orbiting the same body
-            if (currentTarget.Orbit.referenceBody.Name == activeVessel.Orbit.referenceBody.Name)
+            if (currentTarget.Orbit != null) // No maneuvers relative to a star
             {
-                DrawSectionHeader("Maneuvers Relative to Target");
-                DrawButton("Match Planes at AN", ref matchPlanesA);
-                DrawButton("Match Planes at DN", ref matchPlanesD);
-
-                DrawButton("Hohmann Xfer", ref hohmannT);
-                DrawButton("Course Correction", ref courseCorrection);
-
-                if (experimental.Value)
+                if (currentTarget.Orbit.referenceBody.Name == referenceBody.Name)
                 {
-                    DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
-                    try { interceptT = double.Parse(interceptTStr); }
-                    catch { interceptT = 100; }
-                    DrawButton("Match Velocity @CA", ref matchVCA);
-                    DrawButton("Match Velocity Now", ref matchVNow);
+                    DrawSectionHeader("Maneuvers Relative to Target");
+                    DrawButton("Match Planes at AN", ref matchPlanesA);
+                    DrawButton("Match Planes at DN", ref matchPlanesD);
+
+                    DrawButton("Hohmann Xfer", ref hohmannT);
+                    DrawButton("Course Correction", ref courseCorrection);
+
+                    if (experimental.Value)
+                    {
+                        DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
+                        try { interceptT = double.Parse(interceptTStr); }
+                        catch { interceptT = 100; }
+                        DrawButton("Match Velocity @CA", ref matchVCA);
+                        DrawButton("Match Velocity Now", ref matchVNow);
+                    }
                 }
             }
 
             if (experimental.Value)
             {
-                //if the currentTarget is a celestial body and it's in orbit around the same body that the activeVessel's parent body is orbiting
-                if ((currentTarget.Name != activeVessel.Orbit.referenceBody.Name) && (currentTarget.Orbit.referenceBody.Name == activeVessel.Orbit.referenceBody.Orbit.referenceBody.Name))
+                // If the activeVessel is not orbiting a star
+                if (!referenceBody.IsStar && currentTarget.IsCelestialBody) // not orbiting a start and target is celestial
                 {
-                    DrawSectionHeader("Interplanetary Maneuvers");
-                    DrawButton("Interplanetary Transfer", ref planetaryXfer);
+                    // If the activeVessel is orbiting a planet and the current target is not the body the active vessel is orbiting
+                    if (referenceBody.Orbit.referenceBody.IsStar && (currentTarget.Name != referenceBody.Name) && currentTarget.Orbit != null)
+                    {
+                        if (currentTarget.Orbit.referenceBody.IsStar) // exclude targets that are a moon
+                        {
+                            DrawSectionHeader("Interplanetary Maneuvers");
+                            DrawButton("Interplanetary Transfer", ref planetaryXfer);
+                        }
+                    }
                 }
+
             }
         }
 
         // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
-        var referenceBody = activeVessel.Orbit.referenceBody;
-        if (!referenceBody.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1)
+        if (!referenceBody.IsStar) // not orbiting a star
         {
-            DrawSectionHeader("Moon Specific Maneuvers");
-            // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
-            DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAStr, "m");
-            if (double.TryParse(targetMRPeAStr, out targetMRPeR)) targetMRPeR += activeVessel.Orbit.referenceBody.radius;
-            else targetMRPeR = 0;
+            if (!referenceBody.Orbit.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1) // not orbiting a planet, and e < 1
+            {
+                DrawSectionHeader("Moon Specific Maneuvers");
+                // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
+                DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAStr, "m");
+                if (double.TryParse(targetMRPeAStr, out targetMRPeR)) targetMRPeR += activeVessel.Orbit.referenceBody.radius;
+                else targetMRPeR = 0;
+            }
         }
 
         var UT = game.UniverseModel.UniversalTime;
@@ -776,9 +801,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         else
             GUILayout.Label(inputStateString, warnStyle);
         GUILayout.FlexibleSpace();
-        if (MNCLoaded)
+        if (MNCLoaded && mncVerCheck >= 0)
         {
             launchMNC = GUILayout.Button("MNC", smallBtnStyle);
+        }
+        GUILayout.Space(10);
+        if (K2D2Loaded && currentNode != null)
+        {
+            executeNode = GUILayout.Button("K2D2", smallBtnStyle);
         }
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
@@ -786,13 +816,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void callMNC()
     {
-        if (MNCLoaded && autoLaunchMNC.Value)
+        if (MNCLoaded && mncVerCheck >= 0)
         {
             // Reflections method to attempt the same thing more cleanly
             var mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
             // Logger.LogDebug($"Type name: {mncType!.Name}");
             var instanceProperty = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
             // Logger.LogDebug($"Property name: {instanceProperty!.Name}");
+
             var methodInfo = instanceProperty!.PropertyType.GetMethod("LaunchMNC");
             // Logger.LogDebug($"Method name: {methodInfo!.Name}");
             methodInfo!.Invoke(instanceProperty.GetValue(null), null);
@@ -804,13 +835,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (K2D2Loaded)
         {
             // Reflections method to attempt the same thing more cleanly
-            var k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
+
+            var k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, K2D2");
             // Logger.LogDebug($"Type name: {mncType!.Name}");
             var instanceProperty = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
             // Logger.LogDebug($"Property name: {instanceProperty!.Name}");
-            var methodInfo = instanceProperty!.PropertyType.GetMethod("AutoExecuteManeuver.Instance.AutoExecuteManeuver");
-            // Logger.LogDebug($"Method name: {methodInfo!.Name}");
-            methodInfo!.Invoke(instanceProperty.GetValue(null), null);
+
+            if (k2d2VerCheck < 0)
+            {
+
+                var methodInfo = instanceProperty!.PropertyType.GetMethod("ToggleAppBarButton");
+                // Logger.LogDebug($"Method name: {methodInfo!.Name}");
+                methodInfo!.Invoke(instanceProperty.GetValue(null), new object[] { true });
+            }
+            else
+            {
+                var methodInfo = instanceProperty!.PropertyType.GetMethod("FlyNode");
+                // Logger.LogDebug($"Method name: {methodInfo!.Name}");
+                methodInfo!.Invoke(instanceProperty.GetValue(null), null);
+            }
         }
     }
 
@@ -1385,91 +1428,92 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void handleButtons()
     {
-        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer || launchMNC)
+        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer || launchMNC || executeNode)
         {
             bool pass;
 
             if (circAp) // Working
             {
                 pass = CircularizeAtAP(-0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (circPe) // Working
             {
                 pass = CircularizeAtPe(-0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (circNow) // Working
             {
                 pass = CircularizeNow(-0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newPe) // Working
             {
                 pass = SetNewPe(targetPeR, - 0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newAp) // Working
             {
                 pass = SetNewAp(targetApR, - 0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
             {
                 pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newInc) // Working
             {
                 pass = SetInclination(targetInc, -0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (matchPlanesA) // Working
             {
                 pass = MatchPlanesAtAN(-0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (matchPlanesD) // Working
             {
                 pass = MatchPlanesAtDN(-0.5);
-                // if (pass) callMNC();
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
             {
                 pass = HohmannTransfer(-0.5);
-                if (pass) callMNC();
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (interceptAtTime) // Experimental
             {
                 pass = InterceptTgtAtUT(interceptT, -0.5);
-                if (pass) callMNC();
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (courseCorrection) // Experimental Works at least some times...
             {
                 pass = CourseCorrection(-0.5);
-                if (pass) callMNC();
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
             {
                 pass = MoonReturn(-0.5);
-                if (pass) callMNC();
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (matchVCA) // Experimental
             {
                 pass = MatchVelocityAtCA(-0.5);
-                if (pass) callMNC();
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (matchVNow) // Experimental
             {
                 pass = MatchVelocityNow(-0.5);
-                if (pass) callMNC();
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
             {
                 pass = PlanetaryXfer(-0.5);
-                if (pass) callMNC();
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (launchMNC) callMNC();
+            else if (executeNode) callK2D2();
         }
     }
 
