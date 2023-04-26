@@ -10,7 +10,8 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
 * Requires [SpaceWarp 1.0.1+](https://spacedock.info/mod/3277/Space%20Warp%20+%20BepInEx)
 * Requires [Node Manager 0.5.2+](https://spacedock.info/mod/3366/Node%20Manager)
-* Optional, but highly recommended: [Maneuver Node Controller](https://spacedock.info/mod/3270/Maneuver%20Node%20Controller). See capabilites described below.
+* Optional, but highly recommended: [K2-D2 0.8.1+](https://spacedock.info/mod/3325/K2-D2). See capabilites described below.
+* Optional, but highly recommended: [Maneuver Node Controller 0.8.3+](https://spacedock.info/mod/3270/Maneuver%20Node%20Controller). See capabilites described below.
 
 ## Links
 * [Space Dock](https://spacedock.info/mod/3359/Flight%20Plan)
@@ -28,23 +29,28 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 ### Own Ship Maneuvers
 * Circularize at Ap
 * Circularize at Pe
+* Circularize Now
 * New Pe (user specified value) - planned for next Ap
 * New Ap (user specified value) - planned for next Pe
+* New Pe & Ap (for user specified values) - Burn ASAP
 * New Inclination (user specified value) - if e < 0: Planned for cheapest AN/DN, otherwise planned for ASAP
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
+* Course Correction (requires being on an intercept trajectory)
 * Match planes with Target at AN
 * Match Planes with Target at DN 
 * Hohmann Transfer to Target
+### Moon Specific Maneuvers (only available when in orbit about a moon)
+* Return from a Moon
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
 * Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
 * Failures are shown in **Red** indicating no node has been generated with some clue as to why.
 ### Game Input Enable/Disable Status
 * To prevent the things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your time warp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full functionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
+### Integration with K2-D2, v0.8.1+
+* *If* K2-D2 is installed, then a "K2D2" button will be presented in the lower right part of the GUI whenever there is an execuable maneuver node. If the version of K2-D2 is 0.8.0 or *earlier*, then pressing Flight Plan's K2-D2 button will bring up the K2-D2 GUI to assist with the precision execution of the planned maneuver. If K2-D2 0.8.1 or *later* is installed, then pressing the K2-D2 button will cause K2-D2 to **execute** the next maneuver node - this doens't bring up the K2-D2 GUI, but if you have it up you'll be able to watch it as it executes the node.
 ### Integration with Maneuver Node Controller, v0.8.3+
-* *If* Maneuver Node Controller (v0.8.3 or later) is installed, and *if* the Launch Maneuver Node Controller configuration setting is Enabled, then when you activate an *experimental* node creation function the Maneuver Node Controller mod will automatically be brought up if it is not already up. This can make it easier to evaluate and adjust nodes constructed using experimental functions (those listed under Planned Improvement below)
-
-**NOTE:** At this time *Flight Plan has no capability to execute nodes* - it just helps you plan them. Getting a *Good* result in the status does not mean your craft is pointed in the right direction or is otherwise ready to execute the node, but rather that the node is ready for you!
+* *If* Maneuver Node Controller (v0.8.3 or later) is installed then Flight Plan will present a "MNC" button in the lower right corner of the GUI. Pressing that button will bring up the Maneuver Node Controller GUI. *If* the *Launch Maneuver Node Controller* configuration setting is Enabled, then when you activate an *experimental* node creation function the Maneuver Node Controller mod will automatically be brought up if it is not already up. This can make it easier to evaluate and adjust nodes constructed using experimental functions (those listed under Planned Improvement below)
 
 ## UI Screens
 In addition to the basic UI screen above the UI will automatically asjust to offer capabilities relevant to the current orbit and selected target.
@@ -70,18 +76,12 @@ Using the configuration parameters you can change a variety of things such as ho
 ![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
 
 Work In Progress developmental features may be enabled by switching on the Experimental Features in the mod's configuration screen. You will need to restart the game for this setting to take effect, but it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the Experimental Features setting.
-### Own Ship Maneuvers
-* Circularize Now
-* New Pe & Ap (for user specified values) - Burn ASAP
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
 * Intercept Target (at user specified time from now)
-* Course Correction (requires being on an intercept trajectory)
 * Match Velocity at Closest Approach (requires being on an intercept trajectory)
 * Match Velocity Now
 ### Interplanetary Transfer Maneuvers (only available if a planet is the selected target)
 * Interplanetary Transfer
-### Moon Specific Maneuvers (only available when in orbit about a moon)
-* Return from a Moon
 
 ## Example Images
 ### Circularize at the Next Ap
