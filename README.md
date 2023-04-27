@@ -9,7 +9,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 ## Compatibility
 * Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
 * Requires [SpaceWarp 1.0.1+](https://spacedock.info/mod/3277/Space%20Warp%20+%20BepInEx)
-* Requires [Node Manager 0.5.2+](https://spacedock.info/mod/3366/Node%20Manager)
+* Requires [Node Manager 0.5.3+](https://spacedock.info/mod/3366/Node%20Manager)
 * Optional, but highly recommended: [K2-D2 0.8.1+](https://spacedock.info/mod/3325/K2-D2). See capabilities described below.
 * Optional, but highly recommended: [Maneuver Node Controller 0.8.3+](https://spacedock.info/mod/3270/Maneuver%20Node%20Controller). See capabilites described below.
 
