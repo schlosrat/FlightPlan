@@ -136,11 +136,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     //public ManualLogSource logger;
     public new static ManualLogSource Logger { get; set; }
 
-    // Access control bool for launching MNC
-    private bool MNCLoaded, K2D2Loaded;
+    // Refelction access variables for launching MNC & K2-D2
+    private bool MNCLoaded, K2D2Loaded, checkK2D2status  = false;
     private PluginInfo MNC, K2D2;
     private Version mncMinVersion, k2d2MinVersion;
     private int mncVerCheck, k2d2VerCheck;
+    private string k2d2Status;
+    Type k2d2Type, mncType;
+    PropertyInfo k2d2PropertyInfo, mncPropertyInfo;
+    MethodInfo k2d2GetStatusMethodInfo, k2d2FlyNodeMethodInfo, k2d2ToggleMethodInfo, mncLaunchMNCMethodInfo;
+    object k2d2Instance, mncInstance;
 
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
@@ -185,8 +190,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             mncMinVersion = new Version(0, 8, 3);
             mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
             Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
+
+            // Reflections method to attempt the same thing more cleanly
+            mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
+            mncPropertyInfo = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            mncInstance = mncPropertyInfo.GetValue(null);
+            mncLaunchMNCMethodInfo = mncPropertyInfo!.PropertyType.GetMethod("LaunchMNC");
         }
-        else MNCLoaded = false;
+        // else MNCLoaded = false;
         Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
 
         Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
@@ -195,12 +206,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             K2D2Loaded = true;
             Logger.LogInfo("K2-D2 installed and available");
             Logger.LogInfo($"K2D2 = {K2D2}");
-            // k2d2Version = K2D2.Metadata.Version;
             k2d2MinVersion = new Version(0, 8, 1);
             k2d2VerCheck = K2D2.Metadata.Version.CompareTo(k2d2MinVersion);
             Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
+
+            k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
+            k2d2PropertyInfo = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            k2d2Instance = k2d2PropertyInfo.GetValue(null);
+            k2d2ToggleMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("ToggleAppBarButton");
+            k2d2FlyNodeMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("FlyNode");
+            k2d2GetStatusMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("GetStatus");
         }
-        else K2D2Loaded = false;
+        // else K2D2Loaded = false;
         Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
 
         //Logger.LogInfo($"NMLoaded = {NMLoaded}");
@@ -811,6 +828,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             executeNode = GUILayout.Button("K2D2", smallBtnStyle);
         }
         GUILayout.EndHorizontal();
+        if (checkK2D2status)
+        {
+            getK2D2Status();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"K2D2: {k2d2Status}", labelStyle);
+            // GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
         GUILayout.Space(spacingAfterEntry);
     }
 
@@ -818,15 +843,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         if (MNCLoaded && mncVerCheck >= 0)
         {
-            // Reflections method to attempt the same thing more cleanly
-            var mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
-            // Logger.LogDebug($"Type name: {mncType!.Name}");
-            var instanceProperty = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            // Logger.LogDebug($"Property name: {instanceProperty!.Name}");
-
-            var methodInfo = instanceProperty!.PropertyType.GetMethod("LaunchMNC");
-            // Logger.LogDebug($"Method name: {methodInfo!.Name}");
-            methodInfo!.Invoke(instanceProperty.GetValue(null), null);
+            mncLaunchMNCMethodInfo!.Invoke(mncPropertyInfo.GetValue(null), null);
         }
     }
 
@@ -835,24 +852,34 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (K2D2Loaded)
         {
             // Reflections method to attempt the same thing more cleanly
-
-            var k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, K2D2");
-            // Logger.LogDebug($"Type name: {mncType!.Name}");
-            var instanceProperty = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            // Logger.LogDebug($"Property name: {instanceProperty!.Name}");
-
             if (k2d2VerCheck < 0)
             {
-
-                var methodInfo = instanceProperty!.PropertyType.GetMethod("ToggleAppBarButton");
-                // Logger.LogDebug($"Method name: {methodInfo!.Name}");
-                methodInfo!.Invoke(instanceProperty.GetValue(null), new object[] { true });
+                k2d2ToggleMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), new object[] { true });
             }
             else
             {
-                var methodInfo = instanceProperty!.PropertyType.GetMethod("FlyNode");
-                // Logger.LogDebug($"Method name: {methodInfo!.Name}");
-                methodInfo!.Invoke(instanceProperty.GetValue(null), null);
+                k2d2FlyNodeMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), null);
+                checkK2D2status = true;
+            }
+        }
+    }
+
+    private void getK2D2Status()
+    {
+        if (K2D2Loaded)
+        {
+            if (k2d2VerCheck >= 0)
+            {
+                k2d2Status = (string)k2d2GetStatusMethodInfo!.Invoke(k2d2Instance, null);
+
+                if (k2d2Status == "Done")
+                {
+                    if (currentNode.Time < Game.UniverseModel.UniversalTime)
+                    {
+                        NodeManagerPlugin.Instance.DeleteNodes(0);
+                    }
+                    checkK2D2status = false;
+                }
             }
         }
     }
