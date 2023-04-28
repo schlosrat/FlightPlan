@@ -4,11 +4,12 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using FPUtilities;
 using HarmonyLib;
+using K2D2;
 using KSP.Game;
-using KSP.Sim;
 using KSP.Sim.impl;
 using KSP.Sim.Maneuver;
 using KSP.UI.Binding;
+using LibNoise.Modifiers;
 using ManeuverNodeController;
 using MuMech;
 using NodeManager;
@@ -20,7 +21,6 @@ using SpaceWarp.API.UI.Appbar;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
-using K2D2;
 
 namespace FlightPlan;
 
@@ -68,13 +68,37 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<string> defaultTargetMRPeAStr;
     private ConfigEntry<string> defaultTargetIncStr;
     private ConfigEntry<string> defaultInterceptTStr;
+    private ConfigEntry<string> defaultTargetLANStr;
     private ConfigEntry<double> statusPersistence;
     private ConfigEntry<double> statusFadeTime;
     private ConfigEntry<bool> experimental;
     private ConfigEntry<bool> autoLaunchMNC;
 
     // Button bools
-    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer, launchMNC, executeNode;
+    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, newLAN; // Ownship maneuvers
+    private bool matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, matchVCA, matchVNow; // Maneuvers relative to target
+    private bool moonReturn, planetaryXfer; // Specialized Moon/Planet relative maneuvers
+    private bool launchMNC, executeNode; // Utility functions
+
+    private List<Toggle> _initialToggles = new()
+    {
+        new Toggle(){name = "Circularize",      selected = false},
+        new Toggle(){name = "SetNewAp",         selected = false},
+        new Toggle(){name = "SetNewPe",         selected = false},
+        new Toggle(){name = "Elipticize",       selected = false},
+        new Toggle(){name = "SetNewInc",        selected = false},
+        new Toggle(){name = "SetNewLAN",        selected = false},
+        new Toggle(){name = "MatchPlane",       selected = false},
+        new Toggle(){name = "MatchVelocity",    selected = false},
+        new Toggle(){name = "CourseCorrection", selected = false},
+        new Toggle(){name = "HohmannTransfer",  selected = false},
+        new Toggle(){name = "InterceptTgt",     selected = false},
+        new Toggle(){name = "MoonReturn",       selected = false},
+        new Toggle(){name = "PlanetaryXfer",    selected = false}
+    };
+    private List<Toggle> _toggles = new();
+    private List<Toggle> _previousToggles = new();
+    private readonly Dictionary<string, bool> _wasToggledDict = new();
 
     // Body selection.
     private string selectedBody = null;
@@ -95,6 +119,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private string targetApAStr1;  // m - This is initially set = targetApAStr
     private string targetMRPeAStr; // m - This is initially set = targetApAStr
     private string targetIncStr;   // degrees - Default 0
+    private string targetLANStr;   // degrees - Default 0
     private string interceptTStr;  // s - This is a Configurable Parameter
 
     // Values from Text Inputs
@@ -104,6 +129,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private double targetApR1;
     private double targetMRPeR;
     private double targetInc;
+    private double targetLAN;
     private double interceptT;
 
     // GUI layout and style stuff
@@ -117,7 +143,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private GUIStyle smallBtnStyle;
     // private GUIStyle mainWindowStyle;
     private GUIStyle textInputStyle;
-    // private GUIStyle sectionToggleStyle;
+    private GUIStyle sectionToggleStyle;
     private GUIStyle closeBtnStyle;
     private GUIStyle nameLabelStyle;
     private GUIStyle valueLabelStyle;
@@ -186,12 +212,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             MNCLoaded = true;
             Logger.LogInfo("Maneuver Node Controller installed and available");
             Logger.LogInfo($"MNC = {MNC}");
-            // mncVersion = MNC.Metadata.Version;
             mncMinVersion = new Version(0, 8, 3);
             mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
             Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
 
-            // Reflections method to attempt the same thing more cleanly
+            // Get instance and method(s) once at initilization to have them on hand for calling later
             mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
             mncPropertyInfo = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
             mncInstance = mncPropertyInfo.GetValue(null);
@@ -210,6 +235,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             k2d2VerCheck = K2D2.Metadata.Version.CompareTo(k2d2MinVersion);
             Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
 
+            // Get instance and method(s) once at initilization to have them on hand for calling later
             k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
             k2d2PropertyInfo = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
             k2d2Instance = k2d2PropertyInfo.GetValue(null);
@@ -220,22 +246,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // else K2D2Loaded = false;
         Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
 
-        //Logger.LogInfo($"NMLoaded = {NMLoaded}");
-        //if (Chainloader.PluginInfos.TryGetValue(NodeManagerPlugin.Instance.ModGuid, out NM))
-        //{
-        //    NMLoaded = true;
-        //    Logger.LogInfo("Node Manager installed and available");
-        //    Logger.LogInfo($"MNC = {NM}");
-        //}
-        //else NMLoaded = false;
-        //Logger.LogInfo($"NMLoaded = {NMLoaded}");
-
         // Setup the list of input field names (most are the same as the entry string text displayed in the GUI window)
         inputFields.Add("New Pe");
         inputFields.Add("New Ap");
         inputFields.Add("New Pe & Ap");
         inputFields.Add("New Ap & Pe"); // kludgy name for the second input in a two input line
         inputFields.Add("New Inclination");
+        inputFields.Add("New LAN");
         inputFields.Add("Intercept at Time");
         inputFields.Add("Select Target");
 
@@ -245,6 +262,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             Destroy(this);
         }
         loaded = true;
+
+        // Borrowed from ModListUI in SpaceWarp. May need to initialize _initialToggles and _toggles here, but this example
+        // need to be updated to work here.
+        //_initialToggles = SpaceWarpManager.PluginGuidEnabledStatus.ToList().FindAll(
+        //    item => !NoTogglePlugins.Contains(item.Item1)
+        //);
+        _toggles         = new List<Toggle>(_initialToggles);
+        _previousToggles = new List<Toggle>(_initialToggles);
 
         gameObject.hideFlags = HideFlags.HideAndDontSave;
         DontDestroyOnLoad(gameObject);
@@ -263,11 +288,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         textInputStyle = new GUIStyle(_spaceWarpUISkin.textField)
         {
             alignment = TextAnchor.LowerCenter,
-            padding = new RectOffset(10, 10, 0, 0),
+            padding = new RectOffset(10, 10, 0, 3),
             contentOffset = new Vector2(0, 2),
-            fixedHeight = 20,
+            fixedHeight = 24,
             clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
+            margin = new RectOffset(0, 0, 10, 1)
         };
 
         tgtBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
@@ -318,10 +343,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             margin = new RectOffset(0, 0, 10, 0)
         };
 
-        //sectionToggleStyle = new GUIStyle(_spaceWarpUISkin.toggle)
-        //{
-        //    padding = new RectOffset(14, 0, 3, 3)
-        //};
+        sectionToggleStyle = new GUIStyle(_spaceWarpUISkin.toggle)
+        {
+            // padding = new RectOffset(0, 18, -5, 0),
+            // contentOffset = new Vector2(17, 8),
+            padding = new RectOffset(14, 0, 3, 3)
+        };
 
         statusStyle = new GUIStyle(_spaceWarpUISkin.label);
 
@@ -349,11 +376,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         closeBtnRect = new Rect(windowWidth - 23, 6, 16, 16);
 
-        labelStyle = warnStyle = new GUIStyle(_spaceWarpUISkin.label); //  GUI.skin.GetStyle("Label"));
-        errorStyle = new GUIStyle(_spaceWarpUISkin.label); //  GUI.skin.GetStyle("Label"));
+        labelStyle = new GUIStyle(_spaceWarpUISkin.label) //  GUI.skin.GetStyle("Label"));
+        {
+            padding = new RectOffset(0, 0, 0, 3),
+            fixedHeight = 25
+        };
+        errorStyle = new GUIStyle(_spaceWarpUISkin.label) //  GUI.skin.GetStyle("Label"));
+        {
+            padding = new RectOffset(0, 0, 0, 3),
+            fixedHeight = 25
+        };
         errorStyle.normal.textColor = Color.red;
-        warnStyle = new GUIStyle(_spaceWarpUISkin.label); //  GUI.skin.GetStyle("Label"));
+
+        warnStyle = new GUIStyle(_spaceWarpUISkin.label) //  GUI.skin.GetStyle("Label"));
+        {
+            padding = new RectOffset(0, 0, 0, 3),
+            fixedHeight = 25
+        };
         warnStyle.normal.textColor = Color.yellow;
+
         horizontalDivider.fixedHeight = 2;
         horizontalDivider.margin = new RectOffset(0, 0, 4, 4);
 
@@ -379,10 +420,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         initialStatusText = Config.Bind<string>("Status Settings Section", "Initial Status", "Virgin", "Controls the status reported at startup prior to the first command");
         experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable experimental.Value features for testing - Warrantee Void if Enabled!");
         autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when experimental.Value nodes are created");
-        defaultTargetPeAStr  = Config.Bind<string>("Defualt Inputs Section", "Target Pe Alt",        "80000", "Default Pe input (in meters) used to pre-populate text input field at startup");
+        defaultTargetPeAStr  = Config.Bind<string>("Defualt Inputs Section", "Target Pe Alt",       "80000", "Default Pe input (in meters) used to pre-populate text input field at startup");
         defaultTargetApAStr = Config.Bind<string>("Defualt Inputs Section", "Target Ap Alt",       "250000", "Default Ap input (in meters) used to pre-populate text input field at startup");
         defaultTargetIncStr = Config.Bind<string>("Defualt Inputs Section", "Target Inclination",       "0", "Default inclination input (in degrees) used to pre-populate text input field at startup");
-        defaultInterceptTStr = Config.Bind<string>("Defualt Inputs Section", "Target Intercept Time",  "100", "Default intercept time (in seconds) used to pre-populate text input field at startup");
+        defaultTargetLANStr = Config.Bind<string>("Defualt Inputs Section", "Target LAN",               "0", "Default Longitude of Ascending Node (in degrees) used to pre-populate text input field at startup");
+        defaultInterceptTStr = Config.Bind<string>("Defualt Inputs Section", "Target Intercept Time", "100", "Default intercept time (in seconds) used to pre-populate text input field at startup");
         defaultTargetMRPeAStr = Config.Bind<string>("Defualt Inputs Section", "Target Moon Return Pe Alt", "100000", "Default Moon Return Target Pe input (in meters) used to pre-populate text input field at startup");
 
         // Set the initial and defualt values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
@@ -393,7 +435,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         targetApAStr1  = defaultTargetApAStr.Value;
         targetMRPeAStr = defaultTargetMRPeAStr.Value;
         targetIncStr   = defaultTargetIncStr.Value;
-        interceptTStr  = defaultInterceptTStr.Value;
+        targetLANStr   = defaultTargetLANStr.Value;
+        interceptTStr = defaultInterceptTStr.Value;
 
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental.Value}");
@@ -506,6 +549,79 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             CloseWindow();
         }
+        
+        // Make toggle buttons behave like radio buttons
+        int numChecked = _toggles.Count(item => item.selected); // how many are selected now (could be 0, 1, or 2)
+        int oldNumChecked = _previousToggles.Count(item => item.selected); // how many were selected before (could be 0 or 1)
+        if (numChecked == 0 && oldNumChecked > 0) // if the selected action has been deselected
+        {
+            _previousToggles = new List<Toggle>(_initialToggles);
+        }
+        if (numChecked == 1)
+        {
+            if (oldNumChecked == 0) // We gone from none selected to 1 selected
+            {
+                var selected = _toggles.FindIndex(item => item.selected);
+                _previousToggles[selected].selected = true; // record the new selection in the previous list
+            }
+            else if (oldNumChecked == 1) // they should be the same, let's check
+            {
+                var oldSelected = _previousToggles.FindIndex(item => item.selected);
+                var newSelected = _toggles.FindIndex(item => item.selected);
+                if (oldSelected != newSelected)
+                {
+                    Logger.LogWarning($"Selection Mismatch: Previously {_toggles[oldSelected].name} was selected, but now {_toggles[newSelected].name} is selected. Correcting previous list.");
+                    _previousToggles[oldSelected].selected = false; // update the previous list to deselect the previous selection
+                    _previousToggles[newSelected].selected = true;  // update the previous list to select the new selection
+                }
+            }
+            else // We shouldn't get here, but if there's more than one thing selected in the previous list and only one in the current list then fix it
+            {
+                _previousToggles = new List<Toggle>(_initialToggles);
+                var newSelected = _toggles.FindIndex(item => item.selected);
+                _previousToggles[newSelected].selected = true;
+            }
+        }
+        else if (numChecked == 2)
+        {
+            if (oldNumChecked == 0) // This should not happen, report it and clear everything
+            {
+                Logger.LogError($"Selection Mismatch: Two or more things selected with zero previously. Resetting all.");
+                _toggles = new List<Toggle>(_initialToggles);
+                _previousToggles = new List<Toggle>(_initialToggles);
+            }
+            else if (oldNumChecked == 1) // We've selected something new
+            {
+                var oldSelected = _previousToggles.FindIndex(item => item.selected);
+                _toggles[oldSelected].selected = false; // deselect the previous selection
+                var newSelected = _toggles.FindIndex(item => item.selected);
+                _previousToggles[newSelected].selected = true; // update the previous list to select the new selection
+            }
+            else // We shouldn't get here, but if there's more than one thing selected in the previous list and two in the current list then clear everything
+            {
+                Logger.LogError($"Selection Mismatch: Two or more things selected with two or more previously. Resetting all.");
+                _toggles = new List<Toggle>(_initialToggles);
+                _previousToggles = new List<Toggle>(_initialToggles);
+            }
+        }
+        else // We should not be able to get here! Deselect everything...
+        {
+            Logger.LogError($"Selection Mismatch: More than two things selected! Resetting all.");
+            _toggles = new List<Toggle>(_initialToggles);
+            _previousToggles = new List<Toggle>(_initialToggles);
+        }
+        // Make toggle buttons behave like radio buttons
+        numChecked = _toggles.Count(item => item.selected); // how many are selected now (could be 0, 1)
+        oldNumChecked = _previousToggles.Count(item => item.selected); // how many were selected before (should match numChecked)
+        int selectedAction = -1;
+        if (numChecked == 1)
+            selectedAction = _toggles.FindIndex(item => item.selected);
+        else
+        {
+            Logger.LogError($"Selection Mismatch: Two or more things selected after update. Resetting all.");
+            _toggles = new List<Toggle>(_initialToggles);
+            _previousToggles = new List<Toggle>(_initialToggles);
+        }
 
         // game = GameManager.Instance.Game;
         //activeNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
@@ -524,21 +640,30 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         var referenceBody = activeVessel.Orbit.referenceBody;
 
+        int thisItem;
         DrawSectionHeader("Ownship Maneuvers");
+        //if (activeVessel.Orbit.eccentricity < 1)
+        //{
+        //    DrawButton("Circularize at Ap", ref circAp);
+        //}
+        //DrawButton("Circularize at Pe", ref circPe);
+
+        //DrawButton("Circularize Now", ref circNow);
+        thisItem = _toggles.FindIndex(item => item.name == "Circularize");
+        DrawSoloToggle(" Circularize", ref circNow);
+        if (circNow) _toggles[thisItem].selected = true;
+
+        // DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
+        thisItem = _toggles.FindIndex(item => item.name == "SetNewPe");
+        DrawSoloToggle(" Set New Pe", ref newPe);
+        if (newPe) _toggles[thisItem].selected = true;
+
+        //if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += referenceBody.radius;
+        //else targetPeR = 0;
+
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            DrawButton("Circularize at Ap", ref circAp);
-        }
-        DrawButton("Circularize at Pe", ref circPe);
-
-        DrawButton("Circularize Now", ref circNow);
-
-        DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
-        if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += referenceBody.radius;
-        else targetPeR = 0;
-
-        if (activeVessel.Orbit.eccentricity < 1)
-        {
+            thisItem = _toggles.FindIndex(item => item.name == "SetNewPe");
             DrawButtonWithTextField("New Ap", ref newAp, ref targetApAStr, "m");
             if (double.TryParse(targetApAStr, out targetApR)) targetApR += referenceBody.radius;
             else targetApR = 0;
@@ -552,6 +677,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
         if (!double.TryParse(targetIncStr, out targetInc)) targetInc = 0;
+
+        if (experimental.Value)
+            DrawButtonWithTextField("New LAN", ref newLAN, ref targetLANStr, "°");
+
+        if (!double.TryParse(targetLANStr, out targetLAN)) targetLAN = 0;
 
         if (currentTarget != null)
         {
@@ -792,6 +922,34 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
+
+    private void DrawSoloToggle(string optionName, ref bool toggle)
+    {
+        GUILayout.Space(5);
+        GUILayout.BeginHorizontal();
+        toggle = GUILayout.Toggle(toggle, optionName, sectionToggleStyle);
+        // GUILayout.Space(5);
+        // GUILayout.Label(optionName, labelStyle);
+        GUILayout.EndHorizontal();
+        GUILayout.Space(-5);
+    }
+
+    /// <summary>
+    /// Draws a white horizontal line accross the container it's put in
+    /// </summary>
+    /// <param name="height">Height/thickness of the line</param>
+    public static void DrawHorizontalLine(float height)
+    {
+        Texture2D horizontalLineTexture = new Texture2D(1, 1);
+        horizontalLineTexture.SetPixel(0, 0, Color.white);
+        horizontalLineTexture.Apply();
+        GUI.DrawTexture(GUILayoutUtility.GetRect(Screen.width, height), horizontalLineTexture);
+    }
+
+    /// <summary>
+    /// Draws a white horizontal line accross the container it's put in with height of 1 px
+    /// </summary>
+    public static void DrawHorizontalLine() { DrawHorizontalLine(1); }
 
     private void DrawGUIStatus(double UT)
     {
@@ -1161,6 +1319,37 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
+    public bool SetNewLAN(double newLAN, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("SetNewAp");
+        // Debug.Log("Set New Ap");
+        // var TimeToPe = orbit.TimeToPe;
+        var burnUT = UT + 30;
+
+        status = Status.WARNING;
+        statusText = "Experimental LAN Change Ready";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(orbit, burnUT, newLAN);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New LAN: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
     public bool MatchPlanesAtAN(double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -1221,16 +1410,35 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
+        TimeSelector timeSelector;
 
         Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name}");
         // Debug.Log("Hohmann Transfer");
         double burnUT;
+        Vector3d deltaV;
 
         status = Status.WARNING;
         statusText = $"Ready to Transfer to {currentTarget.Name}?";
         statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        bool simpleTransfer = true;
+        bool intercept_only = true;
+        if (simpleTransfer)
+        {
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        }
+        else
+        {
+            // timeSelector = new TimeSelector(new TimeReference[] { TimeReference.COMPUTED, TimeReference.PERIAPSIS, TimeReference.APOAPSIS, TimeReference.X_FROM_NOW, TimeReference.ALTITUDE, TimeReference.EQ_DESCENDING, TimeReference.EQ_ASCENDING, TimeReference.REL_NEAREST_AD, TimeReference.REL_ASCENDING, TimeReference.REL_DESCENDING, TimeReference.CLOSEST_APPROACH });
+
+            var anExists = orbit.AscendingNodeExists(currentTarget.Orbit as PatchedConicsOrbit);
+            var dnExists = orbit.DescendingNodeExists(currentTarget.Orbit as PatchedConicsOrbit);
+            double anTime = orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            double dnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            // burnUT = timeSelector.ComputeManeuverTime(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT, intercept_only: intercept_only, fixed_ut: false);
+        }
+
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
@@ -1430,7 +1638,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         var orbit = activeVessel.Orbit;
 
         Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name}");
-        double burnUT;
+        double burnUT, burnUT2;
         bool syncPhaseAngle = true;
 
         status = Status.WARNING;
@@ -1438,6 +1646,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         statusTime = UT + statusPersistence.Value;
 
         var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT);
+        var deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, out burnUT2);
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
@@ -1455,12 +1664,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void handleButtons()
     {
-        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer || launchMNC || executeNode)
+        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || newLAN || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer || launchMNC || executeNode)
         {
             bool pass;
+            TimeSelector timeSelector;
 
             if (circAp) // Working
             {
+                timeSelector = new TimeSelector(new TimeReference[] { TimeReference.APOAPSIS, TimeReference.PERIAPSIS, TimeReference.ALTITUDE, TimeReference.X_FROM_NOW });
+                timeSelector.DoChooseTimeGUI();
                 pass = CircularizeAtAP(-0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
@@ -1488,6 +1700,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             {
                 pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
+            }
+            else if (newLAN) // Untested
+            {
+                pass = SetNewLAN(targetLAN, -0.5);
+                if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newInc) // Working
             {
@@ -1587,4 +1804,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             Logger.LogDebug($"hypotheticalOrbit:{hypotheticalOrbit}");
         }
     }
+}
+
+public class Toggle
+{
+    public string name { get; set; }
+    public bool selected { get; set; }
 }
