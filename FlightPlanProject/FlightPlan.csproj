@@ -8,7 +8,7 @@
 		<AssemblyName>com.github.schlosrat.flight_plan</AssemblyName>
 		<Product>Flight Plan</Product>
 		<Description>Plan your (Space) Flight! Fly your Plan! Set up useful maneuver nodes to get you where you want to go</Description>
-		<Version>0.7.5</Version>
+		<Version Label="Version of the mod">0.7.5</Version>
 		<RestoreAdditionalProjectSources>
 			https://nuget.spacewarp.org/v3/index.json
 		</RestoreAdditionalProjectSources>
