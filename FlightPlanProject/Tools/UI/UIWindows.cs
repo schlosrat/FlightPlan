@@ -39,8 +39,8 @@ public class UIWindow
     {
         if (window_frame == Rect.zero)
         {
-            int x_pos = Settings.window_x_pos;
-            int y_pos = Settings.window_y_pos;
+            int x_pos = FPSettings.window_x_pos;
+            int y_pos = FPSettings.window_y_pos;
 
             if (x_pos == -1)
             {

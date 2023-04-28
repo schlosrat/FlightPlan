@@ -4,7 +4,7 @@ using FlightPlan.Tools;
 
 namespace FlightPlan.UI;
 
-public class MyStyles
+public class FPStyles
 {
     private static bool guiLoaded = false;
 
@@ -33,7 +33,7 @@ public class MyStyles
 
     public static GUIStyle icons_label, title;
 
-    public static Texture2D gear, icon, big_icon, cross;
+    public static Texture2D gear, icon, k2d2_big_icon, cross;
 
     public static void Init()
     {
@@ -64,9 +64,8 @@ public class MyStyles
 
     public static void GetStyles()
     {
-        if (window != null)
+        if (guiLoaded)
             return;
-
 
         // Define the GUIStyle for the window
         window = new GUIStyle(GUI.skin.window);
@@ -240,7 +239,7 @@ public class MyStyles
         // icons
         gear = AssetsLoader.loadIcon("gear");
         icon = AssetsLoader.loadIcon("icon");
-        big_icon = AssetsLoader.loadIcon("big_icon");
+        k2d2_big_icon = AssetsLoader.loadIcon("k2d2_big_icon");
         cross = AssetsLoader.loadIcon("Cross");
 
         icons_label = new GUIStyle(GUI.skin.GetStyle("Label"));

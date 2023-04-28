@@ -305,26 +305,3 @@ public class SettingsFile
     }
 }
     
-public class Settings
-{
-    public static SettingsFile s_settings_file = null;
-    public static string s_settings_path;
-
-    public static void Init(string settings_path)
-    {
-        s_settings_file = new SettingsFile(settings_path);
-    }
-
-    public static int window_x_pos
-    {
-        get => s_settings_file.GetInt("window_x_pos", 70);
-        set { s_settings_file.SetInt("window_x_pos", value); }
-    }
-
-    public static int window_y_pos
-    {
-        get => s_settings_file.GetInt("window_y_pos", 50);
-        set { s_settings_file.SetInt("window_y_pos", value); }
-    }
-
-}

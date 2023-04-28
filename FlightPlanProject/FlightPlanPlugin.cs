@@ -39,7 +39,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
     // Control click through to the game
-    public List<String> inputFields = new List<String>();
+    //public List<String> inputFields = new List<String>();
 
     // GUI stuff
     static bool loaded = false;
@@ -64,11 +64,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     // Config parameters
     private ConfigEntry<string> initialStatusText;
-    private ConfigEntry<string> defaultTargetPeAStr;
-    private ConfigEntry<string> defaultTargetApAStr;
-    private ConfigEntry<string> defaultTargetMRPeAStr;
-    private ConfigEntry<string> defaultTargetIncStr;
-    private ConfigEntry<string> defaultInterceptTStr;
+    //private ConfigEntry<string> defaultTargetPeAStr;
+    //private ConfigEntry<string> defaultTargetApAStr;
+    //private ConfigEntry<string> defaultTargetMRPeAStr;
+    //private ConfigEntry<string> defaultTargetIncStr;
+    //private ConfigEntry<string> defaultInterceptTStr;
     private ConfigEntry<double> statusPersistence;
     private ConfigEntry<double> statusFadeTime;
     private ConfigEntry<bool> experimental;
@@ -95,8 +95,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private double targetPeAltitude1;  // m
     private double targetApAltitude1;  // m
     private double targetMRPeAtitude; // m
-
-    private string interceptTStr;  // s - This is a Configurable Parameter
 
     // Values from Text Inputs
     private double targetPeR;
@@ -136,7 +134,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         base.OnInitialized();
 
-        Settings.Init(SettingsPath);
+        FPSettings.Init(SettingsPath);
 
         Instance = this;
 
@@ -177,13 +175,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //Logger.LogInfo($"NMLoaded = {NMLoaded}");
 
         // Setup the list of input field names (most are the same as the entry string text displayed in the GUI window)
-        inputFields.Add("New Pe");
-        inputFields.Add("New Ap");
-        inputFields.Add("New Pe & Ap");
-        inputFields.Add("New Ap & Pe"); // kludgy name for the second input in a two input line
-        inputFields.Add("New Inclination");
-        inputFields.Add("Intercept at Time");
-        inputFields.Add("Select Target");
+        //inputFields.Add("New Pe");
+        //inputFields.Add("New Ap");
+        //inputFields.Add("New Pe & Ap");
+        //inputFields.Add("New Ap & Pe"); // kludgy name for the second input in a two input line
+        //inputFields.Add("New Inclination");
+        //inputFields.Add("Intercept at Time");
+        //inputFields.Add("Select Target");
 
         Logger.LogInfo("Loaded");
         if (loaded)
@@ -205,11 +203,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Harmony.CreateAndPatchAll(typeof(FlightPlanPlugin).Assembly);
 
         // Fetch a configuration value or create a default one if it does not exist
-        // statusPersistence = Config.Bind<double>("Status Settings Section", "Satus Hold Time",      20, "Controls time delay (in seconds) before status beings to fade");
-        // statusFadeTime    = Config.Bind<double>("Status Settings Section", "Satus Fade Time",      20, "Controls the time (in seconds) it takes for status to fade");
-        // initialStatusText = Config.Bind<string>("Status Settings Section", "Initial Status", "Virgin", "Controls the status reported at startup prior to the first command");
-        // experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable experimental.Value features for testing - Warrantee Void if Enabled!");
-        // autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when experimental.Value nodes are created");
+        statusPersistence = Config.Bind<double>("Status Settings Section", "Satus Hold Time",      20, "Controls time delay (in seconds) before status beings to fade");
+        statusFadeTime    = Config.Bind<double>("Status Settings Section", "Satus Fade Time",      20, "Controls the time (in seconds) it takes for status to fade");
+        initialStatusText = Config.Bind<string>("Status Settings Section", "Initial Status", "Virgin", "Controls the status reported at startup prior to the first command");
+        experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable experimental.Value features for testing - Warrantee Void if Enabled!");
+        autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when experimental.Value nodes are created");
         // defaultTargetPeAStr  = Config.Bind<string>("Default Inputs Section", "Target Pe Alt",        "80000", "Default Pe input (in meters) used to pre-populate text input field at startup");
         // defaultTargetApAStr = Config.Bind<string>("Default Inputs Section", "Target Ap Alt",       "250000", "Default Ap input (in meters) used to pre-populate text input field at startup");
         // defaultTargetIncStr = Config.Bind<string>("Default Inputs Section", "Target Inclination",       "0", "Default inclination input (in degrees) used to pre-populate text input field at startup");
@@ -217,14 +215,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // defaultTargetMRPeAStr = Config.Bind<string>("Default Inputs Section", "Target Moon Return Pe Alt", "100000", "Default Moon Return Target Pe input (in meters) used to pre-populate text input field at startup");
 
         // Set the initial and Default values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
-        // statusText     = initialStatusText.Value;
-        // targetPeAStr   = defaultTargetPeAStr.Value;
-        // targetApAStr   = defaultTargetApAStr.Value;
-        // targetPeAStr1  = defaultTargetPeAStr.Value;
-        // targetApAStr1  = defaultTargetApAStr.Value;
-        // targetMRPeAStr = defaultTargetMRPeAStr.Value;
-        // targetIncStr   = defaultTargetIncStr.Value;
-        // interceptTStr  = defaultInterceptTStr.Value;
+        statusText     = initialStatusText.Value;
+        //targetPeAStr   = defaultTargetPeAStr.Value;
+        //targetApAStr   = defaultTargetApAStr.Value;
+        //targetPeAStr1  = defaultTargetPeAStr.Value;
+        //targetApAStr1  = defaultTargetApAStr.Value;
+        //targetMRPeAStr = defaultTargetMRPeAStr.Value;
+        //targetIncStr   = defaultTargetIncStr.Value;
+        //interceptTStr  = defaultInterceptTStr.Value;
 
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental.Value}");
@@ -252,8 +250,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     void save_rect_pos()
     {
-        Settings.window_x_pos = (int)windowRect.xMin;
-        Settings.window_y_pos = (int)windowRect.yMin;
+        FPSettings.window_x_pos = (int)windowRect.xMin;
+        FPSettings.window_y_pos = (int)windowRect.yMin;
     }
 
     /// <summary>
@@ -282,17 +280,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             GUI.skin = Skins.ConsoleSkin;
 
-             FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
-            FlightPlan.UI.MyStyles.Init();
+            FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
+            FPStyles.Init();
 
             windowRect = GUILayout.Window(
                 GUIUtility.GetControlID(FocusType.Passive),
                 windowRect,
                 FillWindow,
-                "<color=#696DFF>// FLIGHT PLAN</color>",
-                GUILayout.Height(windowHeight),
-                GUILayout.Width(windowWidth)
-            );
+                "<color=#696DFF>FLIGHT. PLAN</color>",
+                FPStyles.window,
+                GUILayout.Height(0),
+                GUILayout.Width(350));
 
             save_rect_pos();
             // Draw the tool tip if needed
@@ -329,10 +327,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     /// <param name="windowID"></param>
     private void FillWindow(int windowID)
     {
-
         TopButtons.Init(windowRect.width);
-        if ( TopButtons.Button(MyStyles.cross))
+        if ( TopButtons.Button(FPStyles.cross))
             CloseWindow();
+
+        GUI.Label(new Rect(9, 2, 29, 29), FPStyles.icon, FPStyles.icons_label);
 
         // game = GameManager.Instance.Game;
         //activeNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
@@ -346,6 +345,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             tgtName = "None";
         else
             tgtName = currentTarget.Name;
+
         DrawSectionHeader("Target", tgtName);
         BodySelectionGUI();
 
@@ -360,20 +360,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         DrawButton("Circularize Now", ref circNow);
 
-        DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAltitude, "m");
-        targetPeR = targetPeAltitude + referenceBody.radius;
+        FPSettings.pe_altiude_km = DrawButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altiude_km, "km");
+        targetPeR = FPSettings.pe_altiude_km * 1000 + referenceBody.radius;
 
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            DrawButtonWithTextField("New Ap", ref newAp, ref targetApAltitude, "m");
-            targetApR = targetApAltitude + referenceBody.radius;
+            FPSettings.ap_altiude_km =  DrawButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altiude_km, "km");
+            targetApR = FPSettings.ap_altiude_km*1000 + referenceBody.radius;
 
             DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAltitude1, ref targetApAltitude1);
             targetPeR1 = targetPeAltitude1 + referenceBody.radius;
             targetApR1 = targetApAltitude1 + referenceBody.radius;
         }
 
-        DrawButtonWithTextField("New Inclination", ref newInc, ref targetInc, "°");
+        targetInc = DrawButtonWithTextField("New Inclination", ref newInc, targetInc, "°");
 
         if (currentTarget != null)
         {
@@ -391,9 +391,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
                     if (experimental.Value)
                     {
-                        DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptT, "s");
-                        // try { interceptT = double.Parse(interceptTStr); }
-                        // catch { interceptT = 100; }
+                        interceptT = DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, interceptT, "s");
                         DrawButton("Match Velocity @CA", ref matchVCA);
                         DrawButton("Match Velocity Now", ref matchVNow);
                     }
@@ -426,7 +424,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             {
                 DrawSectionHeader("Moon Specific Maneuvers");
                 // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
-                DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAtitude, "m");
+                targetMRPeAtitude= DrawButtonWithTextField("Moon Return", ref moonReturn, targetMRPeAtitude, "m");
                 targetMRPeR = targetMRPeAtitude + activeVessel.Orbit.referenceBody.radius;
             }
         }
@@ -471,15 +469,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            GUILayout.BeginVertical(MyStyles.separator);
+            GUILayout.BeginVertical(FPStyles.separator);
             GUI.SetNextControlName("Select Target");
             scrollPositionBodies = GUILayout.BeginScrollView(scrollPositionBodies, false, true, GUILayout.Height(150));
             int index = 0;
             foreach (string body in bodies)
             {
                 var thisName = baseName + index.ToString("d2");
-                if (!inputFields.Contains(thisName)) inputFields.Add(thisName);
-                GUI.SetNextControlName(thisName);
                 if (UI_Tools.SmallButton(body))
                 {
                     selectedBody = body;
@@ -500,7 +496,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void DrawSectionHeader(string sectionName, string value = "", GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
-        if (valueStyle == null) valueStyle = MyStyles.label;
+        if (valueStyle == null) valueStyle = FPStyles.label;
         GUILayout.BeginHorizontal();
         // Don't need popout buttons for ROC
         // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);
@@ -569,7 +565,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.Space(spacingAfterEntry);
     }
 
-    private void DrawButtonWithTextField(string entryName, ref bool button, ref double value, string unit = "")
+    private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
         button = UI_Tools.SmallButton(entryName);
@@ -582,6 +578,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.EndHorizontal();
 
         GUILayout.Space(spacingAfterEntry);
+        return value;
     }
 
     private void DrawButtonWithDualTextField(string entryName1, string entryName2, ref bool button, ref double value1, ref double value2, string unit = "")
@@ -607,15 +604,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         float transparency = 1;
         if (UT > statusTime) transparency = (float)MuUtils.Clamp(1 - (UT - statusTime) / statusFadeTime.Value, 0, 1);
 
-        var status_style = MyStyles.label;
+        var status_style = FPStyles.label;
         if (status == Status.VIRGIN)
-            status_style = MyStyles.label;
+            status_style = FPStyles.label;
         if (status == Status.OK)
-            status_style = MyStyles.phase_ok;
+            status_style = FPStyles.phase_ok;
         if (status == Status.WARNING)
-            status_style = MyStyles.phase_warning;
+            status_style = FPStyles.phase_warning;
         if (status == Status.ERROR)
-            status_style = MyStyles.phase_error;
+            status_style = FPStyles.phase_error;
 
         UI_Tools.Separator();
         DrawSectionHeader("Status:", statusText, status_style);
