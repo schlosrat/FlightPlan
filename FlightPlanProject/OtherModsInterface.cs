@@ -145,7 +145,7 @@ public class OtherModsInterface
     public void OnGUI(ManeuverNodeData currentNode)
     {
         GUILayout.BeginHorizontal();
-        if (FlightPlan.UI.UI_Tools.SmallButton("Make Node"))
+        if (FlightPlan.UI.UI_Tools.BigButton("Make\nNode"))
             callMNC();
 
         if (MNCLoaded && mncVerCheck >= 0)
