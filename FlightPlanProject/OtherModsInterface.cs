@@ -146,7 +146,7 @@ public class OtherModsInterface
     {
         GUILayout.BeginHorizontal();
         if (FlightPlan.UI.UI_Tools.BigButton("Make\nNode"))
-            callMNC();
+            FlightPlanPlugin.Instance.MakeNode();
 
         if (MNCLoaded && mncVerCheck >= 0)
         {

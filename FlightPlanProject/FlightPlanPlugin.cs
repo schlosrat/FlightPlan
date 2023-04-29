@@ -1612,7 +1612,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    private void MakeNode()
+    public void MakeNode()
     {
         if (circAp || circPe || circularize|| newPe || newAp || newPeAp || newInc || matchPlane || matchPlanesD || hohmannT || interceptTgt || courseCorrection || moonReturn || matchVelocity || matchVNow || planetaryXfer )
         {
