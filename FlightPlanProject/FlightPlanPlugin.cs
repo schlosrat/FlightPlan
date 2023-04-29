@@ -90,20 +90,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // Time references for selectedOption
     public readonly Dictionary<string, string> TimeReference = new()
     {
-        { "COMPUTED",          "At Optimum Time"               }, //at the optimum time
-        { "APOAPSIS",          "At Next Apoapsis"              }, //"at the next apoapsis"
-        { "CLOSEST_APPROACH",  "At Closest Approach to Target" }, //"at closest approach to target"
-        { "EQ_ASCENDING",      "At Equatorial AN"              }, //"at the equatorial AN"
-        { "EQ_DESCENDING",     "At Equatorial DN"              }, //"at the equatorial DN"
-        { "PERIAPSIS",         "At Next Periapsis"             }, //"at the next periapsis"
-        { "REL_ASCENDING",     "At Next AN with Target"        }, //"at the next AN with the target."
-        { "REL_DESCENDING",    "At Next DN with Target"        }, //"at the next DN with the target."
-        { "X_FROM_NOW",        "After a Fixed Time"            }, //"after a fixed time"
-        { "ALTITUDE",          "At an Altitude"                }, //"at an altitude"
-        { "EQ_NEAREST_AD",     "At Nearest Equatorial AN/DN"   }, //"at the nearest equatorial AN/DN"
-        { "EQ_HIGHEST_AD",     "At Cheapest Equatorial AN/DN"  }, //"at the cheapest equatorial AN/DN"
-        { "REL_NEAREST_AD",    "At Nearest AN/DN with Target"  }, //"at the nearest AN/DN with the target"
-        { "REL_HIGHEST_AD",    "At Cheapest AN/DN with Target" } //"at the cheapest AN/DN with the target"
+        { "COMPUTED",          "At Optimum Time"         }, //at the optimum time
+        { "APOAPSIS",          "At Next Apoapsis"        }, //"at the next apoapsis"
+        { "CLOSEST_APPROACH",  "At Closest Approach"     }, //"at closest approach to target"
+        { "EQ_ASCENDING",      "At Equatorial AN"        }, //"at the equatorial AN"
+        { "EQ_DESCENDING",     "At Equatorial DN"        }, //"at the equatorial DN"
+        { "PERIAPSIS",         "At Next Periapsis"       }, //"at the next periapsis"
+        { "REL_ASCENDING",     "At Next AN with Target"  }, //"at the next AN with the target."
+        { "REL_DESCENDING",    "At Next DN with Target"  }, //"at the next DN with the target."
+        { "X_FROM_NOW",        "After a Fixed Time"      }, //"after a fixed time"
+        { "ALTITUDE",          "At an Altitude"          }, //"at an altitude"
+        { "EQ_NEAREST_AD",     "At Nearest Eq. AN/DN"    }, //"at the nearest equatorial AN/DN"
+        { "EQ_HIGHEST_AD",     "At Cheapest Eq. AN/DN"   }, //"at the cheapest equatorial AN/DN"
+        { "REL_NEAREST_AD",    "At Nearest AN/DN w/Tgt"  }, //"at the nearest AN/DN with the target"
+        { "REL_HIGHEST_AD",    "At Cheapest AN/DN w/Tgt" } //"at the cheapest AN/DN with the target"
     };
 
     // Body selection.
@@ -337,6 +337,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             return;
         }
 
+        updateToggleButtons();
+
         // game = GameManager.Instance.Game;
         //activeNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
         //currentNode = (activeNodes.Count() > 0) ? activeNodes[0] : null;
@@ -351,33 +353,35 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         var referenceBody = activeVessel.Orbit.referenceBody;
 
         // Initialize the available list of options. These get updated in setOptionsList
-        options = new List<string> { "" };
+        options = new List<string> { "none" };
 
         DrawSectionHeader("Ownship Maneuvers");
 
         UI_Tools.Label("Circularize");
         GUILayout.BeginHorizontal();
-        if (activeVessel.Orbit.eccentricity < 1)
-        {
-            DrawButton("at Ap", ref circAp);
-        }
-        DrawButton("at Pe", ref circPe);
+        //if (activeVessel.Orbit.eccentricity < 1)
+        //{
+        //    DrawToggleButton("at Ap", ref circAp);
+        //}
+        // DrawToggleButton("at Pe", ref circPe);
 
-        DrawButton("Now", ref circularize);
+        DrawToggleButton("Circularize", ref circularize);
         GUILayout.EndHorizontal();
 
-        FPSettings.pe_altitude_km = DrawButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altitude_km, "km");
+        FPSettings.pe_altitude_km = DrawToggleButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altitude_km, "km");
         targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
 
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            FPSettings.ap_altitude_km =  DrawButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altitude_km, "km");
+            FPSettings.ap_altitude_km = DrawToggleButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altitude_km, "km");
             targetApR = FPSettings.ap_altitude_km*1000 + referenceBody.radius;
 
-            DrawButton("New Pe & Ap", ref newPeAp);
+            DrawToggleButton("New Pe & Ap", ref newPeAp);
         }
 
-        FPSettings.target_inc_deg = DrawButtonWithTextField("New Inclination", ref newInc, FPSettings.target_inc_deg, "°");
+        FPSettings.target_inc_deg = DrawToggleButtonWithTextField("New Inclination", ref newInc, FPSettings.target_inc_deg, "°");
+
+        FPSettings.target_lan_deg = DrawToggleButtonWithTextField("New LAN", ref newLAN, FPSettings.target_lan_deg, "°");
 
         if (currentTarget != null)
         {
@@ -387,17 +391,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (currentTarget.Orbit.referenceBody.Name == referenceBody.Name)
                 {
                     DrawSectionHeader("Maneuvers Relative to Target");
-                    DrawButton("Match Planes at AN", ref matchPlane);
-                    DrawButton("Match Planes at DN", ref matchPlanesD);
+                    DrawToggleButton("Match Planes", ref matchPlane);
+                    // DrawButton("Match Planes at DN", ref matchPlanesD);
 
-                    DrawButton("Hohmann Xfer", ref hohmannT);
-                    DrawButton("Course Correction", ref courseCorrection);
+                    DrawToggleButton("Hohmann Xfer", ref hohmannT);
+                    DrawToggleButton("Course Correction", ref courseCorrection);
 
                     if (experimental.Value)
                     {
-                        FPSettings.interceptT = DrawButtonWithTextField("Intercept at Time", ref interceptTgt, FPSettings.interceptT, "s");
-                        DrawButton("Match Velocity @CA", ref matchVelocity);
-                        DrawButton("Match Velocity Now", ref matchVNow);
+                        FPSettings.interceptT = DrawToggleButtonWithTextField("Intercept", ref interceptTgt, FPSettings.interceptT, "s");
+                        DrawToggleButton("Match Velocity", ref matchVelocity);
+                        // DrawButton("Match Velocity Now", ref matchVNow);
                     }
                 }
             }
@@ -413,7 +417,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                         if (currentTarget.Orbit.referenceBody.IsStar) // exclude targets that are a moon
                         {
                             DrawSectionHeader("Interplanetary Maneuvers");
-                            DrawButton("Interplanetary Transfer", ref planetaryXfer);
+                            DrawToggleButton("Interplanetary Transfer", ref planetaryXfer);
                         }
                     }
                 }
@@ -430,7 +434,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
                 var parentPlanet = referenceBody.Orbit.referenceBody;
                 // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
-                FPSettings.mr_altitude_km = DrawButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
+                FPSettings.mr_altitude_km = DrawToggleButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
                 targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
             }
         }
@@ -447,7 +451,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         DrawGUIStatus(UT);
 
-        handleButtons();
+        setBurnTime();
+
+        // handleButtons();
 
         GUI.DragWindow(new Rect(0, 0, 10000, 500));
     }
@@ -805,6 +811,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         button = UI_Tools.Button(buttonStr);
     }
 
+    private void DrawToggleButton(string runString, ref bool button, string stopString = "")
+    {
+        if (stopString.Length < 1)
+            stopString = runString;
+        button = UI_Tools.ToggleButton(button, runString, stopString);
+    }
+
     private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
@@ -812,6 +825,24 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.Space(10);
 
         value = UI_Fields.DoubleField(entryName, value);
+
+        GUILayout.Space(3);
+        UI_Tools.Label(unit);
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(spacingAfterEntry);
+        return value;
+    }
+
+    private double DrawToggleButtonWithTextField(string runString, ref bool button, double value, string unit = "", string stopString = "")
+    {
+        GUILayout.BeginHorizontal();
+        if (stopString.Length < 1)
+            stopString = runString;
+        button = UI_Tools.ToggleButton(button, runString, stopString);
+        GUILayout.Space(10);
+
+        value = UI_Fields.DoubleField(runString, value);
 
         GUILayout.Space(3);
         UI_Tools.Label(unit);
@@ -1432,6 +1463,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         if (circularize || newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannT || interceptTgt || courseCorrection || moonReturn || matchVelocity || planetaryXfer)
         {
+            if (options.Contains("none"))
+                options.Remove("none");
             if (circularize)
             {
                 _toggles["Circularize"] = true;
@@ -1543,6 +1576,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 _toggles["planetaryXfer"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
             }
+            if (!options.Contains(selectedOption))
+                selectedOption = options[0];
         }
     }
 

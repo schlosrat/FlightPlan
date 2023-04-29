@@ -49,6 +49,12 @@ public class FPSettings
         set { s_settings_file.SetDouble("target_inc_deg", value); }
     }
 
+    public static double target_lan_deg
+    {
+        get => s_settings_file.GetDouble("target_lan_deg", 0);
+        set { s_settings_file.SetDouble("target_lan_deg", value); }
+    }
+
     public static double interceptT
     {
         get => s_settings_file.GetDouble("interceptT", 0);
