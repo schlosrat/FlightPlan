@@ -1,23 +1,9 @@
 
 
-using System.Reflection;
-using UnityEngine;
-using KSP.Sim.Maneuver;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using BepInEx;
-using BepInEx.Logging;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
-using HarmonyLib;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using MonoMod.Cil;
+using FlightPlan.UI;
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
 
@@ -25,9 +11,11 @@ using MonoMod.Cil;
 // it is not really needed, we can easyly hardcode the mode names
 // during the introduction of K2D2 UI it cause me many trouble in naming
 using K2D2;
+using KSP.Sim.Maneuver;
 using ManeuverNodeController;
-
-using FlightPlan.UI;
+using SpaceWarp.API.Assets;
+using System.Reflection;
+using UnityEngine;
 
 namespace FlightPlan;
 
@@ -45,6 +33,8 @@ public class OtherModsInterface
     PropertyInfo k2d2PropertyInfo, mncPropertyInfo;
     MethodInfo k2d2GetStatusMethodInfo, k2d2FlyNodeMethodInfo, k2d2ToggleMethodInfo, mncLaunchMNCMethodInfo;
     object k2d2Instance, mncInstance;
+    Texture2D mnc_button_tex, k2d2_button_tex;
+    GUIContent mnc_button_tex_con, k2d2_button_tex_con;
 
     private bool launchMNC, executeNode;
 
@@ -60,6 +50,10 @@ public class OtherModsInterface
             mncMinVersion = new Version(0, 8, 3);
             mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
             Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
+
+            // Get MNC buton icon
+            mnc_button_tex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/mnc_icon.png");
+            mnc_button_tex_con = new GUIContent(mnc_button_tex, "Launch Maneuver Node Controller");
 
             // Reflections method to attempt the same thing more cleanly
             mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
@@ -81,6 +75,13 @@ public class OtherModsInterface
             k2d2MinVersion = new Version(0, 8, 1);
             k2d2VerCheck = K2D2_info.Metadata.Version.CompareTo(k2d2MinVersion);
             Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
+            string tooltip;
+            if (k2d2VerCheck >= 0) tooltip = "Have K2-D2 Execute this node";
+            else tooltip = "Launch K2-D2";
+
+            // Get K2-D2 buton icon
+            k2d2_button_tex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/k2d2_icon.png");
+            k2d2_button_tex_con = new GUIContent(k2d2_button_tex, tooltip);
 
             k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
             k2d2PropertyInfo = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
@@ -141,30 +142,31 @@ public class OtherModsInterface
 
     public void OnGUI(ManeuverNodeData currentNode)
     {
+        GUILayout.BeginHorizontal();
+        if (FlightPlan.UI.UI_Tools.SmallButton("Make Node"))
+            callMNC();
+
         if (MNCLoaded && mncVerCheck >= 0)
         {
-            if (FlightPlan.UI.UI_Tools.SmallButton("MNC"))
+            GUILayout.FlexibleSpace();
+            if (FlightPlan.UI.UI_Tools.BigIconButton(FPStyles.mnc_icon))
                 callMNC();
         }
 
-        GUILayout.Space(10);
-
         if (K2D2Loaded && currentNode != null)
         {
-            GUILayout.BeginHorizontal();
-            if (checkK2D2status)
-            {
-                getK2D2Status();
-                FlightPlan.UI.UI_Tools.Label($"K2D2: {k2d2Status}");
-            }
-            else
-                GUILayout.FlexibleSpace();
-
+            GUILayout.FlexibleSpace();
             if (FlightPlan.UI.UI_Tools.BigIconButton(FPStyles.k2d2_big_icon))
                 callK2D2();
+        }
+        GUILayout.EndHorizontal();
 
+        if (checkK2D2status)
+        {
+            getK2D2Status();
+            GUILayout.BeginHorizontal();
+            FlightPlan.UI.UI_Tools.Label($"K2D2: {k2d2Status}");
             GUILayout.EndHorizontal();
         }
-       
     }
 }
