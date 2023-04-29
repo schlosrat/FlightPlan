@@ -30,7 +30,7 @@ public class FPStyles
 
     public static GUIStyle icons_label, title;
 
-    public static Texture2D gear, icon, k2d2_big_icon, cross;
+    public static Texture2D gear, icon, k2d2_big_icon, mnc_icon, cross;
 
     public static void Init()
     {
@@ -276,6 +276,7 @@ public class FPStyles
         gear = AssetsLoader.loadIcon("gear");
         icon = AssetsLoader.loadIcon("icon");
         k2d2_big_icon = AssetsLoader.loadIcon("k2d2_big_icon");
+        mnc_icon = AssetsLoader.loadIcon("mnc_icon");
         cross = AssetsLoader.loadIcon("Cross");
 
         icons_label = new GUIStyle(GUI.skin.GetStyle("Label"));
