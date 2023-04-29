@@ -16,6 +16,8 @@ using ManeuverNodeController;
 using SpaceWarp.API.Assets;
 using System.Reflection;
 using UnityEngine;
+using NodeManager;
+using KSP.Game;
 
 namespace FlightPlan;
 
@@ -130,10 +132,10 @@ public class OtherModsInterface
 
                 if (k2d2Status == "Done")
                 {
-                    // if (currentNode.Time < Game.UniverseModel.UniversalTime)
-                    // {
-                    //     NodeManagerPlugin.Instance.DeleteNodes(0);
-                    // }
+                    if (FlightPlanPlugin.Instance.currentNode.Time < GameManager.Instance.Game.UniverseModel.UniversalTime)
+                    {
+                        NodeManagerPlugin.Instance.DeleteNodes(0);
+                    }
                     checkK2D2status = false;
                 }
             }
