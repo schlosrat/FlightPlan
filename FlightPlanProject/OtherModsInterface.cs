@@ -146,6 +146,7 @@ public class OtherModsInterface
             if (FlightPlan.UI.UI_Tools.SmallButton("MNC"))
                 callMNC();
         }
+
         GUILayout.Space(10);
 
         if (K2D2Loaded && currentNode != null)
@@ -156,6 +157,8 @@ public class OtherModsInterface
                 getK2D2Status();
                 FlightPlan.UI.UI_Tools.Label($"K2D2: {k2d2Status}");
             }
+            else
+                GUILayout.FlexibleSpace();
 
             if (FlightPlan.UI.UI_Tools.BigIconButton(FPStyles.k2d2_big_icon))
                 callK2D2();
