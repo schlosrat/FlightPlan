@@ -93,7 +93,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     };
 
     // Time references for selectedOption
-    private readonly Dictionary<string, string> TimeReference = new()
+    public readonly Dictionary<string, string> TimeReference = new()
     {
         { "COMPUTED",          "At Optimum Time"               }, //at the optimum time
         { "APOAPSIS",          "At Next Apoapsis"              }, //"at the next apoapsis"
