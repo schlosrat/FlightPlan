@@ -15,7 +15,6 @@ public class FPStyles
 
     public static GUIStyle progress_bar_empty, progress_bar_full;
 
-
     public static GUIStyle bigicon_button, icon_button, small_button, big_button, button;
 
     public static GUIStyle tab_normal, tab_active;
@@ -212,6 +211,7 @@ public class FPStyles
         bigicon_button = new GUIStyle(icon_button);
         bigicon_button.fixedWidth = 50;
         bigicon_button.fixedHeight = 50;
+        bigicon_button.fontStyle = FontStyle.Bold;
 
         foldout_close = new GUIStyle(small_button);
         foldout_close.fixedHeight = 30;
