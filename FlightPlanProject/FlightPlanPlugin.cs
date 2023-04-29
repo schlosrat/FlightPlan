@@ -1165,6 +1165,37 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
+    public bool SetNewLAN(double newLAN, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug("SetNewLAN");
+        // Debug.Log("Set New Ap");
+        // var TimeToPe = orbit.TimeToPe;
+        var burnUT = UT + 30;
+
+        status = Status.WARNING;
+        statusText = "Experimental LAN Change Ready";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(orbit, burnUT, newLAN);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New LAN: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
     public bool MatchPlanesAtAN(double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -1581,23 +1612,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    private void handleButtons()
+    private void MakeNode()
     {
         if (circAp || circPe || circularize|| newPe || newAp || newPeAp || newInc || matchPlane || matchPlanesD || hohmannT || interceptTgt || courseCorrection || moonReturn || matchVelocity || matchVNow || planetaryXfer )
         {
             bool pass;
 
-            if (circAp) // Working
-            {
-                pass = CircularizeAtAP(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (circPe) // Working
-            {
-                pass = CircularizeAtPe(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (circularize) // Working
+            //if (circAp) // Working
+            //{
+            //    pass = CircularizeAtAP(-0.5);
+            //    // if (pass && autoLaunchMNC.Value) callMNC();
+            //}
+            //else if (circPe) // Working
+            //{
+            //    pass = CircularizeAtPe(-0.5);
+            //    // if (pass && autoLaunchMNC.Value) callMNC();
+            //}
+            if (circularize) // Working
             {
                 pass = CircularizeNow(-0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
@@ -1621,6 +1652,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             {
                 pass = SetInclination(FPSettings.target_inc_deg, -0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
+            }
+            else if (newLAN) // Untested
+            {
+                pass = SetNewLAN(targetLAN, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (matchPlane) // Working
             {
