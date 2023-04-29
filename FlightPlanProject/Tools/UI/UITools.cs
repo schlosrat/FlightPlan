@@ -175,6 +175,11 @@ public class UI_Tools
         return GUILayout.Button(txt, FPStyles.small_button);
     }
 
+    public static bool BigButton(string txt)
+    {
+        return GUILayout.Button(txt, FPStyles.bigicon_button);
+    }
+
     public static bool ListButton(string txt)
     {
         return GUILayout.Button(txt, FPStyles.button, GUILayout.ExpandWidth(true));
