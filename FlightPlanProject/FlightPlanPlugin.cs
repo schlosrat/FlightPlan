@@ -9,8 +9,8 @@ using KSP.Game;
 using KSP.Sim.impl;
 using KSP.Sim.Maneuver;
 using KSP.UI.Binding;
-using LibNoise.Modifiers;
 using ManeuverNodeController;
+using Microsoft.CodeAnalysis;
 using MuMech;
 using NodeManager;
 using SpaceWarp;
@@ -45,8 +45,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private bool interfaceEnabled = false;
     private bool GUIenabled = true;
     private Rect _windowRect;
-    private int windowWidth = Screen.width / 6; //384px on 1920x1080
-    private int windowHeight = Screen.height / 4; //360px on 1920x1080
+    private int windowWidth = Screen.width / 5; //384px on 1920x1080
+    private int windowHeight = Screen.height / 4; //480px on 1920x1080
     private Rect closeBtnRect;
 
     // Status of last Flight Plan function
@@ -74,37 +74,62 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<bool> experimental;
     private ConfigEntry<bool> autoLaunchMNC;
 
-    // Button bools
-    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, newLAN; // Ownship maneuvers
-    private bool matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, matchVCA, matchVNow; // Maneuvers relative to target
-    private bool moonReturn, planetaryXfer; // Specialized Moon/Planet relative maneuvers
-    private bool launchMNC, executeNode; // Utility functions
+    // Button toggles and bools
+    private bool circAp, circPe, circularize, newPe, newAp, newPeAp, newInc, newLAN; // Ownship maneuvers (activity toggels)
+    private bool matchPlane, matchPlanesD, hohmannT, interceptTgt, courseCorrection, matchVelocity, matchVNow; // Maneuvers relative to target (activity toggels)
+    private bool moonReturn, planetaryXfer; // Specialized Moon/Planet relative maneuvers (activity toggels)
+    private bool makeNode, launchMNC, executeNode; // Utility functions (buttons)
 
-    private List<Toggle> _initialToggles = new()
+    private Dictionary<string, bool> _toggles = new();
+    private Dictionary<string, bool> _previousToggles = new();
+    private readonly Dictionary<string, bool> _initialToggles = new()
     {
-        new Toggle(){name = "Circularize",      selected = false},
-        new Toggle(){name = "SetNewAp",         selected = false},
-        new Toggle(){name = "SetNewPe",         selected = false},
-        new Toggle(){name = "Elipticize",       selected = false},
-        new Toggle(){name = "SetNewInc",        selected = false},
-        new Toggle(){name = "SetNewLAN",        selected = false},
-        new Toggle(){name = "MatchPlane",       selected = false},
-        new Toggle(){name = "MatchVelocity",    selected = false},
-        new Toggle(){name = "CourseCorrection", selected = false},
-        new Toggle(){name = "HohmannTransfer",  selected = false},
-        new Toggle(){name = "InterceptTgt",     selected = false},
-        new Toggle(){name = "MoonReturn",       selected = false},
-        new Toggle(){name = "PlanetaryXfer",    selected = false}
+        { "Circularize",      false },
+        { "SetNewAp",         false },
+        { "SetNewPe",         false },
+        { "Elipticize",       false },
+        { "SetNewInc",        false },
+        { "SetNewLAN",        false },
+        { "MatchPlane",       false },
+        { "MatchVelocity",    false },
+        { "CourseCorrection", false },
+        { "HohmannTransfer",  false },
+        { "InterceptTgt",     false },
+        { "MoonReturn",       false },
+        { "PlanetaryXfer",    false }
     };
-    private List<Toggle> _toggles = new();
-    private List<Toggle> _previousToggles = new();
-    private readonly Dictionary<string, bool> _wasToggledDict = new();
+
+    // Time references for selectedOption
+    private readonly Dictionary<string, string> TimeReference = new()
+    {
+        { "COMPUTED",          "At Optimum Time"               }, //at the optimum time
+        { "APOAPSIS",          "At Next Apoapsis"              }, //"at the next apoapsis"
+        { "CLOSEST_APPROACH",  "At Closest Approach to Target" }, //"at closest approach to target"
+        { "EQ_ASCENDING",      "At Equatorial AN"              }, //"at the equatorial AN"
+        { "EQ_DESCENDING",     "At Equatorial DN"              }, //"at the equatorial DN"
+        { "PERIAPSIS",         "At Next Periapsis"             }, //"at the next periapsis"
+        { "REL_ASCENDING",     "At Next AN with Target"        }, //"at the next AN with the target."
+        { "REL_DESCENDING",    "At Next DN with Target"        }, //"at the next DN with the target."
+        { "X_FROM_NOW",        "After a Fixed Time"            }, //"after a fixed time"
+        { "ALTITUDE",          "At an Altitude"                }, //"at an altitude"
+        { "EQ_NEAREST_AD",     "At Nearest Equatorial AN/DN"   }, //"at the nearest equatorial AN/DN"
+        { "EQ_HIGHEST_AD",     "At Cheapest Equatorial AN/DN"  }, //"at the cheapest equatorial AN/DN"
+        { "REL_NEAREST_AD",    "At Nearest AN/DN with Target"  }, //"at the nearest AN/DN with the target"
+        { "REL_HIGHEST_AD",    "At Cheapest AN/DN with Target" } //"at the cheapest AN/DN with the target"
+    };
 
     // Body selection.
     private string selectedBody = null;
     private List<string> bodies;
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
+
+    // Option selection.
+    private string selectedOption = null;
+    private List<string> options;
+    private bool selectingOption = false;
+    private static Vector2 scrollPositionOptions;
+    private double requestedBurnTime = 0;
 
     // mod-wide data
     private VesselComponent activeVessel;
@@ -137,7 +162,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private GameInstance game;
     private GUIStyle horizontalDivider = new GUIStyle();
     private GUISkin _spaceWarpUISkin;
-    private GUIStyle tgtBtnStyle;
+    private GUIStyle listBtnStyle;
     private GUIStyle ctrlBtnStyle;
     private GUIStyle bigBtnStyle;
     private GUIStyle smallBtnStyle;
@@ -153,7 +178,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // private string unitColorHex;
     private int spacingAfterHeader = -12;
     private int spacingAfterEntry = -5;
-    // private int spacingAfterSection = 5;
+    private int spacingAfterSection = 5;
 
     // App bar button(s)
     private const string ToolbarFlightButtonID = "BTN-FlightPlanFlight";
@@ -172,6 +197,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     PropertyInfo k2d2PropertyInfo, mncPropertyInfo;
     MethodInfo k2d2GetStatusMethodInfo, k2d2FlyNodeMethodInfo, k2d2ToggleMethodInfo, mncLaunchMNCMethodInfo;
     object k2d2Instance, mncInstance;
+    Texture mnc_button_tex, k2d2_button_tex;
+    GUIContent mnc_button_tex_con, k2d2_button_tex_con;
 
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
@@ -216,6 +243,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
             Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
 
+            // Get MNC buton icon
+            mnc_button_tex = AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/mnc_icon.png");
+            mnc_button_tex_con = new GUIContent(mnc_button_tex, "Launch Maneuver Node Controller");
+
             // Get instance and method(s) once at initilization to have them on hand for calling later
             mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
             mncPropertyInfo = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
@@ -234,6 +265,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             k2d2MinVersion = new Version(0, 8, 1);
             k2d2VerCheck = K2D2.Metadata.Version.CompareTo(k2d2MinVersion);
             Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
+            string tooltip;
+            if (k2d2VerCheck >= 0) tooltip = "Have K2-D2 Execute this node";
+            else tooltip = "Launch K2-D2";
+
+            // Get K2-D2 buton icon
+            k2d2_button_tex = AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/k2d2_icon.png");
+            k2d2_button_tex_con = new GUIContent(k2d2_button_tex, tooltip);
 
             // Get instance and method(s) once at initilization to have them on hand for calling later
             k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
@@ -268,8 +306,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //_initialToggles = SpaceWarpManager.PluginGuidEnabledStatus.ToList().FindAll(
         //    item => !NoTogglePlugins.Contains(item.Item1)
         //);
-        _toggles         = new List<Toggle>(_initialToggles);
-        _previousToggles = new List<Toggle>(_initialToggles);
+        _toggles         = new Dictionary<string, bool>(_initialToggles);
+        _previousToggles = new Dictionary<string, bool>(_initialToggles);
 
         gameObject.hideFlags = HideFlags.HideAndDontSave;
         DontDestroyOnLoad(gameObject);
@@ -295,18 +333,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             margin = new RectOffset(0, 0, 10, 1)
         };
 
-        tgtBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
+        listBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
         {
             alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(0, 0, 0, 3),
+            padding = new RectOffset(0, 0, 1, 1),
             contentOffset = new Vector2(0, 2),
-            fixedHeight = 25, // 16,
-            // fixedWidth = (int)(windowWidth * 0.6),
+            fixedHeight = 16, // 16,
+            //fixedWidth = (int)(windowWidth * 0.5),
             fontSize = 16,
             clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
+            margin = new RectOffset(0, 0, 1, 1)
         };
-
+        
         ctrlBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
         {
             alignment = TextAnchor.MiddleCenter,
@@ -551,35 +589,36 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         
         // Make toggle buttons behave like radio buttons
-        int numChecked = _toggles.Count(item => item.selected); // how many are selected now (could be 0, 1, or 2)
-        int oldNumChecked = _previousToggles.Count(item => item.selected); // how many were selected before (could be 0 or 1)
-        if (numChecked == 0 && oldNumChecked > 0) // if the selected action has been deselected
+        int numChecked = _toggles.Count(item => item.Value); // how many are selected now (could be 0, 1, or 2)
+        int oldNumChecked = _previousToggles.Count(item => item.Value); // how many were selected before (could be 0 or 1)
+        if (numChecked == 0)
         {
-            _previousToggles = new List<Toggle>(_initialToggles);
+            if(oldNumChecked > 0) // if the selected action has been deselected
+            _previousToggles = new Dictionary<string, bool>(_initialToggles);
         }
-        if (numChecked == 1)
+        else if (numChecked == 1)
         {
             if (oldNumChecked == 0) // We gone from none selected to 1 selected
             {
-                var selected = _toggles.FindIndex(item => item.selected);
-                _previousToggles[selected].selected = true; // record the new selection in the previous list
+                var selected = _toggles.FirstOrDefault(item => item.Value).Key;
+                _previousToggles[selected] = true; // record the new selection in the previous list
             }
             else if (oldNumChecked == 1) // they should be the same, let's check
             {
-                var oldSelected = _previousToggles.FindIndex(item => item.selected);
-                var newSelected = _toggles.FindIndex(item => item.selected);
+                var oldSelected = _previousToggles.FirstOrDefault(item => item.Value).Key;
+                var newSelected = _toggles.FirstOrDefault(item => item.Value).Key;
                 if (oldSelected != newSelected)
                 {
-                    Logger.LogWarning($"Selection Mismatch: Previously {_toggles[oldSelected].name} was selected, but now {_toggles[newSelected].name} is selected. Correcting previous list.");
-                    _previousToggles[oldSelected].selected = false; // update the previous list to deselect the previous selection
-                    _previousToggles[newSelected].selected = true;  // update the previous list to select the new selection
+                    Logger.LogWarning($"Selection Mismatch: Previously {oldSelected} was selected, but now {newSelected} is selected. Correcting previous list.");
+                    _previousToggles[oldSelected] = false; // update the previous list to deselect the previous selection
+                    _previousToggles[newSelected] = true;  // update the previous list to select the new selection
                 }
             }
             else // We shouldn't get here, but if there's more than one thing selected in the previous list and only one in the current list then fix it
             {
-                _previousToggles = new List<Toggle>(_initialToggles);
-                var newSelected = _toggles.FindIndex(item => item.selected);
-                _previousToggles[newSelected].selected = true;
+                _previousToggles = new Dictionary<string, bool>(_initialToggles);
+                var newSelected = _toggles.FirstOrDefault(item => item.Value).Key;
+                _previousToggles[newSelected] = true;
             }
         }
         else if (numChecked == 2)
@@ -587,40 +626,46 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (oldNumChecked == 0) // This should not happen, report it and clear everything
             {
                 Logger.LogError($"Selection Mismatch: Two or more things selected with zero previously. Resetting all.");
-                _toggles = new List<Toggle>(_initialToggles);
-                _previousToggles = new List<Toggle>(_initialToggles);
+                _toggles = new Dictionary<string, bool>(_initialToggles);
+                _previousToggles = new Dictionary<string, bool>(_initialToggles);
+                clearToggleStates();
             }
             else if (oldNumChecked == 1) // We've selected something new
             {
-                var oldSelected = _previousToggles.FindIndex(item => item.selected);
-                _toggles[oldSelected].selected = false; // deselect the previous selection
-                var newSelected = _toggles.FindIndex(item => item.selected);
-                _previousToggles[newSelected].selected = true; // update the previous list to select the new selection
+                var oldSelected = _previousToggles.FirstOrDefault(item => item.Value).Key;
+                _toggles[oldSelected] = false; // deselect the previous selection
+                setToggleState(oldSelected, false);
+                var newSelected = _toggles.FirstOrDefault(item => item.Value).Key;
+                _previousToggles[newSelected] = true; // update the previous list to select the new selection
             }
             else // We shouldn't get here, but if there's more than one thing selected in the previous list and two in the current list then clear everything
             {
                 Logger.LogError($"Selection Mismatch: Two or more things selected with two or more previously. Resetting all.");
-                _toggles = new List<Toggle>(_initialToggles);
-                _previousToggles = new List<Toggle>(_initialToggles);
+                _toggles = new Dictionary<string, bool>(_initialToggles);
+                _previousToggles = new Dictionary<string, bool>(_initialToggles);
+                clearToggleStates();
             }
         }
         else // We should not be able to get here! Deselect everything...
         {
             Logger.LogError($"Selection Mismatch: More than two things selected! Resetting all.");
-            _toggles = new List<Toggle>(_initialToggles);
-            _previousToggles = new List<Toggle>(_initialToggles);
+            _toggles = new Dictionary<string, bool>(_initialToggles);
+            _previousToggles = new Dictionary<string, bool>(_initialToggles);
+            clearToggleStates();
         }
+
         // Make toggle buttons behave like radio buttons
-        numChecked = _toggles.Count(item => item.selected); // how many are selected now (could be 0, 1)
-        oldNumChecked = _previousToggles.Count(item => item.selected); // how many were selected before (should match numChecked)
-        int selectedAction = -1;
+        numChecked = _toggles.Count(item => item.Value); // how many are selected now (could be 0, 1)
+        oldNumChecked = _previousToggles.Count(item => item.Value); // how many were selected before (should match numChecked)
+        string selectedAction = null;
         if (numChecked == 1)
-            selectedAction = _toggles.FindIndex(item => item.selected);
-        else
+            selectedAction = _toggles.FirstOrDefault(item => item.Value).Key;
+        else if (numChecked > 1)
         {
             Logger.LogError($"Selection Mismatch: Two or more things selected after update. Resetting all.");
-            _toggles = new List<Toggle>(_initialToggles);
-            _previousToggles = new List<Toggle>(_initialToggles);
+            _toggles = new Dictionary<string, bool>(_initialToggles);
+            _previousToggles = new Dictionary<string, bool>(_initialToggles);
+            clearToggleStates();
         }
 
         // game = GameManager.Instance.Game;
@@ -636,52 +681,40 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         else
             tgtName = currentTarget.Name;
         DrawSectionHeader("Target", tgtName);
-        BodySelectionGUI();
 
         var referenceBody = activeVessel.Orbit.referenceBody;
 
-        int thisItem;
-        DrawSectionHeader("Ownship Maneuvers");
-        //if (activeVessel.Orbit.eccentricity < 1)
-        //{
-        //    DrawButton("Circularize at Ap", ref circAp);
-        //}
-        //DrawButton("Circularize at Pe", ref circPe);
+        GUILayout.BeginHorizontal(); // Begin for Horizontal pane that contains the Left and Right Vertical panes
 
-        //DrawButton("Circularize Now", ref circNow);
-        thisItem = _toggles.FindIndex(item => item.name == "Circularize");
-        DrawSoloToggle(" Circularize", ref circNow);
-        if (circNow) _toggles[thisItem].selected = true;
+        // Left hand side of main GUI starts here
+        GUILayout.BeginVertical(GUILayout.Width(windowWidth/3)); // Begin for Left side Vertical pane (holds radio buttons)
+
+        options = new List<string>{""};
+
+        DrawSectionHeader("Ownship Maneuvers");
+        //DrawButton("Circularize Now", ref circularize);
+        DrawSoloToggle(" Circularize", ref circularize);
 
         // DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
-        thisItem = _toggles.FindIndex(item => item.name == "SetNewPe");
-        DrawSoloToggle(" Set New Pe", ref newPe);
-        if (newPe) _toggles[thisItem].selected = true;
-
-        //if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += referenceBody.radius;
-        //else targetPeR = 0;
+        DrawSoloToggle(" New Pe", ref newPe);
 
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            thisItem = _toggles.FindIndex(item => item.name == "SetNewPe");
-            DrawButtonWithTextField("New Ap", ref newAp, ref targetApAStr, "m");
-            if (double.TryParse(targetApAStr, out targetApR)) targetApR += referenceBody.radius;
-            else targetApR = 0;
+            // DrawButtonWithTextField("New Ap", ref newAp, ref targetApAStr, "m");
+            DrawSoloToggle(" New Ap", ref newAp);
 
-            DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
-            if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += referenceBody.radius;
-            else targetPeR1 = 0;
-            if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += referenceBody.radius;
-            else targetApR1 = 0;
+            // DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
+            DrawSoloToggle(" New Pe & Ap", ref newPeAp);
         }
 
-        DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
-        if (!double.TryParse(targetIncStr, out targetInc)) targetInc = 0;
+        // DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
+        DrawSoloToggle(" New Inclination", ref newInc);
 
         if (experimental.Value)
-            DrawButtonWithTextField("New LAN", ref newLAN, ref targetLANStr, "°");
-
-        if (!double.TryParse(targetLANStr, out targetLAN)) targetLAN = 0;
+        {
+            // DrawButtonWithTextField("New LAN", ref newLAN, ref targetLANStr, "°");
+            DrawSoloToggle(" New LAN", ref newLAN);
+        }
 
         if (currentTarget != null)
         {
@@ -691,19 +724,24 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (currentTarget.Orbit.referenceBody.Name == referenceBody.Name)
                 {
                     DrawSectionHeader("Maneuvers Relative to Target");
-                    DrawButton("Match Planes at AN", ref matchPlanesA);
-                    DrawButton("Match Planes at DN", ref matchPlanesD);
+                    // DrawButton("Match Planes at AN", ref matchPlanesA);
+                    // DrawButton("Match Planes at DN", ref matchPlanesD);
+                    DrawSoloToggle(" Match Planes with Target", ref matchPlane);
 
-                    DrawButton("Hohmann Xfer", ref hohmannT);
-                    DrawButton("Course Correction", ref courseCorrection);
+                    // DrawButton("Hohmann Xfer", ref hohmannT);
+                    DrawSoloToggle(" Hohman Transfer", ref hohmannT);
+
+                    // DrawButton("Course Correction", ref courseCorrection);
+                    DrawSoloToggle(" Course Correction", ref courseCorrection);
 
                     if (experimental.Value)
                     {
-                        DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
-                        try { interceptT = double.Parse(interceptTStr); }
-                        catch { interceptT = 100; }
-                        DrawButton("Match Velocity @CA", ref matchVCA);
-                        DrawButton("Match Velocity Now", ref matchVNow);
+                        // DrawButtonWithTextField("Intercept at Time", ref interceptTgt, ref interceptTStr, "s");
+                        DrawSoloToggle(" Intercept Target", ref interceptTgt);
+
+                        //DrawButton("Match Velocity @CA", ref matchVCA);
+                        //DrawButton("Match Velocity Now", ref matchVNow);
+                        DrawSoloToggle(" Match Velicity with Target", ref matchVelocity);
                     }
                 }
             }
@@ -719,7 +757,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                         if (currentTarget.Orbit.referenceBody.IsStar) // exclude targets that are a moon
                         {
                             DrawSectionHeader("Interplanetary Maneuvers");
-                            DrawButton("Interplanetary Transfer", ref planetaryXfer);
+                            // DrawButton("Interplanetary Transfer", ref planetaryXfer);
+                            DrawSoloToggle(" Interplanetary Transfer", ref planetaryXfer);
                         }
                     }
                 }
@@ -734,13 +773,108 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             {
                 DrawSectionHeader("Moon Specific Maneuvers");
                 // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
-                DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAStr, "m");
-                if (double.TryParse(targetMRPeAStr, out targetMRPeR)) targetMRPeR += activeVessel.Orbit.referenceBody.radius;
-                else targetMRPeR = 0;
+                // DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAStr, "m");
+                DrawSoloToggle(" Moon Return", ref moonReturn);
             }
         }
+        GUILayout.EndVertical(); // End for Left side Vertical pane
 
-        var UT = game.UniverseModel.UniversalTime;
+        handleToggles(); // Toggel-dependent code that needs to run after Left Side and before Right Side, sets up options
+
+        // Right hand side of main GUI starts here
+        GUILayout.BeginVertical(GUILayout.Width(windowWidth / 2)); // Begin for Right side Vertical pane (celestial target selection and option selection drop down menus)
+
+        BodySelectionGUI(); // Celestial target selection drop down menu
+
+        // Allow player to select a burn time option
+        GUILayout.BeginVertical(boxStyle, GUILayout.Width(windowWidth / 2)); // Begin Vertical pane within right side for option selection
+        GUI.SetNextControlName("Select Options");
+        scrollPositionOptions = GUILayout.BeginScrollView(scrollPositionOptions, false, true, GUILayout.Height(125)); // Begin scroll view for option selection
+        if (!selectingOption)
+        {
+            if (GUILayout.Button(selectedOption, listBtnStyle))
+                selectingOption = true;
+        }
+        else
+        {
+            foreach (string option in options)
+            {
+                if (GUILayout.Button(option, listBtnStyle))
+                {
+                    selectedOption = option;
+                    selectingOption = false;
+                }
+            }
+        }
+        GUILayout.EndScrollView(); // End scroll view for option selection
+        GUILayout.EndVertical(); // End Vertical pane for option selection
+
+        GUILayout.EndVertical(); // End Vertical pane for right side
+
+        GUILayout.EndHorizontal(); // End for Horizontal pane that contains the Left and Right Vertical panes
+
+        // Set the requested burn time based on the selected timing option
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        if (selectedOption == TimeReference["COMPUTED"])
+            requestedBurnTime = -1; // for optimal time the burn time is computed and returned from the OrbitalManeuverCalculator method called.
+        else if (selectedOption == TimeReference["APOAPSIS"])
+            requestedBurnTime = activeVessel.Orbit.NextApoapsisTime(UT);
+        else if (selectedOption == TimeReference["PERIAPSIS"])
+            requestedBurnTime = activeVessel.Orbit.NextPeriapsisTime(UT);
+        else if (selectedOption == TimeReference["CLOSEST_APPROACH"])
+            requestedBurnTime = activeVessel.Orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); // +2 so that closestApproachTime is definitely > UT
+        else if (selectedOption == TimeReference["EQ_ASCENDING"])
+            requestedBurnTime = activeVessel.Orbit.TimeOfANEquatorial(UT); // Same code as MJ in OrbitExtensions: TimeOfAscendingNodeEquatorial(UT)
+        else if (selectedOption == TimeReference["EQ_DESCENDING"])
+            requestedBurnTime = activeVessel.Orbit.TimeOfDNEquatorial(UT); // Same code as MJ in OrbitExtensions: TimeOfDescendingNodeEquatorial(UT)
+        else if (selectedOption == TimeReference["REL_ASCENDING"])
+            requestedBurnTime = activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT); // like built in TimeOfAN(currentTarget.Orbit, UT), but with check to prevent time in the past
+        else if (selectedOption == TimeReference["REL_DESCENDING"])
+            requestedBurnTime = activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT); // like built in TimeOfDN(currentTarget.Orbit, UT), but with check to prevent time in the past
+        else if (selectedOption == TimeReference["X_FROM_NOW"])
+            requestedBurnTime = UT + 30; // FIX ME! This should be a user selectable offset
+        else if (selectedOption == TimeReference["ALTITUDE"])
+            requestedBurnTime = activeVessel.Orbit.NextTimeOfRadius(UT, (double)1000000); // FIX ME! This should be a user selectable offset
+        else if (selectedOption == TimeReference["EQ_NEAREST_AD"])
+            requestedBurnTime = Math.Min(activeVessel.Orbit.TimeOfANEquatorial(UT), activeVessel.Orbit.TimeOfDNEquatorial(UT));
+        else if (selectedOption == TimeReference["EQ_HIGHEST_AD"])
+        {
+            var timeAN = activeVessel.Orbit.TimeOfANEquatorial(UT);
+            var timeDN = activeVessel.Orbit.TimeOfDNEquatorial(UT);
+            var ANRadius = activeVessel.Orbit.Radius(timeAN);
+            var DNRadius = activeVessel.Orbit.Radius(timeDN);
+            if (ANRadius > DNRadius) requestedBurnTime = timeAN;
+            else requestedBurnTime = timeDN;
+        }
+        else if (selectedOption == TimeReference["REL_NEAREST_AD"])
+            requestedBurnTime = Math.Min(activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT), activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT));
+        else if (selectedOption == TimeReference["REL_HIGHEST_AD"])
+        {
+            var timeAN = activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT);
+            var timeDN = activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT);
+            var ANRadius = activeVessel.Orbit.Radius(timeAN);
+            var DNRadius = activeVessel.Orbit.Radius(timeDN);
+            if (ANRadius > DNRadius) requestedBurnTime = timeAN;
+            else requestedBurnTime = timeDN;
+        }
+
+        // Get any user input values needed before any GUI action button call
+        if (double.TryParse(targetApAStr, out targetApR)) targetApR += referenceBody.radius;
+        else targetApR = 0;
+        if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += referenceBody.radius;
+        else targetPeR = 0;
+        if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += referenceBody.radius;
+        else targetPeR1 = 0;
+        if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += referenceBody.radius;
+        else targetApR1 = 0;
+        if (!double.TryParse(targetIncStr, out targetInc)) targetInc = 0;
+        if (!double.TryParse(targetLANStr, out targetLAN)) targetLAN = 0;
+        if (!double.TryParse(interceptTStr, out interceptT)) interceptT = 3600;
+        if (double.TryParse(targetMRPeAStr, out targetMRPeR)) targetMRPeR += referenceBody.radius;
+        else targetMRPeR = 0;
+
+        DrawGUIButtons();
+
         // if (statusText == "Virgin") statusTime = UT;
         if (currentNode == null && status != Status.VIRGIN)
         {
@@ -752,6 +886,52 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         handleButtons();
 
         GUI.DragWindow(new Rect(0, 0, 10000, 500));
+    }
+
+    private void setToggleState(string key, bool value)
+    {
+        if (key == "Circularize")
+            circularize = value;
+        if (key == "SetNewAp")
+            newAp = value;
+        if (key == "SetNewPe")
+            newPe = value;
+        if (key == "Elipticize")
+            newPeAp = value;
+        if (key == "SetNewInc")
+            newInc = value;
+        if (key == "SetNewLAN")
+            newLAN = value;
+        if (key == "MatchPlane")
+            matchPlane = value;
+        if (key == "MatchVelocity")
+            matchVelocity = value;
+        if (key == "CourseCorrection")
+            courseCorrection = value;
+        if (key == "HohmannTransfer")
+            hohmannT = value;
+        if (key == "InterceptTgt")
+            interceptTgt = value;
+        if (key == "MoonReturn")
+            moonReturn = value;
+        if (key == "PlanetaryXfer")
+            planetaryXfer = value;
+    }
+    private void clearToggleStates()
+    {
+        circularize = false;
+        newAp = false;
+        newPe = false;
+        newPeAp = false;
+        newInc = false;
+        newLAN = false;
+        matchPlane = false;
+        matchVelocity = false;
+        courseCorrection = false;
+        hohmannT = false;
+        interceptTgt = false;
+        moonReturn = false;
+        planetaryXfer = false;
     }
 
     private bool CloseButton()
@@ -773,38 +953,33 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
         string baseName = "Select Target";
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Target Celestial Body: ", GUILayout.Width((float)(windowWidth * 0.6)));
+        //GUILayout.BeginHorizontal();
+        GUILayout.Label("Target Celestial Body: ", GUILayout.Width((windowWidth / 2)));
+        //GUILayout.EndHorizontal();
         if (!selectingBody)
         {
             GUI.SetNextControlName(baseName);
-            if (GUILayout.Button(selectedBody, tgtBtnStyle))
+            if (GUILayout.Button(selectedBody, listBtnStyle, GUILayout.Width(windowWidth / 2)))
                 selectingBody = true;
         }
         else
         {
-            GUILayout.BeginVertical(boxStyle);
+            GUILayout.BeginVertical(boxStyle, GUILayout.Width(windowWidth / 2));
             GUI.SetNextControlName("Select Target");
             scrollPositionBodies = GUILayout.BeginScrollView(scrollPositionBodies, false, true, GUILayout.Height(150));
-            int index = 0;
             foreach (string body in bodies)
             {
-                var thisName = baseName + index.ToString("d2");
-                if (!inputFields.Contains(thisName)) inputFields.Add(thisName);
-                GUI.SetNextControlName(thisName);
-                if (GUILayout.Button(body, tgtBtnStyle))
+                if (GUILayout.Button(body, listBtnStyle))
                 {
                     selectedBody = body;
                     selectingBody = false;
                     activeVessel.SetTargetByID(game.UniverseModel.FindCelestialBodyByName(body).GlobalId);
                     currentTarget = activeVessel.TargetObject;
                 }
-                index++;
             }
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
         }
-        GUILayout.EndHorizontal();
     }
 
     private void DrawSectionHeader(string sectionName, string value = "", GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
@@ -925,13 +1100,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void DrawSoloToggle(string optionName, ref bool toggle)
     {
-        GUILayout.Space(5);
+        //GUILayout.Space(5);
         GUILayout.BeginHorizontal();
         toggle = GUILayout.Toggle(toggle, optionName, sectionToggleStyle);
         // GUILayout.Space(5);
         // GUILayout.Label(optionName, labelStyle);
         GUILayout.EndHorizontal();
-        GUILayout.Space(-5);
+        GUILayout.Space(-10);
     }
 
     /// <summary>
@@ -950,6 +1125,30 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     /// Draws a white horizontal line accross the container it's put in with height of 1 px
     /// </summary>
     public static void DrawHorizontalLine() { DrawHorizontalLine(1); }
+
+    private void DrawGUIButtons()
+    {
+        GUILayout.BeginHorizontal();
+        makeNode = GUILayout.Button("Make Node", smallBtnStyle);
+        if (MNCLoaded && mncVerCheck >= 0)
+        {
+            GUILayout.FlexibleSpace();
+            launchMNC = GUILayout.Button(mnc_button_tex_con, smallBtnStyle);
+        }
+        if (K2D2Loaded && currentNode != null)
+        {
+            GUILayout.FlexibleSpace();
+            executeNode = GUILayout.Button(k2d2_button_tex_con, smallBtnStyle);
+        }
+        GUILayout.EndHorizontal();
+        if (checkK2D2status)
+        {
+            getK2D2Status();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"K2D2: {k2d2Status}", labelStyle);
+            GUILayout.EndHorizontal();
+        }
+    }
 
     private void DrawGUIStatus(double UT)
     {
@@ -975,26 +1174,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             GUILayout.Label(inputStateString, labelStyle);
         else
             GUILayout.Label(inputStateString, warnStyle);
-        GUILayout.FlexibleSpace();
-        if (MNCLoaded && mncVerCheck >= 0)
-        {
-            launchMNC = GUILayout.Button("MNC", smallBtnStyle);
-        }
-        GUILayout.Space(10);
-        if (K2D2Loaded && currentNode != null)
-        {
-            executeNode = GUILayout.Button("K2D2", smallBtnStyle);
-        }
         GUILayout.EndHorizontal();
-        if (checkK2D2status)
-        {
-            getK2D2Status();
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"K2D2: {k2d2Status}", labelStyle);
-            // GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-        }
-        GUILayout.Space(spacingAfterEntry);
+        GUILayout.Space(spacingAfterSection);
     }
 
     private void callMNC()
@@ -1429,8 +1610,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            // timeSelector = new TimeSelector(new TimeReference[] { TimeReference.COMPUTED, TimeReference.PERIAPSIS, TimeReference.APOAPSIS, TimeReference.X_FROM_NOW, TimeReference.ALTITUDE, TimeReference.EQ_DESCENDING, TimeReference.EQ_ASCENDING, TimeReference.REL_NEAREST_AD, TimeReference.REL_ASCENDING, TimeReference.REL_DESCENDING, TimeReference.CLOSEST_APPROACH });
-
             var anExists = orbit.AscendingNodeExists(currentTarget.Orbit as PatchedConicsOrbit);
             var dnExists = orbit.DescendingNodeExists(currentTarget.Orbit as PatchedConicsOrbit);
             double anTime = orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
@@ -1662,99 +1841,218 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
+    private void handleToggles()
+    {
+        if (circularize|| newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannT || interceptTgt || courseCorrection || moonReturn || matchVelocity || planetaryXfer )
+        {
+            if (circularize)
+            {
+                _toggles["Circularize"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+            }
+            if (newPe)
+            {
+                _toggles["SetNewPe"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+            }
+            if (newAp)
+            {
+                _toggles["SetNewAp"] = true;
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+            }
+            if (newPeAp)
+            {
+                _toggles["Elipticize"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+            }
+            if (newLAN)
+            {
+                _toggles["SetNewLAN"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+            }
+            if (newInc)
+            {
+                _toggles["SetNewInc"] = true;
+                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest eq AN/DN"
+                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest eq AN/DN"
+                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+            }
+            if (matchPlane)
+            {
+                _toggles["MatchPlane"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Next AN With Target"
+                options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
+                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+            }
+            if (hohmannT)
+            {
+                _toggles["HohmanTransfer"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
+                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
+                options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
+                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+            }
+            if (interceptTgt)
+            {
+                _toggles["InterceptTgt"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
+                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
+                options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
+                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+            }
+            if (courseCorrection)
+            {
+                _toggles["CourseCorrection"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+            }
+            if (moonReturn)
+            {
+                _toggles["MoonReturn"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+            }
+            if (matchVelocity)
+            {
+                _toggles["MatchVelocity"] = true;
+                options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+            }
+            if (planetaryXfer)
+            {
+                _toggles["planetaryXfer"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+            }
+        }
+    }
+
     private void handleButtons()
     {
-        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || newLAN || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer || launchMNC || executeNode)
+        if (makeNode || launchMNC || executeNode)
         {
             bool pass;
-            TimeSelector timeSelector;
+            // TimeSelector timeSelector;
 
-            if (circAp) // Working
+            if (makeNode)
             {
-                timeSelector = new TimeSelector(new TimeReference[] { TimeReference.APOAPSIS, TimeReference.PERIAPSIS, TimeReference.ALTITUDE, TimeReference.X_FROM_NOW });
-                timeSelector.DoChooseTimeGUI();
-                pass = CircularizeAtAP(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (circPe) // Working
-            {
-                pass = CircularizeAtPe(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (circNow) // Working
-            {
-                pass = CircularizeNow(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (newPe) // Working
-            {
-                pass = SetNewPe(targetPeR, - 0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (newAp) // Working
-            {
-                pass = SetNewAp(targetApR, - 0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
-            {
-                pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (newLAN) // Untested
-            {
-                pass = SetNewLAN(targetLAN, -0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (newInc) // Working
-            {
-                pass = SetInclination(targetInc, -0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (matchPlanesA) // Working
-            {
-                pass = MatchPlanesAtAN(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (matchPlanesD) // Working
-            {
-                pass = MatchPlanesAtDN(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
-            {
-                pass = HohmannTransfer(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (interceptAtTime) // Experimental
-            {
-                pass = InterceptTgtAtUT(interceptT, -0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (courseCorrection) // Experimental Works at least some times...
-            {
-                pass = CourseCorrection(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
-            {
-                pass = MoonReturn(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (matchVCA) // Experimental
-            {
-                pass = MatchVelocityAtCA(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (matchVNow) // Experimental
-            {
-                pass = MatchVelocityNow(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-            {
-                pass = PlanetaryXfer(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                if (circAp) // Working
+                {
+                    pass = CircularizeAtAP(-0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (circPe) // Working
+                {
+                    pass = CircularizeAtPe(-0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (circularize) // Working
+                {
+                    // pass = CircularizeNow(-0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (newPe) // Working
+                {
+                    // pass = SetNewPe(targetPeR, - 0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (newAp) // Working
+                {
+                    // pass = SetNewAp(targetApR, - 0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
+                {
+                    // pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (newLAN) // Untested
+                {
+                    pass = SetNewLAN(targetLAN, -0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (newInc) // Working
+                {
+                    pass = SetInclination(targetInc, -0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (matchPlane) // Working
+                {
+                    pass = MatchPlanesAtAN(-0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (matchPlanesD) // Working
+                {
+                    pass = MatchPlanesAtDN(-0.5);
+                    // if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
+                {
+                    pass = HohmannTransfer(-0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (interceptTgt) // Experimental
+                {
+                    pass = InterceptTgtAtUT(interceptT, -0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (courseCorrection) // Experimental Works at least some times...
+                {
+                    pass = CourseCorrection(-0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
+                {
+                    pass = MoonReturn(-0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (matchVelocity) // Experimental
+                {
+                    pass = MatchVelocityAtCA(-0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (matchVNow) // Experimental
+                {
+                    pass = MatchVelocityNow(-0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
+                else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
+                {
+                    pass = PlanetaryXfer(-0.5);
+                    if (pass && autoLaunchMNC.Value) callMNC();
+                }
             }
             else if (launchMNC) callMNC();
             else if (executeNode) callK2D2();
