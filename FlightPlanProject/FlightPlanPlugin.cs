@@ -9,7 +9,7 @@ using KSP.Sim;
 using KSP.Sim.impl;
 using KSP.Sim.Maneuver;
 using KSP.UI.Binding;
-using ManeuverNodeController;
+// using ManeuverNodeController;
 using MuMech;
 using NodeManager;
 using SpaceWarp;
@@ -20,7 +20,9 @@ using SpaceWarp.API.UI.Appbar;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
-using K2D2;
+
+using FlightPlan.Tools;
+using FlightPlan.UI;
 
 namespace FlightPlan;
 
@@ -37,17 +39,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
     // Control click through to the game
-    private bool gameInputState = true;
-    public List<String> inputFields = new List<String>();
+    //public List<String> inputFields = new List<String>();
 
     // GUI stuff
     static bool loaded = false;
     private bool interfaceEnabled = false;
     private bool GUIenabled = true;
-    private Rect _windowRect;
-    private int windowWidth = Screen.width / 6; //384px on 1920x1080
-    private int windowHeight = Screen.height / 4; //360px on 1920x1080
-    private Rect closeBtnRect;
+    private Rect windowRect = Rect.zero;
+    private int windowWidth = 250; //384px on 1920x1080
+  //  private int windowHeight = Screen.height / 4; //360px on 1920x1080
+
 
     // Status of last Flight Plan function
     private enum Status
@@ -63,22 +64,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     // Config parameters
     private ConfigEntry<string> initialStatusText;
-    private ConfigEntry<string> defaultTargetPeAStr;
-    private ConfigEntry<string> defaultTargetApAStr;
-    private ConfigEntry<string> defaultTargetMRPeAStr;
-    private ConfigEntry<string> defaultTargetIncStr;
-    private ConfigEntry<string> defaultInterceptTStr;
     private ConfigEntry<double> statusPersistence;
     private ConfigEntry<double> statusFadeTime;
     private ConfigEntry<bool> experimental;
     private ConfigEntry<bool> autoLaunchMNC;
 
     // Button bools
-    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer, launchMNC, executeNode;
+    private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer;
 
     // Body selection.
-    private string selectedBody = null;
-    private List<string> bodies;
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
 
@@ -88,64 +82,33 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ManeuverNodeData currentNode = null;
     List<ManeuverNodeData> activeNodes;
 
-    // Text Inputs
-    private string targetPeAStr;   // m - This is a Configurable Parameter
-    private string targetApAStr;   // m - This is a Configurable Parameter
-    private string targetPeAStr1;  // m - This is initially set = targetPeAStr
-    private string targetApAStr1;  // m - This is initially set = targetApAStr
-    private string targetMRPeAStr; // m - This is initially set = targetApAStr
-    private string targetIncStr;   // degrees - Default 0
-    private string interceptTStr;  // s - This is a Configurable Parameter
-
-    // Values from Text Inputs
+    // Radius Computed from Inputs
     private double targetPeR;
     private double targetApR;
-    private double targetPeR1;
-    private double targetApR1;
     private double targetMRPeR;
-    private double targetInc;
-    private double interceptT;
 
-    // GUI layout and style stuff
-    private GUIStyle errorStyle, warnStyle, progradeStyle, normalStyle, radialStyle, labelStyle;
+
+
+
     private GameInstance game;
-    private GUIStyle horizontalDivider = new GUIStyle();
-    private GUISkin _spaceWarpUISkin;
-    private GUIStyle tgtBtnStyle;
-    private GUIStyle ctrlBtnStyle;
-    private GUIStyle bigBtnStyle;
-    private GUIStyle smallBtnStyle;
-    // private GUIStyle mainWindowStyle;
-    private GUIStyle textInputStyle;
-    // private GUIStyle sectionToggleStyle;
-    private GUIStyle closeBtnStyle;
-    private GUIStyle nameLabelStyle;
-    private GUIStyle valueLabelStyle;
-    private GUIStyle unitLabelStyle;
-    private GUIStyle statusStyle;
-    private static GUIStyle boxStyle;
-    // private string unitColorHex;
-    private int spacingAfterHeader = -12;
-    private int spacingAfterEntry = -5;
-    // private int spacingAfterSection = 5;
 
     // App bar button(s)
     private const string ToolbarFlightButtonID = "BTN-FlightPlanFlight";
     // private const string ToolbarOABButtonID = "BTN-FlightPlanOAB";
 
+    private static string _assemblyFolder;
+    private static string AssemblyFolder =>
+        _assemblyFolder ?? (_assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+
+    private static string _settingsPath;
+    private static string SettingsPath =>
+        _settingsPath ?? (_settingsPath = Path.Combine(AssemblyFolder, "settings.json"));
+
     //public ManualLogSource logger;
     public new static ManualLogSource Logger { get; set; }
 
-    // Refelction access variables for launching MNC & K2-D2
-    private bool MNCLoaded, K2D2Loaded, checkK2D2status  = false;
-    private PluginInfo MNC, K2D2;
-    private Version mncMinVersion, k2d2MinVersion;
-    private int mncVerCheck, k2d2VerCheck;
-    private string k2d2Status;
-    Type k2d2Type, mncType;
-    PropertyInfo k2d2PropertyInfo, mncPropertyInfo;
-    MethodInfo k2d2GetStatusMethodInfo, k2d2FlyNodeMethodInfo, k2d2ToggleMethodInfo, mncLaunchMNCMethodInfo;
-    object k2d2Instance, mncInstance;
+
+
 
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
@@ -155,6 +118,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public override void OnInitialized()
     {
         base.OnInitialized();
+
+        FPSettings.Init(SettingsPath);
 
         Instance = this;
 
@@ -180,45 +145,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //StateChanges.LaunchpadEntered += message => GUIenabled = false;
         //StateChanges.RunwayEntered += message => GUIenabled = false;
 
-        Logger.LogInfo($"ManeuverNodeControllerMod.ModGuid = {ManeuverNodeControllerMod.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out MNC))
-        {
-            MNCLoaded = true;
-            Logger.LogInfo("Maneuver Node Controller installed and available");
-            Logger.LogInfo($"MNC = {MNC}");
-            // mncVersion = MNC.Metadata.Version;
-            mncMinVersion = new Version(0, 8, 3);
-            mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
-            Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
 
-            // Reflections method to attempt the same thing more cleanly
-            mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
-            mncPropertyInfo = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            mncInstance = mncPropertyInfo.GetValue(null);
-            mncLaunchMNCMethodInfo = mncPropertyInfo!.PropertyType.GetMethod("LaunchMNC");
-        }
-        // else MNCLoaded = false;
-        Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
 
-        Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(K2D2_Plugin.ModGuid, out K2D2))
-        {
-            K2D2Loaded = true;
-            Logger.LogInfo("K2-D2 installed and available");
-            Logger.LogInfo($"K2D2 = {K2D2}");
-            k2d2MinVersion = new Version(0, 8, 1);
-            k2d2VerCheck = K2D2.Metadata.Version.CompareTo(k2d2MinVersion);
-            Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
 
-            k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
-            k2d2PropertyInfo = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            k2d2Instance = k2d2PropertyInfo.GetValue(null);
-            k2d2ToggleMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("ToggleAppBarButton");
-            k2d2FlyNodeMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("FlyNode");
-            k2d2GetStatusMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("GetStatus");
-        }
-        // else K2D2Loaded = false;
-        Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
 
         //Logger.LogInfo($"NMLoaded = {NMLoaded}");
         //if (Chainloader.PluginInfos.TryGetValue(NodeManagerPlugin.Instance.ModGuid, out NM))
@@ -231,13 +160,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //Logger.LogInfo($"NMLoaded = {NMLoaded}");
 
         // Setup the list of input field names (most are the same as the entry string text displayed in the GUI window)
-        inputFields.Add("New Pe");
-        inputFields.Add("New Ap");
-        inputFields.Add("New Pe & Ap");
-        inputFields.Add("New Ap & Pe"); // kludgy name for the second input in a two input line
-        inputFields.Add("New Inclination");
-        inputFields.Add("Intercept at Time");
-        inputFields.Add("Select Target");
+        //inputFields.Add("New Pe");
+        //inputFields.Add("New Ap");
+        //inputFields.Add("New Pe & Ap");
+        //inputFields.Add("New Ap & Pe"); // kludgy name for the second input in a two input line
+        //inputFields.Add("New Inclination");
+        //inputFields.Add("Intercept at Time");
+        //inputFields.Add("Select Target");
 
         Logger.LogInfo("Loaded");
         if (loaded)
@@ -249,121 +178,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         gameObject.hideFlags = HideFlags.HideAndDontSave;
         DontDestroyOnLoad(gameObject);
 
-        _spaceWarpUISkin = Skins.ConsoleSkin;
-
-        boxStyle = new GUIStyle(_spaceWarpUISkin.box); // GUI.skin.GetStyle("Box");
-
-        //mainWindowStyle = new GUIStyle(_spaceWarpUISkin.window)
-        //{
-        //    padding = new RectOffset(8, 8, 20, 8),
-        //    contentOffset = new Vector2(0, -22),
-        //    fixedWidth = windowWidth
-        //};
-
-        textInputStyle = new GUIStyle(_spaceWarpUISkin.textField)
-        {
-            alignment = TextAnchor.LowerCenter,
-            padding = new RectOffset(10, 10, 0, 0),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 20,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        tgtBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(0, 0, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 25, // 16,
-            // fixedWidth = (int)(windowWidth * 0.6),
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        ctrlBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(0, 0, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 16,
-            fixedWidth = 16, // windowWidth / 2,
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        bigBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(0, 0, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 25, // 16,
-            fixedWidth = (int)(windowWidth * 0.6),
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        smallBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(10, 10, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 25, // 16,
-            // fixedWidth = 95,
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        //sectionToggleStyle = new GUIStyle(_spaceWarpUISkin.toggle)
-        //{
-        //    padding = new RectOffset(14, 0, 3, 3)
-        //};
-
-        statusStyle = new GUIStyle(_spaceWarpUISkin.label);
-
-        nameLabelStyle = new GUIStyle(_spaceWarpUISkin.label);
-        nameLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
-
-        valueLabelStyle = new GUIStyle(_spaceWarpUISkin.label)
-        {
-            alignment = TextAnchor.MiddleRight
-        };
-        valueLabelStyle.normal.textColor = new Color(.6f, .7f, 1, 1);
-
-        unitLabelStyle = new GUIStyle(valueLabelStyle)
-        {
-            fixedWidth = 24,
-            alignment = TextAnchor.MiddleLeft
-        };
-        unitLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
-        // unitColorHex = ColorUtility.ToHtmlStringRGBA(unitLabelStyle.normal.textColor);
-
-        closeBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            fontSize = 12
-        };
-
-        closeBtnRect = new Rect(windowWidth - 23, 6, 16, 16);
-
-        labelStyle = warnStyle = new GUIStyle(_spaceWarpUISkin.label); //  GUI.skin.GetStyle("Label"));
-        errorStyle = new GUIStyle(_spaceWarpUISkin.label); //  GUI.skin.GetStyle("Label"));
-        errorStyle.normal.textColor = Color.red;
-        warnStyle = new GUIStyle(_spaceWarpUISkin.label); //  GUI.skin.GetStyle("Label"));
-        warnStyle.normal.textColor = Color.yellow;
-        horizontalDivider.fixedHeight = 2;
-        horizontalDivider.margin = new RectOffset(0, 0, 4, 4);
-
-        // progradeStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // progradeStyle.normal.textColor = Color.yellow;
-        // normalStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // normalStyle.normal.textColor = Color.magenta;
-        // radialStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // radialStyle.normal.textColor = Color.cyan;
-        // Register Flight AppBar button
         Appbar.RegisterAppButton(
             "Flight Plan",
             "BTN-FlightPlan",
@@ -379,22 +193,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         initialStatusText = Config.Bind<string>("Status Settings Section", "Initial Status", "Virgin", "Controls the status reported at startup prior to the first command");
         experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable experimental.Value features for testing - Warrantee Void if Enabled!");
         autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when experimental.Value nodes are created");
-        defaultTargetPeAStr  = Config.Bind<string>("Defualt Inputs Section", "Target Pe Alt",        "80000", "Default Pe input (in meters) used to pre-populate text input field at startup");
-        defaultTargetApAStr = Config.Bind<string>("Defualt Inputs Section", "Target Ap Alt",       "250000", "Default Ap input (in meters) used to pre-populate text input field at startup");
-        defaultTargetIncStr = Config.Bind<string>("Defualt Inputs Section", "Target Inclination",       "0", "Default inclination input (in degrees) used to pre-populate text input field at startup");
-        defaultInterceptTStr = Config.Bind<string>("Defualt Inputs Section", "Target Intercept Time",  "100", "Default intercept time (in seconds) used to pre-populate text input field at startup");
-        defaultTargetMRPeAStr = Config.Bind<string>("Defualt Inputs Section", "Target Moon Return Pe Alt", "100000", "Default Moon Return Target Pe input (in meters) used to pre-populate text input field at startup");
-
-        // Set the initial and defualt values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
+    
+        // Set the initial and Default values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
         statusText     = initialStatusText.Value;
-        targetPeAStr   = defaultTargetPeAStr.Value;
-        targetApAStr   = defaultTargetApAStr.Value;
-        targetPeAStr1  = defaultTargetPeAStr.Value;
-        targetApAStr1  = defaultTargetApAStr.Value;
-        targetMRPeAStr = defaultTargetMRPeAStr.Value;
-        targetIncStr   = defaultTargetIncStr.Value;
-        interceptTStr  = defaultInterceptTStr.Value;
-
+       
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental.Value}");
     }
@@ -407,17 +209,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     void Awake()
     {
-        _windowRect = new Rect((Screen.width * 0.7f) - (windowWidth / 2), (Screen.height / 2) - (windowHeight / 2), 0, 0);
-        // Logger = base.Logger;
+  
     }
 
     void Update()
     {
+        // Logger = base.Logger;
         if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.P))
         {
             ToggleButton(!interfaceEnabled);
             Logger.LogInfo("UI toggled with hotkey");
         }
+    }
+
+    void save_rect_pos()
+    {
+        FPSettings.window_x_pos = (int)windowRect.xMin;
+        FPSettings.window_y_pos = (int)windowRect.yMin;
     }
 
     /// <summary>
@@ -444,29 +252,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Set the UI
         if (interfaceEnabled && GUIenabled && activeVessel != null)
         {
+            FPStyles.Init();
+            FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
             GUI.skin = Skins.ConsoleSkin;
 
-            _windowRect = GUILayout.Window(
+            windowRect = GUILayout.Window(
                 GUIUtility.GetControlID(FocusType.Passive),
-                _windowRect,
+                windowRect,
                 FillWindow,
-                "<color=#696DFF>// FLIGHT PLAN</color>",
-                GUILayout.Height(windowHeight),
-                GUILayout.Width(windowWidth)
-            );
+                "<color=#696DFF>FLIGHT. PLAN</color>",
+                FPStyles.window,
+                GUILayout.Height(0),
+                GUILayout.Width(windowWidth));
 
-            if (gameInputState && inputFields.Contains(GUI.GetNameOfFocusedControl()))
-            {
-                // Logger.LogDebug($"OnGUI: Disabling Game Input: Focused Item '{GUI.GetNameOfFocusedControl()}'");
-                gameInputState = false;
-                GameManager.Instance.Game.Input.Disable();
-            }
-            else if (!gameInputState && !inputFields.Contains(GUI.GetNameOfFocusedControl()))
-            {
-                // Logger.LogDebug($"OnGUI: Enabling Game Input: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
-                gameInputState = true;
-                GameManager.Instance.Game.Input.Enable();
-            }
+            save_rect_pos();
+            // Draw the tool tip if needed
+            ToolTipsManager.DrawToolTips();
+            // check editor focus and unset Input if needed
+            UI_Fields.CheckEditor();
+
             //if (selectingBody)
             //{
             //    // Do something here to disable mouse wheel control of zoom in and out.
@@ -481,12 +285,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            if (!gameInputState)
-            {
-                // Logger.LogDebug($"OnGUI: Enabling Game Input due to GUI disabled: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
-                gameInputState = true;
-                GameManager.Instance.Game.Input.Enable();
-            }
+
         }
     }
 
@@ -502,9 +301,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     /// <param name="windowID"></param>
     private void FillWindow(int windowID)
     {
-        if (CloseButton())
-        {
+        TopButtons.Init(windowRect.width);
+        if ( TopButtons.IconButton(FPStyles.cross))
             CloseWindow();
+
+        GUI.Label(new Rect(9, 2, 29, 29), FPStyles.icon, FPStyles.icons_label);
+        if (selectingBody)
+        {
+            selectBodyUI();
+            return;
         }
 
         // game = GameManager.Instance.Game;
@@ -514,44 +319,35 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // FPNodeControl.RefreshManeuverNodes();
         currentNode = getCurrentNode();
 
-        string tgtName;
-        if (currentTarget == null)
-            tgtName = "None";
-        else
-            tgtName = currentTarget.Name;
-        DrawSectionHeader("Target", tgtName);
         BodySelectionGUI();
 
         var referenceBody = activeVessel.Orbit.referenceBody;
 
         DrawSectionHeader("Ownship Maneuvers");
+
+        UI_Tools.Label("Circularize");
+        GUILayout.BeginHorizontal();
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            DrawButton("Circularize at Ap", ref circAp);
+            DrawButton("at Ap", ref circAp);
         }
-        DrawButton("Circularize at Pe", ref circPe);
+        DrawButton("at Pe", ref circPe);
 
-        DrawButton("Circularize Now", ref circNow);
+        DrawButton("Now", ref circNow);
+        GUILayout.EndHorizontal();
 
-        DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
-        if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += referenceBody.radius;
-        else targetPeR = 0;
+        FPSettings.pe_altitude_km = DrawButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altitude_km, "km");
+        targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
 
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            DrawButtonWithTextField("New Ap", ref newAp, ref targetApAStr, "m");
-            if (double.TryParse(targetApAStr, out targetApR)) targetApR += referenceBody.radius;
-            else targetApR = 0;
+            FPSettings.ap_altitude_km =  DrawButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altitude_km, "km");
+            targetApR = FPSettings.ap_altitude_km*1000 + referenceBody.radius;
 
-            DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
-            if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += referenceBody.radius;
-            else targetPeR1 = 0;
-            if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += referenceBody.radius;
-            else targetApR1 = 0;
+            DrawButton("New Pe & Ap", ref newPeAp);
         }
 
-        DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
-        if (!double.TryParse(targetIncStr, out targetInc)) targetInc = 0;
+        FPSettings.target_inc_deg = DrawButtonWithTextField("New Inclination", ref newInc, FPSettings.target_inc_deg, "°");
 
         if (currentTarget != null)
         {
@@ -569,9 +365,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
                     if (experimental.Value)
                     {
-                        DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, ref interceptTStr, "s");
-                        try { interceptT = double.Parse(interceptTStr); }
-                        catch { interceptT = 100; }
+                        FPSettings.interceptT = DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, FPSettings.interceptT, "s");
                         DrawButton("Match Velocity @CA", ref matchVCA);
                         DrawButton("Match Velocity Now", ref matchVNow);
                     }
@@ -603,10 +397,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (!referenceBody.Orbit.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1) // not orbiting a planet, and e < 1
             {
                 DrawSectionHeader("Moon Specific Maneuvers");
+
+                var parentPlanet = referenceBody.Orbit.referenceBody;
                 // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
-                DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAStr, "m");
-                if (double.TryParse(targetMRPeAStr, out targetMRPeR)) targetMRPeR += activeVessel.Orbit.referenceBody.radius;
-                else targetMRPeR = 0;
+                FPSettings.mr_altitude_km = DrawButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
+                targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
             }
         }
 
@@ -624,11 +419,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUI.DragWindow(new Rect(0, 0, 10000, 500));
     }
 
-    private bool CloseButton()
-    {
-        return GUI.Button(closeBtnRect, "x", closeBtnStyle);
-    }
-
     private void CloseWindow()
     {
         GameObject.Find(ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(false);
@@ -637,52 +427,88 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // game.Input.Flight.Enable();
         GameManager.Instance.Game.Input.Enable();
         ToggleButton(interfaceEnabled);
+
+        UI_Fields.GameInputState = true;
+    }
+
+    
+
+    void selectBodyUI()
+    {
+        //bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
+
+        CelestialBodyComponent root_body = activeVessel.mainBody;
+        while(root_body.referenceBody != null)
+        {
+            root_body = root_body.referenceBody;
+        }
+
+        void listSubBodies(CelestialBodyComponent body, int level)
+        {
+            foreach (CelestialBodyComponent sub in body.orbitingBodies)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(level * 30);
+                if (UI_Tools.ListButton(sub.Name))
+                {
+                    selectingBody = false;
+                    activeVessel.SetTargetByID(sub.GlobalId);
+                    currentTarget = activeVessel.TargetObject;
+                }
+               
+                GUILayout.EndHorizontal();
+                listSubBodies(sub, level + 1);
+            }
+        }
+
+      //  bodies = GameManager.Instance.Game.SpaceSimulation.GetAllObjectsWithComponent<CelestialBodyComponent>();
+
+        GUILayout.BeginHorizontal();
+        UI_Tools.Label("Select target ");
+        if (UI_Tools.SmallButton("Cancel"))
+        {
+            selectingBody = false;
+        }
+        GUILayout.EndHorizontal();
+
+        UI_Tools.Separator();
+
+        //GUI.SetNextControlName("Select Target");
+        scrollPositionBodies = UI_Tools.BeginScrollView(scrollPositionBodies, 300);
+
+        listSubBodies(root_body, 0);
+
+        GUILayout.EndScrollView();
     }
 
     private void BodySelectionGUI()
     {
-        bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
-        string baseName = "Select Target";
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Target Celestial Body: ", GUILayout.Width((float)(windowWidth * 0.6)));
-        if (!selectingBody)
-        {
-            GUI.SetNextControlName(baseName);
-            if (GUILayout.Button(selectedBody, tgtBtnStyle))
-                selectingBody = true;
-        }
+        //string baseName = "Select Target";
+
+        string tgtName;
+        if (currentTarget == null)
+            tgtName = "None";
         else
-        {
-            GUILayout.BeginVertical(boxStyle);
-            GUI.SetNextControlName("Select Target");
-            scrollPositionBodies = GUILayout.BeginScrollView(scrollPositionBodies, false, true, GUILayout.Height(150));
-            int index = 0;
-            foreach (string body in bodies)
-            {
-                var thisName = baseName + index.ToString("d2");
-                if (!inputFields.Contains(thisName)) inputFields.Add(thisName);
-                GUI.SetNextControlName(thisName);
-                if (GUILayout.Button(body, tgtBtnStyle))
-                {
-                    selectedBody = body;
-                    selectingBody = false;
-                    activeVessel.SetTargetByID(game.UniverseModel.FindCelestialBodyByName(body).GlobalId);
-                    currentTarget = activeVessel.TargetObject;
-                }
-                index++;
-            }
-            GUILayout.EndScrollView();
-            GUILayout.EndVertical();
-        }
+            tgtName = currentTarget.Name;
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Target : ");
+
+        if (UI_Tools.SmallButton(tgtName))
+            selectingBody = true;
+        
         GUILayout.EndHorizontal();
     }
 
+    int spacingAfterHeader = 5;
+    int spacingAfterEntry = 5;
+
     private void DrawSectionHeader(string sectionName, string value = "", GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
-        if (valueStyle == null) valueStyle = valueLabelStyle;
+        if (valueStyle == null) valueStyle = FPStyles.label;
         GUILayout.BeginHorizontal();
         // Don't need popout buttons for ROC
-        // isPopout = isPopout ? !CloseButton() : GUILayout.Button("⇖", popoutBtnStyle);
+        // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);
 
         GUILayout.Label($"<b>{sectionName}</b> ");
         GUILayout.FlexibleSpace();
@@ -695,12 +521,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, nameLabelStyle);
+        UI_Tools.Label(entryName);
         GUILayout.FlexibleSpace();
-        button = GUILayout.Button(buttonStr, ctrlBtnStyle);
-        GUILayout.Label(value, valueLabelStyle);
+        button = UI_Tools.SmallButton(buttonStr);
+        UI_Tools.Label(value);
         GUILayout.Space(5);
-        GUILayout.Label(unit, unitLabelStyle);
+        UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
@@ -708,181 +534,73 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void DrawEntry2Button(string entryName, ref bool button1, string button1Str, ref bool button2, string button2Str, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, nameLabelStyle);
+        UI_Tools.Console(entryName);
         GUILayout.FlexibleSpace();
-        button1 = GUILayout.Button(button1Str, ctrlBtnStyle);
-        button2 = GUILayout.Button(button2Str, ctrlBtnStyle);
-        GUILayout.Label(value, valueLabelStyle);
+        button1 = UI_Tools.SmallButton(button1Str);
+        button2 = UI_Tools.SmallButton(button2Str);
+        UI_Tools.Console(value);
         GUILayout.Space(5);
-        GUILayout.Label(unit, unitLabelStyle);
-        GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
-    }
-
-    private void DrawEntryTextField(string entryName, ref string textEntry, string unit = "")
-    {
-        double num;
-        Color normal;
-        GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, nameLabelStyle);
-        GUILayout.FlexibleSpace();
-        normal = GUI.color;
-        bool parsed = double.TryParse(textEntry, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName);
-        textEntry = GUILayout.TextField(textEntry, textInputStyle);
-        GUI.color = normal;
-        GUILayout.Space(5);
-        GUILayout.Label(unit, unitLabelStyle);
+        UI_Tools.Console(unit);
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
 
     private void DrawButton(string buttonStr, ref bool button)
     {
-        GUILayout.BeginHorizontal();
-        button = GUILayout.Button(buttonStr, bigBtnStyle);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
+        button = UI_Tools.Button(buttonStr);
     }
 
-    private void DrawButtonWithTextField(string entryName, ref bool button, ref string textEntry, string unit = "")
+    private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
-        double num;
-        Color normal;
         GUILayout.BeginHorizontal();
-        button = GUILayout.Button(entryName, smallBtnStyle);
+        button = UI_Tools.Button(entryName);
         GUILayout.Space(10);
-        normal = GUI.color;
-        bool parsed = double.TryParse(textEntry, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName);
-        textEntry = GUILayout.TextField(textEntry, textInputStyle);
-        GUI.color = normal;
+
+        value = UI_Fields.DoubleField(entryName, value);
+
         GUILayout.Space(3);
-        GUILayout.Label(unit, unitLabelStyle);
-        GUILayout.FlexibleSpace();
+        UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
+
         GUILayout.Space(spacingAfterEntry);
+        return value;
     }
 
-    private void DrawButtonWithDualTextField(string entryName1, string entryName2, ref bool button, ref string textEntry1, ref string textEntry2, string unit = "")
-    {
-        double num;
-        Color normal;
-        GUILayout.BeginHorizontal();
-        button = GUILayout.Button(entryName1, smallBtnStyle);
-        GUILayout.Space(5);
-        normal = GUI.color;
-        bool parsed = double.TryParse(textEntry1, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName1);
-        textEntry1 = GUILayout.TextField(textEntry1, textInputStyle);
-        GUI.color = normal;
-        GUILayout.Space(5);
-        parsed = double.TryParse(textEntry2, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName2);
-        textEntry2 = GUILayout.TextField(textEntry2, textInputStyle);
-        GUI.color = normal;
-        GUILayout.Space(3);
-        GUILayout.Label(unit, unitLabelStyle);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
-    }
+    public OtherModsInterface other_mods = null;
 
     private void DrawGUIStatus(double UT)
     {
         // Indicate status of last GUI function
         float transparency = 1;
         if (UT > statusTime) transparency = (float)MuUtils.Clamp(1 - (UT - statusTime) / statusFadeTime.Value, 0, 1);
+
+        var status_style = FPStyles.label;
         if (status == Status.VIRGIN)
-            statusStyle.normal.textColor = new Color(1, 1, 1, 1);
+            status_style = FPStyles.label;
         if (status == Status.OK)
-            statusStyle.normal.textColor = new Color(0, 1, 0, transparency);
+            status_style = FPStyles.phase_ok;
         if (status == Status.WARNING)
-            statusStyle.normal.textColor = new Color(1, 1, 0, transparency);
+            status_style = FPStyles.phase_warning;
         if (status == Status.ERROR)
-            statusStyle.normal.textColor = new Color(1, 0, 0, transparency);
-        GUILayout.Box("", horizontalDivider);
-        DrawSectionHeader("Status:", statusText, statusStyle);
+            status_style = FPStyles.phase_error;
+
+        UI_Tools.Separator();
+        DrawSectionHeader("Status:", statusText, status_style);
 
         // Indication to User that its safe to type, or why vessel controls aren't working
-        GUILayout.BeginHorizontal();
-        string inputStateString = gameInputState ? "<b>Enabled</b>" : "<b>Disabled</b>";
-        GUILayout.Label("Game Input: ", labelStyle);
-        if (gameInputState)
-            GUILayout.Label(inputStateString, labelStyle);
-        else
-            GUILayout.Label(inputStateString, warnStyle);
-        GUILayout.FlexibleSpace();
-        if (MNCLoaded && mncVerCheck >= 0)
+
+        if (other_mods == null)
         {
-            launchMNC = GUILayout.Button("MNC", smallBtnStyle);
+            // init mode detection only when first needed
+            other_mods = new OtherModsInterface();
+            other_mods.CheckModsVersions();
         }
-        GUILayout.Space(10);
-        if (K2D2Loaded && currentNode != null)
-        {
-            executeNode = GUILayout.Button("K2D2", smallBtnStyle);
-        }
-        GUILayout.EndHorizontal();
-        if (checkK2D2status)
-        {
-            getK2D2Status();
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"K2D2: {k2d2Status}", labelStyle);
-            // GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-        }
+
+        other_mods.OnGUI(currentNode);
         GUILayout.Space(spacingAfterEntry);
     }
 
-    private void callMNC()
-    {
-        if (MNCLoaded && mncVerCheck >= 0)
-        {
-            mncLaunchMNCMethodInfo!.Invoke(mncPropertyInfo.GetValue(null), null);
-        }
-    }
 
-    private void callK2D2()
-    {
-        if (K2D2Loaded)
-        {
-            // Reflections method to attempt the same thing more cleanly
-            if (k2d2VerCheck < 0)
-            {
-                k2d2ToggleMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), new object[] { true });
-            }
-            else
-            {
-                k2d2FlyNodeMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), null);
-                checkK2D2status = true;
-            }
-        }
-    }
-
-    private void getK2D2Status()
-    {
-        if (K2D2Loaded)
-        {
-            if (k2d2VerCheck >= 0)
-            {
-                k2d2Status = (string)k2d2GetStatusMethodInfo!.Invoke(k2d2Instance, null);
-
-                if (k2d2Status == "Done")
-                {
-                    if (currentNode.Time < Game.UniverseModel.UniversalTime)
-                    {
-                        NodeManagerPlugin.Instance.DeleteNodes(0);
-                    }
-                    checkK2D2status = false;
-                }
-            }
-        }
-    }
 
     private void CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
     {
@@ -1264,7 +982,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         statusText = $"Experimental Intercept of {currentTarget.Name} Ready"; // $"Ready to Intercept {currentTarget.Name}";
         statusTime = UT + statusPersistence.Value;
 
-        Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
+        Logger.LogDebug($"Seeking Solution: interceptT {FPSettings.interceptT} s");
         if (currentTarget.IsCelestialBody) // For a target that is a celestial
             offsetDistance = currentTarget.Orbit.referenceBody.radius + 50000;
         else
@@ -1455,7 +1173,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void handleButtons()
     {
-        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer || launchMNC || executeNode)
+        if (circAp || circPe || circNow|| newPe || newAp || newPeAp || newInc || matchPlanesA || matchPlanesD || hohmannT || interceptAtTime || courseCorrection || moonReturn || matchVCA || matchVNow || planetaryXfer )
         {
             bool pass;
 
@@ -1486,12 +1204,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
             else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
             {
-                pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
+                pass = Ellipticize(targetApR, targetPeR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newInc) // Working
             {
-                pass = SetInclination(targetInc, -0.5);
+                pass = SetInclination(FPSettings.target_inc_deg, -0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (matchPlanesA) // Working
@@ -1507,40 +1225,38 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
             {
                 pass = HohmannTransfer(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (interceptAtTime) // Experimental
             {
-                pass = InterceptTgtAtUT(interceptT, -0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                pass = InterceptTgtAtUT(FPSettings.interceptT, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (courseCorrection) // Experimental Works at least some times...
             {
                 pass = CourseCorrection(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
             {
                 pass = MoonReturn(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (matchVCA) // Experimental
             {
                 pass = MatchVelocityAtCA(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (matchVNow) // Experimental
             {
                 pass = MatchVelocityNow(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
             {
                 pass = PlanetaryXfer(-0.5);
-                if (pass && autoLaunchMNC.Value) callMNC();
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
-            else if (launchMNC) callMNC();
-            else if (executeNode) callK2D2();
         }
     }
 
@@ -1555,7 +1271,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // NodeManagerPlugin.Instance.RefreshNodes();
         yield return (object)new WaitForFixedUpdate();
 
-        //List<ManeuverNodeData> patchList = 
+        //List<ManeuverNodeData> patchList =
         //    Game.SpaceSimulation.Maneuvers.GetNodesForVessel(activeVessel.SimulationObject.GlobalId);
 
         Logger.LogDebug($"TestPerturbedOrbit: patchList.Count = {NodeManagerPlugin.Instance.Nodes.Count}");
