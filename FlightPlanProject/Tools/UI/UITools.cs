@@ -33,7 +33,7 @@ public class SimpleAccordion
         for (int i = 0; i < chapters.Count; i++)
         {
             Chapter chapter = chapters[i];
-            var style = chapter.opened ? FPStyles.accordion_open : FPStyles.accordion_close;
+            var style = chapter.opened ? FPStyles.foldout_open : FPStyles.foldout_close;
             if (GUILayout.Button(chapter.Title, style))
             {
                 chapter.opened = !chapter.opened;
@@ -95,24 +95,24 @@ public class TopButtons
     static public bool Button(string txt)
     {
         position.x -= space;
-        return GUI.Button(position, txt, FPStyles.small_button);
+        return GUI.Button(position, txt, FPStyles.icon_button);
     }
-    static public bool Button(Texture2D icon)
+    static public bool IconButton(Texture2D icon)
     {
         position.x -= space;
-        return GUI.Button(position, icon, FPStyles.small_button);
+        return GUI.Button(position, icon, FPStyles.icon_button);
     }
 
     static public bool Toggle(bool value, string txt)
     {
         position.x -= space;
-        return GUI.Toggle(position, value, txt, FPStyles.small_button);
+        return GUI.Toggle(position, value, txt, FPStyles.icon_button);
     }
 
     static public bool Toggle(bool value, Texture2D icon)
     {
         position.x -= space;
-        return GUI.Toggle(position, value, icon, FPStyles.small_button);
+        return GUI.Toggle(position, value, icon, FPStyles.icon_button);
     }
 }
 
@@ -165,7 +165,7 @@ public class UI_Tools
         return is_on;
     }
 
-    public static bool BigButton(string txt)
+    public static bool Button(string txt)
     {
         return GUILayout.Button(txt, FPStyles.big_button);
     }
@@ -173,6 +173,11 @@ public class UI_Tools
     public static bool SmallButton(string txt)
     {
         return GUILayout.Button(txt, FPStyles.small_button);
+    }
+
+    public static bool ListButton(string txt)
+    {
+        return GUILayout.Button(txt, FPStyles.button, GUILayout.ExpandWidth(true));
     }
 
     public static bool miniToggle(bool value, string txt, string tooltip)
@@ -189,6 +194,12 @@ public class UI_Tools
     {
         return GUILayout.Button(new GUIContent("?", tooltip), FPStyles.small_button, GUILayout.Width(16), GUILayout.Height(20));
     }
+
+    static public bool BigIconButton(Texture2D icon)
+    {
+        return GUILayout.Button(icon, FPStyles.bigicon_button);
+    }
+
 
     public static void Title(string txt)
     {
@@ -341,5 +352,13 @@ public class UI_Tools
 
         GUILayout.Space(10);
     }
+
+    public static Vector2 BeginScrollView(Vector2 scrollPos, int height)
+    {
+        return GUILayout.BeginScrollView(scrollPos, false, true,
+            GUILayout.MinWidth(250),
+            GUILayout.Height(height));
+    }
+
 }
 

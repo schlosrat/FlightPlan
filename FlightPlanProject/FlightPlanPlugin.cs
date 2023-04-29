@@ -46,8 +46,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private bool interfaceEnabled = false;
     private bool GUIenabled = true;
     private Rect windowRect = Rect.zero;
-    private int windowWidth = Screen.width / 6; //384px on 1920x1080
-    private int windowHeight = Screen.height / 4; //360px on 1920x1080
+    private int windowWidth = 250; //384px on 1920x1080
+  //  private int windowHeight = Screen.height / 4; //360px on 1920x1080
 
 
     // Status of last Flight Plan function
@@ -73,8 +73,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer;
 
     // Body selection.
-    private string selectedBody = null;
-    private List<string> bodies;
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
 
@@ -254,10 +252,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Set the UI
         if (interfaceEnabled && GUIenabled && activeVessel != null)
         {
-            GUI.skin = Skins.ConsoleSkin;
-
-            FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
             FPStyles.Init();
+            FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
+            GUI.skin = Skins.ConsoleSkin;
 
             windowRect = GUILayout.Window(
                 GUIUtility.GetControlID(FocusType.Passive),
@@ -266,7 +263,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 "<color=#696DFF>FLIGHT. PLAN</color>",
                 FPStyles.window,
                 GUILayout.Height(0),
-                GUILayout.Width(350));
+                GUILayout.Width(windowWidth));
 
             save_rect_pos();
             // Draw the tool tip if needed
@@ -305,10 +302,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void FillWindow(int windowID)
     {
         TopButtons.Init(windowRect.width);
-        if ( TopButtons.Button(FPStyles.cross))
+        if ( TopButtons.IconButton(FPStyles.cross))
             CloseWindow();
 
         GUI.Label(new Rect(9, 2, 29, 29), FPStyles.icon, FPStyles.icons_label);
+        if (selectingBody)
+        {
+            selectBodyUI();
+            return;
+        }
 
         // game = GameManager.Instance.Game;
         //activeNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
@@ -317,13 +319,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // FPNodeControl.RefreshManeuverNodes();
         currentNode = getCurrentNode();
 
-        string tgtName;
-        if (currentTarget == null)
-            tgtName = "None";
-        else
-            tgtName = currentTarget.Name;
-
-        DrawSectionHeader("Target", tgtName);
         BodySelectionGUI();
 
         var referenceBody = activeVessel.Orbit.referenceBody;
@@ -402,9 +397,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (!referenceBody.Orbit.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1) // not orbiting a planet, and e < 1
             {
                 DrawSectionHeader("Moon Specific Maneuvers");
+
+                var parentPlanet = referenceBody.Orbit.referenceBody;
                 // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
                 FPSettings.mr_altitude_km = DrawButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
-                targetMRPeR = FPSettings.mr_altitude_km * 1000 + activeVessel.Orbit.referenceBody.radius;
+                targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
             }
         }
 
@@ -434,39 +431,72 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         UI_Fields.GameInputState = true;
     }
 
-    private void BodySelectionGUI()
+    
+
+    void selectBodyUI()
     {
-        bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
-        string baseName = "Select Target";
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Target Celestial Body: ", GUILayout.Width((float)(windowWidth * 0.6)));
-        if (!selectingBody)
+        //bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
+
+        CelestialBodyComponent root_body = activeVessel.mainBody;
+        while(root_body.referenceBody != null)
         {
-            GUI.SetNextControlName(baseName);
-            if (UI_Tools.SmallButton(selectedBody))
-                selectingBody = true;
+            root_body = root_body.referenceBody;
         }
-        else
+
+        void listSubBodies(CelestialBodyComponent body, int level)
         {
-            GUILayout.BeginVertical(FPStyles.separator);
-            GUI.SetNextControlName("Select Target");
-            scrollPositionBodies = GUILayout.BeginScrollView(scrollPositionBodies, false, true, GUILayout.Height(150));
-            int index = 0;
-            foreach (string body in bodies)
+            foreach (CelestialBodyComponent sub in body.orbitingBodies)
             {
-                var thisName = baseName + index.ToString("d2");
-                if (UI_Tools.SmallButton(body))
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(level * 30);
+                if (UI_Tools.ListButton(sub.Name))
                 {
-                    selectedBody = body;
                     selectingBody = false;
-                    activeVessel.SetTargetByID(game.UniverseModel.FindCelestialBodyByName(body).GlobalId);
+                    activeVessel.SetTargetByID(sub.GlobalId);
                     currentTarget = activeVessel.TargetObject;
                 }
-                index++;
+               
+                GUILayout.EndHorizontal();
+                listSubBodies(sub, level + 1);
             }
-            GUILayout.EndScrollView();
-            GUILayout.EndVertical();
         }
+
+      //  bodies = GameManager.Instance.Game.SpaceSimulation.GetAllObjectsWithComponent<CelestialBodyComponent>();
+
+        GUILayout.BeginHorizontal();
+        UI_Tools.Label("Select target ");
+        if (UI_Tools.SmallButton("Cancel"))
+        {
+            selectingBody = false;
+        }
+        GUILayout.EndHorizontal();
+
+        UI_Tools.Separator();
+
+        //GUI.SetNextControlName("Select Target");
+        scrollPositionBodies = UI_Tools.BeginScrollView(scrollPositionBodies, 300);
+
+        listSubBodies(root_body, 0);
+
+        GUILayout.EndScrollView();
+    }
+
+    private void BodySelectionGUI()
+    {
+        //string baseName = "Select Target";
+
+        string tgtName;
+        if (currentTarget == null)
+            tgtName = "None";
+        else
+            tgtName = currentTarget.Name;
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Target : ");
+
+        if (UI_Tools.SmallButton(tgtName))
+            selectingBody = true;
+        
         GUILayout.EndHorizontal();
     }
 
@@ -480,7 +510,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Don't need popout buttons for ROC
         // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);
 
-        GUILayout.Label($"<b>-- {sectionName} --</b> ");
+        GUILayout.Label($"<b>{sectionName}</b> ");
         GUILayout.FlexibleSpace();
         GUILayout.Label(value, valueStyle);
         GUILayout.Space(5);
@@ -517,13 +547,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void DrawButton(string buttonStr, ref bool button)
     {
-        button = UI_Tools.BigButton(buttonStr);
+        button = UI_Tools.Button(buttonStr);
     }
 
     private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        button = UI_Tools.BigButton(entryName);
+        button = UI_Tools.Button(entryName);
         GUILayout.Space(10);
 
         value = UI_Fields.DoubleField(entryName, value);
@@ -558,9 +588,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         DrawSectionHeader("Status:", statusText, status_style);
 
         // Indication to User that its safe to type, or why vessel controls aren't working
-        GUILayout.BeginHorizontal();
-
-        GUILayout.FlexibleSpace();
 
         if (other_mods == null)
         {
