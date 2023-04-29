@@ -72,14 +72,60 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // Button bools
     private bool circAp, circPe, circNow, newPe, newAp, newPeAp, newInc, matchPlanesA, matchPlanesD, hohmannT, interceptAtTime, courseCorrection, moonReturn, matchVCA, matchVNow, planetaryXfer;
 
+    // Dictionaries used for toggle button management to function like radio buttons. If no "radio buttons", then this can go.
+    private Dictionary<string, bool> _toggles = new();
+    private Dictionary<string, bool> _previousToggles = new();
+    private readonly Dictionary<string, bool> _initialToggles = new()
+    {
+        { "Circularize",      false },
+        { "SetNewAp",         false },
+        { "SetNewPe",         false },
+        { "Elipticize",       false },
+        { "SetNewInc",        false },
+        { "SetNewLAN",        false },
+        { "MatchPlane",       false },
+        { "MatchVelocity",    false },
+        { "CourseCorrection", false },
+        { "HohmannTransfer",  false },
+        { "InterceptTgt",     false },
+        { "MoonReturn",       false },
+        { "PlanetaryXfer",    false }
+    };
+
+    // Time references for selectedOption
+    private readonly Dictionary<string, string> TimeReference = new()
+    {
+        { "COMPUTED",          "At Optimum Time"               }, //at the optimum time
+        { "APOAPSIS",          "At Next Apoapsis"              }, //"at the next apoapsis"
+        { "CLOSEST_APPROACH",  "At Closest Approach to Target" }, //"at closest approach to target"
+        { "EQ_ASCENDING",      "At Equatorial AN"              }, //"at the equatorial AN"
+        { "EQ_DESCENDING",     "At Equatorial DN"              }, //"at the equatorial DN"
+        { "PERIAPSIS",         "At Next Periapsis"             }, //"at the next periapsis"
+        { "REL_ASCENDING",     "At Next AN with Target"        }, //"at the next AN with the target."
+        { "REL_DESCENDING",    "At Next DN with Target"        }, //"at the next DN with the target."
+        { "X_FROM_NOW",        "After a Fixed Time"            }, //"after a fixed time"
+        { "ALTITUDE",          "At an Altitude"                }, //"at an altitude"
+        { "EQ_NEAREST_AD",     "At Nearest Equatorial AN/DN"   }, //"at the nearest equatorial AN/DN"
+        { "EQ_HIGHEST_AD",     "At Cheapest Equatorial AN/DN"  }, //"at the cheapest equatorial AN/DN"
+        { "REL_NEAREST_AD",    "At Nearest AN/DN with Target"  }, //"at the nearest AN/DN with the target"
+        { "REL_HIGHEST_AD",    "At Cheapest AN/DN with Target" } //"at the cheapest AN/DN with the target"
+    };
+
     // Body selection.
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
 
+    // Option selection
+    private bool selectingOption = false;
+    private static Vector2 scrollPositionOptions;
+    private string selectedOption = null;
+    private List<string> options;
+    private double requestedBurnTime = 0;
+
     // mod-wide data
     private VesselComponent activeVessel;
     private SimulationObjectModel currentTarget;
-    private ManeuverNodeData currentNode = null;
+    public ManeuverNodeData currentNode = null;
     List<ManeuverNodeData> activeNodes;
 
     // Radius Computed from Inputs
