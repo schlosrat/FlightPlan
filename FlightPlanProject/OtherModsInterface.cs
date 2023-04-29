@@ -20,6 +20,9 @@ using MonoMod.Cil;
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
 
+// CF : this direct dependency cause the dll to be needed during build
+// it is not really needed, we can easyly hardcode the mode names
+// during the introduction of K2D2 UI it cause me many trouble in naming
 using K2D2;
 using ManeuverNodeController;
 
@@ -27,13 +30,13 @@ using FlightPlan.UI;
 
 namespace FlightPlan;
 
-public class OtherMods
+public class OtherModsInterface
 {
-    ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("ManeuverNodeController.Utility");
+    ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanPlugin.OtherModsInterface");
 
     // Reflection access variables for launching MNC & K2-D2
     private bool MNCLoaded, K2D2Loaded, checkK2D2status  = false;
-    private PluginInfo MNC, K2D2;
+    private PluginInfo MNC, K2D2_info;
     private Version mncMinVersion, k2d2MinVersion;
     private int mncVerCheck, k2d2VerCheck;
     private string k2d2Status;
@@ -44,8 +47,7 @@ public class OtherMods
 
     private bool launchMNC, executeNode;
 
-
-    public void check()
+    public void CheckModsVersions()
     {
         Logger.LogInfo($"ManeuverNodeControllerMod.ModGuid = {ManeuverNodeControllerMod.ModGuid}");
         if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out MNC))
@@ -67,15 +69,16 @@ public class OtherMods
         // else MNCLoaded = false;
         Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
 
-
         Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(K2D2_Plugin.ModGuid, out K2D2))
+        if (Chainloader.PluginInfos.ContainsKey(K2D2_Plugin.ModGuid))
         {
+            K2D2_info = Chainloader.PluginInfos[K2D2_Plugin.ModGuid];
+
             K2D2Loaded = true;
             Logger.LogInfo("K2-D2 installed and available");
-            Logger.LogInfo($"K2D2 = {K2D2}");
+            Logger.LogInfo($"K2D2 = {K2D2_info}");
             k2d2MinVersion = new Version(0, 8, 1);
-            k2d2VerCheck = K2D2.Metadata.Version.CompareTo(k2d2MinVersion);
+            k2d2VerCheck = K2D2_info.Metadata.Version.CompareTo(k2d2MinVersion);
             Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
 
             k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");

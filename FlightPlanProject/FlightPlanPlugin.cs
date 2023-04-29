@@ -226,6 +226,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental.Value}");
+
+        
     }
 
     private void ToggleButton(bool toggle)
@@ -237,10 +239,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     void Awake()
     {
         // Logger = base.Logger;
+        other_mods.CheckModsVersions();
     }
 
     void Update()
     {
+        // Logger = base.Logger;
+        other_mods.CheckModsVersions();
         if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.P))
         {
             ToggleButton(!interfaceEnabled);
@@ -352,13 +357,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         var referenceBody = activeVessel.Orbit.referenceBody;
 
         DrawSectionHeader("Ownship Maneuvers");
+
+        UI_Tools.Label("Circularize");
+        GUILayout.BeginHorizontal();
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            DrawButton("Circularize at Ap", ref circAp);
+            DrawButton("at Ap", ref circAp);
         }
-        DrawButton("Circularize at Pe", ref circPe);
+        DrawButton("at Pe", ref circPe);
 
-        DrawButton("Circularize Now", ref circNow);
+        DrawButton("Now", ref circNow);
+        GUILayout.EndHorizontal();
+
 
         FPSettings.pe_altiude_km = DrawButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altiude_km, "km");
         targetPeR = FPSettings.pe_altiude_km * 1000 + referenceBody.radius;
@@ -368,9 +378,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             FPSettings.ap_altiude_km =  DrawButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altiude_km, "km");
             targetApR = FPSettings.ap_altiude_km*1000 + referenceBody.radius;
 
-            DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAltitude1, ref targetApAltitude1);
-            targetPeR1 = targetPeAltitude1 + referenceBody.radius;
-            targetApR1 = targetApAltitude1 + referenceBody.radius;
+            DrawButton("New Pe & Ap", ref newPeAp);
+
+          //  DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAltitude1, ref targetApAltitude1);
+          //  targetPeR1 = targetPeAltitude1 + referenceBody.radius;
+          //  targetApR1 = targetApAltitude1 + referenceBody.radius;
         }
 
         targetInc = DrawButtonWithTextField("New Inclination", ref newInc, targetInc, "°");
@@ -558,17 +570,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void DrawButton(string buttonStr, ref bool button)
     {
-        GUILayout.BeginHorizontal();
-        button = UI_Tools.SmallButton(buttonStr);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
+        button = UI_Tools.BigButton(buttonStr);
     }
 
     private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        button = UI_Tools.SmallButton(entryName);
+        button = UI_Tools.BigButton(entryName);
         GUILayout.Space(10);
 
         value = UI_Fields.DoubleField(entryName, value);
@@ -596,7 +604,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.Space(5);
     }
 
-    public OtherMods other_mods = new OtherMods();
+    public OtherModsInterface other_mods = new OtherModsInterface();
 
     private void DrawGUIStatus(double UT)
     {
@@ -1226,12 +1234,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
             else if (newAp) // Working
             {
-                pass = SetNewAp(targetApR, - 0.5);
+                pass = SetNewAp(targetPeR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
             {
-                pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
+                pass = Ellipticize(targetPeR , targetPeR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newInc) // Working
