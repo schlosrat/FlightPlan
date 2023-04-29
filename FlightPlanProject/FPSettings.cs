@@ -25,17 +25,34 @@ public class FPSettings
         set { s_settings_file.SetInt("window_y_pos", value); }
     }
 
-    public static double ap_altiude_km
+    public static double ap_altitude_km
     {
-        get => s_settings_file.GetDouble("ap_altiude_km", 100);
-        set { s_settings_file.SetDouble("ap_altiude_km", value); }
+        get => s_settings_file.GetDouble("ap_altitude_km", 100);
+        set { s_settings_file.SetDouble("ap_altitude_km", value); }
     }
 
-    public static double pe_altiude_km
+    public static double pe_altitude_km
     {
-        get => s_settings_file.GetDouble("pe_altiude_km", 100);
-        set { s_settings_file.SetDouble("pe_altiude_km", value); }
+        get => s_settings_file.GetDouble("pe_altitude_km", 100);
+        set { s_settings_file.SetDouble("pe_altitude_km", value); }
     }
-    
+
+    public static double mr_altitude_km
+    {
+        get => s_settings_file.GetDouble("mr_altitude_km", 100);
+        set { s_settings_file.SetDouble("mr_altitude_km", value); }
+    }
+
+    public static double target_inc_deg
+    {
+        get => s_settings_file.GetDouble("target_inc_deg", 0);
+        set { s_settings_file.SetDouble("target_inc_deg", value); }
+    }
+
+    public static double interceptT
+    {
+        get => s_settings_file.GetDouble("interceptT", 0);
+        set { s_settings_file.SetDouble("interceptT", value); }
+    }
 
 }

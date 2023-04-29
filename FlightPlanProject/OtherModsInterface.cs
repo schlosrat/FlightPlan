@@ -4,6 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using KSP.Sim.Maneuver;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -70,7 +71,7 @@ public class OtherModsInterface
         Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
 
         Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
-        if (Chainloader.PluginInfos.ContainsKey(K2D2_Plugin.ModGuid))
+        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out K2D2_info))
         {
             K2D2_info = Chainloader.PluginInfos[K2D2_Plugin.ModGuid];
 
@@ -124,6 +125,7 @@ public class OtherModsInterface
             if (k2d2VerCheck >= 0)
             {
                 k2d2Status = (string)k2d2GetStatusMethodInfo!.Invoke(k2d2Instance, null);
+                
 
                 if (k2d2Status == "Done")
                 {

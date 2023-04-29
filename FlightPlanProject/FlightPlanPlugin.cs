@@ -64,11 +64,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     // Config parameters
     private ConfigEntry<string> initialStatusText;
-    //private ConfigEntry<string> defaultTargetPeAStr;
-    //private ConfigEntry<string> defaultTargetApAStr;
-    //private ConfigEntry<string> defaultTargetMRPeAStr;
-    //private ConfigEntry<string> defaultTargetIncStr;
-    //private ConfigEntry<string> defaultInterceptTStr;
     private ConfigEntry<double> statusPersistence;
     private ConfigEntry<double> statusFadeTime;
     private ConfigEntry<bool> experimental;
@@ -89,21 +84,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ManeuverNodeData currentNode = null;
     List<ManeuverNodeData> activeNodes;
 
-    // Text Inputs
-    private double targetPeAltitude;   // m
-    private double targetApAltitude;   // m
-    private double targetPeAltitude1;  // m
-    private double targetApAltitude1;  // m
-    private double targetMRPeAtitude; // m
-
-    // Values from Text Inputs
+    // Radius Computed from Inputs
     private double targetPeR;
     private double targetApR;
-    private double targetPeR1;
-    private double targetApR1;
     private double targetMRPeR;
-    private double targetInc;
-    private double interceptT;
+
+
+
 
     private GameInstance game;
 
@@ -208,26 +195,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         initialStatusText = Config.Bind<string>("Status Settings Section", "Initial Status", "Virgin", "Controls the status reported at startup prior to the first command");
         experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable experimental.Value features for testing - Warrantee Void if Enabled!");
         autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when experimental.Value nodes are created");
-        // defaultTargetPeAStr  = Config.Bind<string>("Default Inputs Section", "Target Pe Alt",        "80000", "Default Pe input (in meters) used to pre-populate text input field at startup");
-        // defaultTargetApAStr = Config.Bind<string>("Default Inputs Section", "Target Ap Alt",       "250000", "Default Ap input (in meters) used to pre-populate text input field at startup");
-        // defaultTargetIncStr = Config.Bind<string>("Default Inputs Section", "Target Inclination",       "0", "Default inclination input (in degrees) used to pre-populate text input field at startup");
-        // defaultInterceptTStr = Config.Bind<string>("Default Inputs Section", "Target Intercept Time",  "100", "Default intercept time (in seconds) used to pre-populate text input field at startup");
-        // defaultTargetMRPeAStr = Config.Bind<string>("Default Inputs Section", "Target Moon Return Pe Alt", "100000", "Default Moon Return Target Pe input (in meters) used to pre-populate text input field at startup");
-
+    
         // Set the initial and Default values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
         statusText     = initialStatusText.Value;
-        //targetPeAStr   = defaultTargetPeAStr.Value;
-        //targetApAStr   = defaultTargetApAStr.Value;
-        //targetPeAStr1  = defaultTargetPeAStr.Value;
-        //targetApAStr1  = defaultTargetApAStr.Value;
-        //targetMRPeAStr = defaultTargetMRPeAStr.Value;
-        //targetIncStr   = defaultTargetIncStr.Value;
-        //interceptTStr  = defaultInterceptTStr.Value;
-
+       
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental.Value}");
-
-        
     }
 
     private void ToggleButton(bool toggle)
@@ -238,14 +211,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     void Awake()
     {
-        // Logger = base.Logger;
-        other_mods.CheckModsVersions();
+  
     }
 
     void Update()
     {
         // Logger = base.Logger;
-        other_mods.CheckModsVersions();
         if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.P))
         {
             ToggleButton(!interfaceEnabled);
@@ -300,8 +271,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             save_rect_pos();
             // Draw the tool tip if needed
             ToolTipsManager.DrawToolTips();
-            // check editor focus and un set Input
+            // check editor focus and unset Input if needed
             UI_Fields.CheckEditor();
+
             //if (selectingBody)
             //{
             //    // Do something here to disable mouse wheel control of zoom in and out.
@@ -369,23 +341,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         DrawButton("Now", ref circNow);
         GUILayout.EndHorizontal();
 
-
-        FPSettings.pe_altiude_km = DrawButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altiude_km, "km");
-        targetPeR = FPSettings.pe_altiude_km * 1000 + referenceBody.radius;
+        FPSettings.pe_altitude_km = DrawButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altitude_km, "km");
+        targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
 
         if (activeVessel.Orbit.eccentricity < 1)
         {
-            FPSettings.ap_altiude_km =  DrawButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altiude_km, "km");
-            targetApR = FPSettings.ap_altiude_km*1000 + referenceBody.radius;
+            FPSettings.ap_altitude_km =  DrawButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altitude_km, "km");
+            targetApR = FPSettings.ap_altitude_km*1000 + referenceBody.radius;
 
             DrawButton("New Pe & Ap", ref newPeAp);
-
-          //  DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAltitude1, ref targetApAltitude1);
-          //  targetPeR1 = targetPeAltitude1 + referenceBody.radius;
-          //  targetApR1 = targetApAltitude1 + referenceBody.radius;
         }
 
-        targetInc = DrawButtonWithTextField("New Inclination", ref newInc, targetInc, "°");
+        FPSettings.target_inc_deg = DrawButtonWithTextField("New Inclination", ref newInc, FPSettings.target_inc_deg, "°");
 
         if (currentTarget != null)
         {
@@ -403,7 +370,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
                     if (experimental.Value)
                     {
-                        interceptT = DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, interceptT, "s");
+                        FPSettings.interceptT = DrawButtonWithTextField("Intercept at Time", ref interceptAtTime, FPSettings.interceptT, "s");
                         DrawButton("Match Velocity @CA", ref matchVCA);
                         DrawButton("Match Velocity Now", ref matchVNow);
                     }
@@ -436,8 +403,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             {
                 DrawSectionHeader("Moon Specific Maneuvers");
                 // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
-                targetMRPeAtitude= DrawButtonWithTextField("Moon Return", ref moonReturn, targetMRPeAtitude, "m");
-                targetMRPeR = targetMRPeAtitude + activeVessel.Orbit.referenceBody.radius;
+                FPSettings.mr_altitude_km = DrawButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
+                targetMRPeR = FPSettings.mr_altitude_km * 1000 + activeVessel.Orbit.referenceBody.radius;
             }
         }
 
@@ -513,7 +480,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Don't need popout buttons for ROC
         // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);
 
-        GUILayout.Label($"<b>{sectionName}</b> ");
+        GUILayout.Label($"<b>-- {sectionName} --</b> ");
         GUILayout.FlexibleSpace();
         GUILayout.Label(value, valueStyle);
         GUILayout.Space(5);
@@ -548,26 +515,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.Space(spacingAfterEntry);
     }
 
-    // private void DrawEntryTextField(string entryName, ref string textEntry, string unit = "")
-    // {
-    //     double num;
-    //     Color normal;
-    //     GUILayout.BeginHorizontal();
-    //     UI_Tools.Label(entryName);
-    //     GUILayout.FlexibleSpace();
-    //     normal = GUI.color;
-    //     bool parsed = double.TryParse(textEntry, out num);
-    //     if (!parsed) GUI.color = Color.red;
-
-    //     GUI.SetNextControlName(entryName);
-    //     textEntry = GUILayout.TextField(textEntry, textInputStyle);
-    //     GUI.color = normal;
-    //     GUILayout.Space(5);
-    //     UI_Tools.Console(unit);
-    //     GUILayout.EndHorizontal();
-    //     GUILayout.Space(spacingAfterEntry);
-    // }
-
     private void DrawButton(string buttonStr, ref bool button)
     {
         button = UI_Tools.BigButton(buttonStr);
@@ -589,22 +536,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         return value;
     }
 
-    private void DrawButtonWithDualTextField(string entryName1, string entryName2, ref bool button, ref double value1, ref double value2, string unit = "")
-    {
-        GUILayout.BeginHorizontal();
-        button = UI_Tools.SmallButton(entryName1);
-        GUILayout.Space(5);
-        value1 = UI_Fields.DoubleField(entryName1, value1);
-        GUILayout.Space(5);
-        value2 = UI_Fields.DoubleField(entryName2, value2);
-        GUILayout.Space(3);
-        UI_Tools.Console(unit);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-        GUILayout.Space(5);
-    }
-
-    public OtherModsInterface other_mods = new OtherModsInterface();
+    public OtherModsInterface other_mods = null;
 
     private void DrawGUIStatus(double UT)
     {
@@ -630,6 +562,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         GUILayout.FlexibleSpace();
 
+        if (other_mods == null)
+        {
+            // init mode detection only when first needed
+            other_mods = new OtherModsInterface();
+            other_mods.CheckModsVersions();
+        }
 
         other_mods.OnGUI(currentNode);
         GUILayout.Space(spacingAfterEntry);
@@ -1017,7 +955,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         statusText = $"Experimental Intercept of {currentTarget.Name} Ready"; // $"Ready to Intercept {currentTarget.Name}";
         statusTime = UT + statusPersistence.Value;
 
-        Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
+        Logger.LogDebug($"Seeking Solution: interceptT {FPSettings.interceptT} s");
         if (currentTarget.IsCelestialBody) // For a target that is a celestial
             offsetDistance = currentTarget.Orbit.referenceBody.radius + 50000;
         else
@@ -1234,17 +1172,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
             else if (newAp) // Working
             {
-                pass = SetNewAp(targetPeR, - 0.5);
+                pass = SetNewAp(targetApR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
             {
-                pass = Ellipticize(targetPeR , targetPeR, - 0.5);
+                pass = Ellipticize(targetApR, targetPeR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newInc) // Working
             {
-                pass = SetInclination(targetInc, -0.5);
+                pass = SetInclination(FPSettings.target_inc_deg, -0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (matchPlanesA) // Working
@@ -1264,7 +1202,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
             else if (interceptAtTime) // Experimental
             {
-                pass = InterceptTgtAtUT(interceptT, -0.5);
+                pass = InterceptTgtAtUT(FPSettings.interceptT, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (courseCorrection) // Experimental Works at least some times...
