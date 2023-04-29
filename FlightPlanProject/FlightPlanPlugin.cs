@@ -919,72 +919,72 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     }
 
     // Flight Plan API Methods
-    public bool CircularizeAtAP(double burnOffsetFactor = -0.5)
+    //public bool CircularizeAtAP(double burnOffsetFactor = -0.5)
+    //{
+    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+    //    var orbit = activeVessel.Orbit;
+
+    //    Logger.LogDebug("CircularizeAtAP");
+    //    var TimeToAp = orbit.TimeToAp;
+    //    var burnUT = UT + TimeToAp;
+    //    var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
+
+    //    status = Status.OK;
+    //    statusText = "Ready to Circularize at Ap";
+    //    statusTime = UT + statusPersistence.Value;
+
+    //    if (deltaV != Vector3d.zero)
+    //    {
+    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+    //        return true;
+    //    }
+    //    else
+    //    {
+    //        status = Status.ERROR;
+    //        statusText = "Circularize at Ap: Solution Not Found!";
+    //        statusTime = UT + statusPersistence.Value;
+    //        Logger.LogDebug(statusText);
+    //        return false;
+    //    }
+    //}
+
+    //public bool CircularizeAtPe(double burnOffsetFactor = -0.5)
+    //{
+    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+    //    var orbit = activeVessel.Orbit;
+
+    //    Logger.LogDebug("CircularizeAtPe");
+    //    var TimeToPe = orbit.TimeToPe;
+    //    var burnUT = UT + TimeToPe;
+    //    var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
+
+    //    status = Status.OK;
+    //    statusText = "Ready to Circularize at Pe";
+    //    statusTime = UT + statusPersistence.Value;
+
+    //    if (deltaV != Vector3d.zero)
+    //    {
+    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+    //        return true;
+    //    }
+    //    else
+    //    {
+    //        status = Status.ERROR;
+    //        statusText = "Circularize at Pe: Solution Not Found!";
+    //        statusTime = UT + statusPersistence.Value;
+    //        Logger.LogDebug(statusText);
+    //        return false;
+    //    }
+    //}
+
+    public bool Circularize(double burnUT, double burnOffsetFactor = -0.5)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("CircularizeAtAP");
-        var TimeToAp = orbit.TimeToAp;
-        var burnUT = UT + TimeToAp;
-        var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-        status = Status.OK;
-        statusText = "Ready to Circularize at Ap";
-        statusTime = UT + statusPersistence.Value;
-
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = "Circularize at Ap: Solution Not Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
-
-    public bool CircularizeAtPe(double burnOffsetFactor = -0.5)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
-
-        Logger.LogDebug("CircularizeAtPe");
-        var TimeToPe = orbit.TimeToPe;
-        var burnUT = UT + TimeToPe;
-        var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-        status = Status.OK;
-        statusText = "Ready to Circularize at Pe";
-        statusTime = UT + statusPersistence.Value;
-
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = "Circularize at Pe: Solution Not Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
-
-    public bool CircularizeNow(double burnOffsetFactor = -0.5)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
-
-        Logger.LogDebug("CircularizeNow");
-        var startTimeOffset = 60;
-        var burnUT = UT + startTimeOffset;
+        Logger.LogDebug($"Circularize {selectedOption}");
+        //var startTimeOffset = 60;
+        //var burnUT = UT + startTimeOffset;
         var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
 
         status = Status.OK;
@@ -1006,20 +1006,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool SetNewPe(double newPe, double burnOffsetFactor = -0.5)
+    public bool SetNewPe(double burnUT, double newPe, double burnOffsetFactor = -0.5)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetNewPe");
+        Logger.LogDebug($"SetNewPe: {selectedOption}");
         // Debug.Log("Set New Pe");
-        var TimeToAp = orbit.TimeToAp;
-        double burnUT, e;
-        e = orbit.eccentricity;
-        if (e < 1)
-            burnUT = UT + TimeToAp;
-        else
-            burnUT = UT + 30;
+        //var TimeToAp = orbit.TimeToAp;
+        //double burnUT, e;
+        //e = orbit.eccentricity;
+        //if (e < 1)
+        //    burnUT = UT + TimeToAp;
+        //else
+        //    burnUT = UT + 30;
 
         status = Status.OK;
         statusText = "Ready to Change Pe";
@@ -1043,15 +1043,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool SetNewAp(double newAp, double burnOffsetFactor)
+    public bool SetNewAp(double burnUT, double newAp, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetNewAp");
+        Logger.LogDebug($"SetNewAp: {selectedOption}");
         // Debug.Log("Set New Ap");
-        var TimeToPe = orbit.TimeToPe;
-        var burnUT = UT + TimeToPe;
+        //var TimeToPe = orbit.TimeToPe;
+        //var burnUT = UT + TimeToPe;
 
         status = Status.OK;
         statusText = "Ready to Change Ap";
@@ -1074,7 +1074,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool Ellipticize(double newAp, double newPe, double burnOffsetFactor)
+    public bool Ellipticize(double burnUT, double newAp, double newPe, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
@@ -1093,7 +1093,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
 
         Logger.LogDebug($"Seeking Solution: targetPeR {newPe} m, targetApR {newAp} m, body.radius {orbit.referenceBody.radius} m");
-        var burnUT = UT + 30;
+        // var burnUT = UT + 30;
         var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(orbit, burnUT, newPe, newAp);
         if (deltaV != Vector3d.zero)
         {
@@ -1110,46 +1110,21 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool SetInclination(double inclination, double burnOffsetFactor)
+    public bool SetInclination(double burnUT, double inclination, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
         Logger.LogDebug("SetInclination: Set New Inclination");
         Logger.LogDebug($"Seeking Solution: targetInc {inclination}°");
-        double burnUT, TAN, TDN;
-        Vector3d deltaV, deltaV1, deltaV2;
+        // double burnUT, TAN, TDN;
+        Vector3d deltaV;
 
         status = Status.OK;
         statusText = "Ready to Change Inclination";
         statusTime = UT + statusPersistence.Value;
 
-        if (orbit.eccentricity < 1) // Eliptical orbit: Pick cheapest deltaV between AN and DN
-        {
-            TAN = orbit.TimeOfAscendingNodeEquatorial(UT);
-            TDN = orbit.TimeOfDescendingNodeEquatorial(UT);
-            deltaV1 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TAN, inclination);
-            deltaV2 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TDN, inclination);
-            if (deltaV1.magnitude < deltaV2.magnitude)
-            {
-                Logger.LogDebug($"Selecting maneuver at Ascending Node");
-                burnUT = TAN;
-                deltaV = deltaV1;
-            }
-            else
-            {
-                Logger.LogDebug($"Selecting maneuver at Descending Node");
-                burnUT = TDN;
-                deltaV = deltaV2;
-            }
-            Logger.LogDebug($"deltaV1 (AN) [{deltaV1.x}, {deltaV1.y}, {deltaV1.z}] = {deltaV1.magnitude} m/s {TAN - UT} s from UT");
-            Logger.LogDebug($"deltaV2 (DN) [{deltaV2.x}, {deltaV2.y}, {deltaV2.z}] = {deltaV2.magnitude} m/s {TDN - UT} s from UT");
-        }
-        else // parabolic or hyperbolic orbit: Do it now!
-        {
-            burnUT = UT + 30;
-            deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, inclination);
-        }
+        deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, inclination);
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
@@ -1165,15 +1140,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool SetNewLAN(double newLAN, double burnOffsetFactor)
+    public bool SetNewLAN(double burnUT, double newLAN, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetNewLAN");
+        Logger.LogDebug($"SetNewLAN: {selectedOption}");
         // Debug.Log("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
-        var burnUT = UT + 30;
+        // var burnUT = UT + 30;
 
         status = Status.WARNING;
         statusText = "Experimental LAN Change Ready";
@@ -1196,22 +1171,42 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchPlanesAtAN(double burnOffsetFactor)
+    public bool MatchPlanes(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchPlanesAtAN: Match Planes  with {currentTarget.Name} at AN");
-        double burnUT;
+        Logger.LogDebug($"MatchPlanes: Match Planes with {currentTarget.Name} {selectedOption}");
+        double burnUTout = UT + 1;
 
         status = Status.OK;
-        statusText = $"Ready to Match Planes with {currentTarget.Name} at AN";
+        statusText = $"Ready to Match Planes with {currentTarget.Name} {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        Vector3d deltaV = Vector3d.zero;
+        if (selectedOption == TimeReference["REL_ASCENDING"])
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        else if (selectedOption == TimeReference["REL_DESCENDING"])
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        else if (selectedOption == TimeReference["REL_NEAREST_AD"])
+        {
+            if (orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT) < orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT))
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+            else
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        }
+        else if (selectedOption == TimeReference["REL_HIGHEST_AD"])
+        {
+            var anTime = orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            var dnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            if (orbit.Radius(anTime) > orbit.Radius(dnTime))
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+            else
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        }
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1224,51 +1219,51 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchPlanesAtDN(double burnOffsetFactor)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
+    //public bool MatchPlanesAtDN(double burnOffsetFactor)
+    //{
+    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+    //    var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchPlanesAtDN: Match Planes with {currentTarget.Name} at DN");
-        double burnUT;
+    //    Logger.LogDebug($"MatchPlanesAtDN: Match Planes with {currentTarget.Name} at DN");
+    //    double burnUT;
 
-        status = Status.OK;
-        statusText = $"Ready to Match Planes with {currentTarget.Name} at DN";
-        statusTime = UT + statusPersistence.Value;
+    //    status = Status.OK;
+    //    statusText = $"Ready to Match Planes with {currentTarget.Name} at DN";
+    //    statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = $"Match Planes with {currentTarget.Name} at DN: Solution Not Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
+    //    var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+    //    if (deltaV != Vector3d.zero)
+    //    {
+    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+    //        return true;
+    //    }
+    //    else
+    //    {
+    //        status = Status.ERROR;
+    //        statusText = $"Match Planes with {currentTarget.Name} at DN: Solution Not Found!";
+    //        statusTime = UT + statusPersistence.Value;
+    //        Logger.LogDebug(statusText);
+    //        return false;
+    //    }
+    //}
 
-    public bool HohmannTransfer(double burnOffsetFactor)
+    public bool HohmannTransfer(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
         Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name}");
         // Debug.Log("Hohmann Transfer");
-        double burnUT;
+        double burnUTout;
 
         status = Status.WARNING;
         statusText = $"Ready to Transfer to {currentTarget.Name}?";
         statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1281,7 +1276,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool InterceptTgtAtUT(double tgtUT, double burnOffsetFactor)
+    public bool InterceptTgt(double burnUT, double tgtUT, double burnOffsetFactor)
     {
         // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
         // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
@@ -1290,8 +1285,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"InterceptTgtAtUT: Intercept {currentTarget.Name} at Time");
-        var burnUT = UT + 30;
+        Logger.LogDebug($"InterceptTgt: Intercept {currentTarget.Name} {selectedOption}");
+        // var burnUT = UT + 30;
         var interceptUT = UT + tgtUT;
         double offsetDistance;
 
@@ -1320,13 +1315,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool CourseCorrection(double burnOffsetFactor)
+    public bool CourseCorrection(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
         Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name}");
-        double burnUT;
+        double burnUTout;
         Vector3d deltaV;
 
         status = Status.OK;
@@ -1337,17 +1332,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             Logger.LogDebug($"Seeking Solution for Celestial Target");
             double finalPeR = currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
-            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, currentTarget.Orbit.referenceBody, finalPeR, out burnUT);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, currentTarget.Orbit.referenceBody, finalPeR, out burnUTout);
         }
         else // For a tartget that is not a celestial
         {
             Logger.LogDebug($"Seeking Solution for Non-Celestial Target");
             double caDistance = 100; // m (closest approach to non-celestial target)
-            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, caDistance, out burnUT);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, caDistance, out burnUTout);
         }
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1360,7 +1355,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MoonReturn(double burnOffsetFactor)
+    public bool MoonReturn(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
@@ -1383,13 +1378,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            double burnUT;
+            double burnUTout;
             // double primaryRaidus = orbit.referenceBody.Orbit.referenceBody.radius + 100000; // m
             Logger.LogDebug($"Moon Return Attempting to Solve...");
-            var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, targetMRPeR, out burnUT);
+            var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, targetMRPeR, out burnUTout);
             if (deltaV != Vector3d.zero)
             {
-                CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+                CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
                 return true;
             }
             else
@@ -1403,22 +1398,22 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchVelocityAtCA(double burnOffsetFactor)
+    public bool MatchVelocity(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchVelocityAtCA: Match Velocity with {currentTarget.Name} at Closest Approach");
+        Logger.LogDebug($"MatchVelocity: Match Velocity with {currentTarget.Name} {selectedOption}");
 
         status = Status.WARNING;
         statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
         statusTime = UT + statusPersistence.Value;
 
-        double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
-        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, closestApproachTime, currentTarget.Orbit as PatchedConicsOrbit);
+        // double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
+        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, closestApproachTime, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
             return true;
         }
         else
@@ -1431,51 +1426,51 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchVelocityNow(double burnOffsetFactor)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
+    //public bool MatchVelocityNow(double burnOffsetFactor)
+    //{
+    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+    //    var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchVelocityNow: Match Velocity with {currentTarget.Name} Now");
-        var burnUT = UT + 30;
+    //    Logger.LogDebug($"MatchVelocityNow: Match Velocity with {currentTarget.Name} Now");
+    //    var burnUT = UT + 30;
 
-        status = Status.WARNING;
-        statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
-        statusTime = UT + statusPersistence.Value;
+    //    status = Status.WARNING;
+    //    statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
+    //    statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = $"Match Velocity with {currentTarget.Name} Now: No Solution Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
+    //    var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
+    //    if (deltaV != Vector3d.zero)
+    //    {
+    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+    //        return true;
+    //    }
+    //    else
+    //    {
+    //        status = Status.ERROR;
+    //        statusText = $"Match Velocity with {currentTarget.Name} Now: No Solution Found!";
+    //        statusTime = UT + statusPersistence.Value;
+    //        Logger.LogDebug(statusText);
+    //        return false;
+    //    }
+    //}
 
-    public bool PlanetaryXfer(double burnOffsetFactor)
+    public bool PlanetaryXfer(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
         Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name}");
-        double burnUT;
+        double burnUTout;
         bool syncPhaseAngle = true;
 
         status = Status.WARNING;
         statusText = $"Experimental Transfer to {currentTarget.Name} Ready"; // $"Ready to depart for {currentTarget.Name}";
         statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT);
+        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUTout);
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1618,89 +1613,69 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             bool pass;
 
-            //if (circAp) // Working
-            //{
-            //    pass = CircularizeAtAP(-0.5);
-            //    // if (pass && autoLaunchMNC.Value) callMNC();
-            //}
-            //else if (circPe) // Working
-            //{
-            //    pass = CircularizeAtPe(-0.5);
-            //    // if (pass && autoLaunchMNC.Value) callMNC();
-            //}
             if (circularize) // Working
             {
-                pass = CircularizeNow(-0.5);
+                pass = Circularize(requestedBurnTime, -0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newPe) // Working
             {
-                pass = SetNewPe(targetPeR, - 0.5);
+                pass = SetNewPe(requestedBurnTime, targetPeR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newAp) // Working
             {
-                pass = SetNewAp(targetApR, - 0.5);
+                pass = SetNewAp(requestedBurnTime, targetApR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
             {
-                pass = Ellipticize(targetApR, targetPeR, - 0.5);
+                pass = Ellipticize(requestedBurnTime, targetApR, targetPeR, - 0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newInc) // Working
             {
-                pass = SetInclination(FPSettings.target_inc_deg, -0.5);
+                pass = SetInclination(requestedBurnTime, FPSettings.target_inc_deg, -0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (newLAN) // Untested
             {
-                pass = SetNewLAN(targetLAN, -0.5);
+                pass = SetNewLAN(requestedBurnTime, FPSettings.target_lan_deg, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (matchPlane) // Working
             {
-                pass = MatchPlanesAtAN(-0.5);
-                // if (pass && autoLaunchMNC.Value) callMNC();
-            }
-            else if (matchPlanesD) // Working
-            {
-                pass = MatchPlanesAtDN(-0.5);
+                pass = MatchPlanes(requestedBurnTime, -0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
             else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
             {
-                pass = HohmannTransfer(-0.5);
+                pass = HohmannTransfer(requestedBurnTime, - 0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (interceptTgt) // Experimental
             {
-                pass = InterceptTgtAtUT(FPSettings.interceptT, -0.5);
+                pass = InterceptTgt(requestedBurnTime, FPSettings.interceptT, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (courseCorrection) // Experimental Works at least some times...
             {
-                pass = CourseCorrection(-0.5);
+                pass = CourseCorrection(requestedBurnTime, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
             {
-                pass = MoonReturn(-0.5);
+                pass = MoonReturn(requestedBurnTime, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (matchVelocity) // Experimental
             {
-                pass = MatchVelocityAtCA(-0.5);
-                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
-            }
-            else if (matchVNow) // Experimental
-            {
-                pass = MatchVelocityNow(-0.5);
+                pass = MatchVelocity(requestedBurnTime, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
             {
-                pass = PlanetaryXfer(-0.5);
+                pass = PlanetaryXfer(requestedBurnTime, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
         }
