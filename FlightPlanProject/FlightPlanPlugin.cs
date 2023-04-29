@@ -65,7 +65,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<bool> autoLaunchMNC;
 
     // Button bools
-    private bool circAp, circPe, circularize, newPe, newAp, newPeAp, newInc, newLAN, matchPlane, matchPlanesD, hohmannT, interceptTgt, courseCorrection, moonReturn, matchVelocity, matchVNow, planetaryXfer;
+    private bool circAp, circPe, circularize, newPe, newAp, newPeAp, newInc, newLAN, matchPlane, matchPlanesD, hohmannXfer, interceptTgt, courseCorrection, moonReturn, matchVelocity, matchVNow, planetaryXfer;
 
     // Dictionaries used for toggle button management to function like radio buttons. If no "radio buttons", then this can go.
     private Dictionary<string, bool> _toggles = new();
@@ -90,20 +90,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // Time references for selectedOption
     public readonly Dictionary<string, string> TimeReference = new()
     {
-        { "COMPUTED",          "At Optimum Time"         }, //at the optimum time
-        { "APOAPSIS",          "At Next Apoapsis"        }, //"at the next apoapsis"
-        { "CLOSEST_APPROACH",  "At Closest Approach"     }, //"at closest approach to target"
-        { "EQ_ASCENDING",      "At Equatorial AN"        }, //"at the equatorial AN"
-        { "EQ_DESCENDING",     "At Equatorial DN"        }, //"at the equatorial DN"
-        { "PERIAPSIS",         "At Next Periapsis"       }, //"at the next periapsis"
-        { "REL_ASCENDING",     "At Next AN with Target"  }, //"at the next AN with the target."
-        { "REL_DESCENDING",    "At Next DN with Target"  }, //"at the next DN with the target."
-        { "X_FROM_NOW",        "After a Fixed Time"      }, //"after a fixed time"
-        { "ALTITUDE",          "At an Altitude"          }, //"at an altitude"
-        { "EQ_NEAREST_AD",     "At Nearest Eq. AN/DN"    }, //"at the nearest equatorial AN/DN"
-        { "EQ_HIGHEST_AD",     "At Cheapest Eq. AN/DN"   }, //"at the cheapest equatorial AN/DN"
-        { "REL_NEAREST_AD",    "At Nearest AN/DN w/Tgt"  }, //"at the nearest AN/DN with the target"
-        { "REL_HIGHEST_AD",    "At Cheapest AN/DN w/Tgt" } //"at the cheapest AN/DN with the target"
+        { "COMPUTED",          "at optimum time"         }, //at the optimum time
+        { "APOAPSIS",          "at next apoapsis"        }, //"at the next apoapsis"
+        { "CLOSEST_APPROACH",  "at closest approach"     }, //"at closest approach to target"
+        { "EQ_ASCENDING",      "at equatorial AN"        }, //"at the equatorial AN"
+        { "EQ_DESCENDING",     "at equatorial DN"        }, //"at the equatorial DN"
+        { "PERIAPSIS",         "at next periapsis"       }, //"at the next periapsis"
+        { "REL_ASCENDING",     "at next AN with target"  }, //"at the next AN with the target."
+        { "REL_DESCENDING",    "at next DN with target"  }, //"at the next DN with the target."
+        { "X_FROM_NOW",        "after a fixed time"      }, //"after a fixed time"
+        { "ALTITUDE",          "at an altitude"          }, //"at an altitude"
+        { "EQ_NEAREST_AD",     "at nearest Eq. AN/DN"    }, //"at the nearest equatorial AN/DN"
+        { "EQ_HIGHEST_AD",     "at cheapest Eq. AN/DN"   }, //"at the cheapest equatorial AN/DN"
+        { "REL_NEAREST_AD",    "at nearest AN/DN w/Target"  }, //"at the nearest AN/DN with the target"
+        { "REL_HIGHEST_AD",    "at cheapest AN/DN w/Target" } //"at the cheapest AN/DN with the target"
     };
 
     // Body selection.
@@ -394,7 +394,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     DrawToggleButton("Match Planes", ref matchPlane);
                     // DrawButton("Match Planes at DN", ref matchPlanesD);
 
-                    DrawToggleButton("Hohmann Xfer", ref hohmannT);
+                    DrawToggleButton("Hohmann Transfer", ref hohmannXfer);
                     DrawToggleButton("Course Correction", ref courseCorrection);
 
                     if (experimental.Value)
@@ -613,7 +613,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (key == "CourseCorrection")
             courseCorrection = value;
         if (key == "HohmannTransfer")
-            hohmannT = value;
+            hohmannXfer = value;
         if (key == "InterceptTgt")
             interceptTgt = value;
         if (key == "MoonReturn")
@@ -634,7 +634,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         matchPlane = false;
         matchVelocity = false;
         courseCorrection = false;
-        hohmannT = false;
+        hohmannXfer = false;
         interceptTgt = false;
         moonReturn = false;
         planetaryXfer = false;
@@ -919,64 +919,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     }
 
     // Flight Plan API Methods
-    //public bool CircularizeAtAP(double burnOffsetFactor = -0.5)
-    //{
-    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-    //    var orbit = activeVessel.Orbit;
-
-    //    Logger.LogDebug("CircularizeAtAP");
-    //    var TimeToAp = orbit.TimeToAp;
-    //    var burnUT = UT + TimeToAp;
-    //    var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-    //    status = Status.OK;
-    //    statusText = "Ready to Circularize at Ap";
-    //    statusTime = UT + statusPersistence.Value;
-
-    //    if (deltaV != Vector3d.zero)
-    //    {
-    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-    //        return true;
-    //    }
-    //    else
-    //    {
-    //        status = Status.ERROR;
-    //        statusText = "Circularize at Ap: Solution Not Found!";
-    //        statusTime = UT + statusPersistence.Value;
-    //        Logger.LogDebug(statusText);
-    //        return false;
-    //    }
-    //}
-
-    //public bool CircularizeAtPe(double burnOffsetFactor = -0.5)
-    //{
-    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-    //    var orbit = activeVessel.Orbit;
-
-    //    Logger.LogDebug("CircularizeAtPe");
-    //    var TimeToPe = orbit.TimeToPe;
-    //    var burnUT = UT + TimeToPe;
-    //    var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-    //    status = Status.OK;
-    //    statusText = "Ready to Circularize at Pe";
-    //    statusTime = UT + statusPersistence.Value;
-
-    //    if (deltaV != Vector3d.zero)
-    //    {
-    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-    //        return true;
-    //    }
-    //    else
-    //    {
-    //        status = Status.ERROR;
-    //        statusText = "Circularize at Pe: Solution Not Found!";
-    //        statusTime = UT + statusPersistence.Value;
-    //        Logger.LogDebug(statusText);
-    //        return false;
-    //    }
-    //}
-
     public bool Circularize(double burnUT, double burnOffsetFactor = -0.5)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -1011,7 +953,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewPe: {selectedOption}");
+        Logger.LogDebug($"SetNewPe {selectedOption}");
         // Debug.Log("Set New Pe");
         //var TimeToAp = orbit.TimeToAp;
         //double burnUT, e;
@@ -1048,7 +990,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewAp: {selectedOption}");
+        Logger.LogDebug($"SetNewAp {selectedOption}");
         // Debug.Log("Set New Ap");
         //var TimeToPe = orbit.TimeToPe;
         //var burnUT = UT + TimeToPe;
@@ -1079,7 +1021,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("Ellipticize: Set New Pe and Ap");
+        Logger.LogDebug($"Ellipticize: Set New Pe and Ap {selectedOption}");
 
         status = Status.OK;
         statusText = "Ready to Ellipticize"; // "Ready to Ellipticize";
@@ -1115,8 +1057,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetInclination: Set New Inclination");
-        Logger.LogDebug($"Seeking Solution: targetInc {inclination}°");
+        Logger.LogDebug($"SetInclination: Set New Inclination {inclination}° {selectedOption}");
         // double burnUT, TAN, TDN;
         Vector3d deltaV;
 
@@ -1145,7 +1086,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewLAN: {selectedOption}");
+        Logger.LogDebug($"SetNewLAN {selectedOption}");
         // Debug.Log("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = UT + 30;
@@ -1219,40 +1160,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    //public bool MatchPlanesAtDN(double burnOffsetFactor)
-    //{
-    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-    //    var orbit = activeVessel.Orbit;
-
-    //    Logger.LogDebug($"MatchPlanesAtDN: Match Planes with {currentTarget.Name} at DN");
-    //    double burnUT;
-
-    //    status = Status.OK;
-    //    statusText = $"Ready to Match Planes with {currentTarget.Name} at DN";
-    //    statusTime = UT + statusPersistence.Value;
-
-    //    var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-    //    if (deltaV != Vector3d.zero)
-    //    {
-    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-    //        return true;
-    //    }
-    //    else
-    //    {
-    //        status = Status.ERROR;
-    //        statusText = $"Match Planes with {currentTarget.Name} at DN: Solution Not Found!";
-    //        statusTime = UT + statusPersistence.Value;
-    //        Logger.LogDebug(statusText);
-    //        return false;
-    //    }
-    //}
-
     public bool HohmannTransfer(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name}");
+        Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name} {selectedOption}");
         // Debug.Log("Hohmann Transfer");
         double burnUTout;
 
@@ -1320,7 +1233,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name}");
+        Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name} {selectedOption}");
         double burnUTout;
         Vector3d deltaV;
 
@@ -1360,7 +1273,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name}");
+        Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name} {selectedOption}");
         var e = orbit.eccentricity;
 
         status = Status.WARNING;
@@ -1426,40 +1339,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    //public bool MatchVelocityNow(double burnOffsetFactor)
-    //{
-    //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-    //    var orbit = activeVessel.Orbit;
-
-    //    Logger.LogDebug($"MatchVelocityNow: Match Velocity with {currentTarget.Name} Now");
-    //    var burnUT = UT + 30;
-
-    //    status = Status.WARNING;
-    //    statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
-    //    statusTime = UT + statusPersistence.Value;
-
-    //    var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
-    //    if (deltaV != Vector3d.zero)
-    //    {
-    //        CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-    //        return true;
-    //    }
-    //    else
-    //    {
-    //        status = Status.ERROR;
-    //        statusText = $"Match Velocity with {currentTarget.Name} Now: No Solution Found!";
-    //        statusTime = UT + statusPersistence.Value;
-    //        Logger.LogDebug(statusText);
-    //        return false;
-    //    }
-    //}
-
     public bool PlanetaryXfer(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name}");
+        Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name} {selectedOption}");
         double burnUTout;
         bool syncPhaseAngle = true;
 
@@ -1487,7 +1372,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // for comparison to the _previousToggles dictionary.
     private void setOptionsList()
     {
-        if (circularize || newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannT || interceptTgt || courseCorrection || moonReturn || matchVelocity || planetaryXfer)
+        if (circularize || newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannXfer || interceptTgt || courseCorrection || moonReturn || matchVelocity || planetaryXfer)
         {
             if (options.Contains("none"))
                 options.Remove("none");
@@ -1544,42 +1429,42 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (matchPlane)
             {
                 _toggles["MatchPlane"] = true;
-                options.Add(TimeReference["COMPUTED"]); //"At Next AN With Target"
-                options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
-                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
-                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
-            }
-            if (hohmannT)
-            {
-                _toggles["HohmanTransfer"] = true;
-                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
-                options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
-                options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
-                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
-                options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
-                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
-                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                options.Add(TimeReference["REL_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                options.Add(TimeReference["REL_NEAREST_AD"]); //"At Nearest AN/DN With Target"
                 options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
                 options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
-                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
-                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
-                options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+            }
+            if (hohmannXfer)
+            {
+                _toggles["HohmannTransfer"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                //options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
+                //options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
+                //options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                //options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
+                //options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                //options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                //options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
+                //options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                //options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
+                //options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                //options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
             }
             if (interceptTgt)
             {
                 _toggles["InterceptTgt"] = true;
-                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
-                options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
-                options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
-                options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
-                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
-                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
-                options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
-                options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
-                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
-                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
-                options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                //options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                //options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                //options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
+                //options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
+                //options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
+                //options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                //options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                //options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
+                //options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                //options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
+                //options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
             }
             if (courseCorrection)
             {
@@ -1599,7 +1484,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
             if (planetaryXfer)
             {
-                _toggles["planetaryXfer"] = true;
+                _toggles["PlanetaryXfer"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
             }
             if (!options.Contains(selectedOption))
@@ -1609,7 +1494,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public void MakeNode()
     {
-        if (circAp || circPe || circularize|| newPe || newAp || newPeAp || newInc || matchPlane || matchPlanesD || hohmannT || interceptTgt || courseCorrection || moonReturn || matchVelocity || matchVNow || planetaryXfer )
+        if (circAp || circPe || circularize|| newPe || newAp || newPeAp || newInc || matchPlane || matchPlanesD || hohmannXfer || interceptTgt || courseCorrection || moonReturn || matchVelocity || matchVNow || planetaryXfer )
         {
             bool pass;
 
@@ -1648,7 +1533,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 pass = MatchPlanes(requestedBurnTime, -0.5);
                 // if (pass && autoLaunchMNC.Value) callMNC();
             }
-            else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
+            else if (hohmannXfer) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
             {
                 pass = HohmannTransfer(requestedBurnTime, - 0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
