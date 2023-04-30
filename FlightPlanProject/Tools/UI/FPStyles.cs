@@ -48,24 +48,31 @@ public class FPStyles
         icons_label.overflow = new RectOffset(0, 0, 0, 0);
 
         error = new GUIStyle(GUI.skin.GetStyle("Label"));
-        warning = new GUIStyle(GUI.skin.GetStyle("Label"));
+        // error.alignment = TextAnchor.MiddleLeft;
         error.normal.textColor = Color.red;
+
+        warning = new GUIStyle(GUI.skin.GetStyle("Label"));
+        // warning.alignment = TextAnchor.MiddleLeft;
         warning.normal.textColor = Color.yellow;
         //labelColor = GUI.skin.GetStyle("Label").normal.textColor;
 
         phase_ok = new GUIStyle(GUI.skin.GetStyle("Label"));
+        // phase_ok.alignment = TextAnchor.MiddleLeft;
         phase_ok.normal.textColor = ColorTools.parseColor("#00BC16");
         // phase_ok.fontSize = 20;
 
         phase_warning = new GUIStyle(GUI.skin.GetStyle("Label"));
+        // phase_warning.alignment = TextAnchor.MiddleLeft;
         phase_warning.normal.textColor = ColorTools.parseColor("#BC9200");
         // phase_warning.fontSize = 20;
 
         phase_error = new GUIStyle(GUI.skin.GetStyle("Label"));
+        // phase_error.alignment = TextAnchor.MiddleLeft;
         phase_error.normal.textColor = ColorTools.parseColor("#B30F0F");
         // phase_error.fontSize = 20;
 
         console_text = new GUIStyle(GUI.skin.GetStyle("Label"));
+        // console_text.alignment = TextAnchor.MiddleLeft;
         console_text.normal.textColor = ColorTools.parseColor("#B6B8FA");
         // console_text.fontSize = 15;
         console_text.padding = new RectOffset(0, 0, 0, 0);
@@ -80,6 +87,7 @@ public class FPStyles
         slider_text.contentOffset = new Vector2(8, 5);
 
         label = new GUIStyle(GUI.skin.GetStyle("Label"));
+        label.alignment = TextAnchor.MiddleLeft;
         // label.fontSize = 17;
         label.margin = new RectOffset(0, 0, 0, 0);
         label.padding = new RectOffset(0, 0, 0, 0);
