@@ -27,22 +27,22 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 
 ## Features
 ### Easy Celestial Target Selection
-* Drop Down Menu for easy selection of *Celestial Targets*
-### Own Ship Maneuvers
-* Circularize at Ap
-* Circularize at Pe
-* Circularize Now
-* New Pe (user specified value) - planned for next Ap
-* New Ap (user specified value) - planned for next Pe
-* New Pe & Ap (for user specified values) - Burn ASAP
-* New Inclination (user specified value) - if e < 0: Planned for cheapest AN/DN, otherwise planned for ASAP
+* Menu for easy selection of *Celestial Targets*. Planets and their moons are graphically organized with moons indented below the planet they orbit. This capability augments the game's built-in target selection for easier selection of distant celestial bodies.
+### Burn Time Option Selection
+* Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
+* ### Ownship Maneuvers
+* **Circularize**
+* **New Pe** (user specified value)
+* **New Ap** (user specified value)
+* **New Pe & Ap** (for user specified values)
+* **New Inclination** (user specified value)
+* **New LAN** (user specified value)
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
-* Course Correction (requires being on an intercept trajectory)
-* Match planes with Target at AN
-* Match Planes with Target at DN 
-* Hohmann Transfer to Target
+* **Course Correction** (requires being on an intercept trajectory)
+* **Match Planes** with Target
+* **Hohmann Transfer** to Target
 ### Moon Specific Maneuvers (only available when in orbit about a moon)
-* Return from a Moon
+* **Moon Return** (user specified target Pe for arrival back at the parent planet)
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
 * Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
