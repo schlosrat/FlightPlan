@@ -106,7 +106,7 @@ Here we can see the plane change burn is done, the old node has been deleted, an
 ![Flight Plan: Match Planes with Minmus 5](https://i.imgur.com/qeKaGaS.png)
 
 ### Step 2: Hohmann Transfer
-Now that we're in a coplanar orbit with our target we're ready to plan a Hohmann Transfer. Note that Flight Plan generated Hohmann Transfer maneuvers are not always spot on but will get you close. For this reason Flight Plan will bring up the Maneuver Node Controller mod if it's installed any time it produces an Hohmann Transfer. You may need to make minor adjustments to the prograde burn component or the node time, but should find that it's easy to get the transfer orbit you need with only a few clicks and no need to manually tweak the node. This example produced a good initial orbit that only reqired a few m/s more prograde delta-v and a slightly earlier burn time to get the result shown below.
+Now that we're in a coplanar orbit with our target we're ready to plan a Hohmann Transfer. Note that Flight Plan generated Hohmann Transfer maneuvers are not always spot on but will get you close. For this reason Flight Plan will bring up the Maneuver Node Controller mod if it's installed any time it produces an Hohmann Transfer. You may need to make minor adjustments to the prograde burn component or the node time, but should find that it's easy to get the transfer orbit you need with only a few clicks and no need to manually tweak the node. This example produced a good initial orbit that only required a few m/s more prograde delta-v and a slightly earlier burn time to get the result shown below.
 ![Flight Plan: Match Planes with Minmus 6](https://i.imgur.com/pFHp7Du.png)
 
 Here we can see K2-D2 has been commanded to execute the node and we're warping to the starting point for the burn.
@@ -124,10 +124,10 @@ Here we can see a Course Correction burn has been planned. Like the Hohmann Tran
 Here we can see K2-D2 performing a flawless Course Correction burn to get us back on track and headed for the encounter we want.
 ![Flight Plan: Match Planes with Minmus 10](https://i.imgur.com/EKoN3BR.png)
 
-Here we can see that we've arrived inside the Minmus SOI, and are on track for a nearly equatorial flyby with a nice low Pe in a prograde orbit. What if we'd like to have an inclined orbit when we get to Minmus? Easy! Use Flight Plan to set up a a New Inclination at a burn time 30 seconds from now (this offset ensures we'll have sufficient time to point in the direction we need beofre the start of the burn).
+Here we can see that we've arrived inside the Minmus SOI, and are on track for a nearly equatorial flyby with a nice low Pe in a prograde orbit. What if we'd like to have an inclined orbit when we get to Minmus? Easy! Use Flight Plan to set up a a New Inclination at a burn time 30 seconds from now (this offset ensures we'll have sufficient time to point in the direction we need before the start of the burn).
 ![Flight Plan: Match Planes with Minmus 11](https://i.imgur.com/TwGmGpb.png)
 
-Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circularization burn planned for the periapsis of the Minmus encoutner.
+Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circularization burn planned for the periapsis of the Minmus encounter.
 ![Flight Plan: Match Planes with Minmus 12](https://i.imgur.com/mAkr1MG.png)
 
 Here we are approaching Pe in our Minmus Flyby with a Circularization burn planned to put us into a 60 degree inclined low circular orbit about Minmus. Perfect for picking a landing spot almost anywhere we may want to go. In this view you can also see the Maneuver Node Controller's GUI showing that our planned maneuver will place us in the orbit we want.
