@@ -88,12 +88,12 @@ Using the configuration parameters you can change a variety of things such as ho
 ### Interplanetary Transfer Maneuvers (only available if a planet is the selected target)
 * **Interplanetary Transfer**
 
-## Take a Trip to Minmus
+## Example: Take a Trip to Minmus
 ### Step 1: Match Planes
-Here we can see a plane change maneuver has been planned and is ready to execute.
+Here we're stating out in a nicely equatorial Low Kerbin Orbit. As we want to go to Minmus, the first step is to get into a new cricular orbit that's co-planar with the target. We can see that the necessary plane change maneuver has been planned and is ready to execute.
 ![Flight Plan: Match Planes with Minmus 1](https://i.imgur.com/1Se5ET3.png)
 
-Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're execuring the planned maneuver, and K2-D2 is reporting its status indicating it's turning the vessel to point in the right direction for the planned burn.
+Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're execuring the planned maneuver, and K2-D2 is reporting its status indicating the vessel is turning to point in the right direction for the planned burn.
 ![Flight Plan: Match Planes with Minmus 2](https://i.imgur.com/eHeOimz.png)
 
 Here we can see K2-D2's status indicates we're warping to the burn. The Flight Plan status is unchanged.
@@ -104,14 +104,15 @@ Here we can see K2-D2's status indicates we're executing the burn. The Flight Pl
 
 Here we can see the plane change burn is done, the old node has been deleted, and we're now in a coplanar orbit with the target: Minums.
 ![Flight Plan: Match Planes with Minmus 5](https://i.imgur.com/qeKaGaS.png)
+
 ### Step 2: Hohmann Transfer
-Now that we're in a coplanar orbit with our target we're ready to plan a Hohmann Transfer. Note that Flight Plan generated Hohmann Transfer maneuvers are not always spot on but will get you very close. For this reason Flight Plan will bring up the Maneuver Node Controller mod if it's installed any time it produces an Hohmann Transfer. You may need to make minor adjustments to the prograde burn component or the node time, but should find that it's easy to get the transfer orbit you need with only a few clicks and no need to manually tweak the node. This example produced a good initial orbit that only reqired a few m/s more prograde delta-v and a slightly earlier burn time to get the result shown below.
+Now that we're in a coplanar orbit with our target we're ready to plan a Hohmann Transfer. Note that Flight Plan generated Hohmann Transfer maneuvers are not always spot on but will get you close. For this reason Flight Plan will bring up the Maneuver Node Controller mod if it's installed any time it produces an Hohmann Transfer. You may need to make minor adjustments to the prograde burn component or the node time, but should find that it's easy to get the transfer orbit you need with only a few clicks and no need to manually tweak the node. This example produced a good initial orbit that only reqired a few m/s more prograde delta-v and a slightly earlier burn time to get the result shown below.
 ![Flight Plan: Match Planes with Minmus 6](https://i.imgur.com/pFHp7Du.png)
 
-Here we can see K2-D2 has been commanded to execute the node and we're warping to the starting point for the burn
+Here we can see K2-D2 has been commanded to execute the node and we're warping to the starting point for the burn.
 ![Flight Plan: Match Planes with Minmus 7](https://i.imgur.com/sb9e2cu.png)
 
-Here we can see K2-D2 executing the transfer burn
+Here we can see K2-D2 executing the transfer burn.
 ![Flight Plan: Match Planes with Minmus 8](https://i.imgur.com/ErbYeRw.png)
 
 Sometimes in the game, as in life, things don't go quite as planned. What if you overshot the planned burn slightly as shown below? This can easily happen when executing a burn manually, and may also happen in some isolated cases when executing an automated burn. 
@@ -175,22 +176,23 @@ This mod is primarily meant as a direct aid to the player but can also be used a
 
 ## Orbital Maneuver Node Capabilities
 
-**NOTE 1:** All of the orbital maneuver node creation methods in Flight Plan take an optional (double) burnOffsetFactor parameter. This factor us uesd with the node's burn duration (as estimated by the game) to allow you to offset the start time of the node. By default in KSP2 nodes begin at the time you've created them for unlike in KSP1 where they would bracket the requested start time. This optional parameter allws you to plan maneuver nodes that will start earlier so that the applied Delta-v occurs centered on the intended time.
+**NOTE 1:** All of the orbital maneuver node creation methods in Flight Plan take a (double) burnUT, and an optional (double) burnOffsetFactor parameter. This factor is uesd with the node's burn duration (as estimated by the game) to allow you to offset the start time of the node. By default in KSP2 nodes begin at the time you've created them for unlike in KSP1 where they would bracket the requested start time. This optional parameter allows you to plan maneuver nodes that will start earlier so that the applied Delta-v occurs centered on the intended time.
 
 **NOTE 2:** All of the orbital maneuver node creation methods in Flight Plan return a boolean value which is true if the node creation was successful and false otherwise.
 
 * **Circularize(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time for the active vessel to circularize the vessel's orbit at that point. This method can be used to plan a circularization burn at the next Apoapsis, Periapsis, or any other time that suits your needs during the orbit.
 * **SetNewPe(burnUT, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Periapsis (measured from center of body, not altitude above serface).
 * **SetNewAp(burnUT, newApR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis (measured from center of body, not altitude above serface).
-* **Ellipticize(burnUT, newApR, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis and Periapsis (both measured from center of body, not altitude above serface) at a time aproximately 30 seconds from now.
-* **SetInclination(burnUT, newIncDeg, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbit inclination (in degrees) at either the next Ascending Node or Descending Node. Both options are evaluated and the one requireing the least Delta-v is automatically selected.
-* **MatchPlanes(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbit inclination to match that of the currently selected target at the next Ascending Node for the target.
-* **HohmannTransfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the optimal time for a Hohmann Transfer to the currently selected target at the next available window.
+* **Ellipticize(burnUT, newApR, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis and Periapsis (both measured from center of body, not altitude above serface).
+* **SetInclination(burnUT, newIncDeg, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbital inclination (in degrees).
+* **SetLAN(burnUT, newLANDeg, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's longitude of ascending node (in degrees).
+* **MatchPlanes(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbit inclination to match that of the currently selected target.
+* **HohmannTransfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* for a Hohmann Transfer to the currently selected target at the next available window. *NOTE*: The supplied burnUT parameter presently has no effect.
 * **InterceptTgt(burnUT, deltaUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to intercept the currently selected target at the a time of deltaUT from now.
-* **CourseCorrection(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the optimal time to finetime the trajectory to intercept the currently selected target. This method may be useful after executing a Hohman Transfer or Moon Return maneuver node. Calling it prior to node execution is suboptimal and not advised.
-* **MoonReturn(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the optimal time for a Hohmann Transfer to return the active vessel from a moon to the planet the moon is orbiting.
-* **MatchVelocity(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to match velocity with the currently selected target at the point of closest approach.
-* **PlanetaryXfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node for a Hohmann Transfer to the currently selected target planet at the next available window.
+* **CourseCorrection(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* to finetune the trajectory to intercept the currently selected target. This method may be useful after executing a Hohman Transfer or Moon Return maneuver node. Calling it prior to node execution is suboptimal and not advised. *NOTE*: The supplied burnUT parameter presently has no effect.
+* **MoonReturn(burnUT, targetPe, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* for a Hohmann Transfer to return the active vessel from a moon to the planet the moon is orbiting in a transfer orbit that give the targetPe when arriving at the parent planet. *NOTE*: The supplied burnUT parameter presently has no effect.
+* **MatchVelocity(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to match velocity with the currently selected target.
+* **PlanetaryXfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* for a Hohmann Transfer to the currently selected target planet during the next available transfer window. *NOTE*: The supplied burnUT parameter presently has no effect.
 
 ## Orbital Time Prognistication Capabilities
 
