@@ -6,6 +6,8 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 
 **NOTE:** This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/MechJeb2) code that has been adapted to work in KSP2, and would not be possible without the kind and generous contributions of Sarbian and the MechJeb development team! It is not the intent to replicate all MechJeb2 features and functions in this mod, but merely to make some handy maneuver planning tools available for KSP2 players. While you may be able to create some useful nodes with this mod, you'll still need to execute them accurately! Also, understanding some basic mission planning will be very usful for those employing the tools in this toolbox.
 
+**Note:** Version 0.8.0 has recieved significant updates and improvements in the GUI from cfloutier who richly deserves the credit for those parts. His contrbutions have dramatically improved the quality of the user interface and make the mod not only more modern and visualy pleasing, but also easier and more fun to use.
+
 ## Compatibility
 * Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
 * Requires [SpaceWarp](https://spacedock.info/mod/3277/Space%20Warp%20+%20BepInEx) 1.0.1+
