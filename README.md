@@ -93,7 +93,7 @@ Using the configuration parameters you can change a variety of things such as ho
 Here we're stating out in a nicely equatorial Low Kerbin Orbit. As we want to go to Minmus, the first step is to get into a new circular orbit that's co-planar with the target. We can see that the necessary plane change maneuver has been planned and is ready to execute.
 ![Flight Plan: Match Planes with Minmus 1](https://i.imgur.com/1Se5ET3.png)
 
-Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're execuring the planned maneuver, and K2-D2 is reporting its status indicating the vessel is turning to point in the right direction for the planned burn.
+Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're executing the planned maneuver, and K2-D2 is reporting its status indicating the vessel is turning to point in the right direction for the planned burn.
 ![Flight Plan: Match Planes with Minmus 2](https://i.imgur.com/eHeOimz.png)
 
 Here we can see K2-D2's status indicates we're warping to the burn. The Flight Plan status is unchanged.
