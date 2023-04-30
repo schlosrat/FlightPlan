@@ -35,7 +35,7 @@ public class FPStyles
         guiLoaded = true;
     }
 
-    public static GUIStyle error, warning, label, mid_text, console_text, phase_ok, phase_warning, phase_error;
+    public static GUIStyle error, warning, label, status, mid_text, console_text, phase_ok, phase_warning, phase_error;
     public static GUIStyle icons_label, title, slider_text;
 
     static void BuildLabels()
@@ -91,6 +91,12 @@ public class FPStyles
         // label.fontSize = 17;
         label.margin = new RectOffset(0, 0, 0, 0);
         label.padding = new RectOffset(0, 0, 0, 0);
+
+        status = new GUIStyle(GUI.skin.GetStyle("Label"));
+        status.alignment = TextAnchor.MiddleLeft;
+        // status.fontSize = 17;
+        status.margin = new RectOffset(0, 0, 0, 0);
+        status.padding = new RectOffset(0, 0, 0, 0);
 
         title = new GUIStyle();
         title.normal.textColor = ColorTools.parseColor("#C0C1E2");
