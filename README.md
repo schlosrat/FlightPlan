@@ -1,5 +1,5 @@
 # Flight Plan
-![Flight Plan GUI](https://i.imgur.com/xaRyMGU.png)
+![Flight Plan GUI](https://i.imgur.com/6uuhfJ6.png)
 
 Plan your (Space) Flight! Fly your Plan! Handy tools to help you set up maneuver nodes that will get you where you want to be.
 Making spaceflight planning easier for Kerbal Space Program 2 one mission at a time.
