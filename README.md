@@ -39,10 +39,13 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * **New Inclination** (user specified value - degrees)
 * **New LAN** (user specified value - degrees)
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
+![Flight Plan GUI Example - Maneuvers Relative to Selected Target](https://i.imgur.com/8XOCGXs.png)
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
 ### Moon Specific Maneuvers (only available when in orbit about a moon)
+![Flight Plan GUI Example - Moon Specific Maneuvers](https://i.imgur.com/qVyfgVY.png)
+
 * **Moon Return** (user specified target Pe (km) for arrival back at the parent planet)
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
