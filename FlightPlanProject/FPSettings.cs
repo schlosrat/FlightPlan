@@ -25,6 +25,12 @@ public class FPSettings
         set { s_settings_file.SetInt("window_y_pos", value); }
     }
 
+    public static double altitude_km
+    {
+        get => s_settings_file.GetDouble("altitude_km", 100);
+        set { s_settings_file.SetDouble("altitude_km", value); }
+    }
+
     public static double ap_altitude_km
     {
         get => s_settings_file.GetDouble("ap_altitude_km", 100);
@@ -61,4 +67,9 @@ public class FPSettings
         set { s_settings_file.SetDouble("interceptT", value); }
     }
 
+    public static double timeOffset
+    {
+        get => s_settings_file.GetDouble("timeOffset", 30);
+        set { s_settings_file.SetDouble("timeOffset", value); }
+    }
 }
