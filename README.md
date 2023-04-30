@@ -61,7 +61,7 @@ The Flight Plan GUI will always display all Ownship maneuvers available in the c
 
 Similarly, selecting **Match Planes** will give Burn Time options for *at the cheapest AN/DN w/Target*, *at the nearest AN/DN w/Target*, *at the next AN w/Target*, and *at the next DN w/Target*. NOTE: in the Match Planes example above the Make Node button has been pressed and Flight Plan is showing a status indicating the node is ready. In this example, with K2-D2 installed, the K2-D2 Astromech Icon is displayed in the lower right indicating that K2-D2 is ready to help you fly the node.
 
-In addition to the basic UI screens above, the UI will automatically adjust to offer capabilities relevant to the current orbit and selected target. Some options such as **Interplanetary Transfer** (above far right example) are only available if the *Experimental* option has been selected in the Flight Plan configuration options menu.
+In addition to the basic UI screens above, the UI will automatically adjust to offer capabilities relevant to the current orbit and selected target. Some options such as **Interplanetary Transfer** (above far right example) are only available if the *Experimental Features* option has been selected in the Flight Plan configuration options menu.
 
 ## Configuration Parameters
 ![Flight Plan Configuration Parameters](https://i.imgur.com/wltT7P0.png)
@@ -78,13 +78,12 @@ Using the configuration parameters you can change a variety of things such as ho
 ## Planned Improvement / Experimental Functions
 ![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
 
-Work In Progress developmental features may be enabled by switching on the Experimental Features in the mod's configuration screen. You will need to restart the game for this setting to take effect, but it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the Experimental Features setting.
+**Work In Progress** developmental features may be enabled by switching on the *Experimental Features* in the mod's configuration screen. You do not need to restart the game for this setting to take effect, and it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the *Experimental Features* setting.
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
-* Intercept Target (at user specified time from now)
-* Match Velocity at Closest Approach (requires being on an intercept trajectory)
-* Match Velocity Now
+* **Intercept** Target
+* **Match Velocity**
 ### Interplanetary Transfer Maneuvers (only available if a planet is the selected target)
-* Interplanetary Transfer
+* **Interplanetary Transfer**
 
 ## Example Images
 ### Circularize at the Next Ap
