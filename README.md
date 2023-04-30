@@ -126,7 +126,7 @@ Work In Progress developmental features may be enabled by switching on the Exper
 # Flight Plan as a Library
 Flight Plan's orbital maneuver node creation methods are public, and so may be called from other mods. In this sense, Flight Plan can be accessed like a library whether the Flight Plan GUI is visible or not. 
 
-This mod is primarily meant as a service provider to other mods, which can call functions in this one without needing to recreate all these functions in the base mod. Creating maneuver nodes from a KSP2 mod is not necessarily an intuitive thing to code, so having this as a resource you can call may save you time developing those capabilities internally to your mod.
+This mod is primarily meant as a direct aid to the player but can also be used as a service provider to other mods which can call functions in this one without needing to recreate all these functions in the base mod. Creating maneuver nodes from a KSP2 mod is not necessarily an intuitive thing to code, so having this as a resource you can call may save you time developing those capabilities internally to your mod.
 
 ## Orbital Maneuver Node Capabilities
 
@@ -134,22 +134,24 @@ This mod is primarily meant as a service provider to other mods, which can call 
 
 **NOTE 2:** All of the orbital maneuver node creation methods in Flight Plan return a boolean value which is true if the node creation was successful and false otherwise.
 
-* **CircularizeAtAP(burnOffsetFactor)**: Calling this method will create a maneuver node at the next Apoapsis for the active vessel to circularize the vessel's orbit at that point.
-* **CircularizeAtPe(burnOffsetFactor)**: Calling this method will create a maneuver node at the next Periapsis for the active vessel to circularize the vessel's orbit at that point.
-* **CircularizeNow(burnOffsetFactor)**: Calling this method will create a maneuver node to circularize the vessel's orbit at a time aproximately 30 seconds from now.
-* **SetNewPe(newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's Periapsis (measured from center of body, not altitude above serface) at the next Ap.
-* **SetNewAp(newApR, burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's Apoapsis (measured from center of body, not altitude above serface) at the next Pe.
-* **Ellipticize(newApR, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's Apoapsis and Periapsis (both measured from center of body, not altitude above serface) at a time aproximately 30 seconds from now.
-* **SetInclination(newIncDeg, burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's orbit inclination (in degrees) at either the next Ascending Node or Descending Node. Both options are evaluated and the one requireing the least Delta-v is automatically selected.
-* **MatchPlanesAtAN(burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's orbit inclination to match that of the currently selected target at the next Ascending Node for the target.
-* **MatchPlanesAtDN(burnOffsetFactor)**: Calling this method will create a maneuver node to set the vessel's orbit inclination to match that of the currently selected target at the next Descending Node for the target.
-* **HohmannTransfer(burnOffsetFactor)**: Calling this method will create a maneuver node for a Hohmann Transfer to the currently selected target at the next available window.
-* **InterceptTgtAtUT(deltaUT, burnOffsetFactor)**: Calling this method will create a maneuver node to intercept the currently selected target at the a time of deltaUT from now.
-* **CourseCorrection()**: Calling this method will create a maneuver node to finetime the trajectory to intercept the currently selected target. This method may be useful after executing a Hohman Transfer or Moon Return maneuver node. Calling it prior to node execution is suboptimal and not advised.
-* **MoonReturn(burnOffsetFactor)**: Calling this method will create a maneuver node for a Hohmann Transfer to return the active vessel from a moon to the planet the moon is orbiting.
-* **MatchVelocityAtCA(burnOffsetFactor)**: Calling this method will create a maneuver node to match velocity with the currently selected target at the point of closest approach.
-* **MatchVelocityNow(burnOffsetFactor)**: Calling this method will create a maneuver node to match velocity with the currently selected target at a time aproximately 20s from now.
-* **PlanetaryXfer(burnOffsetFactor)**: Calling this method will create a maneuver node for a Hohmann Transfer to the currently selected target planet at the next available window.
+* **Circularize(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time for the active vessel to circularize the vessel's orbit at that point. This method can be used to plan a circularization burn at the next Apoapsis, Periapsis, or any other time that suits your needs during the orbit.
+* **SetNewPe(burnUT, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Periapsis (measured from center of body, not altitude above serface).
+* **SetNewAp(burnUT, newApR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis (measured from center of body, not altitude above serface).
+* **Ellipticize(burnUT, newApR, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis and Periapsis (both measured from center of body, not altitude above serface) at a time aproximately 30 seconds from now.
+* **SetInclination(burnUT, newIncDeg, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbit inclination (in degrees) at either the next Ascending Node or Descending Node. Both options are evaluated and the one requireing the least Delta-v is automatically selected.
+* **MatchPlanes(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbit inclination to match that of the currently selected target at the next Ascending Node for the target.
+* **HohmannTransfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the optimal time for a Hohmann Transfer to the currently selected target at the next available window.
+* **InterceptTgt(burnUT, deltaUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to intercept the currently selected target at the a time of deltaUT from now.
+* **CourseCorrection(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the optimal time to finetime the trajectory to intercept the currently selected target. This method may be useful after executing a Hohman Transfer or Moon Return maneuver node. Calling it prior to node execution is suboptimal and not advised.
+* **MoonReturn(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the optimal time for a Hohmann Transfer to return the active vessel from a moon to the planet the moon is orbiting.
+* **MatchVelocity(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to match velocity with the currently selected target at the point of closest approach.
+* **PlanetaryXfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node for a Hohmann Transfer to the currently selected target planet at the next available window.
+
+## Orbital Time Prognistication Capabilities
+
+* Time_to_Ap
+* Time_to_Pe
+* 
 
 To use this mod from your mod you will need to do one of the following:
 
