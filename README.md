@@ -38,9 +38,9 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * **New Inclination** (user specified value - degrees)
 * **New LAN** (user specified value - degrees)
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
-* **Course Correction** (requires being on an intercept trajectory)
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
+* **Course Correction** (requires being on an intercept trajectory)
 ### Moon Specific Maneuvers (only available when in orbit about a moon)
 * **Moon Return** (user specified target Pe (km) for arrival back at the parent planet)
 ### Display Status of Last Command
