@@ -90,7 +90,7 @@ Using the configuration parameters you can change a variety of things such as ho
 
 ## Take a Trip to Minmus
 ### Step 1: Match Planes
-Here we can see a plane change maeuver has been planned and is ready to execute.
+Here we can see a plane change maneuver has been planned and is ready to execute.
 ![Flight Plan: Match Planes with Minmus 1](https://i.imgur.com/1Se5ET3.png)
 
 Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're execuring the planned maneuver, and K2-D2 is reporting its status indicating it's turning the vessel to point in the right direction for the planned burn.
