@@ -117,6 +117,9 @@ public class OtherModsInterface
             {
                 k2d2FlyNodeMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), null);
                 checkK2D2status = true;
+                // Extend the status time to encompass the maneuver
+                FlightPlanPlugin.Instance.statusTime = FlightPlanPlugin.Instance.currentNode.Time + FlightPlanPlugin.Instance.currentNode.BurnDuration;
+                FlightPlanPlugin.Instance.statusText = FlightPlanPlugin.Instance.maneuver;
             }
         }
     }
@@ -128,7 +131,6 @@ public class OtherModsInterface
             if (k2d2VerCheck >= 0)
             {
                 k2d2Status = (string)k2d2GetStatusMethodInfo!.Invoke(k2d2Instance, null);
-                
 
                 if (k2d2Status == "Done")
                 {

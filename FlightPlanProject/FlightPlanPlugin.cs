@@ -54,8 +54,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         ERROR
     }
     private Status status = Status.VIRGIN; // Everyone starts out this way...
-    private double statusTime = 0; // UT of last staus update
-    private string statusText;
+    public double statusTime = 0; // UT of last staus update
+    public string statusText;
+    public string maneuver;
+    private string baseManeuver;
 
     // Config parameters
     private ConfigEntry<string> initialStatusText;
@@ -477,6 +479,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                     UI_Fields.temp_dict["Maneuver Altitude"] = FPSettings.altitude_km.ToString();
             }
         }
+
+        maneuver = $"{baseManeuver} {selectedOption}";
 
         setBurnTime();
 
@@ -1425,6 +1429,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Circularizing";
             }
             if (newPe)
             {
@@ -1433,6 +1438,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["PERIAPSIS"]); //"At Next Apoapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+                baseManeuver = "Setting new Pe";
             }
             if (newAp)
             {
@@ -1441,6 +1447,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+                baseManeuver = "Setting new Ap";
             }
             if (newPeAp)
             {
@@ -1451,6 +1458,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
                 options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
                 options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                baseManeuver = "Elipticizing";
             }
             if (newLAN)
             {
@@ -1458,6 +1466,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
                 options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Setting new LAN";
             }
             if (newInc)
             {
@@ -1467,6 +1476,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
                 options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Setting new inclination";
             }
             if (matchPlane)
             {
@@ -1475,6 +1485,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["REL_NEAREST_AD"]); //"At Nearest AN/DN With Target"
                 options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
                 options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                baseManeuver = "Matching planes";
             }
             if (hohmannXfer)
             {
@@ -1491,6 +1502,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 //options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
                 //options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
                 //options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                baseManeuver = "Performaing Homann transfer";
             }
             if (interceptTgt)
             {
@@ -1507,27 +1519,32 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 //options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
                 //options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
                 //options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                baseManeuver = "Intercepting";
             }
             if (courseCorrection)
             {
                 _toggles["CourseCorrection"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                baseManeuver = "Performaing course correction";
             }
             if (moonReturn)
             {
                 _toggles["MoonReturn"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                baseManeuver = "Performaing moon return";
             }
             if (matchVelocity)
             {
                 _toggles["MatchVelocity"] = true;
                 options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Matching velocity";
             }
             if (planetaryXfer)
             {
                 _toggles["PlanetaryXfer"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                baseManeuver = "Performaing planetary transfer";
             }
             if (!options.Contains(selectedOption))
                 selectedOption = options[0];
