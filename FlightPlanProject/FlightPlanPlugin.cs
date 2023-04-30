@@ -357,8 +357,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         DrawSectionHeader("Ownship Maneuvers");
 
-        UI_Tools.Label("Circularize");
-        GUILayout.BeginHorizontal();
+        // UI_Tools.Label("Circularize");
+        // GUILayout.BeginHorizontal();
         //if (activeVessel.Orbit.eccentricity < 1)
         //{
         //    DrawToggleButton("at Ap", ref circAp);
@@ -366,7 +366,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // DrawToggleButton("at Pe", ref circPe);
 
         DrawToggleButton("Circularize", ref circularize);
-        GUILayout.EndHorizontal();
+        // GUILayout.EndHorizontal();
 
         FPSettings.pe_altitude_km = DrawToggleButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altitude_km, "km");
         targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
@@ -861,14 +861,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (UT > statusTime) transparency = (float)MuUtils.Clamp(1 - (UT - statusTime) / statusFadeTime.Value, 0, 1);
 
         var status_style = FPStyles.label;
-        if (status == Status.VIRGIN)
-            status_style = FPStyles.label;
+        //if (status == Status.VIRGIN)
+        //    status_style = FPStyles.label;
         if (status == Status.OK)
-            status_style = FPStyles.phase_ok;
+            status_style.normal.textColor = new Color(0, 1, 0, transparency); // FPStyles.phase_ok;
         if (status == Status.WARNING)
-            status_style = FPStyles.phase_warning;
+            status_style.normal.textColor = new Color(1, 1, 0, transparency); // FPStyles.phase_warning;
         if (status == Status.ERROR)
-            status_style = FPStyles.phase_error;
+            status_style.normal.textColor = new Color(1, 0, 0, transparency); // FPStyles.phase_error;
 
         UI_Tools.Separator();
         DrawSectionHeader("Status:", statusText, status_style);
