@@ -292,7 +292,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 windowRect,
                 FillWindow,
                 "<color=#696DFF>FLIGHT PLAN</color>",
-                FPStyles.window,
                 GUILayout.Height(0),
                 GUILayout.Width(windowWidth));
 

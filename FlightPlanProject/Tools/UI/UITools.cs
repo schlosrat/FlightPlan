@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace FlightPlan.UI;
 
-public class SimpleAccordion
+public class FoldOut
 {
     public delegate void onChapterUI();
 
@@ -174,7 +174,7 @@ public class UI_Tools
     {
         return GUILayout.Button(txt, FPStyles.small_button);
     }
-
+     
     public static bool BigButton(string txt)
     {
         return GUILayout.Button(txt, FPStyles.bigicon_button);
