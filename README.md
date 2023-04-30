@@ -130,7 +130,7 @@ Here we can see that we've arrived inside the Minmus SOI, and are on track for a
 Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circularization burn planned for the periapsis of the Minmus encoutner.
 ![Flight Plan: Match Planes with Minmus 12](https://i.imgur.com/mAkr1MG.png)
 
-Here we are approaching Pe in our Minmus Flyby with a Circularization burn planned to put us into a 60 degree inclined low circular orbit about Minmus. Perfect for picking a landing spot almost anywhere we may want to go.
+Here we are approaching Pe in our Minmus Flyby with a Circularization burn planned to put us into a 60 degree inclined low circular orbit about Minmus. Perfect for picking a landing spot almost anywhere we may want to go. In this view you can also see the Maneuver Node Controller's GUI showing that our planned maneuver will place us in the orbit we want.
 ![Flight Plan: Match Planes with Minmus 13](https://i.imgur.com/OUeWhYu.png)
 
 ### Burn Timing Detail (burn brackets effective point: Ap)
