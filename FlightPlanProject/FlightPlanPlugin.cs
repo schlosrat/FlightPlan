@@ -336,6 +336,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             return;
         }
 
+        var orbit = activeVessel.Orbit;
+        var referenceBody = orbit.referenceBody;
+
         updateToggleButtons();
 
         // game = GameManager.Instance.Game;
@@ -349,8 +352,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         OptionSelectionGUI();
 
-        var referenceBody = activeVessel.Orbit.referenceBody;
-
         // Initialize the available list of options. These get updated in setOptionsList
         options = new List<string> { "none" };
 
@@ -358,19 +359,19 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         // UI_Tools.Label("Circularize");
         // GUILayout.BeginHorizontal();
-        //if (activeVessel.Orbit.eccentricity < 1)
+        //if (orbit.eccentricity < 1)
         //{
         //    DrawToggleButton("at Ap", ref circAp);
         //}
         // DrawToggleButton("at Pe", ref circPe);
-
+        
         DrawToggleButton("Circularize", ref circularize);
         // GUILayout.EndHorizontal();
 
         FPSettings.pe_altitude_km = DrawToggleButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altitude_km, "km");
         targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
 
-        if (activeVessel.Orbit.eccentricity < 1)
+        if (orbit.eccentricity < 1)
         {
             FPSettings.ap_altitude_km = DrawToggleButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altitude_km, "km");
             targetApR = FPSettings.ap_altitude_km*1000 + referenceBody.radius;
@@ -427,7 +428,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
         if (!referenceBody.IsStar) // not orbiting a star
         {
-            if (!referenceBody.Orbit.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1) // not orbiting a planet, and e < 1
+            if (!referenceBody.Orbit.referenceBody.IsStar && orbit.eccentricity < 1) // not orbiting a planet, and e < 1
             {
                 DrawSectionHeader("Moon Specific Maneuvers");
 
@@ -436,6 +437,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 FPSettings.mr_altitude_km = DrawToggleButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
                 targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
             }
+        }
+
+        // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
+        if (selectedOption == TimeReference["ALTITUDE"])
+        {
+            FPSettings.altitude_km = DrawLabelithTextField("Maneuver Altitude", FPSettings.altitude_km, "km");
+        }
+        if (selectedOption == TimeReference["X_FROM_NOW"])
+        {
+            FPSettings.timeOffset = DrawLabelithTextField("Time From Now", FPSettings.timeOffset, "s");
         }
 
         // Using the selected activity configure the valid options list
@@ -450,6 +461,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         DrawGUIStatus(UT);
 
+        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the orbit
+        if (selectedOption == TimeReference["ALTITUDE"])
+        {
+            if (FPSettings.altitude_km * 1000 < orbit.Periapsis)
+            {
+                FPSettings.altitude_km = Math.Ceiling(orbit.Periapsis) / 1000;
+                if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
+                    UI_Fields.temp_dict["Maneuver Altitude"] = FPSettings.altitude_km.ToString();
+            }
+            if (orbit.eccentricity < 1 && FPSettings.altitude_km * 1000 > orbit.Apoapsis)
+            {
+                FPSettings.altitude_km = Math.Floor(orbit.Apoapsis) / 1000;
+                if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
+                    UI_Fields.temp_dict["Maneuver Altitude"] = FPSettings.altitude_km.ToString();
+            }
+        }
+
         setBurnTime();
 
         // handleButtons();
@@ -462,45 +490,47 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         // Set the requested burn time based on the selected timing option
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
         if (selectedOption == TimeReference["COMPUTED"])
             requestedBurnTime = -1; // for optimal time the burn time is computed and returned from the OrbitalManeuverCalculator method called.
         else if (selectedOption == TimeReference["APOAPSIS"])
-            requestedBurnTime = activeVessel.Orbit.NextApoapsisTime(UT);
+            requestedBurnTime = orbit.NextApoapsisTime(UT);
         else if (selectedOption == TimeReference["PERIAPSIS"])
-            requestedBurnTime = activeVessel.Orbit.NextPeriapsisTime(UT);
+            requestedBurnTime = orbit.NextPeriapsisTime(UT);
         else if (selectedOption == TimeReference["CLOSEST_APPROACH"])
-            requestedBurnTime = activeVessel.Orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); // +2 so that closestApproachTime is definitely > UT
+            requestedBurnTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); // +2 so that closestApproachTime is definitely > UT
         else if (selectedOption == TimeReference["EQ_ASCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfAscendingNodeEquatorial(UT);
+            requestedBurnTime = orbit.TimeOfAscendingNodeEquatorial(UT);
         else if (selectedOption == TimeReference["EQ_DESCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfDescendingNodeEquatorial(UT);
+            requestedBurnTime = orbit.TimeOfDescendingNodeEquatorial(UT);
         else if (selectedOption == TimeReference["REL_ASCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT); // like built in TimeOfAN(currentTarget.Orbit, UT), but with check to prevent time in the past
+            requestedBurnTime = orbit.TimeOfAscendingNode(currentTarget.Orbit, UT); // like built in TimeOfAN(currentTarget.Orbit, UT), but with check to prevent time in the past
         else if (selectedOption == TimeReference["REL_DESCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT); // like built in TimeOfDN(currentTarget.Orbit, UT), but with check to prevent time in the past
+            requestedBurnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit, UT); // like built in TimeOfDN(currentTarget.Orbit, UT), but with check to prevent time in the past
         else if (selectedOption == TimeReference["X_FROM_NOW"])
-            requestedBurnTime = UT + 30; // FIX ME! This should be a user selectable offset
+            requestedBurnTime = UT + FPSettings.timeOffset;
         else if (selectedOption == TimeReference["ALTITUDE"])
-            requestedBurnTime = activeVessel.Orbit.NextTimeOfRadius(UT, (double)1000000); // FIX ME! This should be a user selectable offset
+            requestedBurnTime = orbit.NextTimeOfRadius(UT, FPSettings.altitude_km * 1000);
         else if (selectedOption == TimeReference["EQ_NEAREST_AD"])
-            requestedBurnTime = Math.Min(activeVessel.Orbit.TimeOfAscendingNodeEquatorial(UT), activeVessel.Orbit.TimeOfDescendingNodeEquatorial(UT));
+            requestedBurnTime = Math.Min(orbit.TimeOfAscendingNodeEquatorial(UT), orbit.TimeOfDescendingNodeEquatorial(UT));
         else if (selectedOption == TimeReference["EQ_HIGHEST_AD"])
         {
-            var timeAN = activeVessel.Orbit.TimeOfAscendingNodeEquatorial(UT);
-            var timeDN = activeVessel.Orbit.TimeOfDescendingNodeEquatorial(UT);
-            var ANRadius = activeVessel.Orbit.Radius(timeAN);
-            var DNRadius = activeVessel.Orbit.Radius(timeDN);
+            var timeAN = orbit.TimeOfAscendingNodeEquatorial(UT);
+            var timeDN = orbit.TimeOfDescendingNodeEquatorial(UT);
+            var ANRadius = orbit.Radius(timeAN);
+            var DNRadius = orbit.Radius(timeDN);
             if (ANRadius > DNRadius) requestedBurnTime = timeAN;
             else requestedBurnTime = timeDN;
         }
         else if (selectedOption == TimeReference["REL_NEAREST_AD"])
-            requestedBurnTime = Math.Min(activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT), activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT));
+            requestedBurnTime = Math.Min(orbit.TimeOfAscendingNode(currentTarget.Orbit, UT), orbit.TimeOfDescendingNode(currentTarget.Orbit, UT));
         else if (selectedOption == TimeReference["REL_HIGHEST_AD"])
         {
-            var timeAN = activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT);
-            var timeDN = activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT);
-            var ANRadius = activeVessel.Orbit.Radius(timeAN);
-            var DNRadius = activeVessel.Orbit.Radius(timeDN);
+            var timeAN = orbit.TimeOfAscendingNode(currentTarget.Orbit, UT);
+            var timeDN = orbit.TimeOfDescendingNode(currentTarget.Orbit, UT);
+            var ANRadius = orbit.Radius(timeAN);
+            var DNRadius = orbit.Radius(timeDN);
             if (ANRadius > DNRadius) requestedBurnTime = timeAN;
             else requestedBurnTime = timeDN;
         }
@@ -817,6 +847,21 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         button = UI_Tools.ToggleButton(button, runString, stopString);
     }
 
+    private double DrawLabelithTextField(string entryName, double value, string unit = "")
+    {
+        GUILayout.BeginHorizontal();
+        UI_Tools.Label(entryName);
+        GUILayout.Space(10);
+
+        value = UI_Fields.DoubleField(entryName, value);
+
+        GUILayout.Space(3);
+        UI_Tools.Label(unit);
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(spacingAfterEntry);
+        return value;
+    }
     private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
@@ -884,8 +929,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         other_mods.OnGUI(currentNode);
         GUILayout.Space(spacingAfterEntry);
     }
-
-
 
     private void CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
     {
