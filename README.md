@@ -55,15 +55,10 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * *If* Maneuver Node Controller (v0.8.3 or later) is installed then Flight Plan will present an MNC Icon button in the lower right corner of the GUI (to the right of the **Make Node** button, and left of the K2D2 button if present). Pressing that button will bring up the Maneuver Node Controller GUI. *If* the *Launch Maneuver Node Controller* configuration setting is Enabled, then when you activate an *experimental* node creation function the Maneuver Node Controller mod will automatically be brought up if it is not already up. This can make it easier to evaluate and adjust nodes constructed using experimental functions (those listed under Planned Improvement below)
 
 ## UI Screens
-The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time Offset From Now**
+The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time From Now**. Similarly, selecting **Match Planes** will give Burn Time options for *at the cheapest AN/DN w/Target*, *at the nearest AN/DN w/Target*, *at the next AN w/Target*, and *at the next DN w/Target*.
 ![Flight Plan GUI Examples](https://i.imgur.com/sJKFA12.png)
 
-In addition to the basic UI screen above the UI will automatically asjust to offer capabilities relevant to the current orbit and selected target.
-### Selecting a Celestial Target with the Drop Down Menu
-![Flight Plan Target Selection GUI](https://i.imgur.com/NyhCARt.png)
-
-### With a Local Object Selected (selected target is orbiting the same body your vessel is)
-![Flight Plan Target Selected GUI - Moon](https://i.imgur.com/givkRgG.png)
+In addition to the basic UI screens above, the UI will automatically adjust to offer capabilities relevant to the current orbit and selected target. Some options such as **Interplanetary Transfer** (above far right example) are only available if the *Experimental* option has been selected in the Flight Plan configuration options menu.
 
 ## Configuration Parameters
 ![Flight Plan Configuration Parameters](https://i.imgur.com/BcJsRLP.png)
