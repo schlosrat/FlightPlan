@@ -199,7 +199,7 @@ public class FPStyles
         gear = AssetsLoader.loadIcon("gear");
         icon = AssetsLoader.loadIcon("icon");
         k2d2_big_icon = AssetsLoader.loadIcon("k2d2_big_icon");
-        mnc_icon = AssetsLoader.loadIcon("mnc_new_icon_50");
+        mnc_icon = AssetsLoader.loadIcon("mnc_icon_white_50"); //  mnc_icon_bw_50
         cross = AssetsLoader.loadIcon("Cross");
     }
 
