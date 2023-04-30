@@ -39,13 +39,10 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * **New Inclination** (user specified value - degrees)
 * **New LAN** (user specified value - degrees)
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
-![Flight Plan GUI Example - Maneuvers Relative to Selected Target](https://i.imgur.com/8XOCGXs.png)
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
 ### Moon Specific Maneuvers (only available when in orbit about a moon)
-![Flight Plan GUI Example - Moon Specific Maneuvers](https://i.imgur.com/qVyfgVY.png)
-
 * **Moon Return** (user specified target Pe (km) for arrival back at the parent planet)
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
@@ -80,7 +77,7 @@ Using the configuration parameters you can change a variety of things such as ho
 * Status Hold Time: Seconds
 
 ## Planned Improvement / Experimental Functions
-![Flight Plan Future GUI](https://i.imgur.com/nAqnh60.png)
+![Flight Plan Future GUI](https://i.imgur.com/zPLPAsx.png)
 
 **Work In Progress** developmental features may be enabled by switching on the *Experimental Features* in the mod's configuration screen. You do not need to restart the game for this setting to take effect, and it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the *Experimental Features* setting.
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
@@ -89,9 +86,23 @@ Using the configuration parameters you can change a variety of things such as ho
 ### Interplanetary Transfer Maneuvers (only available if a planet is the selected target)
 * **Interplanetary Transfer**
 
-## Example Images
-### Circularize at the Next Ap
-![Flight Plan: Circularize at Next Ap Example](https://i.imgur.com/by0kbUF.png)
+## Take a Trip to Minmus
+### Step 1: Match Planes
+![Flight Plan: Match Planes with Minmus 1](https://i.imgur.com/1Se5ET3.png)
+![Flight Plan: Match Planes with Minmus 2](https://i.imgur.com/eHeOimz.png)
+![Flight Plan: Match Planes with Minmus 3](https://i.imgur.com/j1kp06a.png)
+![Flight Plan: Match Planes with Minmus 4](https://i.imgur.com/SmpwCSx.png)
+![Flight Plan: Match Planes with Minmus 5](https://i.imgur.com/qeKaGaS.png)
+### Step 2: Hohmann Transfer
+![Flight Plan: Match Planes with Minmus 6](https://i.imgur.com/pFHp7Du.png)
+![Flight Plan: Match Planes with Minmus 7](https://i.imgur.com/sb9e2cu.png)
+![Flight Plan: Match Planes with Minmus 8](https://i.imgur.com/ErbYeRw.png)
+![Flight Plan: Match Planes with Minmus 8a](https://i.imgur.com/dHYzrHN.png)
+![Flight Plan: Match Planes with Minmus 9](https://i.imgur.com/rsZUbjG.png)
+![Flight Plan: Match Planes with Minmus 10](https://i.imgur.com/EKoN3BR.png)
+![Flight Plan: Match Planes with Minmus 11](https://i.imgur.com/TwGmGpb.png)
+![Flight Plan: Match Planes with Minmus 12](https://i.imgur.com/mAkr1MG.png)
+![Flight Plan: Match Planes with Minmus 13](https://i.imgur.com/OUeWhYu.png)
 
 ### Burn Timing Detail (burn brackets effective point: Ap)
 ![Flight Plan: Circularize at Next Ap Burn Detail](https://i.imgur.com/pDkXeBM.png)
