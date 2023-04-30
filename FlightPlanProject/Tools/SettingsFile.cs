@@ -17,7 +17,7 @@ public class SettingsFile
 
         public SettingsFile(string file_path)
     {
-        this.file_path = file_path;
+        this.file_path = file_path; 
         Load();
     }
 

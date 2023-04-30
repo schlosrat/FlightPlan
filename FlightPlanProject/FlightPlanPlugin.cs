@@ -285,7 +285,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             FPStyles.Init();
             FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
-            GUI.skin = Skins.ConsoleSkin;
+            GUI.skin = FPStyles.skin;
 
             windowRect = GUILayout.Window(
                 GUIUtility.GetControlID(FocusType.Passive),

@@ -13,6 +13,28 @@ public class FPStyles
     private static bool guiLoaded = false;
 
 
+    public static GUISkin skin;
+
+    public static void BuildStyles()
+    {
+        if (guiLoaded)
+            return;
+
+        skin = CopySkin(Skins.ConsoleSkin);
+
+        BuildFrames();
+        BuildSliders();
+        BuildTabs();
+        BuildButtons();
+        BuildFoldout();
+        BuildToggle();
+        BuildProgressBar();
+        BuildIcons();
+        BuildLabels();
+
+        guiLoaded = true;
+    }
+
     public static GUIStyle error, warning, label, mid_text, console_text, phase_ok, phase_warning, phase_error;
     public static GUIStyle icons_label, title, slider_text;
 
@@ -329,7 +351,7 @@ public class FPStyles
     {
         if (!guiLoaded)
         {
-            GetStyles();
+            BuildStyles();
         }
     }
 
@@ -394,42 +416,6 @@ public class FPStyles
         copy.scrollView = new GUIStyle(source.scrollView);
 
         return copy;
-    }
-
-    public static GUISkin skin;
-
-    public static void GetStyles()
-    {
-        if (guiLoaded)
-            return;
-
-        skin = CopySkin(Skins.ConsoleSkin);
-
-        BuildFrames();
-        BuildSliders();
-
-        BuildTabs();
-
-        BuildButtons();
-        BuildFoldout();
-        BuildToggle();
-
-
-
-
-       
-
-
-
-
-
-
-
-        BuildProgressBar();
-        BuildIcons();
-        BuildLabels();
-
-        guiLoaded = true;
     }
 }
 
