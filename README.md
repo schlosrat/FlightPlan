@@ -133,6 +133,8 @@ Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circul
 Here we are approaching Pe in our Minmus Flyby with a Circularization burn planned to put us into a 60 degree inclined low circular orbit about Minmus. Perfect for picking a landing spot almost anywhere we may want to go. In this view you can also see the Maneuver Node Controller's GUI showing that our planned maneuver will place us in the orbit we want.
 ![Flight Plan: Match Planes with Minmus 13](https://i.imgur.com/OUeWhYu.png)
 
+## Older Examples
+The follwing images show more details illustrating Flight Plans fetures and capabilities. Althoguh the GUI has since been updated, these images still show relevant performance characteristics for the nodes you can generate.
 ### Burn Timing Detail (burn brackets effective point: Ap)
 ![Flight Plan: Circularize at Next Ap Burn Detail](https://i.imgur.com/pDkXeBM.png)
 
@@ -194,11 +196,20 @@ This mod is primarily meant as a direct aid to the player but can also be used a
 * **MatchVelocity(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to match velocity with the currently selected target.
 * **PlanetaryXfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* for a Hohmann Transfer to the currently selected target planet during the next available transfer window. *NOTE*: The supplied burnUT parameter presently has no effect.
 
-## Orbital Time Prognistication Capabilities
+## Orbital Time Prognistication Capabilities (KSP2's plus those available from Flight Plan)
+These methods can be accessed either directly (in the case of KSP2 native parameters) or by calling Flight Plan to get them. They are useful to determine the burnUT you may wish to use in a call to one of Flight Plans's maneuver node creation methods above.
 
-* Time_to_Ap
-* Time_to_Pe
-* 
+* Time_to_Ap - Basic KSP2 parameter available from the active vessel's Orbit object.
+* Time_to_Pe - Basic KSP2 parameter available from the active vessel's Orbit object.
+* Radius(UT) - Basic KSP2 parameter available from the active vessel's Orbit object. Use in conjunction with AN/DN time predictors to get the *cheapest* node (hgihest node).
+* **NextApoapsisTime(UT)**: Returns the time of the next Ap occuring *after* UT. Useful for finding an Ap further in the future
+* **NextPeriapsisTime(UT)**: Returns the time of the next Pe occuring *after* UT. Useful for finding a Pe further in the future
+* **NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT)**: Returns the time of the next closest approach *after* UT between the active vessel and the target specified.
+* TimeOfAscendingNodeEquatorial(UT): Returns the time of the next *Equatorial* AN *after* UT for the active vessel. This is the point where the active vessel's orbit moves North through the plane of the ecliptic for the parent body the vessel is in orbit about.
+* TimeOfDescendingNodeEquatorial(UT): Returns the time of the next *Equatorial* DN *after* UT for the active vessel. This is the point where the active vessel's orbit moves South through the plane of the ecliptic for the parent body the vessel is in orbit about.
+* TimeOfAscendingNode(currentTarget.Orbit, UT): Returns the time of the next *target relative* AN *after* UT for the active vessel. This is the point where the active vessel's orbit moves North through the plane of the target's orbit for targets in orbit about the same parent body the vessel is orbiting.
+* TimeOfDescendingNode(currentTarget.Orbit, UT): Returns the time of the next *target relative* DN *after* UT for the active vessel. This is the point where the active vessel's orbit moves South through the plane of the target's orbit for targets in orbit about the same parent body the vessel is orbiting.
+* NextTimeOfRadius(UT, Radius): This is the next time *after* UT at which the active vessel will have the radius specified. Returns -1 in the event that the specified radius is not possible given the current orbit.
 
 To use this mod from your mod you will need to do one of the following:
 
@@ -244,22 +255,18 @@ Bring in the FlightPlan namespace in the class you want to call it from, and add
 You can now call any of Node Manager's public methods directly and easily from your code. Here are some examples:
 
 ```cs
-    pass = FlightPlanPlugin.Instance.CircularizeAtAP(burnOffsetFactor) // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.CircularizeAtPe(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.CircularizeNow(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.SetNewPe(newPeR, burnOffsetFactor); // double, double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.SetNewAp(newApR, burnOffsetFactor); // double, double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.Ellipticize(newApR, newPeR, burnOffsetFactor); // double, double, double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.SetInclination(newIncDeg, burnOffsetFactor); // double, double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.MatchPlanesAtAN(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.MatchPlanesAtDN(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.HohmannTransfer(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.InterceptTgtAtUT(deltaUT, burnOffsetFactor); // double, double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.CourseCorrection(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.MoonReturn(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.MatchVelocityAtCA(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.MatchVelocityNow(burnOffsetFactor); // double (default = -0.5)
-    pass = FlightPlanPlugin.Instance.PlanetaryXfer(burnOffsetFactor); // double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.Circularize(burnUT, burnOffsetFactor) // double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.SetNewPe(burnUT, newPeR, burnOffsetFactor); // double, double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.SetNewAp(burnUT, newApR, burnOffsetFactor); // double, double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.Ellipticize(burnUT, newApR, newPeR, burnOffsetFactor); // double, double, double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.SetInclination(burnUT, newIncDeg, burnOffsetFactor); // double, double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.MatchPlanes(burnUT, burnOffsetFactor); // double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.HohmannTransfer(burnUT, burnOffsetFactor); // double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.InterceptTgt(burnUT, deltaUT, burnOffsetFactor); // double, double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.CourseCorrection(burnUT, burnOffsetFactor); // double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.MoonReturn(burnUT, burnOffsetFactor); // double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.MatchVelocity(burnUT, burnOffsetFactor); // double, double (default = -0.5)
+    pass = FlightPlanPlugin.Instance.PlanetaryXfer(burnUT, burnOffsetFactor); // double, double (default = -0.5)
 ```
 
 ### Step 4: Profit!
@@ -334,7 +341,7 @@ Somewhere in your mod you need to check to make sure Flight Plan is loaded befor
 This is where things get really different for you compared to what's needed to call Flight Plan methods using a hard dependency. For a soft dependency to work you're going to need to create a reflection calling method for each of the Flight Plan methods that you would like to call from your mod. Here's an example of one for calling Flight Plan's SetNewPe method which will pass it the new Pe you would like to have, and optionally a burn time offset. Note: Using a burn time time offset of -0.5 will cause the maneuver node to be centered on the nominal time for the burn (next Ap in this case).
 
 ```cs
-    private void SetNewPe(double newPeR, double burnOffsetFactor = -0.5)
+    private void SetNewPe(double burnUT, double newPeR, double burnOffsetFactor = -0.5)
     {
         if (FPLoaded)
         {
@@ -345,7 +352,7 @@ This is where things get really different for you compared to what's needed to c
             Logger.LogDebug($"Property name: {instanceProperty!.Name}");
             var methodInfo = instanceProperty!.PropertyType.GetMethod("SetNewPe");
             Logger.LogDebug($"Method name: {methodInfo!.Name}");
-            methodInfo!.Invoke(instanceProperty.GetValue(null), new object[] { newPeR, burnOffsetFactor });
+            methodInfo!.Invoke(instanceProperty.GetValue(null), new object[] { burnUT, newPeR, burnOffsetFactor });
         }
     }
 ```
