@@ -26,6 +26,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 1. *Optional*: Download and install **Maneuver Node Controller** to assist you with finetuning your maneuver nodes! (see link above). From the ManeuverNodeController-x.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\maneuver_node_controller`.
 
 ## Features
+![Flight Plan Main GUI](https://i.imgur.com/N4OKm4f.png)
 ### Easy Celestial Target Selection
 * Menu for easy selection of *Celestial Targets*. Planets and their moons are graphically organized with moons indented below the planet they orbit. This capability augments the game's built-in target selection for easier selection of distant celestial bodies.
 ### Burn Time Option Selection
@@ -34,7 +35,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * **Circularize**
 * **New Pe** (user specified value - km)
 * **New Ap** (user specified value - km)
-* **New Pe & Ap** (for user specified values - km)
+* **New Pe & Ap** (uses inputs for **New Pe** and **New Ap** above changing both in one maneuver)
 * **New Inclination** (user specified value - degrees)
 * **New LAN** (user specified value - degrees)
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
