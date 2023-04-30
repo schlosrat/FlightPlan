@@ -756,7 +756,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     void selectOptionUI()
     {
         GUILayout.BeginHorizontal();
-        UI_Tools.Label("Select Option ");
+        UI_Tools.Label("Burn Time Option ");
         if (UI_Tools.SmallButton("Cancel"))
         {
             selectingOption = false;
