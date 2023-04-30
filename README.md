@@ -56,6 +56,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 
 ## UI Screens
 The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time Offset From Now**
+![Flight Plan GUI Examples](https://i.imgur.com/sJKFA12.png)
 
 In addition to the basic UI screen above the UI will automatically asjust to offer capabilities relevant to the current orbit and selected target.
 ### Selecting a Celestial Target with the Drop Down Menu
