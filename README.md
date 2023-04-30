@@ -126,7 +126,7 @@ Here we can see K2-D2 performing a flawless Course Correction burn to get us bac
 Here we can see that we've arrived inside the Minmus SOI, and are on track for a nearly equatorial flyby with a nice low Pe in a prograde orbit. What if we'd like to have an inclined orbit when we get to Minmus? Easy! Use Flight Plan to set up a a New Inclination at a burn time 30 seconds from now (this offset ensures we'll have sufficient time to point in the direction we need beofre the start of the burn).
 ![Flight Plan: Match Planes with Minmus 11](https://i.imgur.com/TwGmGpb.png)
 
-Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circularization burn planned for the periapsis of the Minmus encoutner
+Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circularization burn planned for the periapsis of the Minmus encoutner.
 ![Flight Plan: Match Planes with Minmus 12](https://i.imgur.com/mAkr1MG.png)
 
 Here we are approaching Pe in our Minmus Flyby with a Circularization burn planned to put us into a 60 degree inclined low circular orbit about Minmus. Perfect for picking a landing spot almost anywhere we may want to go.
