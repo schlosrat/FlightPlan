@@ -782,7 +782,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void OptionSelectionGUI()
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Option : ");
+        GUILayout.Label("Burn : ");
 
         if (UI_Tools.SmallButton(selectedOption))
             selectingOption = true;
