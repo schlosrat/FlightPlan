@@ -32,29 +32,31 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 ### Ownship Maneuvers
 * **Circularize**
-* **New Pe** (user specified value)
-* **New Ap** (user specified value)
-* **New Pe & Ap** (for user specified values)
-* **New Inclination** (user specified value)
-* **New LAN** (user specified value)
+* **New Pe** (user specified value - km)
+* **New Ap** (user specified value - km)
+* **New Pe & Ap** (for user specified values - km)
+* **New Inclination** (user specified value - degrees)
+* **New LAN** (user specified value - degrees)
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
 * **Course Correction** (requires being on an intercept trajectory)
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 ### Moon Specific Maneuvers (only available when in orbit about a moon)
-* **Moon Return** (user specified target Pe for arrival back at the parent planet)
+* **Moon Return** (user specified target Pe (km) for arrival back at the parent planet)
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
 * Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
 * Failures are shown in **Red** indicating no node has been generated with some clue as to why.
 ### Game Input Enable/Disable Status
-* To prevent the things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your time warp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full functionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
+* To prevent things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your time warp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full functionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
 ### Integration with K2-D2, v0.8.1+
 * *If* K2-D2 is installed, then a K2D2 Icon button will be presented in the lower right part of the GUI whenever there is an executable maneuver node. If the version of K2-D2 is 0.8.0 or *earlier*, then pressing Flight Plan's K2-D2 button will bring up the K2-D2 GUI to assist with the precision execution of the planned maneuver. If K2-D2 0.8.1 or *later* is installed, then pressing the K2-D2 button will cause K2-D2 to **execute** the next maneuver node - this doesn't bring up the K2-D2 GUI, but if you have it up you'll be able to watch it as it executes the node.
 ### Integration with Maneuver Node Controller, v0.8.3+
 * *If* Maneuver Node Controller (v0.8.3 or later) is installed then Flight Plan will present an MNC Icon button in the lower right corner of the GUI (to the right of the **Make Node** button, and left of the K2D2 button if present). Pressing that button will bring up the Maneuver Node Controller GUI. *If* the *Launch Maneuver Node Controller* configuration setting is Enabled, then when you activate an *experimental* node creation function the Maneuver Node Controller mod will automatically be brought up if it is not already up. This can make it easier to evaluate and adjust nodes constructed using experimental functions (those listed under Planned Improvement below)
 
 ## UI Screens
+The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time Offset From Now**
+
 In addition to the basic UI screen above the UI will automatically asjust to offer capabilities relevant to the current orbit and selected target.
 ### Selecting a Celestial Target with the Drop Down Menu
 ![Flight Plan Target Selection GUI](https://i.imgur.com/NyhCARt.png)
