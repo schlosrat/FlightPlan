@@ -31,7 +31,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * Menu for easy selection of *Celestial Targets*. Planets and their moons are graphically organized with moons indented below the planet they orbit. This capability augments the game's built-in target selection for easier selection of distant celestial bodies.
 ### Burn Time Option Selection
 ![Flight Plan Burn Time Option Menu](https://i.imgur.com/bYgeCMo.png)
-* Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
+* Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 ### Ownship Maneuvers
 ![Flight Plan Main GUI](https://i.imgur.com/N4OKm4f.png)
 * **Circularize**
