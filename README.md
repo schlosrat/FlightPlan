@@ -90,20 +90,46 @@ Using the configuration parameters you can change a variety of things such as ho
 
 ## Take a Trip to Minmus
 ### Step 1: Match Planes
+Here we can see a plane change maeuver has been planned and is ready to execute.
 ![Flight Plan: Match Planes with Minmus 1](https://i.imgur.com/1Se5ET3.png)
+
+Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're execuring the planned maneuver, and K2-D2 is reporting its status indicating it's turning the vessel to point in the right direction for the planned burn.
 ![Flight Plan: Match Planes with Minmus 2](https://i.imgur.com/eHeOimz.png)
+
+Here we can see K2-D2's status indicates we're warping to the burn. The Flight Plan status is unchanged.
 ![Flight Plan: Match Planes with Minmus 3](https://i.imgur.com/j1kp06a.png)
+
+Here we can see K2-D2's status indicates we're executing the burn. The Flight Plan status is unchanged.
 ![Flight Plan: Match Planes with Minmus 4](https://i.imgur.com/SmpwCSx.png)
+
+Here we can see the plane change burn is done, the old node has been deleted, and we're now in a coplanar orbit with the target: Minums.
 ![Flight Plan: Match Planes with Minmus 5](https://i.imgur.com/qeKaGaS.png)
 ### Step 2: Hohmann Transfer
+Now that we're in a coplanar orbit with our target we're ready to plan a Hohmann Transfer. Note that Flight Plan generated Hohmann Transfer maneuvers are not always spot on but will get you very close. For this reason Flight Plan will bring up the Maneuver Node Controller mod if it's installed any time it produces an Hohmann Transfer. You may need to make minor adjustments to the prograde burn component or the node time, but should find that it's easy to get the transfer orbit you need with only a few clicks and no need to manually tweak the node. This example produced a good initial orbit that only reqired a few m/s more prograde delta-v and a slightly earlier burn time to get the result shown below.
 ![Flight Plan: Match Planes with Minmus 6](https://i.imgur.com/pFHp7Du.png)
+
+Here we can see K2-D2 has been commanded to execute the node and we're warping to the starting point for the burn
 ![Flight Plan: Match Planes with Minmus 7](https://i.imgur.com/sb9e2cu.png)
+
+Here we can see K2-D2 executing the transfer burn
 ![Flight Plan: Match Planes with Minmus 8](https://i.imgur.com/ErbYeRw.png)
+
+Sometimes in the game, as in life, things don't go quite as planned. What if you overshot the planned burn slightly as shown below? This can easily happen when executing a burn manually, and may also happen in some isolated cases when executing an automated burn. 
 ![Flight Plan: Match Planes with Minmus 8a](https://i.imgur.com/dHYzrHN.png)
+
+Here we can see a Course Correction burn has been planned. Like the Hohmann Transfer option, this option will also bring up the Maneuver Node Controller mod so you can fine tune things to make sure you've got the exact node you want. In this case very small prograde adjustments were made to get a good Pe at the Minmus flyby encounter.
 ![Flight Plan: Match Planes with Minmus 9](https://i.imgur.com/rsZUbjG.png)
+
+Here we can see K2-D2 performing a flawless Course Correction burn to get us back on track and headed for the encounter we want.
 ![Flight Plan: Match Planes with Minmus 10](https://i.imgur.com/EKoN3BR.png)
+
+Here we can see that we've arrived inside the Minmus SOI, and are on track for a nearly equatorial flyby with a nice low Pe in a prograde orbit. What if we'd like to have an inclined orbit when we get to Minmus? Easy! Use Flight Plan to set up a a New Inclination at a burn time 30 seconds from now (this offset ensures we'll have sufficient time to point in the direction we need beofre the start of the burn).
 ![Flight Plan: Match Planes with Minmus 11](https://i.imgur.com/TwGmGpb.png)
+
+Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circularization burn planned for the periapsis of the Minmus encoutner
 ![Flight Plan: Match Planes with Minmus 12](https://i.imgur.com/mAkr1MG.png)
+
+Here we are approaching Pe in our Minmus Flyby with a Circularization burn planned to put us into a 60 degree inclined low circular orbit about Minmus. Perfect for picking a landing spot almost anywhere we may want to go.
 ![Flight Plan: Match Planes with Minmus 13](https://i.imgur.com/OUeWhYu.png)
 
 ### Burn Timing Detail (burn brackets effective point: Ap)
