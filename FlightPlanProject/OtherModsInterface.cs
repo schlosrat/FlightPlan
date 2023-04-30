@@ -54,7 +54,7 @@ public class OtherModsInterface
             Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
 
             // Get MNC buton icon
-            mnc_button_tex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/mnc_icon.png");
+            mnc_button_tex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/mnc_icon_white_50.png");
             mnc_button_tex_con = new GUIContent(mnc_button_tex, "Launch Maneuver Node Controller");
 
             // Reflections method to attempt the same thing more cleanly
