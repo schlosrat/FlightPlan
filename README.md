@@ -55,18 +55,21 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * *If* Maneuver Node Controller (v0.8.3 or later) is installed then Flight Plan will present an MNC Icon button in the lower right corner of the GUI (to the right of the **Make Node** button, and left of the K2D2 button if present). Pressing that button will bring up the Maneuver Node Controller GUI. *If* the *Launch Maneuver Node Controller* configuration setting is Enabled, then when you activate an *experimental* node creation function the Maneuver Node Controller mod will automatically be brought up if it is not already up. This can make it easier to evaluate and adjust nodes constructed using experimental functions (those listed under Planned Improvement below)
 
 ## UI Screens
-The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time From Now**. Similarly, selecting **Match Planes** will give Burn Time options for *at the cheapest AN/DN w/Target*, *at the nearest AN/DN w/Target*, *at the next AN w/Target*, and *at the next DN w/Target*.
+The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time From Now**.
+
 ![Flight Plan GUI Examples](https://i.imgur.com/sJKFA12.png)
+
+Similarly, selecting **Match Planes** will give Burn Time options for *at the cheapest AN/DN w/Target*, *at the nearest AN/DN w/Target*, *at the next AN w/Target*, and *at the next DN w/Target*. NOTE: in the Match Planes example above the Make Node button has been pressed and Flight Plan is showing a status indicating the node is ready. In this example, with K2-D2 installed, the K2-D2 Astromech Icon is displayed in the lower right indicating that K2-D2 is ready to help you fly the node.
 
 In addition to the basic UI screens above, the UI will automatically adjust to offer capabilities relevant to the current orbit and selected target. Some options such as **Interplanetary Transfer** (above far right example) are only available if the *Experimental* option has been selected in the Flight Plan configuration options menu.
 
 ## Configuration Parameters
-![Flight Plan Configuration Parameters](https://i.imgur.com/BcJsRLP.png)
+![Flight Plan Configuration Parameters](https://i.imgur.com/wltT7P0.png)
 
-This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press Alt + M to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
+This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press **Alt + M** to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
 Using the configuration parameters you can change a variety of things such as how long a status message sticks around before it start to fade, and also how long it will take to fade.
 
-**NOTE:** The following settings are dyanically managed and may be usted by the user while the game is running. All others will require exiting and restart to take effect.
+**NOTE:** The following settings are dynamically managed and may be usted by the user while the game is running. All others will require exiting and restart to take effect.
 * Experimental Features: Enable/Disable
 * Launch Maneuver Node Controller: Enable/Disable
 * Status Fade Time: Seconds
