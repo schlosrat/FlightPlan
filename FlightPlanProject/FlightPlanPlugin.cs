@@ -904,7 +904,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         float transparency = 1;
         if (UT > statusTime) transparency = (float)MuUtils.Clamp(1 - (UT - statusTime) / statusFadeTime.Value, 0, 1);
 
-        var status_style = FPStyles.label;
+        var status_style = FPStyles.status;
         //if (status == Status.VIRGIN)
         //    status_style = FPStyles.label;
         if (status == Status.OK)
