@@ -119,7 +119,7 @@ Here we can see K2-D2 executing the transfer burn.
 
 **Step 3: Course Correction**
 Sometimes in the game, as in life, things don't go quite as planned. What if you overshot the planned burn slightly as shown below? This can easily happen when executing a burn manually, and may also happen in some isolated cases when executing an automated burn. 
-![Flight Plan: Match Planes with Minmus 8a](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-8a.png)
+![Flight Plan: Match Planes with Minmus 8a](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-8a%20-%20overshoot.png)
 
 Here we can see a Course Correction burn has been planned. Like the Hohmann Transfer option, this option will also bring up the Maneuver Node Controller mod so you can fine tune things to make sure you've got the exact node you want. In this case very small prograde adjustments were made to get a good Pe at the Minmus flyby encounter.
 ![Flight Plan: Match Planes with Minmus 9](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-9.png)
