@@ -21,7 +21,7 @@ public class SettingsFile
         Load();
     }
 
-    public ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("K2D2.SettingsFile");
+    public ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FP.SettingsFile");
 
     protected void Load()
     {
