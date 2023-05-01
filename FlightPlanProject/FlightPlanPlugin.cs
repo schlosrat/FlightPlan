@@ -13,7 +13,6 @@ using NodeManager;
 using SpaceWarp;
 using SpaceWarp.API.Assets;
 using SpaceWarp.API.Mods;
-using SpaceWarp.API.UI;
 using SpaceWarp.API.UI.Appbar;
 using System.Collections;
 using System.Reflection;
@@ -67,7 +66,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<bool> autoLaunchMNC;
 
     // Button bools
-    private bool circAp, circPe, circularize, newPe, newAp, newPeAp, newInc, newLAN, matchPlane, matchPlanesD, hohmannXfer, interceptTgt, courseCorrection, moonReturn, matchVelocity, matchVNow, planetaryXfer;
+    private bool circularize, newPe, newAp, newPeAp, newInc, newLAN; // Ownship maneuvers (activity toggels)
+    private bool matchPlane, hohmannXfer, interceptTgt, courseCorrection, matchVelocity; // Maneuvers relative to target (activity toggels)
+    private bool moonReturn, planetaryXfer; // Specialized Moon/Planet relative maneuvers (activity toggels)
 
     // Dictionaries used for toggle button management to function like radio buttons. If no "radio buttons", then this can go.
     private Dictionary<string, bool> _toggles = new();
@@ -130,9 +131,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private double targetApR;
     private double targetMRPeR;
 
-
-
-
     private GameInstance game;
 
     // App bar button(s)
@@ -149,9 +147,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     //public ManualLogSource logger;
     public new static ManualLogSource Logger { get; set; }
-
-
-
 
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
@@ -188,15 +183,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //StateChanges.LaunchpadEntered += message => GUIenabled = false;
         //StateChanges.RunwayEntered += message => GUIenabled = false;
 
-        // Setup the list of input field names (most are the same as the entry string text displayed in the GUI window)
-        //inputFields.Add("New Pe");
-        //inputFields.Add("New Ap");
-        //inputFields.Add("New Pe & Ap");
-        //inputFields.Add("New Ap & Pe"); // kludgy name for the second input in a two input line
-        //inputFields.Add("New Inclination");
-        //inputFields.Add("Intercept at Time");
-        //inputFields.Add("Select Target");
-
         Logger.LogInfo("Loaded");
         if (loaded)
         {
@@ -205,7 +191,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         loaded = true;
 
         // Initialize the toggle button dictionaries
-        _toggles = new Dictionary<string, bool>(_initialToggles);
+        _toggles         = new Dictionary<string, bool>(_initialToggles);
         _previousToggles = new Dictionary<string, bool>(_initialToggles);
 
         gameObject.hideFlags = HideFlags.HideAndDontSave;
@@ -247,7 +233,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     void Update()
     {
-        // Logger = base.Logger;
         if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.P))
         {
             ToggleButton(!interfaceEnabled);
@@ -304,10 +289,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             // check editor focus and unset Input if needed
             UI_Fields.CheckEditor();
         }
-        else
-        {
-
-        }
     }
 
     private ManeuverNodeData getCurrentNode()
@@ -327,6 +308,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             CloseWindow();
 
         GUI.Label(new Rect(9, 2, 29, 29), FPStyles.icon, FPStyles.icons_label);
+        
         if (selectingBody)
         {
             selectBodyUI();
@@ -358,15 +340,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         options = new List<string> { "none" };
 
         DrawSectionHeader("Ownship Maneuvers");
-
-        // UI_Tools.Label("Circularize");
-        // GUILayout.BeginHorizontal();
-        //if (orbit.eccentricity < 1)
-        //{
-        //    DrawToggleButton("at Ap", ref circAp);
-        //}
-        // DrawToggleButton("at Pe", ref circPe);
-        
         DrawToggleButton("Circularize", ref circularize);
         // GUILayout.EndHorizontal();
 
@@ -383,7 +356,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         FPSettings.target_inc_deg = DrawToggleButtonWithTextField("New Inclination", ref newInc, FPSettings.target_inc_deg, "°");
 
-        FPSettings.target_lan_deg = DrawToggleButtonWithTextField("New LAN", ref newLAN, FPSettings.target_lan_deg, "°");
+        if (experimental.Value)
+        {
+            FPSettings.target_lan_deg = DrawToggleButtonWithTextField("New LAN", ref newLAN, FPSettings.target_lan_deg, "°");
+        }
 
         if (currentTarget != null)
         {
@@ -394,16 +370,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 {
                     DrawSectionHeader("Maneuvers Relative to Target");
                     DrawToggleButton("Match Planes", ref matchPlane);
-                    // DrawButton("Match Planes at DN", ref matchPlanesD);
 
                     DrawToggleButton("Hohmann Transfer", ref hohmannXfer);
+
                     DrawToggleButton("Course Correction", ref courseCorrection);
 
                     if (experimental.Value)
                     {
                         FPSettings.interceptT = DrawToggleButtonWithTextField("Intercept", ref interceptTgt, FPSettings.interceptT, "s");
+
                         DrawToggleButton("Match Velocity", ref matchVelocity);
-                        // DrawButton("Match Velocity Now", ref matchVNow);
                     }
                 }
             }
@@ -423,7 +399,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                         }
                     }
                 }
-
             }
         }
 
@@ -435,7 +410,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 DrawSectionHeader("Moon Specific Maneuvers");
 
                 var parentPlanet = referenceBody.Orbit.referenceBody;
-                // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
                 FPSettings.mr_altitude_km = DrawToggleButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
                 targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
             }
@@ -684,8 +658,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         UI_Fields.GameInputState = true;
     }
-
-    
 
     void selectBodyUI()
     {
@@ -1214,12 +1186,28 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name} {selectedOption}");
         // Debug.Log("Hohmann Transfer");
         double burnUTout;
+        Vector3d deltaV;
 
         status = Status.WARNING;
         statusText = $"Ready to Transfer to {currentTarget.Name}?";
         statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        bool simpleTransfer = true;
+        bool intercept_only = true;
+        if (simpleTransfer)
+        {
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        }
+        else
+        {
+            var anExists = orbit.AscendingNodeExists(currentTarget.Orbit as PatchedConicsOrbit);
+            var dnExists = orbit.DescendingNodeExists(currentTarget.Orbit as PatchedConicsOrbit);
+            double anTime = orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            double dnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            // burnUT = timeSelector.ComputeManeuverTime(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout, intercept_only: intercept_only, fixed_ut: false);
+        }
+
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
@@ -1391,7 +1379,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         var orbit = activeVessel.Orbit;
 
         Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name} {selectedOption}");
-        double burnUTout;
+        double burnUTout, burnUT2;
         bool syncPhaseAngle = true;
 
         status = Status.WARNING;
@@ -1399,6 +1387,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         statusTime = UT + statusPersistence.Value;
 
         var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUTout);
+        var deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, out burnUT2);
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
@@ -1418,7 +1407,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // for comparison to the _previousToggles dictionary.
     private void setOptionsList()
     {
-        if (circularize || newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannXfer || interceptTgt || courseCorrection || moonReturn || matchVelocity || planetaryXfer)
+        if ( circularize || newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
         {
             if (options.Contains("none"))
                 options.Remove("none");
@@ -1481,7 +1470,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (matchPlane)
             {
                 _toggles["MatchPlane"] = true;
-                options.Add(TimeReference["REL_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                options.Add(TimeReference["REL_HIGHEST_AD"]); //"At Cheapest AN/DN With Target"
                 options.Add(TimeReference["REL_NEAREST_AD"]); //"At Nearest AN/DN With Target"
                 options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
                 options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
@@ -1553,7 +1542,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public void MakeNode()
     {
-        if (circAp || circPe || circularize|| newPe || newAp || newPeAp || newInc || matchPlane || matchPlanesD || hohmannXfer || interceptTgt || courseCorrection || moonReturn || matchVelocity || matchVNow || planetaryXfer )
+        if (circularize|| newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
         {
             bool pass;
 
