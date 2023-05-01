@@ -35,7 +35,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 ![Flight Plan Burn Time Option Menu](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-GUI-9.png)
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 ### Ownship Maneuvers
-![Flight Plan Main GUI](https://i.imgur.com/N4OKm4f.png)
+![Flight Plan Main GUI](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-GUI-1.png)
 * **Circularize**
 * **New Pe** (user specified value - km)
 * **New Ap** (user specified value - km)
@@ -62,14 +62,14 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 ## UI Screens
 The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time From Now**.
 
-![Flight Plan GUI Examples](https://i.imgur.com/sJKFA12.png)
+![Flight Plan GUI Examples](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-GUIs.png)
 
 Similarly, selecting **Match Planes** will give Burn Time options for *at the cheapest AN/DN w/Target*, *at the nearest AN/DN w/Target*, *at the next AN w/Target*, and *at the next DN w/Target*. NOTE: in the Match Planes example above the Make Node button has been pressed and Flight Plan is showing a status indicating the node is ready. In this example, with K2-D2 installed, the K2-D2 Astromech Icon is displayed in the lower right indicating that K2-D2 is ready to help you fly the node.
 
 In addition to the basic UI screens above, the UI will automatically adjust to offer capabilities relevant to the current orbit and selected target. Some options such as **Interplanetary Transfer** (above far right example) are only available if the *Experimental Features* option has been selected in the Flight Plan configuration options menu.
 
 ## Configuration Parameters
-![Flight Plan Configuration Parameters](https://i.imgur.com/wltT7P0.png)
+![Flight Plan Configuration Parameters](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Config_Menu.png)
 
 This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press **Alt + M** to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
 Using the configuration parameters you can change a variety of things such as how long a status message sticks around before it start to fade, and also how long it will take to fade.
@@ -81,7 +81,7 @@ Using the configuration parameters you can change a variety of things such as ho
 * Status Hold Time: Seconds
 
 ## Planned Improvement / Experimental Functions
-![Flight Plan Future GUI](https://i.imgur.com/zPLPAsx.png)
+![Flight Plan Future GUI](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-GUI-4.png)
 
 **Work In Progress** developmental features may be enabled by switching on the *Experimental Features* in the mod's configuration screen. You do not need to restart the game for this setting to take effect, and it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the *Experimental Features* setting.
 ### Maneuvers Relative to the Selected Target (only available if a target is selected)
