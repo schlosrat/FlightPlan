@@ -1,5 +1,5 @@
 # Flight Plan
-![Flight Plan GUI](https://i.imgur.com/6uuhfJ6.png)
+![Flight Plan Banner Image](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-banner-2.png)
 
 Plan your (Space) Flight! Fly your Plan! Handy tools to help you set up maneuver nodes that will get you where you want to be.
 Making spaceflight planning easier for Kerbal Space Program 2 one mission at a time.
@@ -29,10 +29,10 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 
 ## Features
 ### Easy Celestial Target Selection
-![Flight Plan Celestial Target Selection Menu](https://i.imgur.com/7b7Muph.png)
+![Flight Plan Celestial Target Selection Menu](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-GUI-8.png)
 * Menu for easy selection of *Celestial Targets*. Planets and their moons are graphically organized with moons indented below the planet they orbit. This capability augments the game's built-in target selection for easier selection of distant celestial bodies.
 ### Burn Time Option Selection
-![Flight Plan Burn Time Option Menu](https://i.imgur.com/bYgeCMo.png)
+![Flight Plan Burn Time Option Menu](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-GUI-9.png)
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 ### Ownship Maneuvers
 ![Flight Plan Main GUI](https://i.imgur.com/N4OKm4f.png)
@@ -93,7 +93,7 @@ Using the configuration parameters you can change a variety of things such as ho
 ## Example: Take a Trip to Minmus
 ### Step 1: Match Planes
 Here we're stating out in a nicely equatorial Low Kerbin Orbit. As we want to go to Minmus, the first step is to get into a new circular orbit that's co-planar with the target. We can see that the necessary plane change maneuver has been planned and is ready to execute.
-![Flight Plan: Match Planes with Minmus 1](https://i.imgur.com/1Se5ET3.png)
+![Flight Plan: Match Planes with Minmus 1](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-1.png)
 
 Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're executing the planned maneuver, and K2-D2 is reporting its status indicating the vessel is turning to point in the right direction for the planned burn.
 ![Flight Plan: Match Planes with Minmus 2](https://i.imgur.com/eHeOimz.png)
