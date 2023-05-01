@@ -121,14 +121,14 @@ Here we can see K2-D2 executing the transfer burn.
 Sometimes in the game, as in life, things don't go quite as planned. What if you overshot the planned burn slightly as shown below? This can easily happen when executing a burn manually, and may also happen in some isolated cases when executing an automated burn. 
 ![Flight Plan: Match Planes with Minmus 8a](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-8a%20-%20overshoot.png)
 
-Here we can see a Course Correction burn has been planned. Like the Hohmann Transfer option, this option will also bring up the Maneuver Node Controller mod so you can fine tune things to make sure you've got the exact node you want. In this case very small prograde adjustments were made to get a good Pe at the Minmus flyby encounter.
+Here we can see a Course Correction burn has been planned. Like the Hohmann Transfer option, this option will also bring up the Maneuver Node Controller mod so you can finetune things to make sure you've got the exact node you want. In this case very small prograde adjustments were made to get a good Pe at the Minmus flyby encounter.
 ![Flight Plan: Match Planes with Minmus 9](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-9.png)
 
 Here we can see K2-D2 performing a flawless Course Correction burn to get us back on track and headed for the encounter we want.
 ![Flight Plan: Match Planes with Minmus 10](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-10.png)
 
 **Step 4: Arrival at Minmus**
-Here we can see that we've arrived inside the Minmus SOI, and are on track for a nearly equatorial flyby with a nice low Pe in a prograde orbit. What if we'd like to have an inclined orbit when we get to Minmus? Easy! Use Flight Plan to set up a a New Inclination at a burn time 30 seconds from now (this offset ensures we'll have sufficient time to point in the direction we need before the start of the burn).
+Here we can see that we've arrived inside the Minmus SOI and are on track for a nearly equatorial flyby with a nice low Pe in a prograde orbit. What if we'd like to have an inclined orbit when we get to Minmus? Easy! Use Flight Plan to set up a a New Inclination at a burn time 30 seconds from now (this offset ensures we'll have sufficient time to point in the direction we need before the start of the burn).
 ![Flight Plan: Match Planes with Minmus 11](https://github.com/schlosrat/FlightPlan/blob/master/DocImages/FP-Action-11.png)
 
 **Step 5: Capture!** 
