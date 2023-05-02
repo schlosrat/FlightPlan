@@ -32,7 +32,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public const string ModName = MyPluginInfo.PLUGIN_NAME;
     public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
-    // Control click through to the game
+    // Control game input state while user has clicked into a TextField.
     //public List<String> inputFields = new List<String>();
 
     // GUI stuff
@@ -173,15 +173,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // StateChanges.Map3DViewLeft += message => GUIenabled = false;
         // StateChanges.VehicleAssemblyBuilderEntered += message => GUIenabled = false;
         // StateChanges.KerbalSpaceCenterStateEntered += message => GUIenabled = false;
-        //StateChanges.BaseAssemblyEditorEntered += message => GUIenabled = false;
-        //StateChanges.MainMenuStateEntered += message => GUIenabled = false;
-        //StateChanges.ColonyViewEntered += message => GUIenabled = false;
+        // StateChanges.BaseAssemblyEditorEntered += message => GUIenabled = false;
+        // StateChanges.MainMenuStateEntered += message => GUIenabled = false;
+        // StateChanges.ColonyViewEntered += message => GUIenabled = false;
         // StateChanges.TrainingCenterEntered += message => GUIenabled = false;
-        //StateChanges.MissionControlEntered += message => GUIenabled = false;
+        // StateChanges.MissionControlEntered += message => GUIenabled = false;
         // StateChanges.TrackingStationEntered += message => GUIenabled = false;
-        //StateChanges.ResearchAndDevelopmentEntered += message => GUIenabled = false;
-        //StateChanges.LaunchpadEntered += message => GUIenabled = false;
-        //StateChanges.RunwayEntered += message => GUIenabled = false;
+        // StateChanges.ResearchAndDevelopmentEntered += message => GUIenabled = false;
+        // StateChanges.LaunchpadEntered += message => GUIenabled = false;
+        // StateChanges.RunwayEntered += message => GUIenabled = false;
 
         Logger.LogInfo("Loaded");
         if (loaded)
@@ -199,7 +199,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Appbar.RegisterAppButton(
             "Flight Plan",
-            "BTN-FlightPlan",
+            ToolbarFlightButtonID,
             AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/icon.png"),
             ToggleButton);
 
@@ -223,7 +223,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void ToggleButton(bool toggle)
     {
         interfaceEnabled = toggle;
-        GameObject.Find("BTN-FlightPlan")?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(toggle);
+        GameObject.Find(ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(interfaceEnabled);
     }
 
     void Awake()
@@ -236,7 +236,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.P))
         {
             ToggleButton(!interfaceEnabled);
-            Logger.LogInfo("UI toggled with hotkey");
+            Logger.LogInfo("Update: UI toggled with hotkey");
         }
     }
 
@@ -418,11 +418,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
         if (selectedOption == TimeReference["ALTITUDE"])
         {
-            FPSettings.altitude_km = DrawLabelithTextField("Maneuver Altitude", FPSettings.altitude_km, "km");
+            FPSettings.altitude_km = DrawLabelWithTextField("Maneuver Altitude", FPSettings.altitude_km, "km");
         }
         if (selectedOption == TimeReference["X_FROM_NOW"])
         {
-            FPSettings.timeOffset = DrawLabelithTextField("Time From Now", FPSettings.timeOffset, "s");
+            FPSettings.timeOffset = DrawLabelWithTextField("Time From Now", FPSettings.timeOffset, "s");
         }
 
         // Using the selected activity configure the valid options list
@@ -823,7 +823,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         button = UI_Tools.ToggleButton(button, runString, stopString);
     }
 
-    private double DrawLabelithTextField(string entryName, double value, string unit = "")
+    private double DrawLabelWithTextField(string entryName, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Label(entryName);
