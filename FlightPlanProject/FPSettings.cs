@@ -33,7 +33,7 @@ public class FPSettings
 
     public static double ap_altitude_km
     {
-        get => s_settings_file.GetDouble("ap_altitude_km", 100);
+        get => s_settings_file.GetDouble("ap_altitude_km", 200);
         set { s_settings_file.SetDouble("ap_altitude_km", value); }
     }
 
@@ -49,6 +49,12 @@ public class FPSettings
         set { s_settings_file.SetDouble("mr_altitude_km", value); }
     }
 
+    public static double target_sma_km
+    {
+        get => s_settings_file.GetDouble("target_sma_km", 100);
+        set { s_settings_file.SetDouble("target_sma_km", value); }
+    }
+
     public static double target_inc_deg
     {
         get => s_settings_file.GetDouble("target_inc_deg", 0);
@@ -61,6 +67,12 @@ public class FPSettings
         set { s_settings_file.SetDouble("target_lan_deg", value); }
     }
 
+    public static double target_node_long_deg
+    {
+        get => s_settings_file.GetDouble("target_node_long_deg", 0);
+        set { s_settings_file.SetDouble("target_node_long_deg", value); }
+    }
+    
     public static double interceptT
     {
         get => s_settings_file.GetDouble("interceptT", 0);
