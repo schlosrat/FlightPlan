@@ -66,7 +66,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private ConfigEntry<bool> autoLaunchMNC;
 
     // Button bools
-    private bool circularize, newPe, newAp, newPeAp, newInc, newLAN; // Ownship maneuvers (activity toggels)
+    private bool circularize, newPe, newAp, newPeAp, newInc, newLAN, newNodeLon, newSMA; // Ownship maneuvers (activity toggels)
     private bool matchPlane, hohmannXfer, interceptTgt, courseCorrection, matchVelocity; // Maneuvers relative to target (activity toggels)
     private bool moonReturn, planetaryXfer; // Specialized Moon/Planet relative maneuvers (activity toggels)
 
@@ -81,6 +81,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         { "Elipticize",       false },
         { "SetNewInc",        false },
         { "SetNewLAN",        false },
+        { "SetNodeLongitude", false },
+        { "SetNewSMA",        false },
         { "MatchPlane",       false },
         { "MatchVelocity",    false },
         { "CourseCorrection", false },
@@ -129,6 +131,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // Radius Computed from Inputs
     private double targetPeR;
     private double targetApR;
+    private double targetSMA;
     private double targetMRPeR;
 
     private GameInstance game;
@@ -349,7 +352,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (orbit.eccentricity < 1)
         {
             FPSettings.ap_altitude_km = DrawToggleButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altitude_km, "km");
-            targetApR = FPSettings.ap_altitude_km*1000 + referenceBody.radius;
+            targetApR = FPSettings.ap_altitude_km * 1000 + referenceBody.radius;
 
             DrawToggleButton("New Pe & Ap", ref newPeAp);
         }
@@ -359,7 +362,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (experimental.Value)
         {
             FPSettings.target_lan_deg = DrawToggleButtonWithTextField("New LAN", ref newLAN, FPSettings.target_lan_deg, "°");
+
+            // FPSettings.target_node_long_deg = DrawToggleButtonWithTextField("New Node Longitude", ref newNodeLon, FPSettings.target_node_long_deg, "°");
         }
+
+        FPSettings.target_sma_km = DrawToggleButtonWithTextField("New SMA", ref newSMA, FPSettings.target_sma_km, "km");
+        targetSMA = FPSettings.target_sma_km * 1000 + referenceBody.radius;
 
         if (currentTarget != null)
         {
@@ -613,6 +621,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             newInc = value;
         if (key == "SetNewLAN")
             newLAN = value;
+        if (key == "SetNodeLongitude")
+            newNodeLon = value;
+        if (key == "SetSMA")
+            newSMA = value;
         if (key == "MatchPlane")
             matchPlane = value;
         if (key == "MatchVelocity")
@@ -638,6 +650,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         newPeAp = false;
         newInc = false;
         newLAN = false;
+        newNodeLon = false;
+        newSMA = false;
         matchPlane = false;
         matchVelocity = false;
         courseCorrection = false;
@@ -769,14 +783,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     int spacingAfterHeader = 5;
     int spacingAfterEntry = 5;
 
-    private void DrawSectionHeader(string sectionName, string value = "", GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
+    private void DrawSectionHeader(string sectionName, string value = "", float labelWidth = -1, GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
         if (valueStyle == null) valueStyle = FPStyles.label;
         GUILayout.BeginHorizontal();
         // Don't need popout buttons for ROC
         // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);
 
-        GUILayout.Label($"<b>{sectionName}</b> ");
+        if (labelWidth < 0)
+            GUILayout.Label($"<b>{sectionName}</b> ");
+        else
+            GUILayout.Label($"<b>{sectionName}</b> ", GUILayout.Width(labelWidth));
         GUILayout.FlexibleSpace();
         GUILayout.Label(value, valueStyle);
         GUILayout.Space(5);
@@ -872,7 +889,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         return value;
     }
 
-    public OtherModsInterface other_mods = null;
+    public FPOtherModsInterface other_mods = null;
 
     private void DrawGUIStatus(double UT)
     {
@@ -891,14 +908,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             status_style.normal.textColor = new Color(1, 0, 0, transparency); // FPStyles.phase_error;
 
         UI_Tools.Separator();
-        DrawSectionHeader("Status:", statusText, status_style);
+        DrawSectionHeader("Status:", statusText, 60, status_style);
 
         // Indication to User that its safe to type, or why vessel controls aren't working
 
         if (other_mods == null)
         {
             // init mode detection only when first needed
-            other_mods = new OtherModsInterface();
+            other_mods = new FPOtherModsInterface();
             other_mods.CheckModsVersions();
         }
 
@@ -948,7 +965,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
 
         status = Status.OK;
-        statusText = "Ready to Circularize Now"; // "Ready to Circularize Now"
+        statusText = $"Ready to Circularize {selectedOption}"; // "Ready to Circularize Now"
         statusTime = UT + statusPersistence.Value;
 
         if (deltaV != Vector3d.zero)
@@ -982,7 +999,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //    burnUT = UT + 30;
 
         status = Status.OK;
-        statusText = "Ready to Change Pe";
+        statusText = $"Ready to Change Pe {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
         Logger.LogDebug($"Seeking Solution: targetPeR {newPe} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
@@ -1014,7 +1031,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //var burnUT = UT + TimeToPe;
 
         status = Status.OK;
-        statusText = "Ready to Change Ap";
+        statusText = $"Ready to Change Ap {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
         Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
@@ -1042,7 +1059,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Logger.LogDebug($"Ellipticize: Set New Pe and Ap {selectedOption}");
 
         status = Status.OK;
-        statusText = "Ready to Ellipticize"; // "Ready to Ellipticize";
+        statusText = $"Ready to Ellipticize {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
         if (newPe > newAp)
@@ -1080,7 +1097,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d deltaV;
 
         status = Status.OK;
-        statusText = "Ready to Change Inclination";
+        statusText = $"Ready to Change Inclination {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
         deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, inclination);
@@ -1098,23 +1115,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             return false;
         }
     }
-
-    public bool SetNewLAN(double burnUT, double newLAN, double burnOffsetFactor)
+    
+    public bool SetNewLAN(double burnUT, double newLANvalue, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewLAN {selectedOption}");
+        Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {selectedOption}");
         // Debug.Log("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = UT + 30;
 
         status = Status.WARNING;
-        statusText = "Experimental LAN Change Ready";
+        statusText = $"Experimental LAN Change {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
-        Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
-        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(orbit, burnUT, newLAN);
+        Logger.LogDebug($"Seeking Solution: newLANvalue {newLANvalue}°");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(orbit, burnUT, newLANvalue);
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
@@ -1130,6 +1147,68 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
+    public bool SetNodeLongitude(double burnUT, double newNodeLongValue, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {selectedOption}");
+        // Debug.Log("Set New Ap");
+        // var TimeToPe = orbit.TimeToPe;
+        // var burnUT = UT + 30;
+
+        status = Status.WARNING;
+        statusText = $"Experimental Node Longitude Change {selectedOption}";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: newNodeLongValue {newNodeLongValue}°");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftNodeLongitude(orbit, burnUT, newNodeLongValue);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Shift Node Longitude: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool SetNewSMA(double burnUT, double newSMA, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"SetNewSMA {selectedOption}");
+        // Debug.Log("Set New Ap");
+        // var TimeToPe = orbit.TimeToPe;
+        // var burnUT = UT + 30;
+
+        status = Status.OK;
+        statusText = $"Ready to Change SMA Change {selectedOption}";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: newSMA {newSMA} m");
+        var deltaV = OrbitalManeuverCalculator.DeltaVForSemiMajorAxis(orbit, burnUT, newSMA);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New SMA: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+    
     public bool MatchPlanes(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -1407,7 +1486,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // for comparison to the _previousToggles dictionary.
     private void setOptionsList()
     {
-        if ( circularize || newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
+        if (circularize || newPe || newAp || newPeAp || newInc || newLAN || newNodeLon || newSMA || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
         {
             if (options.Contains("none"))
                 options.Remove("none");
@@ -1456,6 +1535,22 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
                 baseManeuver = "Setting new LAN";
+            }
+            if (newNodeLon)
+            {
+                _toggles["SetNodeLongitude"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Shifting Node LongitudeN";
+            }
+            if (newSMA)
+            {
+                _toggles["SetNewSMA"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Setting new SMA";
             }
             if (newInc)
             {
@@ -1542,7 +1637,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public void MakeNode()
     {
-        if (circularize|| newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
+        if (circularize|| newPe || newAp || newPeAp || newInc || newLAN || newNodeLon || newSMA || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
         {
             bool pass;
 
@@ -1574,6 +1669,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             else if (newLAN) // Untested
             {
                 pass = SetNewLAN(requestedBurnTime, FPSettings.target_lan_deg, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (newNodeLon) // Untested
+            {
+                pass = SetNodeLongitude(requestedBurnTime, FPSettings.target_node_long_deg, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (newSMA) // Untested
+            {
+                pass = SetNewSMA(requestedBurnTime, targetSMA, -0.5);
                 if (pass && autoLaunchMNC.Value) other_mods.callMNC();
             }
             else if (matchPlane) // Working
