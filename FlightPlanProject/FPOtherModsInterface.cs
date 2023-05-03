@@ -21,7 +21,7 @@ using KSP.Game;
 
 namespace FlightPlan;
 
-public class OtherModsInterface
+public class FPOtherModsInterface
 {
     ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanPlugin.OtherModsInterface");
 
