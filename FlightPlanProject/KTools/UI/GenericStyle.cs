@@ -1,31 +1,30 @@
 
 using UnityEngine;
-using FlightPlan.Tools;
 using SpaceWarp.API.UI;
-using UnityEngine.UIElements;
-using System.Reflection.Emit;
-using K2D2.Controller;
 
-namespace FlightPlan.UI;
+namespace FlightPlan.KTools.UI;
 
-public class FPStyles
+public class GenericStyle
 {
-    private static bool guiLoaded = false;
-
+    public static bool Init()
+    {
+        return BuildStyles();
+    }
 
     public static GUISkin skin;
+    private static bool guiLoaded = false;
 
-    public static void BuildStyles()
+    public static bool BuildStyles()
     {
         if (guiLoaded)
-            return;
+            return true;
 
         skin = CopySkin(Skins.ConsoleSkin);
 
         BuildFrames();
         BuildSliders();
-        BuildTabs();
         BuildButtons();
+        BuildTabs();
         BuildFoldout();
         BuildToggle();
         BuildProgressBar();
@@ -33,9 +32,10 @@ public class FPStyles
         BuildLabels();
 
         guiLoaded = true;
+        return true;
     }
 
-    public static GUIStyle error, warning, label, status, mid_text, console_text, phase_ok, phase_warning, phase_error;
+    public static GUIStyle error, warning, label, mid_text, console_text, phase_ok, phase_warning, phase_error;
     public static GUIStyle icons_label, title, slider_text;
 
     static void BuildLabels()
@@ -48,31 +48,24 @@ public class FPStyles
         icons_label.overflow = new RectOffset(0, 0, 0, 0);
 
         error = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // error.alignment = TextAnchor.MiddleLeft;
-        error.normal.textColor = Color.red;
-
         warning = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // warning.alignment = TextAnchor.MiddleLeft;
+        error.normal.textColor = Color.red;
         warning.normal.textColor = Color.yellow;
         //labelColor = GUI.skin.GetStyle("Label").normal.textColor;
 
         phase_ok = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // phase_ok.alignment = TextAnchor.MiddleLeft;
         phase_ok.normal.textColor = ColorTools.parseColor("#00BC16");
         // phase_ok.fontSize = 20;
 
         phase_warning = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // phase_warning.alignment = TextAnchor.MiddleLeft;
         phase_warning.normal.textColor = ColorTools.parseColor("#BC9200");
         // phase_warning.fontSize = 20;
 
         phase_error = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // phase_error.alignment = TextAnchor.MiddleLeft;
         phase_error.normal.textColor = ColorTools.parseColor("#B30F0F");
         // phase_error.fontSize = 20;
 
         console_text = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // console_text.alignment = TextAnchor.MiddleLeft;
         console_text.normal.textColor = ColorTools.parseColor("#B6B8FA");
         // console_text.fontSize = 15;
         console_text.padding = new RectOffset(0, 0, 0, 0);
@@ -87,16 +80,9 @@ public class FPStyles
         slider_text.contentOffset = new Vector2(8, 5);
 
         label = new GUIStyle(GUI.skin.GetStyle("Label"));
-        label.alignment = TextAnchor.MiddleLeft;
         // label.fontSize = 17;
         label.margin = new RectOffset(0, 0, 0, 0);
         label.padding = new RectOffset(0, 0, 0, 0);
-
-        status = new GUIStyle(GUI.skin.GetStyle("Label"));
-        status.alignment = TextAnchor.MiddleLeft;
-        // status.fontSize = 17;
-        status.margin = new RectOffset(0, 0, 0, 0);
-        status.padding = new RectOffset(0, 0, 0, 0);
 
         title = new GUIStyle();
         title.normal.textColor = ColorTools.parseColor("#C0C1E2");
@@ -141,12 +127,12 @@ public class FPStyles
 
         // define the V scrollbar
         GUIStyle verticalScrollbar = new GUIStyle(GUI.skin.verticalScrollbar);
-        
+
         verticalScrollbar.normal.background = AssetsLoader.loadIcon("VerticalScroll");
         setAllFromNormal(verticalScrollbar);
         verticalScrollbar.border = new RectOffset(5, 5, 5, 5);
         verticalScrollbar.fixedWidth = 10;
-   
+
         skin.verticalScrollbar = verticalScrollbar;
 
         GUIStyle verticalScrollbarThumb = new GUIStyle(GUI.skin.verticalScrollbarThumb);
@@ -191,15 +177,15 @@ public class FPStyles
     }
 
     // icons
-    public static Texture2D gear, icon, k2d2_big_icon, mnc_icon, cross;
+    public static Texture2D gear, icon, mnc_icon, cross;
 
     static void BuildIcons()
     {
         // icons
         gear = AssetsLoader.loadIcon("gear");
         icon = AssetsLoader.loadIcon("icon");
-        k2d2_big_icon = AssetsLoader.loadIcon("k2d2_big_icon");
-        mnc_icon = AssetsLoader.loadIcon("mnc_icon_white_50"); //  mnc_icon_bw_50
+        
+        // mnc_icon = AssetsLoader.loadIcon("mnc_new_icon_50");
         cross = AssetsLoader.loadIcon("Cross");
     }
 
@@ -221,12 +207,76 @@ public class FPStyles
     }
 
 
+    public static GUIStyle bigicon_button, icon_button, small_button, big_button, button;
+
+    static void BuildButtons()
+    {
+        // button std
+        button = new GUIStyle(GUI.skin.GetStyle("Button"));
+        button.normal.background = AssetsLoader.loadIcon("BigButton_Normal");
+        button.normal.textColor = ColorTools.parseColor("#FFFFFF");
+        setAllFromNormal(button);
+
+        button.hover.background = AssetsLoader.loadIcon("BigButton_hover");
+        button.active.background = AssetsLoader.loadIcon("BigButton_hover");
+        // button.active.background = AssetsLoader.loadIcon("BigButton_on");
+        // button.onNormal = button.active;
+        // setFromOn(button);
+
+        button.border = new RectOffset(5, 5, 5, 5);
+        button.padding = new RectOffset(4, 4, 4, 4);
+        button.overflow = new RectOffset(0, 0, 0, 0);
+        // button.fontSize = 20;
+        button.alignment = TextAnchor.MiddleCenter;
+        skin.button = button;
+
+        // Small Button
+        small_button = new GUIStyle(GUI.skin.GetStyle("Button"));
+        small_button.normal.background = AssetsLoader.loadIcon("Small_Button");
+        setAllFromNormal(small_button);
+        small_button.hover.background = AssetsLoader.loadIcon("Small_Button_hover");
+        small_button.active.background = AssetsLoader.loadIcon("Small_Button_active");
+        small_button.onNormal = small_button.active;
+        setFromOn(small_button);
+
+        small_button.border = new RectOffset(5, 5, 5, 5);
+        small_button.padding = new RectOffset(5, 5, 5, 5);
+        small_button.overflow = new RectOffset(0, 0, 0, 0);
+        small_button.alignment = TextAnchor.MiddleCenter;
+
+        big_button = new GUIStyle(GUI.skin.GetStyle("Button"));
+        big_button.normal.background = AssetsLoader.loadIcon("BigButton_Normal");
+        big_button.normal.textColor = ColorTools.parseColor("#FFFFFF");
+        setAllFromNormal(big_button);
+
+        big_button.hover.background = AssetsLoader.loadIcon("BigButton_Hover");
+        big_button.active.background = AssetsLoader.loadIcon("BigButton_Active");
+        big_button.onNormal = big_button.active;
+        setFromOn(big_button);
+
+        big_button.border = new RectOffset(5, 5, 5, 5);
+        big_button.padding = new RectOffset(8, 8, 10, 10);
+        big_button.overflow = new RectOffset(0, 0, 0, 0);
+        // big_button.fontSize = 20;
+        big_button.alignment = TextAnchor.MiddleCenter;
+
+        // Small Button
+        icon_button = new GUIStyle(small_button);
+        icon_button.padding = new RectOffset(4, 4, 4, 4);
+
+        bigicon_button = new GUIStyle(icon_button);
+        bigicon_button.fixedWidth = 50;
+        bigicon_button.fixedHeight = 50;
+        bigicon_button.fontStyle = FontStyle.Bold;
+
+    }
+
     public static GUIStyle tab_normal, tab_active;
     static void BuildTabs()
     {
         tab_normal = new GUIStyle(button);
         tab_normal.border = new RectOffset(5, 5, 5, 5);
-        tab_normal.padding = new RectOffset(4, 3, 4, 3);
+        tab_normal.padding = new RectOffset(10, 10, 5, 5);
         tab_normal.overflow = new RectOffset(0, 0, 0, 0);
         // big_button.fontSize = 20;
         tab_normal.alignment = TextAnchor.MiddleCenter;
@@ -250,71 +300,9 @@ public class FPStyles
         setFromOn(tab_active);
     }
 
-    public static GUIStyle bigicon_button, icon_button, small_button, big_button, button;
 
-    static void BuildButtons()
-    {
-        // button std
-        button = new GUIStyle(GUI.skin.GetStyle("Button"));
-        button.normal.background = AssetsLoader.loadIcon("BigButton_Normal");
-        button.normal.textColor = ColorTools.parseColor("#FFFFFF");
-        setAllFromNormal(button);
-
-        button.hover.background = AssetsLoader.loadIcon("BigButton_hover");
-        button.active.background = AssetsLoader.loadIcon("BigButton_hover");
-        // button.active.background = AssetsLoader.loadIcon("BigButton_on");
-        // button.onNormal = button.active;
-        // setFromOn(button);
-
-        button.border = new RectOffset(5, 5, 5, 5);
-        button.padding = new RectOffset(4, 3, 4, 3);
-        button.overflow = new RectOffset(0, 0, 0, 0);
-        // button.fontSize = 20;
-        button.alignment = TextAnchor.MiddleCenter;
-        skin.button = button;
-
-        // Small Button
-        small_button = new GUIStyle(GUI.skin.GetStyle("Button"));
-        small_button.normal.background = AssetsLoader.loadIcon("Small_Button");
-        setAllFromNormal(small_button);
-        small_button.hover.background = AssetsLoader.loadIcon("Small_Button_hover");
-        small_button.active.background = AssetsLoader.loadIcon("Small_Button_active");
-        small_button.onNormal = small_button.active;
-        setFromOn(small_button);
-
-        small_button.border = new RectOffset(5, 5, 5, 5);
-        small_button.padding = new RectOffset(0, 0, 0, 0);
-        small_button.overflow = new RectOffset(0, 0, 0, 0);
-        small_button.alignment = TextAnchor.MiddleCenter;
-
-        big_button = new GUIStyle(GUI.skin.GetStyle("Button"));
-        big_button.normal.background = AssetsLoader.loadIcon("BigButton_Normal");
-        big_button.normal.textColor = ColorTools.parseColor("#FFFFFF");
-        setAllFromNormal(big_button);
-
-        big_button.hover.background = AssetsLoader.loadIcon("BigButton_Hover");
-        big_button.active.background = AssetsLoader.loadIcon("BigButton_Active");
-        big_button.onNormal = big_button.active;
-        setFromOn(big_button);
-
-        big_button.border = new RectOffset(5, 5, 5, 5);
-        big_button.padding = new RectOffset(4, 3, 4, 3);
-        big_button.overflow = new RectOffset(0, 0, 0, 0);
-        // big_button.fontSize = 20;
-        big_button.alignment = TextAnchor.MiddleCenter;
-
-        // Small Button
-        icon_button = new GUIStyle(small_button);
-        icon_button.padding = new RectOffset(4, 4, 4, 4);
-
-        bigicon_button = new GUIStyle(icon_button);
-        bigicon_button.fixedWidth = 50;
-        bigicon_button.fixedHeight = 50;
-        bigicon_button.fontStyle = FontStyle.Bold;
-
-    }
     public static GUIStyle foldout_close, foldout_open;
-    
+
     static void BuildFoldout()
     {
 
@@ -339,7 +327,6 @@ public class FPStyles
         foldout_open.active.background = AssetsLoader.loadIcon("Chapter_On_Active");
     }
 
-
     public static GUIStyle toggle;
     static void BuildToggle()
     {
@@ -361,14 +348,7 @@ public class FPStyles
         toggle.overflow = new RectOffset(0, 0, 0, 2);
     }
 
-    public static void Init()
-    {
-        if (!guiLoaded)
-        {
-            BuildStyles();
-        }
-    }
-
+   
     /// <summary>
     /// copy all styles from normal state to others
     /// </summary>
@@ -413,7 +393,7 @@ public class FPStyles
         copy.window = new GUIStyle(source.window);
 
         copy.horizontalSlider = new GUIStyle(source.horizontalSlider);
-        copy.horizontalSliderThumb = new GUIStyle(source.horizontalSliderThumb);    
+        copy.horizontalSliderThumb = new GUIStyle(source.horizontalSliderThumb);
         copy.verticalSlider = new GUIStyle(source.verticalSlider);
         copy.verticalSliderThumb = new GUIStyle(source.verticalSliderThumb);
 
@@ -430,6 +410,7 @@ public class FPStyles
         copy.scrollView = new GUIStyle(source.scrollView);
 
         return copy;
-    }
-}
 
+    }
+
+}
