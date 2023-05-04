@@ -122,6 +122,30 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private List<string> options;
     private double requestedBurnTime = 0;
 
+    // Resonant orbit configuration parameters
+    public bool dive { get; private set; }
+    public bool occlusion { get; private set; }
+    public bool diveOrbit;          // Track if we're doing a diving orbit or not
+    public bool occlusionModifiers; // Track if we're applying occlusion modifiers or not
+    private string numSatellites = "3";         // String number of satellites to deploy (>= 2)
+    private string numOrbits = "1";             // String number of resonant orbit passes between deployments (>= 2)
+    private string resonanceStr;                // String resonant factor relating the deploy orbit and the destiantion orbit
+    private double resonance;                   // Double resonant factor relating the deploy orbit and the destiantion orbit 
+    private string targetAltitude = "600";      // String planned altitide for deployed satellites (destiantion orbit)
+    private double target_alt_km = 600;         // Double planned altitide for deployed satellites (destiantion orbit)
+    private double satPeriod;                   // The period of the destination orbit
+    private double xferPeriod;                  // The period of the resonant deploy orbit (xferPeriod = resonance*satPeriod)
+    private double Ap2;                         // The resonant deploy orbit apoapsis
+    private double Pe2;                         // The resonant deploy orbit periapsis
+    private double synchronousPeriod;           // Syncronous Orbital period about the main body (not sayin its even possible...)
+    private double semiSynchronousPeriod;       // Semi-Syncronous Orbital period about the main body (not sayin its even possible...)
+    private double synchronousAlt;              // Syncronous Orbital altitude about the main body (not sayin its even possible...)
+    private double semiSynchronousAlt;          // Semi-Syncronous Orbital altitude about the main body (not sayin its even possible...)
+    private double minLOSAlt;                   // Minimum LOS Orbit Altitude (only defined if 3 or more satellites in constelation)
+
+    private bool nSatUp, nSatDown, nOrbUp, nOrbDown, setTgtPe, setTgtAp, setTgtSync, setTgtSemiSync, setTgtMinLOS, fixPe, fixAp;
+
+
     // mod-wide data
     private VesselComponent activeVessel;
     private SimulationObjectModel currentTarget;
@@ -249,6 +273,71 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         FPSettings.window_y_pos = (int)windowRect.yMin;
     }
 
+    private double occModCalc(bool hasAtmo)
+    {
+        double occMod;
+        if (occlusionModifiers)
+        {
+            //try { FPSettings.occ_mod_atm = double.Parse(occModAtmStr); }
+            //catch { FPSettings.occ_mod_atm = 1.0; }
+            //try { FPSettings.occ_mod_vac = double.Parse(occModVacStr); }
+            //catch { FPSettings.occ_mod_vac = 1.0; }
+            if (hasAtmo)
+            {
+                occMod = FPSettings.occ_mod_atm;
+            }
+            else
+            {
+                occMod = FPSettings.occ_mod_vac;
+            }
+        }
+        else
+        {
+            occMod = 1;
+        }
+        return occMod;
+    }
+
+    private double minLOSCalc(int numSat, double radius, bool hasAtmo)
+    {
+        if (numSat > 2)
+        {
+            return (radius * occModCalc(hasAtmo)) / (Math.Cos(0.5 * (2.0 * Math.PI / numSat))) - radius;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    private double SMACalc(double period) // Compute SMA given orbital period
+    {
+        double SMA;
+        SMA = Math.Pow((period * Math.Sqrt(activeVessel.mainBody.gravParameter) / (2.0 * Math.PI)), (2.0 / 3.0));
+        return SMA;
+    }
+
+    private double periodCalc(double SMA) // Compute orbital period given SMA
+    {
+        double period;
+        period = (2.0 * Math.PI * Math.Pow(SMA, 1.5)) / Math.Sqrt(activeVessel.mainBody.gravParameter);
+        return period;
+    }
+
+    private double burnCalc(double sAp, double sSMA, double se, double cAp, double cSMA, double ce, double bGM)
+    {
+        double sta = 0;
+        double cta = 0;
+        if (cAp == sAp) cta = 180;
+        double sr = sSMA * (1 - Math.Pow(se, 2)) / (1 + (se * Math.Cos(sta)));
+        double sdv = Math.Sqrt(bGM * ((2 / sr) - (1 / sSMA)));
+
+        double cr = cSMA * (1 - Math.Pow(ce, 2)) / (1 + (ce * Math.Cos(cta)));
+        double cdv = Math.Sqrt(bGM * ((2 / sr) - (1 / cSMA)));
+
+        return Math.Round(100 * Math.Abs(sdv - cdv)) / 100;
+    }
+
     /// <summary>
     /// Draws a simple UI window when <code>this._isWindowOpen</code> is set to <code>true</code>.
     /// </summary>
@@ -311,7 +400,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             CloseWindow();
 
         GUI.Label(new Rect(9, 2, 29, 29), FPStyles.icon, FPStyles.icons_label);
-        
+
+        DrawEntry("Situation", String.Format("{0} {1}", SituationToString(activeVessel.Situation), activeVessel.mainBody.bodyName));
+
         if (selectingBody)
         {
             selectBodyUI();
@@ -780,6 +871,21 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.EndHorizontal();
     }
 
+    private string SituationToString(VesselSituations situation)
+    {
+        return situation switch
+        {
+            VesselSituations.PreLaunch => "Pre-Launch",
+            VesselSituations.Landed => "Landed",
+            VesselSituations.Splashed => "Splashed down",
+            VesselSituations.Flying => "Flying",
+            VesselSituations.SubOrbital => "Suborbital",
+            VesselSituations.Orbiting => "Orbiting",
+            VesselSituations.Escaping => "Escaping",
+            _ => "UNKNOWN",
+        };
+    }
+
     int spacingAfterHeader = 5;
     int spacingAfterEntry = 5;
 
@@ -799,6 +905,21 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.Space(5);
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterHeader);
+    }
+
+    private void DrawEntry(string entryName, string value, string unit = "")
+    {
+        GUILayout.BeginHorizontal();
+        UI_Tools.Label(entryName);
+        GUILayout.FlexibleSpace();
+        UI_Tools.Label(value);
+        if (unit.Length > 0)
+        {
+            GUILayout.Space(5);
+            UI_Tools.Label(unit);
+        }
+        GUILayout.EndHorizontal();
+        GUILayout.Space(spacingAfterEntry);
     }
 
     private void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
