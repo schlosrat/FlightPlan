@@ -1,22 +1,18 @@
 ﻿using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using FlightPlan.UI;
 using FPUtilities;
 using HarmonyLib;
-using K2D2;
 using KSP.Game;
 using KSP.Sim.impl;
 using KSP.Sim.Maneuver;
 using KSP.UI.Binding;
-using ManeuverNodeController;
-using Microsoft.CodeAnalysis;
 using MuMech;
 using NodeManager;
 using SpaceWarp;
 using SpaceWarp.API.Assets;
 using SpaceWarp.API.Mods;
-using SpaceWarp.API.UI;
 using SpaceWarp.API.UI.Appbar;
 using System.Collections;
 using System.Reflection;
@@ -36,18 +32,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public const string ModName = MyPluginInfo.PLUGIN_NAME;
     public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
-    // Control click through to the game
-    private bool gameInputState = true;
-    public List<String> inputFields = new List<String>();
+    // Control game input state while user has clicked into a TextField.
+    //public List<String> inputFields = new List<String>();
 
     // GUI stuff
     static bool loaded = false;
     private bool interfaceEnabled = false;
     private bool GUIenabled = true;
-    private Rect _windowRect;
-    private int windowWidth = Screen.width / 5; //384px on 1920x1080
-    private int windowHeight = Screen.height / 4; //480px on 1920x1080
-    private Rect closeBtnRect;
+    private Rect windowRect = Rect.zero;
+    private int windowWidth = 250; //384px on 1920x1080
+  //  private int windowHeight = Screen.height / 4; //360px on 1920x1080
+
 
     // Status of last Flight Plan function
     private enum Status
@@ -58,28 +53,24 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         ERROR
     }
     private Status status = Status.VIRGIN; // Everyone starts out this way...
-    private double statusTime = 0; // UT of last staus update
-    private string statusText;
+    public double statusTime = 0; // UT of last staus update
+    public string statusText;
+    public string maneuver;
+    private string baseManeuver;
 
     // Config parameters
     private ConfigEntry<string> initialStatusText;
-    private ConfigEntry<string> defaultTargetPeAStr;
-    private ConfigEntry<string> defaultTargetApAStr;
-    private ConfigEntry<string> defaultTargetMRPeAStr;
-    private ConfigEntry<string> defaultTargetIncStr;
-    private ConfigEntry<string> defaultInterceptTStr;
-    private ConfigEntry<string> defaultTargetLANStr;
     private ConfigEntry<double> statusPersistence;
     private ConfigEntry<double> statusFadeTime;
     private ConfigEntry<bool> experimental;
     private ConfigEntry<bool> autoLaunchMNC;
 
-    // Button toggles and bools
-    private bool circAp, circPe, circularize, newPe, newAp, newPeAp, newInc, newLAN; // Ownship maneuvers (activity toggels)
-    private bool matchPlane, matchPlanesD, hohmannT, interceptTgt, courseCorrection, matchVelocity, matchVNow; // Maneuvers relative to target (activity toggels)
+    // Button bools
+    private bool circularize, newPe, newAp, newPeAp, newInc, newLAN, newNodeLon, newSMA; // Ownship maneuvers (activity toggels)
+    private bool matchPlane, hohmannXfer, interceptTgt, courseCorrection, matchVelocity; // Maneuvers relative to target (activity toggels)
     private bool moonReturn, planetaryXfer; // Specialized Moon/Planet relative maneuvers (activity toggels)
-    private bool makeNode, launchMNC, executeNode; // Utility functions (buttons)
 
+    // Dictionaries used for toggle button management to function like radio buttons. If no "radio buttons", then this can go.
     private Dictionary<string, bool> _toggles = new();
     private Dictionary<string, bool> _previousToggles = new();
     private readonly Dictionary<string, bool> _initialToggles = new()
@@ -90,6 +81,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         { "Elipticize",       false },
         { "SetNewInc",        false },
         { "SetNewLAN",        false },
+        { "SetNodeLongitude", false },
+        { "SetNewSMA",        false },
         { "MatchPlane",       false },
         { "MatchVelocity",    false },
         { "CourseCorrection", false },
@@ -100,105 +93,63 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     };
 
     // Time references for selectedOption
-    private readonly Dictionary<string, string> TimeReference = new()
+    public readonly Dictionary<string, string> TimeReference = new()
     {
-        { "COMPUTED",          "At Optimum Time"               }, //at the optimum time
-        { "APOAPSIS",          "At Next Apoapsis"              }, //"at the next apoapsis"
-        { "CLOSEST_APPROACH",  "At Closest Approach to Target" }, //"at closest approach to target"
-        { "EQ_ASCENDING",      "At Equatorial AN"              }, //"at the equatorial AN"
-        { "EQ_DESCENDING",     "At Equatorial DN"              }, //"at the equatorial DN"
-        { "PERIAPSIS",         "At Next Periapsis"             }, //"at the next periapsis"
-        { "REL_ASCENDING",     "At Next AN with Target"        }, //"at the next AN with the target."
-        { "REL_DESCENDING",    "At Next DN with Target"        }, //"at the next DN with the target."
-        { "X_FROM_NOW",        "After a Fixed Time"            }, //"after a fixed time"
-        { "ALTITUDE",          "At an Altitude"                }, //"at an altitude"
-        { "EQ_NEAREST_AD",     "At Nearest Equatorial AN/DN"   }, //"at the nearest equatorial AN/DN"
-        { "EQ_HIGHEST_AD",     "At Cheapest Equatorial AN/DN"  }, //"at the cheapest equatorial AN/DN"
-        { "REL_NEAREST_AD",    "At Nearest AN/DN with Target"  }, //"at the nearest AN/DN with the target"
-        { "REL_HIGHEST_AD",    "At Cheapest AN/DN with Target" } //"at the cheapest AN/DN with the target"
+        { "COMPUTED",          "at optimum time"         }, //at the optimum time
+        { "APOAPSIS",          "at next apoapsis"        }, //"at the next apoapsis"
+        { "CLOSEST_APPROACH",  "at closest approach"     }, //"at closest approach to target"
+        { "EQ_ASCENDING",      "at equatorial AN"        }, //"at the equatorial AN"
+        { "EQ_DESCENDING",     "at equatorial DN"        }, //"at the equatorial DN"
+        { "PERIAPSIS",         "at next periapsis"       }, //"at the next periapsis"
+        { "REL_ASCENDING",     "at next AN with target"  }, //"at the next AN with the target."
+        { "REL_DESCENDING",    "at next DN with target"  }, //"at the next DN with the target."
+        { "X_FROM_NOW",        "after a fixed time"      }, //"after a fixed time"
+        { "ALTITUDE",          "at an altitude"          }, //"at an altitude"
+        { "EQ_NEAREST_AD",     "at nearest Eq. AN/DN"    }, //"at the nearest equatorial AN/DN"
+        { "EQ_HIGHEST_AD",     "at cheapest Eq. AN/DN"   }, //"at the cheapest equatorial AN/DN"
+        { "REL_NEAREST_AD",    "at nearest AN/DN w/Target"  }, //"at the nearest AN/DN with the target"
+        { "REL_HIGHEST_AD",    "at cheapest AN/DN w/Target" } //"at the cheapest AN/DN with the target"
     };
 
     // Body selection.
-    private string selectedBody = null;
-    private List<string> bodies;
     private bool selectingBody = false;
     private static Vector2 scrollPositionBodies;
 
-    // Option selection.
-    private string selectedOption = null;
-    private List<string> options;
+    // Option selection
     private bool selectingOption = false;
     private static Vector2 scrollPositionOptions;
+    private string selectedOption = null;
+    private List<string> options;
     private double requestedBurnTime = 0;
 
     // mod-wide data
     private VesselComponent activeVessel;
     private SimulationObjectModel currentTarget;
-    private ManeuverNodeData currentNode = null;
+    public ManeuverNodeData currentNode = null;
     List<ManeuverNodeData> activeNodes;
 
-    // Text Inputs
-    private string targetPeAStr;   // m - This is a Configurable Parameter
-    private string targetApAStr;   // m - This is a Configurable Parameter
-    private string targetPeAStr1;  // m - This is initially set = targetPeAStr
-    private string targetApAStr1;  // m - This is initially set = targetApAStr
-    private string targetMRPeAStr; // m - This is initially set = targetApAStr
-    private string targetIncStr;   // degrees - Default 0
-    private string targetLANStr;   // degrees - Default 0
-    private string interceptTStr;  // s - This is a Configurable Parameter
-
-    // Values from Text Inputs
+    // Radius Computed from Inputs
     private double targetPeR;
     private double targetApR;
-    private double targetPeR1;
-    private double targetApR1;
+    private double targetSMA;
     private double targetMRPeR;
-    private double targetInc;
-    private double targetLAN;
-    private double interceptT;
 
-    // GUI layout and style stuff
-    private GUIStyle errorStyle, warnStyle, progradeStyle, normalStyle, radialStyle, labelStyle;
     private GameInstance game;
-    private GUIStyle horizontalDivider = new GUIStyle();
-    private GUISkin _spaceWarpUISkin;
-    private GUIStyle listBtnStyle;
-    private GUIStyle ctrlBtnStyle;
-    private GUIStyle bigBtnStyle;
-    private GUIStyle smallBtnStyle;
-    // private GUIStyle mainWindowStyle;
-    private GUIStyle textInputStyle;
-    private GUIStyle sectionToggleStyle;
-    private GUIStyle closeBtnStyle;
-    private GUIStyle nameLabelStyle;
-    private GUIStyle valueLabelStyle;
-    private GUIStyle unitLabelStyle;
-    private GUIStyle statusStyle;
-    private static GUIStyle boxStyle;
-    // private string unitColorHex;
-    private int spacingAfterHeader = -12;
-    private int spacingAfterEntry = -5;
-    private int spacingAfterSection = 5;
 
     // App bar button(s)
     private const string ToolbarFlightButtonID = "BTN-FlightPlanFlight";
     // private const string ToolbarOABButtonID = "BTN-FlightPlanOAB";
 
+    private static string _assemblyFolder;
+    private static string AssemblyFolder =>
+        _assemblyFolder ?? (_assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+
+    private static string _settingsPath;
+    private static string SettingsPath =>
+        _settingsPath ?? (_settingsPath = Path.Combine(AssemblyFolder, "settings.json"));
+
     //public ManualLogSource logger;
     public new static ManualLogSource Logger { get; set; }
-
-    // Refelction access variables for launching MNC & K2-D2
-    private bool MNCLoaded, K2D2Loaded, checkK2D2status  = false;
-    private PluginInfo MNC, K2D2;
-    private Version mncMinVersion, k2d2MinVersion;
-    private int mncVerCheck, k2d2VerCheck;
-    private string k2d2Status;
-    Type k2d2Type, mncType;
-    PropertyInfo k2d2PropertyInfo, mncPropertyInfo;
-    MethodInfo k2d2GetStatusMethodInfo, k2d2FlyNodeMethodInfo, k2d2ToggleMethodInfo, mncLaunchMNCMethodInfo;
-    object k2d2Instance, mncInstance;
-    Texture mnc_button_tex, k2d2_button_tex;
-    GUIContent mnc_button_tex_con, k2d2_button_tex_con;
 
     // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
@@ -208,6 +159,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public override void OnInitialized()
     {
         base.OnInitialized();
+
+        FPSettings.Init(SettingsPath);
 
         Instance = this;
 
@@ -223,76 +176,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // StateChanges.Map3DViewLeft += message => GUIenabled = false;
         // StateChanges.VehicleAssemblyBuilderEntered += message => GUIenabled = false;
         // StateChanges.KerbalSpaceCenterStateEntered += message => GUIenabled = false;
-        //StateChanges.BaseAssemblyEditorEntered += message => GUIenabled = false;
-        //StateChanges.MainMenuStateEntered += message => GUIenabled = false;
-        //StateChanges.ColonyViewEntered += message => GUIenabled = false;
+        // StateChanges.BaseAssemblyEditorEntered += message => GUIenabled = false;
+        // StateChanges.MainMenuStateEntered += message => GUIenabled = false;
+        // StateChanges.ColonyViewEntered += message => GUIenabled = false;
         // StateChanges.TrainingCenterEntered += message => GUIenabled = false;
-        //StateChanges.MissionControlEntered += message => GUIenabled = false;
+        // StateChanges.MissionControlEntered += message => GUIenabled = false;
         // StateChanges.TrackingStationEntered += message => GUIenabled = false;
-        //StateChanges.ResearchAndDevelopmentEntered += message => GUIenabled = false;
-        //StateChanges.LaunchpadEntered += message => GUIenabled = false;
-        //StateChanges.RunwayEntered += message => GUIenabled = false;
-
-        Logger.LogInfo($"ManeuverNodeControllerMod.ModGuid = {ManeuverNodeControllerMod.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out MNC))
-        {
-            MNCLoaded = true;
-            Logger.LogInfo("Maneuver Node Controller installed and available");
-            Logger.LogInfo($"MNC = {MNC}");
-            mncMinVersion = new Version(0, 8, 3);
-            mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
-            Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
-
-            // Get MNC buton icon
-            mnc_button_tex = AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/mnc_icon.png");
-            mnc_button_tex_con = new GUIContent(mnc_button_tex, "Launch Maneuver Node Controller");
-
-            // Get instance and method(s) once at initilization to have them on hand for calling later
-            mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
-            mncPropertyInfo = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            mncInstance = mncPropertyInfo.GetValue(null);
-            mncLaunchMNCMethodInfo = mncPropertyInfo!.PropertyType.GetMethod("LaunchMNC");
-        }
-        // else MNCLoaded = false;
-        Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
-
-        Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(K2D2_Plugin.ModGuid, out K2D2))
-        {
-            K2D2Loaded = true;
-            Logger.LogInfo("K2-D2 installed and available");
-            Logger.LogInfo($"K2D2 = {K2D2}");
-            k2d2MinVersion = new Version(0, 8, 1);
-            k2d2VerCheck = K2D2.Metadata.Version.CompareTo(k2d2MinVersion);
-            Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
-            string tooltip;
-            if (k2d2VerCheck >= 0) tooltip = "Have K2-D2 Execute this node";
-            else tooltip = "Launch K2-D2";
-
-            // Get K2-D2 buton icon
-            k2d2_button_tex = AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/k2d2_icon.png");
-            k2d2_button_tex_con = new GUIContent(k2d2_button_tex, tooltip);
-
-            // Get instance and method(s) once at initilization to have them on hand for calling later
-            k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
-            k2d2PropertyInfo = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            k2d2Instance = k2d2PropertyInfo.GetValue(null);
-            k2d2ToggleMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("ToggleAppBarButton");
-            k2d2FlyNodeMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("FlyNode");
-            k2d2GetStatusMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("GetStatus");
-        }
-        // else K2D2Loaded = false;
-        Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
-
-        // Setup the list of input field names (most are the same as the entry string text displayed in the GUI window)
-        inputFields.Add("New Pe");
-        inputFields.Add("New Ap");
-        inputFields.Add("New Pe & Ap");
-        inputFields.Add("New Ap & Pe"); // kludgy name for the second input in a two input line
-        inputFields.Add("New Inclination");
-        inputFields.Add("New LAN");
-        inputFields.Add("Intercept at Time");
-        inputFields.Add("Select Target");
+        // StateChanges.ResearchAndDevelopmentEntered += message => GUIenabled = false;
+        // StateChanges.LaunchpadEntered += message => GUIenabled = false;
+        // StateChanges.RunwayEntered += message => GUIenabled = false;
 
         Logger.LogInfo("Loaded");
         if (loaded)
@@ -301,151 +193,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         loaded = true;
 
-        // Borrowed from ModListUI in SpaceWarp. May need to initialize _initialToggles and _toggles here, but this example
-        // need to be updated to work here.
-        //_initialToggles = SpaceWarpManager.PluginGuidEnabledStatus.ToList().FindAll(
-        //    item => !NoTogglePlugins.Contains(item.Item1)
-        //);
+        // Initialize the toggle button dictionaries
         _toggles         = new Dictionary<string, bool>(_initialToggles);
         _previousToggles = new Dictionary<string, bool>(_initialToggles);
 
         gameObject.hideFlags = HideFlags.HideAndDontSave;
         DontDestroyOnLoad(gameObject);
 
-        _spaceWarpUISkin = Skins.ConsoleSkin;
-
-        boxStyle = new GUIStyle(_spaceWarpUISkin.box); // GUI.skin.GetStyle("Box");
-
-        //mainWindowStyle = new GUIStyle(_spaceWarpUISkin.window)
-        //{
-        //    padding = new RectOffset(8, 8, 20, 8),
-        //    contentOffset = new Vector2(0, -22),
-        //    fixedWidth = windowWidth
-        //};
-
-        textInputStyle = new GUIStyle(_spaceWarpUISkin.textField)
-        {
-            alignment = TextAnchor.LowerCenter,
-            padding = new RectOffset(10, 10, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 24,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 1)
-        };
-
-        listBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(0, 0, 1, 1),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 16, // 16,
-            //fixedWidth = (int)(windowWidth * 0.5),
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 1, 1)
-        };
-        
-        ctrlBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(0, 0, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 16,
-            fixedWidth = 16, // windowWidth / 2,
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        bigBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(0, 0, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 25, // 16,
-            fixedWidth = (int)(windowWidth * 0.6),
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        smallBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            padding = new RectOffset(10, 10, 0, 3),
-            contentOffset = new Vector2(0, 2),
-            fixedHeight = 25, // 16,
-            // fixedWidth = 95,
-            fontSize = 16,
-            clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
-        };
-
-        sectionToggleStyle = new GUIStyle(_spaceWarpUISkin.toggle)
-        {
-            // padding = new RectOffset(0, 18, -5, 0),
-            // contentOffset = new Vector2(17, 8),
-            padding = new RectOffset(14, 0, 3, 3)
-        };
-
-        statusStyle = new GUIStyle(_spaceWarpUISkin.label);
-
-        nameLabelStyle = new GUIStyle(_spaceWarpUISkin.label);
-        nameLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
-
-        valueLabelStyle = new GUIStyle(_spaceWarpUISkin.label)
-        {
-            alignment = TextAnchor.MiddleRight
-        };
-        valueLabelStyle.normal.textColor = new Color(.6f, .7f, 1, 1);
-
-        unitLabelStyle = new GUIStyle(valueLabelStyle)
-        {
-            fixedWidth = 24,
-            alignment = TextAnchor.MiddleLeft
-        };
-        unitLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
-        // unitColorHex = ColorUtility.ToHtmlStringRGBA(unitLabelStyle.normal.textColor);
-
-        closeBtnStyle = new GUIStyle(_spaceWarpUISkin.button)
-        {
-            fontSize = 12
-        };
-
-        closeBtnRect = new Rect(windowWidth - 23, 6, 16, 16);
-
-        labelStyle = new GUIStyle(_spaceWarpUISkin.label) //  GUI.skin.GetStyle("Label"));
-        {
-            padding = new RectOffset(0, 0, 0, 3),
-            fixedHeight = 25
-        };
-        errorStyle = new GUIStyle(_spaceWarpUISkin.label) //  GUI.skin.GetStyle("Label"));
-        {
-            padding = new RectOffset(0, 0, 0, 3),
-            fixedHeight = 25
-        };
-        errorStyle.normal.textColor = Color.red;
-
-        warnStyle = new GUIStyle(_spaceWarpUISkin.label) //  GUI.skin.GetStyle("Label"));
-        {
-            padding = new RectOffset(0, 0, 0, 3),
-            fixedHeight = 25
-        };
-        warnStyle.normal.textColor = Color.yellow;
-
-        horizontalDivider.fixedHeight = 2;
-        horizontalDivider.margin = new RectOffset(0, 0, 4, 4);
-
-        // progradeStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // progradeStyle.normal.textColor = Color.yellow;
-        // normalStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // normalStyle.normal.textColor = Color.magenta;
-        // radialStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-        // radialStyle.normal.textColor = Color.cyan;
-        // Register Flight AppBar button
         Appbar.RegisterAppButton(
             "Flight Plan",
-            "BTN-FlightPlan",
+            ToolbarFlightButtonID,
             AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/icon.png"),
             ToggleButton);
 
@@ -458,24 +215,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         initialStatusText = Config.Bind<string>("Status Settings Section", "Initial Status", "Virgin", "Controls the status reported at startup prior to the first command");
         experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable experimental.Value features for testing - Warrantee Void if Enabled!");
         autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when experimental.Value nodes are created");
-        defaultTargetPeAStr  = Config.Bind<string>("Defualt Inputs Section", "Target Pe Alt",       "80000", "Default Pe input (in meters) used to pre-populate text input field at startup");
-        defaultTargetApAStr = Config.Bind<string>("Defualt Inputs Section", "Target Ap Alt",       "250000", "Default Ap input (in meters) used to pre-populate text input field at startup");
-        defaultTargetIncStr = Config.Bind<string>("Defualt Inputs Section", "Target Inclination",       "0", "Default inclination input (in degrees) used to pre-populate text input field at startup");
-        defaultTargetLANStr = Config.Bind<string>("Defualt Inputs Section", "Target LAN",               "0", "Default Longitude of Ascending Node (in degrees) used to pre-populate text input field at startup");
-        defaultInterceptTStr = Config.Bind<string>("Defualt Inputs Section", "Target Intercept Time", "100", "Default intercept time (in seconds) used to pre-populate text input field at startup");
-        defaultTargetMRPeAStr = Config.Bind<string>("Defualt Inputs Section", "Target Moon Return Pe Alt", "100000", "Default Moon Return Target Pe input (in meters) used to pre-populate text input field at startup");
-
-        // Set the initial and defualt values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
+    
+        // Set the initial and Default values based on config parameters. These don't make sense to need live update, so there're here instead of useing the configParam.Value elsewhere
         statusText     = initialStatusText.Value;
-        targetPeAStr   = defaultTargetPeAStr.Value;
-        targetApAStr   = defaultTargetApAStr.Value;
-        targetPeAStr1  = defaultTargetPeAStr.Value;
-        targetApAStr1  = defaultTargetApAStr.Value;
-        targetMRPeAStr = defaultTargetMRPeAStr.Value;
-        targetIncStr   = defaultTargetIncStr.Value;
-        targetLANStr   = defaultTargetLANStr.Value;
-        interceptTStr = defaultInterceptTStr.Value;
-
+       
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {experimental.Value}");
     }
@@ -483,13 +226,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void ToggleButton(bool toggle)
     {
         interfaceEnabled = toggle;
-        GameObject.Find("BTN-FlightPlan")?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(toggle);
+        GameObject.Find(ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(interfaceEnabled);
     }
 
     void Awake()
     {
-        _windowRect = new Rect((Screen.width * 0.7f) - (windowWidth / 2), (Screen.height / 2) - (windowHeight / 2), 0, 0);
-        // Logger = base.Logger;
+  
     }
 
     void Update()
@@ -497,8 +239,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.P))
         {
             ToggleButton(!interfaceEnabled);
-            Logger.LogInfo("UI toggled with hotkey");
+            Logger.LogInfo("Update: UI toggled with hotkey");
         }
+    }
+
+    void save_rect_pos()
+    {
+        FPSettings.window_x_pos = (int)windowRect.xMin;
+        FPSettings.window_y_pos = (int)windowRect.yMin;
     }
 
     /// <summary>
@@ -525,49 +273,24 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Set the UI
         if (interfaceEnabled && GUIenabled && activeVessel != null)
         {
-            GUI.skin = Skins.ConsoleSkin;
+            FPStyles.Init();
+            FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
+            GUI.skin = FPStyles.skin;
 
-            _windowRect = GUILayout.Window(
+            windowRect = GUILayout.Window(
                 GUIUtility.GetControlID(FocusType.Passive),
-                _windowRect,
+                windowRect,
                 FillWindow,
-                "<color=#696DFF>// FLIGHT PLAN</color>",
-                GUILayout.Height(windowHeight),
-                GUILayout.Width(windowWidth)
-            );
+                "<color=#696DFF>FLIGHT PLAN</color>",
+                GUILayout.Height(0),
+                GUILayout.Width(windowWidth));
 
-            if (gameInputState && inputFields.Contains(GUI.GetNameOfFocusedControl()))
-            {
-                // Logger.LogDebug($"OnGUI: Disabling Game Input: Focused Item '{GUI.GetNameOfFocusedControl()}'");
-                gameInputState = false;
-                GameManager.Instance.Game.Input.Disable();
-            }
-            else if (!gameInputState && !inputFields.Contains(GUI.GetNameOfFocusedControl()))
-            {
-                // Logger.LogDebug($"OnGUI: Enabling Game Input: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
-                gameInputState = true;
-                GameManager.Instance.Game.Input.Enable();
-            }
-            //if (selectingBody)
-            //{
-            //    // Do something here to disable mouse wheel control of zoom in and out.
-            //    // Intent: allow player to scroll in the scroll view without causing the game to zoom in and out
-            //    GameManager.Instance._game.MouseManager.enabled = false;
-            //}
-            //else
-            //{
-            //    // Do something here to re-enable mouse wheel control of zoom in and out.
-            //    GameManager.Instance._game.MouseManager.enabled = true;
-            //}
-        }
-        else
-        {
-            if (!gameInputState)
-            {
-                // Logger.LogDebug($"OnGUI: Enabling Game Input due to GUI disabled: FYI, Focused Item '{GUI.GetNameOfFocusedControl()}'");
-                gameInputState = true;
-                GameManager.Instance.Game.Input.Enable();
-            }
+            save_rect_pos();
+            // Draw the tool tip if needed
+            ToolTipsManager.DrawToolTips();
+
+            // check editor focus and unset Input if needed
+            UI_Fields.CheckEditor();
         }
     }
 
@@ -583,18 +306,232 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     /// <param name="windowID"></param>
     private void FillWindow(int windowID)
     {
-        if (CloseButton())
-        {
+        TopButtons.Init(windowRect.width);
+        if ( TopButtons.IconButton(FPStyles.cross))
             CloseWindow();
-        }
+
+        GUI.Label(new Rect(9, 2, 29, 29), FPStyles.icon, FPStyles.icons_label);
         
+        if (selectingBody)
+        {
+            selectBodyUI();
+            return;
+        }
+        if (selectingOption)
+        {
+            selectOptionUI();
+            return;
+        }
+
+        var orbit = activeVessel.Orbit;
+        var referenceBody = orbit.referenceBody;
+
+        updateToggleButtons();
+
+        // game = GameManager.Instance.Game;
+        //activeNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
+        //currentNode = (activeNodes.Count() > 0) ? activeNodes[0] : null;
+        FPUtility.RefreshActiveVesselAndCurrentManeuver();
+        // FPNodeControl.RefreshManeuverNodes();
+        currentNode = getCurrentNode();
+
+        BodySelectionGUI();
+
+        OptionSelectionGUI();
+
+        // Initialize the available list of options. These get updated in setOptionsList
+        options = new List<string> { "none" };
+
+        DrawSectionHeader("Ownship Maneuvers");
+        DrawToggleButton("Circularize", ref circularize);
+        // GUILayout.EndHorizontal();
+
+        FPSettings.pe_altitude_km = DrawToggleButtonWithTextField("New Pe", ref newPe, FPSettings.pe_altitude_km, "km");
+        targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
+
+        if (orbit.eccentricity < 1)
+        {
+            FPSettings.ap_altitude_km = DrawToggleButtonWithTextField("New Ap", ref newAp, FPSettings.ap_altitude_km, "km");
+            targetApR = FPSettings.ap_altitude_km * 1000 + referenceBody.radius;
+
+            DrawToggleButton("New Pe & Ap", ref newPeAp);
+        }
+
+        FPSettings.target_inc_deg = DrawToggleButtonWithTextField("New Inclination", ref newInc, FPSettings.target_inc_deg, "°");
+
+        if (experimental.Value)
+        {
+            FPSettings.target_lan_deg = DrawToggleButtonWithTextField("New LAN", ref newLAN, FPSettings.target_lan_deg, "°");
+
+            // FPSettings.target_node_long_deg = DrawToggleButtonWithTextField("New Node Longitude", ref newNodeLon, FPSettings.target_node_long_deg, "°");
+        }
+
+        FPSettings.target_sma_km = DrawToggleButtonWithTextField("New SMA", ref newSMA, FPSettings.target_sma_km, "km");
+        targetSMA = FPSettings.target_sma_km * 1000 + referenceBody.radius;
+
+        if (currentTarget != null)
+        {
+            // If the activeVessel and the currentTarget are both orbiting the same body
+            if (currentTarget.Orbit != null) // No maneuvers relative to a star
+            {
+                if (currentTarget.Orbit.referenceBody.Name == referenceBody.Name)
+                {
+                    DrawSectionHeader("Maneuvers Relative to Target");
+                    DrawToggleButton("Match Planes", ref matchPlane);
+
+                    DrawToggleButton("Hohmann Transfer", ref hohmannXfer);
+
+                    DrawToggleButton("Course Correction", ref courseCorrection);
+
+                    if (experimental.Value)
+                    {
+                        FPSettings.interceptT = DrawToggleButtonWithTextField("Intercept", ref interceptTgt, FPSettings.interceptT, "s");
+
+                        DrawToggleButton("Match Velocity", ref matchVelocity);
+                    }
+                }
+            }
+
+            if (experimental.Value)
+            {
+                // If the activeVessel is not orbiting a star
+                if (!referenceBody.IsStar && currentTarget.IsCelestialBody) // not orbiting a start and target is celestial
+                {
+                    // If the activeVessel is orbiting a planet and the current target is not the body the active vessel is orbiting
+                    if (referenceBody.Orbit.referenceBody.IsStar && (currentTarget.Name != referenceBody.Name) && currentTarget.Orbit != null)
+                    {
+                        if (currentTarget.Orbit.referenceBody.IsStar) // exclude targets that are a moon
+                        {
+                            DrawSectionHeader("Interplanetary Maneuvers");
+                            DrawToggleButton("Interplanetary Transfer", ref planetaryXfer);
+                        }
+                    }
+                }
+            }
+        }
+
+        // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
+        if (!referenceBody.IsStar) // not orbiting a star
+        {
+            if (!referenceBody.Orbit.referenceBody.IsStar && orbit.eccentricity < 1) // not orbiting a planet, and e < 1
+            {
+                DrawSectionHeader("Moon Specific Maneuvers");
+
+                var parentPlanet = referenceBody.Orbit.referenceBody;
+                FPSettings.mr_altitude_km = DrawToggleButtonWithTextField("Moon Return", ref moonReturn, FPSettings.mr_altitude_km, "km");
+                targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
+            }
+        }
+
+        // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
+        if (selectedOption == TimeReference["ALTITUDE"])
+        {
+            FPSettings.altitude_km = DrawLabelWithTextField("Maneuver Altitude", FPSettings.altitude_km, "km");
+        }
+        if (selectedOption == TimeReference["X_FROM_NOW"])
+        {
+            FPSettings.timeOffset = DrawLabelWithTextField("Time From Now", FPSettings.timeOffset, "s");
+        }
+
+        // Using the selected activity configure the valid options list
+        setOptionsList();
+
+        var UT = game.UniverseModel.UniversalTime;
+        // if (statusText == "Virgin") statusTime = UT;
+        if (currentNode == null && status != Status.VIRGIN)
+        {
+            status = Status.OK;
+            statusText = "";
+        }
+        DrawGUIStatus(UT);
+
+        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the orbit
+        if (selectedOption == TimeReference["ALTITUDE"])
+        {
+            if (FPSettings.altitude_km * 1000 < orbit.Periapsis)
+            {
+                FPSettings.altitude_km = Math.Ceiling(orbit.Periapsis) / 1000;
+                if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
+                    UI_Fields.temp_dict["Maneuver Altitude"] = FPSettings.altitude_km.ToString();
+            }
+            if (orbit.eccentricity < 1 && FPSettings.altitude_km * 1000 > orbit.Apoapsis)
+            {
+                FPSettings.altitude_km = Math.Floor(orbit.Apoapsis) / 1000;
+                if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
+                    UI_Fields.temp_dict["Maneuver Altitude"] = FPSettings.altitude_km.ToString();
+            }
+        }
+
+        maneuver = $"{baseManeuver} {selectedOption}";
+
+        setBurnTime();
+
+        // handleButtons();
+
+        GUI.DragWindow(new Rect(0, 0, 10000, 500));
+    }
+
+    // This method should be called after getting the selectedOption for desired maneuver time/effect
+    private void setBurnTime()
+    {
+        // Set the requested burn time based on the selected timing option
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        if (selectedOption == TimeReference["COMPUTED"])
+            requestedBurnTime = -1; // for optimal time the burn time is computed and returned from the OrbitalManeuverCalculator method called.
+        else if (selectedOption == TimeReference["APOAPSIS"])
+            requestedBurnTime = orbit.NextApoapsisTime(UT);
+        else if (selectedOption == TimeReference["PERIAPSIS"])
+            requestedBurnTime = orbit.NextPeriapsisTime(UT);
+        else if (selectedOption == TimeReference["CLOSEST_APPROACH"])
+            requestedBurnTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); // +2 so that closestApproachTime is definitely > UT
+        else if (selectedOption == TimeReference["EQ_ASCENDING"])
+            requestedBurnTime = orbit.TimeOfAscendingNodeEquatorial(UT);
+        else if (selectedOption == TimeReference["EQ_DESCENDING"])
+            requestedBurnTime = orbit.TimeOfDescendingNodeEquatorial(UT);
+        else if (selectedOption == TimeReference["REL_ASCENDING"])
+            requestedBurnTime = orbit.TimeOfAscendingNode(currentTarget.Orbit, UT); // like built in TimeOfAN(currentTarget.Orbit, UT), but with check to prevent time in the past
+        else if (selectedOption == TimeReference["REL_DESCENDING"])
+            requestedBurnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit, UT); // like built in TimeOfDN(currentTarget.Orbit, UT), but with check to prevent time in the past
+        else if (selectedOption == TimeReference["X_FROM_NOW"])
+            requestedBurnTime = UT + FPSettings.timeOffset;
+        else if (selectedOption == TimeReference["ALTITUDE"])
+            requestedBurnTime = orbit.NextTimeOfRadius(UT, FPSettings.altitude_km * 1000);
+        else if (selectedOption == TimeReference["EQ_NEAREST_AD"])
+            requestedBurnTime = Math.Min(orbit.TimeOfAscendingNodeEquatorial(UT), orbit.TimeOfDescendingNodeEquatorial(UT));
+        else if (selectedOption == TimeReference["EQ_HIGHEST_AD"])
+        {
+            var timeAN = orbit.TimeOfAscendingNodeEquatorial(UT);
+            var timeDN = orbit.TimeOfDescendingNodeEquatorial(UT);
+            var ANRadius = orbit.Radius(timeAN);
+            var DNRadius = orbit.Radius(timeDN);
+            if (ANRadius > DNRadius) requestedBurnTime = timeAN;
+            else requestedBurnTime = timeDN;
+        }
+        else if (selectedOption == TimeReference["REL_NEAREST_AD"])
+            requestedBurnTime = Math.Min(orbit.TimeOfAscendingNode(currentTarget.Orbit, UT), orbit.TimeOfDescendingNode(currentTarget.Orbit, UT));
+        else if (selectedOption == TimeReference["REL_HIGHEST_AD"])
+        {
+            var timeAN = orbit.TimeOfAscendingNode(currentTarget.Orbit, UT);
+            var timeDN = orbit.TimeOfDescendingNode(currentTarget.Orbit, UT);
+            var ANRadius = orbit.Radius(timeAN);
+            var DNRadius = orbit.Radius(timeDN);
+            if (ANRadius > DNRadius) requestedBurnTime = timeAN;
+            else requestedBurnTime = timeDN;
+        }
+    }
+
+    // This method sould be called at the top of FillWindow to enable toggle buttons to work like radio buttons
+    private void updateToggleButtons()
+    {
         // Make toggle buttons behave like radio buttons
         int numChecked = _toggles.Count(item => item.Value); // how many are selected now (could be 0, 1, or 2)
         int oldNumChecked = _previousToggles.Count(item => item.Value); // how many were selected before (could be 0 or 1)
         if (numChecked == 0)
         {
-            if(oldNumChecked > 0) // if the selected action has been deselected
-            _previousToggles = new Dictionary<string, bool>(_initialToggles);
+            if (oldNumChecked > 0) // if the selected action has been deselected
+                _previousToggles = new Dictionary<string, bool>(_initialToggles);
         }
         else if (numChecked == 1)
         {
@@ -667,227 +604,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             _previousToggles = new Dictionary<string, bool>(_initialToggles);
             clearToggleStates();
         }
-
-        // game = GameManager.Instance.Game;
-        //activeNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
-        //currentNode = (activeNodes.Count() > 0) ? activeNodes[0] : null;
-        FPUtility.RefreshActiveVesselAndCurrentManeuver();
-        // FPNodeControl.RefreshManeuverNodes();
-        currentNode = getCurrentNode();
-
-        string tgtName;
-        if (currentTarget == null)
-            tgtName = "None";
-        else
-            tgtName = currentTarget.Name;
-        DrawSectionHeader("Target", tgtName);
-
-        var referenceBody = activeVessel.Orbit.referenceBody;
-
-        GUILayout.BeginHorizontal(); // Begin for Horizontal pane that contains the Left and Right Vertical panes
-
-        // Left hand side of main GUI starts here
-        GUILayout.BeginVertical(GUILayout.Width(windowWidth/3)); // Begin for Left side Vertical pane (holds radio buttons)
-
-        options = new List<string>{""};
-
-        DrawSectionHeader("Ownship Maneuvers");
-        //DrawButton("Circularize Now", ref circularize);
-        DrawSoloToggle(" Circularize", ref circularize);
-
-        // DrawButtonWithTextField("New Pe", ref newPe, ref targetPeAStr, "m");
-        DrawSoloToggle(" New Pe", ref newPe);
-
-        if (activeVessel.Orbit.eccentricity < 1)
-        {
-            // DrawButtonWithTextField("New Ap", ref newAp, ref targetApAStr, "m");
-            DrawSoloToggle(" New Ap", ref newAp);
-
-            // DrawButtonWithDualTextField("New Pe & Ap", "New Ap & Pe", ref newPeAp, ref targetPeAStr1, ref targetApAStr1);
-            DrawSoloToggle(" New Pe & Ap", ref newPeAp);
-        }
-
-        // DrawButtonWithTextField("New Inclination", ref newInc, ref targetIncStr, "°");
-        DrawSoloToggle(" New Inclination", ref newInc);
-
-        if (experimental.Value)
-        {
-            // DrawButtonWithTextField("New LAN", ref newLAN, ref targetLANStr, "°");
-            DrawSoloToggle(" New LAN", ref newLAN);
-        }
-
-        if (currentTarget != null)
-        {
-            // If the activeVessel and the currentTarget are both orbiting the same body
-            if (currentTarget.Orbit != null) // No maneuvers relative to a star
-            {
-                if (currentTarget.Orbit.referenceBody.Name == referenceBody.Name)
-                {
-                    DrawSectionHeader("Maneuvers Relative to Target");
-                    // DrawButton("Match Planes at AN", ref matchPlanesA);
-                    // DrawButton("Match Planes at DN", ref matchPlanesD);
-                    DrawSoloToggle(" Match Planes with Target", ref matchPlane);
-
-                    // DrawButton("Hohmann Xfer", ref hohmannT);
-                    DrawSoloToggle(" Hohman Transfer", ref hohmannT);
-
-                    // DrawButton("Course Correction", ref courseCorrection);
-                    DrawSoloToggle(" Course Correction", ref courseCorrection);
-
-                    if (experimental.Value)
-                    {
-                        // DrawButtonWithTextField("Intercept at Time", ref interceptTgt, ref interceptTStr, "s");
-                        DrawSoloToggle(" Intercept Target", ref interceptTgt);
-
-                        //DrawButton("Match Velocity @CA", ref matchVCA);
-                        //DrawButton("Match Velocity Now", ref matchVNow);
-                        DrawSoloToggle(" Match Velicity with Target", ref matchVelocity);
-                    }
-                }
-            }
-
-            if (experimental.Value)
-            {
-                // If the activeVessel is not orbiting a star
-                if (!referenceBody.IsStar && currentTarget.IsCelestialBody) // not orbiting a start and target is celestial
-                {
-                    // If the activeVessel is orbiting a planet and the current target is not the body the active vessel is orbiting
-                    if (referenceBody.Orbit.referenceBody.IsStar && (currentTarget.Name != referenceBody.Name) && currentTarget.Orbit != null)
-                    {
-                        if (currentTarget.Orbit.referenceBody.IsStar) // exclude targets that are a moon
-                        {
-                            DrawSectionHeader("Interplanetary Maneuvers");
-                            // DrawButton("Interplanetary Transfer", ref planetaryXfer);
-                            DrawSoloToggle(" Interplanetary Transfer", ref planetaryXfer);
-                        }
-                    }
-                }
-
-            }
-        }
-
-        // If the activeVessle is at a moon (a celestial in orbit around another celestial that's not also a star)
-        if (!referenceBody.IsStar) // not orbiting a star
-        {
-            if (!referenceBody.Orbit.referenceBody.IsStar && activeVessel.Orbit.eccentricity < 1) // not orbiting a planet, and e < 1
-            {
-                DrawSectionHeader("Moon Specific Maneuvers");
-                // DrawButton("Moon Return", ref moonReturn); // targetMRPeAAStr
-                // DrawButtonWithTextField("Moon Return", ref moonReturn, ref targetMRPeAStr, "m");
-                DrawSoloToggle(" Moon Return", ref moonReturn);
-            }
-        }
-        GUILayout.EndVertical(); // End for Left side Vertical pane
-
-        handleToggles(); // Toggel-dependent code that needs to run after Left Side and before Right Side, sets up options
-
-        // Right hand side of main GUI starts here
-        GUILayout.BeginVertical(GUILayout.Width(windowWidth / 2)); // Begin for Right side Vertical pane (celestial target selection and option selection drop down menus)
-
-        BodySelectionGUI(); // Celestial target selection drop down menu
-
-        // Allow player to select a burn time option
-        GUILayout.BeginVertical(boxStyle, GUILayout.Width(windowWidth / 2)); // Begin Vertical pane within right side for option selection
-        GUI.SetNextControlName("Select Options");
-        scrollPositionOptions = GUILayout.BeginScrollView(scrollPositionOptions, false, true, GUILayout.Height(125)); // Begin scroll view for option selection
-        if (!selectingOption)
-        {
-            if (GUILayout.Button(selectedOption, listBtnStyle))
-                selectingOption = true;
-        }
-        else
-        {
-            foreach (string option in options)
-            {
-                if (GUILayout.Button(option, listBtnStyle))
-                {
-                    selectedOption = option;
-                    selectingOption = false;
-                }
-            }
-        }
-        GUILayout.EndScrollView(); // End scroll view for option selection
-        GUILayout.EndVertical(); // End Vertical pane for option selection
-
-        GUILayout.EndVertical(); // End Vertical pane for right side
-
-        GUILayout.EndHorizontal(); // End for Horizontal pane that contains the Left and Right Vertical panes
-
-        // Set the requested burn time based on the selected timing option
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        if (selectedOption == TimeReference["COMPUTED"])
-            requestedBurnTime = -1; // for optimal time the burn time is computed and returned from the OrbitalManeuverCalculator method called.
-        else if (selectedOption == TimeReference["APOAPSIS"])
-            requestedBurnTime = activeVessel.Orbit.NextApoapsisTime(UT);
-        else if (selectedOption == TimeReference["PERIAPSIS"])
-            requestedBurnTime = activeVessel.Orbit.NextPeriapsisTime(UT);
-        else if (selectedOption == TimeReference["CLOSEST_APPROACH"])
-            requestedBurnTime = activeVessel.Orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); // +2 so that closestApproachTime is definitely > UT
-        else if (selectedOption == TimeReference["EQ_ASCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfANEquatorial(UT); // Same code as MJ in OrbitExtensions: TimeOfAscendingNodeEquatorial(UT)
-        else if (selectedOption == TimeReference["EQ_DESCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfDNEquatorial(UT); // Same code as MJ in OrbitExtensions: TimeOfDescendingNodeEquatorial(UT)
-        else if (selectedOption == TimeReference["REL_ASCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT); // like built in TimeOfAN(currentTarget.Orbit, UT), but with check to prevent time in the past
-        else if (selectedOption == TimeReference["REL_DESCENDING"])
-            requestedBurnTime = activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT); // like built in TimeOfDN(currentTarget.Orbit, UT), but with check to prevent time in the past
-        else if (selectedOption == TimeReference["X_FROM_NOW"])
-            requestedBurnTime = UT + 30; // FIX ME! This should be a user selectable offset
-        else if (selectedOption == TimeReference["ALTITUDE"])
-            requestedBurnTime = activeVessel.Orbit.NextTimeOfRadius(UT, (double)1000000); // FIX ME! This should be a user selectable offset
-        else if (selectedOption == TimeReference["EQ_NEAREST_AD"])
-            requestedBurnTime = Math.Min(activeVessel.Orbit.TimeOfANEquatorial(UT), activeVessel.Orbit.TimeOfDNEquatorial(UT));
-        else if (selectedOption == TimeReference["EQ_HIGHEST_AD"])
-        {
-            var timeAN = activeVessel.Orbit.TimeOfANEquatorial(UT);
-            var timeDN = activeVessel.Orbit.TimeOfDNEquatorial(UT);
-            var ANRadius = activeVessel.Orbit.Radius(timeAN);
-            var DNRadius = activeVessel.Orbit.Radius(timeDN);
-            if (ANRadius > DNRadius) requestedBurnTime = timeAN;
-            else requestedBurnTime = timeDN;
-        }
-        else if (selectedOption == TimeReference["REL_NEAREST_AD"])
-            requestedBurnTime = Math.Min(activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT), activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT));
-        else if (selectedOption == TimeReference["REL_HIGHEST_AD"])
-        {
-            var timeAN = activeVessel.Orbit.TimeOfAscendingNode(currentTarget.Orbit, UT);
-            var timeDN = activeVessel.Orbit.TimeOfDescendingNode(currentTarget.Orbit, UT);
-            var ANRadius = activeVessel.Orbit.Radius(timeAN);
-            var DNRadius = activeVessel.Orbit.Radius(timeDN);
-            if (ANRadius > DNRadius) requestedBurnTime = timeAN;
-            else requestedBurnTime = timeDN;
-        }
-
-        // Get any user input values needed before any GUI action button call
-        if (double.TryParse(targetApAStr, out targetApR)) targetApR += referenceBody.radius;
-        else targetApR = 0;
-        if (double.TryParse(targetPeAStr, out targetPeR)) targetPeR += referenceBody.radius;
-        else targetPeR = 0;
-        if (double.TryParse(targetPeAStr1, out targetPeR1)) targetPeR1 += referenceBody.radius;
-        else targetPeR1 = 0;
-        if (double.TryParse(targetApAStr1, out targetApR1)) targetApR1 += referenceBody.radius;
-        else targetApR1 = 0;
-        if (!double.TryParse(targetIncStr, out targetInc)) targetInc = 0;
-        if (!double.TryParse(targetLANStr, out targetLAN)) targetLAN = 0;
-        if (!double.TryParse(interceptTStr, out interceptT)) interceptT = 3600;
-        if (double.TryParse(targetMRPeAStr, out targetMRPeR)) targetMRPeR += referenceBody.radius;
-        else targetMRPeR = 0;
-
-        DrawGUIButtons();
-
-        // if (statusText == "Virgin") statusTime = UT;
-        if (currentNode == null && status != Status.VIRGIN)
-        {
-            status = Status.OK;
-            statusText = "";
-        }
-        DrawGUIStatus(UT);
-
-        handleButtons();
-
-        GUI.DragWindow(new Rect(0, 0, 10000, 500));
     }
 
+    // This method is called by updateToggleButtons to set the sate of a toggle button
     private void setToggleState(string key, bool value)
     {
         if (key == "Circularize")
@@ -902,6 +621,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             newInc = value;
         if (key == "SetNewLAN")
             newLAN = value;
+        if (key == "SetNodeLongitude")
+            newNodeLon = value;
+        if (key == "SetSMA")
+            newSMA = value;
         if (key == "MatchPlane")
             matchPlane = value;
         if (key == "MatchVelocity")
@@ -909,7 +632,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (key == "CourseCorrection")
             courseCorrection = value;
         if (key == "HohmannTransfer")
-            hohmannT = value;
+            hohmannXfer = value;
         if (key == "InterceptTgt")
             interceptTgt = value;
         if (key == "MoonReturn")
@@ -917,6 +640,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (key == "PlanetaryXfer")
             planetaryXfer = value;
     }
+
+    // This method is called by updateToggleButtons to clear the state of all toggle buttons
     private void clearToggleStates()
     {
         circularize = false;
@@ -925,18 +650,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         newPeAp = false;
         newInc = false;
         newLAN = false;
+        newNodeLon = false;
+        newSMA = false;
         matchPlane = false;
         matchVelocity = false;
         courseCorrection = false;
-        hohmannT = false;
+        hohmannXfer = false;
         interceptTgt = false;
         moonReturn = false;
         planetaryXfer = false;
-    }
-
-    private bool CloseButton()
-    {
-        return GUI.Button(closeBtnRect, "x", closeBtnStyle);
     }
 
     private void CloseWindow()
@@ -947,49 +669,131 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // game.Input.Flight.Enable();
         GameManager.Instance.Game.Input.Enable();
         ToggleButton(interfaceEnabled);
+
+        UI_Fields.GameInputState = true;
+    }
+
+    void selectBodyUI()
+    {
+        //bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
+
+        CelestialBodyComponent root_body = activeVessel.mainBody;
+        while(root_body.referenceBody != null)
+        {
+            root_body = root_body.referenceBody;
+        }
+
+        void listSubBodies(CelestialBodyComponent body, int level)
+        {
+            foreach (CelestialBodyComponent sub in body.orbitingBodies)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(level * 30);
+                if (UI_Tools.ListButton(sub.Name))
+                {
+                    selectingBody = false;
+                    activeVessel.SetTargetByID(sub.GlobalId);
+                    currentTarget = activeVessel.TargetObject;
+                }
+               
+                GUILayout.EndHorizontal();
+                listSubBodies(sub, level + 1);
+            }
+        }
+
+        // bodies = GameManager.Instance.Game.SpaceSimulation.GetAllObjectsWithComponent<CelestialBodyComponent>();
+
+        GUILayout.BeginHorizontal();
+        UI_Tools.Label("Select target ");
+        if (UI_Tools.SmallButton("Cancel"))
+        {
+            selectingBody = false;
+        }
+        GUILayout.EndHorizontal();
+
+        UI_Tools.Separator();
+
+        //GUI.SetNextControlName("Select Target");
+        scrollPositionBodies = UI_Tools.BeginScrollView(scrollPositionBodies, 300);
+
+        listSubBodies(root_body, 0);
+
+        GUILayout.EndScrollView();
     }
 
     private void BodySelectionGUI()
     {
-        bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
-        string baseName = "Select Target";
-        //GUILayout.BeginHorizontal();
-        GUILayout.Label("Target Celestial Body: ", GUILayout.Width((windowWidth / 2)));
-        //GUILayout.EndHorizontal();
-        if (!selectingBody)
-        {
-            GUI.SetNextControlName(baseName);
-            if (GUILayout.Button(selectedBody, listBtnStyle, GUILayout.Width(windowWidth / 2)))
-                selectingBody = true;
-        }
+        string tgtName;
+        if (currentTarget == null)
+            tgtName = "None";
         else
-        {
-            GUILayout.BeginVertical(boxStyle, GUILayout.Width(windowWidth / 2));
-            GUI.SetNextControlName("Select Target");
-            scrollPositionBodies = GUILayout.BeginScrollView(scrollPositionBodies, false, true, GUILayout.Height(150));
-            foreach (string body in bodies)
-            {
-                if (GUILayout.Button(body, listBtnStyle))
-                {
-                    selectedBody = body;
-                    selectingBody = false;
-                    activeVessel.SetTargetByID(game.UniverseModel.FindCelestialBodyByName(body).GlobalId);
-                    currentTarget = activeVessel.TargetObject;
-                }
-            }
-            GUILayout.EndScrollView();
-            GUILayout.EndVertical();
-        }
+            tgtName = currentTarget.Name;
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Target : ");
+
+        if (UI_Tools.SmallButton(tgtName))
+            selectingBody = true;
+        
+        GUILayout.EndHorizontal();
     }
 
-    private void DrawSectionHeader(string sectionName, string value = "", GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
+    // Allow the user to pick an option for the selected activity
+    void selectOptionUI()
     {
-        if (valueStyle == null) valueStyle = valueLabelStyle;
+        GUILayout.BeginHorizontal();
+        UI_Tools.Label("Burn Time Option ");
+        if (UI_Tools.SmallButton("Cancel"))
+        {
+            selectingOption = false;
+        }
+        GUILayout.EndHorizontal();
+
+        UI_Tools.Separator();
+
+        //GUI.SetNextControlName("Select Target");
+        scrollPositionOptions = UI_Tools.BeginScrollView(scrollPositionOptions, 300);
+
+        foreach (string option in options)
+        {
+            GUILayout.BeginHorizontal();
+             if (UI_Tools.ListButton(option))
+            {
+                selectedOption = option;
+                selectingOption = false;
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.EndScrollView();
+    }
+
+    // Control display of the Option Picker UI
+    private void OptionSelectionGUI()
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Burn : ");
+
+        if (UI_Tools.SmallButton(selectedOption))
+            selectingOption = true;
+
+        GUILayout.EndHorizontal();
+    }
+
+    int spacingAfterHeader = 5;
+    int spacingAfterEntry = 5;
+
+    private void DrawSectionHeader(string sectionName, string value = "", float labelWidth = -1, GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
+    {
+        if (valueStyle == null) valueStyle = FPStyles.label;
         GUILayout.BeginHorizontal();
         // Don't need popout buttons for ROC
-        // isPopout = isPopout ? !CloseButton() : GUILayout.Button("⇖", popoutBtnStyle);
+        // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);
 
-        GUILayout.Label($"<b>{sectionName}</b> ");
+        if (labelWidth < 0)
+            GUILayout.Label($"<b>{sectionName}</b> ");
+        else
+            GUILayout.Label($"<b>{sectionName}</b> ", GUILayout.Width(labelWidth));
         GUILayout.FlexibleSpace();
         GUILayout.Label(value, valueStyle);
         GUILayout.Space(5);
@@ -1000,12 +804,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, nameLabelStyle);
+        UI_Tools.Label(entryName);
         GUILayout.FlexibleSpace();
-        button = GUILayout.Button(buttonStr, ctrlBtnStyle);
-        GUILayout.Label(value, valueLabelStyle);
+        button = UI_Tools.SmallButton(buttonStr);
+        UI_Tools.Label(value);
         GUILayout.Space(5);
-        GUILayout.Label(unit, unitLabelStyle);
+        UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
@@ -1013,214 +817,110 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void DrawEntry2Button(string entryName, ref bool button1, string button1Str, ref bool button2, string button2Str, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, nameLabelStyle);
+        UI_Tools.Console(entryName);
         GUILayout.FlexibleSpace();
-        button1 = GUILayout.Button(button1Str, ctrlBtnStyle);
-        button2 = GUILayout.Button(button2Str, ctrlBtnStyle);
-        GUILayout.Label(value, valueLabelStyle);
+        button1 = UI_Tools.SmallButton(button1Str);
+        button2 = UI_Tools.SmallButton(button2Str);
+        UI_Tools.Console(value);
         GUILayout.Space(5);
-        GUILayout.Label(unit, unitLabelStyle);
-        GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
-    }
-
-    private void DrawEntryTextField(string entryName, ref string textEntry, string unit = "")
-    {
-        double num;
-        Color normal;
-        GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, nameLabelStyle);
-        GUILayout.FlexibleSpace();
-        normal = GUI.color;
-        bool parsed = double.TryParse(textEntry, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName);
-        textEntry = GUILayout.TextField(textEntry, textInputStyle);
-        GUI.color = normal;
-        GUILayout.Space(5);
-        GUILayout.Label(unit, unitLabelStyle);
+        UI_Tools.Console(unit);
         GUILayout.EndHorizontal();
         GUILayout.Space(spacingAfterEntry);
     }
 
     private void DrawButton(string buttonStr, ref bool button)
     {
-        GUILayout.BeginHorizontal();
-        button = GUILayout.Button(buttonStr, bigBtnStyle);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
+        button = UI_Tools.Button(buttonStr);
     }
 
-    private void DrawButtonWithTextField(string entryName, ref bool button, ref string textEntry, string unit = "")
+    private void DrawToggleButton(string runString, ref bool button, string stopString = "")
     {
-        double num;
-        Color normal;
+        if (stopString.Length < 1)
+            stopString = runString;
+        button = UI_Tools.ToggleButton(button, runString, stopString);
+    }
+
+    private double DrawLabelWithTextField(string entryName, double value, string unit = "")
+    {
         GUILayout.BeginHorizontal();
-        button = GUILayout.Button(entryName, smallBtnStyle);
+        UI_Tools.Label(entryName);
         GUILayout.Space(10);
-        normal = GUI.color;
-        bool parsed = double.TryParse(textEntry, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName);
-        textEntry = GUILayout.TextField(textEntry, textInputStyle);
-        GUI.color = normal;
+
+        value = UI_Fields.DoubleField(entryName, value);
+
         GUILayout.Space(3);
-        GUILayout.Label(unit, unitLabelStyle);
-        GUILayout.FlexibleSpace();
+        UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
-    }
 
-    private void DrawButtonWithDualTextField(string entryName1, string entryName2, ref bool button, ref string textEntry1, ref string textEntry2, string unit = "")
+        GUILayout.Space(spacingAfterEntry);
+        return value;
+    }
+    private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
-        double num;
-        Color normal;
         GUILayout.BeginHorizontal();
-        button = GUILayout.Button(entryName1, smallBtnStyle);
-        GUILayout.Space(5);
-        normal = GUI.color;
-        bool parsed = double.TryParse(textEntry1, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName1);
-        textEntry1 = GUILayout.TextField(textEntry1, textInputStyle);
-        GUI.color = normal;
-        GUILayout.Space(5);
-        parsed = double.TryParse(textEntry2, out num);
-        if (!parsed) GUI.color = Color.red;
-        GUI.SetNextControlName(entryName2);
-        textEntry2 = GUILayout.TextField(textEntry2, textInputStyle);
-        GUI.color = normal;
+        button = UI_Tools.Button(entryName);
+        GUILayout.Space(10);
+
+        value = UI_Fields.DoubleField(entryName, value);
+
         GUILayout.Space(3);
-        GUILayout.Label(unit, unitLabelStyle);
-        GUILayout.FlexibleSpace();
+        UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
+
         GUILayout.Space(spacingAfterEntry);
+        return value;
     }
 
-    private void DrawSoloToggle(string optionName, ref bool toggle)
-    {
-        //GUILayout.Space(5);
-        GUILayout.BeginHorizontal();
-        toggle = GUILayout.Toggle(toggle, optionName, sectionToggleStyle);
-        // GUILayout.Space(5);
-        // GUILayout.Label(optionName, labelStyle);
-        GUILayout.EndHorizontal();
-        GUILayout.Space(-10);
-    }
-
-    /// <summary>
-    /// Draws a white horizontal line accross the container it's put in
-    /// </summary>
-    /// <param name="height">Height/thickness of the line</param>
-    public static void DrawHorizontalLine(float height)
-    {
-        Texture2D horizontalLineTexture = new Texture2D(1, 1);
-        horizontalLineTexture.SetPixel(0, 0, Color.white);
-        horizontalLineTexture.Apply();
-        GUI.DrawTexture(GUILayoutUtility.GetRect(Screen.width, height), horizontalLineTexture);
-    }
-
-    /// <summary>
-    /// Draws a white horizontal line accross the container it's put in with height of 1 px
-    /// </summary>
-    public static void DrawHorizontalLine() { DrawHorizontalLine(1); }
-
-    private void DrawGUIButtons()
+    private double DrawToggleButtonWithTextField(string runString, ref bool button, double value, string unit = "", string stopString = "")
     {
         GUILayout.BeginHorizontal();
-        makeNode = GUILayout.Button("Make Node", smallBtnStyle);
-        if (MNCLoaded && mncVerCheck >= 0)
-        {
-            GUILayout.FlexibleSpace();
-            launchMNC = GUILayout.Button(mnc_button_tex_con, smallBtnStyle);
-        }
-        if (K2D2Loaded && currentNode != null)
-        {
-            GUILayout.FlexibleSpace();
-            executeNode = GUILayout.Button(k2d2_button_tex_con, smallBtnStyle);
-        }
+        if (stopString.Length < 1)
+            stopString = runString;
+        button = UI_Tools.ToggleButton(button, runString, stopString);
+        GUILayout.Space(10);
+
+        value = UI_Fields.DoubleField(runString, value);
+
+        GUILayout.Space(3);
+        UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
-        if (checkK2D2status)
-        {
-            getK2D2Status();
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"K2D2: {k2d2Status}", labelStyle);
-            GUILayout.EndHorizontal();
-        }
+
+        GUILayout.Space(spacingAfterEntry);
+        return value;
     }
+
+    public FPOtherModsInterface other_mods = null;
 
     private void DrawGUIStatus(double UT)
     {
         // Indicate status of last GUI function
         float transparency = 1;
         if (UT > statusTime) transparency = (float)MuUtils.Clamp(1 - (UT - statusTime) / statusFadeTime.Value, 0, 1);
-        if (status == Status.VIRGIN)
-            statusStyle.normal.textColor = new Color(1, 1, 1, 1);
+
+        var status_style = FPStyles.status;
+        //if (status == Status.VIRGIN)
+        //    status_style = FPStyles.label;
         if (status == Status.OK)
-            statusStyle.normal.textColor = new Color(0, 1, 0, transparency);
+            status_style.normal.textColor = new Color(0, 1, 0, transparency); // FPStyles.phase_ok;
         if (status == Status.WARNING)
-            statusStyle.normal.textColor = new Color(1, 1, 0, transparency);
+            status_style.normal.textColor = new Color(1, 1, 0, transparency); // FPStyles.phase_warning;
         if (status == Status.ERROR)
-            statusStyle.normal.textColor = new Color(1, 0, 0, transparency);
-        GUILayout.Box("", horizontalDivider);
-        DrawSectionHeader("Status:", statusText, statusStyle);
+            status_style.normal.textColor = new Color(1, 0, 0, transparency); // FPStyles.phase_error;
+
+        UI_Tools.Separator();
+        DrawSectionHeader("Status:", statusText, 60, status_style);
 
         // Indication to User that its safe to type, or why vessel controls aren't working
-        GUILayout.BeginHorizontal();
-        string inputStateString = gameInputState ? "<b>Enabled</b>" : "<b>Disabled</b>";
-        GUILayout.Label("Game Input: ", labelStyle);
-        if (gameInputState)
-            GUILayout.Label(inputStateString, labelStyle);
-        else
-            GUILayout.Label(inputStateString, warnStyle);
-        GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterSection);
-    }
 
-    private void callMNC()
-    {
-        if (MNCLoaded && mncVerCheck >= 0)
+        if (other_mods == null)
         {
-            mncLaunchMNCMethodInfo!.Invoke(mncPropertyInfo.GetValue(null), null);
+            // init mode detection only when first needed
+            other_mods = new FPOtherModsInterface();
+            other_mods.CheckModsVersions();
         }
-    }
 
-    private void callK2D2()
-    {
-        if (K2D2Loaded)
-        {
-            // Reflections method to attempt the same thing more cleanly
-            if (k2d2VerCheck < 0)
-            {
-                k2d2ToggleMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), new object[] { true });
-            }
-            else
-            {
-                k2d2FlyNodeMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), null);
-                checkK2D2status = true;
-            }
-        }
-    }
-
-    private void getK2D2Status()
-    {
-        if (K2D2Loaded)
-        {
-            if (k2d2VerCheck >= 0)
-            {
-                k2d2Status = (string)k2d2GetStatusMethodInfo!.Invoke(k2d2Instance, null);
-
-                if (k2d2Status == "Done")
-                {
-                    if (currentNode.Time < Game.UniverseModel.UniversalTime)
-                    {
-                        NodeManagerPlugin.Instance.DeleteNodes(0);
-                    }
-                    checkK2D2status = false;
-                }
-            }
-        }
+        other_mods.OnGUI(currentNode);
+        GUILayout.Space(spacingAfterEntry);
     }
 
     private void CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
@@ -1254,76 +954,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     }
 
     // Flight Plan API Methods
-    public bool CircularizeAtAP(double burnOffsetFactor = -0.5)
+    public bool Circularize(double burnUT, double burnOffsetFactor = -0.5)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("CircularizeAtAP");
-        var TimeToAp = orbit.TimeToAp;
-        var burnUT = UT + TimeToAp;
+        Logger.LogDebug($"Circularize {selectedOption}");
+        //var startTimeOffset = 60;
+        //var burnUT = UT + startTimeOffset;
         var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
 
         status = Status.OK;
-        statusText = "Ready to Circularize at Ap";
-        statusTime = UT + statusPersistence.Value;
-
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = "Circularize at Ap: Solution Not Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
-
-    public bool CircularizeAtPe(double burnOffsetFactor = -0.5)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
-
-        Logger.LogDebug("CircularizeAtPe");
-        var TimeToPe = orbit.TimeToPe;
-        var burnUT = UT + TimeToPe;
-        var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-        status = Status.OK;
-        statusText = "Ready to Circularize at Pe";
-        statusTime = UT + statusPersistence.Value;
-
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = "Circularize at Pe: Solution Not Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
-
-    public bool CircularizeNow(double burnOffsetFactor = -0.5)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
-
-        Logger.LogDebug("CircularizeNow");
-        var startTimeOffset = 60;
-        var burnUT = UT + startTimeOffset;
-        var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
-
-        status = Status.OK;
-        statusText = "Ready to Circularize Now"; // "Ready to Circularize Now"
+        statusText = $"Ready to Circularize {selectedOption}"; // "Ready to Circularize Now"
         statusTime = UT + statusPersistence.Value;
 
         if (deltaV != Vector3d.zero)
@@ -1341,23 +983,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool SetNewPe(double newPe, double burnOffsetFactor = -0.5)
+    public bool SetNewPe(double burnUT, double newPe, double burnOffsetFactor = -0.5)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetNewPe");
+        Logger.LogDebug($"SetNewPe {selectedOption}");
         // Debug.Log("Set New Pe");
-        var TimeToAp = orbit.TimeToAp;
-        double burnUT, e;
-        e = orbit.eccentricity;
-        if (e < 1)
-            burnUT = UT + TimeToAp;
-        else
-            burnUT = UT + 30;
+        //var TimeToAp = orbit.TimeToAp;
+        //double burnUT, e;
+        //e = orbit.eccentricity;
+        //if (e < 1)
+        //    burnUT = UT + TimeToAp;
+        //else
+        //    burnUT = UT + 30;
 
         status = Status.OK;
-        statusText = "Ready to Change Pe";
+        statusText = $"Ready to Change Pe {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
         Logger.LogDebug($"Seeking Solution: targetPeR {newPe} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
@@ -1378,18 +1020,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool SetNewAp(double newAp, double burnOffsetFactor)
+    public bool SetNewAp(double burnUT, double newAp, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetNewAp");
+        Logger.LogDebug($"SetNewAp {selectedOption}");
         // Debug.Log("Set New Ap");
-        var TimeToPe = orbit.TimeToPe;
-        var burnUT = UT + TimeToPe;
+        //var TimeToPe = orbit.TimeToPe;
+        //var burnUT = UT + TimeToPe;
 
         status = Status.OK;
-        statusText = "Ready to Change Ap";
+        statusText = $"Ready to Change Ap {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
         Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
@@ -1409,15 +1051,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool Ellipticize(double newAp, double newPe, double burnOffsetFactor)
+    public bool Ellipticize(double burnUT, double newAp, double newPe, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("Ellipticize: Set New Pe and Ap");
+        Logger.LogDebug($"Ellipticize: Set New Pe and Ap {selectedOption}");
 
         status = Status.OK;
-        statusText = "Ready to Ellipticize"; // "Ready to Ellipticize";
+        statusText = $"Ready to Ellipticize {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
         if (newPe > newAp)
@@ -1428,7 +1070,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
 
         Logger.LogDebug($"Seeking Solution: targetPeR {newPe} m, targetApR {newAp} m, body.radius {orbit.referenceBody.radius} m");
-        var burnUT = UT + 30;
+        // var burnUT = UT + 30;
         var deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(orbit, burnUT, newPe, newAp);
         if (deltaV != Vector3d.zero)
         {
@@ -1445,46 +1087,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool SetInclination(double inclination, double burnOffsetFactor)
+    public bool SetInclination(double burnUT, double inclination, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetInclination: Set New Inclination");
-        Logger.LogDebug($"Seeking Solution: targetInc {inclination}°");
-        double burnUT, TAN, TDN;
-        Vector3d deltaV, deltaV1, deltaV2;
+        Logger.LogDebug($"SetInclination: Set New Inclination {inclination}° {selectedOption}");
+        // double burnUT, TAN, TDN;
+        Vector3d deltaV;
 
         status = Status.OK;
-        statusText = "Ready to Change Inclination";
+        statusText = $"Ready to Change Inclination {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
-        if (orbit.eccentricity < 1) // Eliptical orbit: Pick cheapest deltaV between AN and DN
-        {
-            TAN = orbit.TimeOfAscendingNodeEquatorial(UT);
-            TDN = orbit.TimeOfDescendingNodeEquatorial(UT);
-            deltaV1 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TAN, inclination);
-            deltaV2 = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, TDN, inclination);
-            if (deltaV1.magnitude < deltaV2.magnitude)
-            {
-                Logger.LogDebug($"Selecting maneuver at Ascending Node");
-                burnUT = TAN;
-                deltaV = deltaV1;
-            }
-            else
-            {
-                Logger.LogDebug($"Selecting maneuver at Descending Node");
-                burnUT = TDN;
-                deltaV = deltaV2;
-            }
-            Logger.LogDebug($"deltaV1 (AN) [{deltaV1.x}, {deltaV1.y}, {deltaV1.z}] = {deltaV1.magnitude} m/s {TAN - UT} s from UT");
-            Logger.LogDebug($"deltaV2 (DN) [{deltaV2.x}, {deltaV2.y}, {deltaV2.z}] = {deltaV2.magnitude} m/s {TDN - UT} s from UT");
-        }
-        else // parabolic or hyperbolic orbit: Do it now!
-        {
-            burnUT = UT + 30;
-            deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, inclination);
-        }
+        deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, inclination);
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
@@ -1499,23 +1115,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             return false;
         }
     }
-
-    public bool SetNewLAN(double newLAN, double burnOffsetFactor)
+    
+    public bool SetNewLAN(double burnUT, double newLANvalue, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug("SetNewAp");
+        Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {selectedOption}");
         // Debug.Log("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
-        var burnUT = UT + 30;
+        // var burnUT = UT + 30;
 
         status = Status.WARNING;
-        statusText = "Experimental LAN Change Ready";
+        statusText = $"Experimental LAN Change {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
-        Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
-        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(orbit, burnUT, newLAN);
+        Logger.LogDebug($"Seeking Solution: newLANvalue {newLANvalue}°");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(orbit, burnUT, newLANvalue);
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
@@ -1531,22 +1147,104 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchPlanesAtAN(double burnOffsetFactor)
+    public bool SetNodeLongitude(double burnUT, double newNodeLongValue, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchPlanesAtAN: Match Planes  with {currentTarget.Name} at AN");
-        double burnUT;
+        Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {selectedOption}");
+        // Debug.Log("Set New Ap");
+        // var TimeToPe = orbit.TimeToPe;
+        // var burnUT = UT + 30;
 
-        status = Status.OK;
-        statusText = $"Ready to Match Planes with {currentTarget.Name} at AN";
+        status = Status.WARNING;
+        statusText = $"Experimental Node Longitude Change {selectedOption}";
         statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+        Logger.LogDebug($"Seeking Solution: newNodeLongValue {newNodeLongValue}°");
+        var deltaV = OrbitalManeuverCalculator.DeltaVToShiftNodeLongitude(orbit, burnUT, newNodeLongValue);
         if (deltaV != Vector3d.zero)
         {
             CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Shift Node Longitude: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+
+    public bool SetNewSMA(double burnUT, double newSMA, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"SetNewSMA {selectedOption}");
+        // Debug.Log("Set New Ap");
+        // var TimeToPe = orbit.TimeToPe;
+        // var burnUT = UT + 30;
+
+        status = Status.OK;
+        statusText = $"Ready to Change SMA Change {selectedOption}";
+        statusTime = UT + statusPersistence.Value;
+
+        Logger.LogDebug($"Seeking Solution: newSMA {newSMA} m");
+        var deltaV = OrbitalManeuverCalculator.DeltaVForSemiMajorAxis(orbit, burnUT, newSMA);
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            return true;
+        }
+        else
+        {
+            status = Status.ERROR;
+            statusText = "Set New SMA: Solution Not Found!";
+            statusTime = UT + statusPersistence.Value;
+            Logger.LogDebug(statusText);
+            return false;
+        }
+    }
+    
+    public bool MatchPlanes(double burnUT, double burnOffsetFactor)
+    {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        var orbit = activeVessel.Orbit;
+
+        Logger.LogDebug($"MatchPlanes: Match Planes with {currentTarget.Name} {selectedOption}");
+        double burnUTout = UT + 1;
+
+        status = Status.OK;
+        statusText = $"Ready to Match Planes with {currentTarget.Name} {selectedOption}";
+        statusTime = UT + statusPersistence.Value;
+
+        Vector3d deltaV = Vector3d.zero;
+        if (selectedOption == TimeReference["REL_ASCENDING"])
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        else if (selectedOption == TimeReference["REL_DESCENDING"])
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        else if (selectedOption == TimeReference["REL_NEAREST_AD"])
+        {
+            if (orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT) < orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT))
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+            else
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        }
+        else if (selectedOption == TimeReference["REL_HIGHEST_AD"])
+        {
+            var anTime = orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            var dnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
+            if (orbit.Radius(anTime) > orbit.Radius(dnTime))
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+            else
+                deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
+        }
+        if (deltaV != Vector3d.zero)
+        {
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1559,43 +1257,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchPlanesAtDN(double burnOffsetFactor)
+    public bool HohmannTransfer(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchPlanesAtDN: Match Planes with {currentTarget.Name} at DN");
-        double burnUT;
-
-        status = Status.OK;
-        statusText = $"Ready to Match Planes with {currentTarget.Name} at DN";
-        statusTime = UT + statusPersistence.Value;
-
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = $"Match Planes with {currentTarget.Name} at DN: Solution Not Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
-
-    public bool HohmannTransfer(double burnOffsetFactor)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
-        TimeSelector timeSelector;
-
-        Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name}");
+        Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name} {selectedOption}");
         // Debug.Log("Hohmann Transfer");
-        double burnUT;
+        double burnUTout;
         Vector3d deltaV;
 
         status = Status.WARNING;
@@ -1606,7 +1275,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         bool intercept_only = true;
         if (simpleTransfer)
         {
-            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
         }
         else
         {
@@ -1615,12 +1284,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             double anTime = orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
             double dnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
             // burnUT = timeSelector.ComputeManeuverTime(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit);
-            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUT, intercept_only: intercept_only, fixed_ut: false);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout, intercept_only: intercept_only, fixed_ut: false);
         }
 
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1633,7 +1302,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool InterceptTgtAtUT(double tgtUT, double burnOffsetFactor)
+    public bool InterceptTgt(double burnUT, double tgtUT, double burnOffsetFactor)
     {
         // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
         // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
@@ -1642,8 +1311,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"InterceptTgtAtUT: Intercept {currentTarget.Name} at Time");
-        var burnUT = UT + 30;
+        Logger.LogDebug($"InterceptTgt: Intercept {currentTarget.Name} {selectedOption}");
+        // var burnUT = UT + 30;
         var interceptUT = UT + tgtUT;
         double offsetDistance;
 
@@ -1651,7 +1320,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         statusText = $"Experimental Intercept of {currentTarget.Name} Ready"; // $"Ready to Intercept {currentTarget.Name}";
         statusTime = UT + statusPersistence.Value;
 
-        Logger.LogDebug($"Seeking Solution: interceptT {interceptT} s");
+        Logger.LogDebug($"Seeking Solution: interceptT {FPSettings.interceptT} s");
         if (currentTarget.IsCelestialBody) // For a target that is a celestial
             offsetDistance = currentTarget.Orbit.referenceBody.radius + 50000;
         else
@@ -1672,13 +1341,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool CourseCorrection(double burnOffsetFactor)
+    public bool CourseCorrection(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name}");
-        double burnUT;
+        Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name} {selectedOption}");
+        double burnUTout;
         Vector3d deltaV;
 
         status = Status.OK;
@@ -1689,17 +1358,17 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             Logger.LogDebug($"Seeking Solution for Celestial Target");
             double finalPeR = currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
-            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, currentTarget.Orbit.referenceBody, finalPeR, out burnUT);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, currentTarget.Orbit.referenceBody, finalPeR, out burnUTout);
         }
         else // For a tartget that is not a celestial
         {
             Logger.LogDebug($"Seeking Solution for Non-Celestial Target");
             double caDistance = 100; // m (closest approach to non-celestial target)
-            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, caDistance, out burnUT);
+            deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, caDistance, out burnUTout);
         }
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1712,12 +1381,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MoonReturn(double burnOffsetFactor)
+    public bool MoonReturn(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name}");
+        Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name} {selectedOption}");
         var e = orbit.eccentricity;
 
         status = Status.WARNING;
@@ -1735,13 +1404,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            double burnUT;
+            double burnUTout;
             // double primaryRaidus = orbit.referenceBody.Orbit.referenceBody.radius + 100000; // m
             Logger.LogDebug($"Moon Return Attempting to Solve...");
-            var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, targetMRPeR, out burnUT);
+            var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(orbit, UT, targetMRPeR, out burnUTout);
             if (deltaV != Vector3d.zero)
             {
-                CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+                CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
                 return true;
             }
             else
@@ -1755,22 +1424,22 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchVelocityAtCA(double burnOffsetFactor)
+    public bool MatchVelocity(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchVelocityAtCA: Match Velocity with {currentTarget.Name} at Closest Approach");
+        Logger.LogDebug($"MatchVelocity: Match Velocity with {currentTarget.Name} {selectedOption}");
 
         status = Status.WARNING;
         statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
         statusTime = UT + statusPersistence.Value;
 
-        double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
-        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, closestApproachTime, currentTarget.Orbit as PatchedConicsOrbit);
+        // double closestApproachTime = orbit.NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT + 2); //+2 so that closestApproachTime is definitely > UT
+        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, closestApproachTime, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
             return true;
         }
         else
@@ -1783,52 +1452,24 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MatchVelocityNow(double burnOffsetFactor)
+    public bool PlanetaryXfer(double burnUT, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchVelocityNow: Match Velocity with {currentTarget.Name} Now");
-        var burnUT = UT + 30;
-
-        status = Status.WARNING;
-        statusText = $"Experimental Velocity Match with {currentTarget.Name} Ready"; // $"Ready to Match Velocity with {currentTarget.Name}";
-        statusTime = UT + statusPersistence.Value;
-
-        var deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(orbit, burnUT, currentTarget.Orbit as PatchedConicsOrbit);
-        if (deltaV != Vector3d.zero)
-        {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
-            return true;
-        }
-        else
-        {
-            status = Status.ERROR;
-            statusText = $"Match Velocity with {currentTarget.Name} Now: No Solution Found!";
-            statusTime = UT + statusPersistence.Value;
-            Logger.LogDebug(statusText);
-            return false;
-        }
-    }
-
-    public bool PlanetaryXfer(double burnOffsetFactor)
-    {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        var orbit = activeVessel.Orbit;
-
-        Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name}");
-        double burnUT, burnUT2;
+        Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name} {selectedOption}");
+        double burnUTout, burnUT2;
         bool syncPhaseAngle = true;
 
         status = Status.WARNING;
         statusText = $"Experimental Transfer to {currentTarget.Name} Ready"; // $"Ready to depart for {currentTarget.Name}";
         statusTime = UT + statusPersistence.Value;
 
-        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUT);
+        var deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, syncPhaseAngle, out burnUTout);
         var deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(orbit, UT, currentTarget.Orbit as PatchedConicsOrbit, out burnUT2);
         if (deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+            CreateManeuverNode(deltaV, burnUTout, burnOffsetFactor);
             return true;
         }
         else
@@ -1841,10 +1482,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    private void handleToggles()
+    // This method sets up the options list based on the selected activity. This method also configures the _toggles dictionary to record the setting of the "radio buttons"
+    // for comparison to the _previousToggles dictionary.
+    private void setOptionsList()
     {
-        if (circularize|| newPe || newAp || newPeAp || newInc || newLAN || matchPlane || hohmannT || interceptTgt || courseCorrection || moonReturn || matchVelocity || planetaryXfer )
+        if (circularize || newPe || newAp || newPeAp || newInc || newLAN || newNodeLon || newSMA || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
         {
+            if (options.Contains("none"))
+                options.Remove("none");
             if (circularize)
             {
                 _toggles["Circularize"] = true;
@@ -1852,6 +1497,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Circularizing";
             }
             if (newPe)
             {
@@ -1860,6 +1506,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["PERIAPSIS"]); //"At Next Apoapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+                baseManeuver = "Setting new Pe";
             }
             if (newAp)
             {
@@ -1868,6 +1515,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
+                baseManeuver = "Setting new Ap";
             }
             if (newPeAp)
             {
@@ -1878,6 +1526,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["ALTITUDE"]); //"At An Altittude"
                 options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
                 options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                baseManeuver = "Elipticizing";
             }
             if (newLAN)
             {
@@ -1885,6 +1534,23 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
                 options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Setting new LAN";
+            }
+            if (newNodeLon)
+            {
+                _toggles["SetNodeLongitude"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Shifting Node LongitudeN";
+            }
+            if (newSMA)
+            {
+                _toggles["SetNewSMA"] = true;
+                if (activeVessel.Orbit.eccentricity < 1) options.Add(TimeReference["APOAPSIS"]); //"At Next Apoapsis"
+                options.Add(TimeReference["PERIAPSIS"]); //"At Next Periapsis"
+                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Setting new SMA";
             }
             if (newInc)
             {
@@ -1894,168 +1560,162 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
                 options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Setting new inclination";
             }
             if (matchPlane)
             {
                 _toggles["MatchPlane"] = true;
-                options.Add(TimeReference["COMPUTED"]); //"At Next AN With Target"
-                options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
-                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
-                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
-            }
-            if (hohmannT)
-            {
-                _toggles["HohmanTransfer"] = true;
-                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
-                options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
-                options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
-                options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
-                options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
-                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
-                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                options.Add(TimeReference["REL_HIGHEST_AD"]); //"At Cheapest AN/DN With Target"
+                options.Add(TimeReference["REL_NEAREST_AD"]); //"At Nearest AN/DN With Target"
                 options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
                 options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
-                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
-                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
-                options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                baseManeuver = "Matching planes";
+            }
+            if (hohmannXfer)
+            {
+                _toggles["HohmannTransfer"] = true;
+                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                //options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
+                //options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
+                //options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                //options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
+                //options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                //options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                //options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
+                //options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                //options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
+                //options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                //options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                baseManeuver = "Performaing Homann transfer";
             }
             if (interceptTgt)
             {
                 _toggles["InterceptTgt"] = true;
-                options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
-                options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
-                options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
-                options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
-                options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
-                options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
-                options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
-                options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
-                options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
-                options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
-                options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                //options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
+                //options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                //options.Add(TimeReference["APOAPSIS"]); //"At Apoapsis"
+                //options.Add(TimeReference["PERIAPSIS"]); //"At Periapsis"
+                //options.Add(TimeReference["ALTITUDE"]); //"At An Altitude"
+                //options.Add(TimeReference["EQ_ASCENDING"]); //"At Equatorial AN"
+                //options.Add(TimeReference["EQ_DESCENDING"]); //"At Equatorial DN"
+                //options.Add(TimeReference["REL_ASCENDING"]); //"At Next AN With Target"
+                //options.Add(TimeReference["REL_DESCENDING"]); //"At Next DN With Target"
+                //options.Add(TimeReference["EQ_NEAREST_AD"]); //"At Nearest AN/DN With Target"
+                //options.Add(TimeReference["EQ_HIGHEST_AD"]); //"At Cheapest An/DN With Target"
+                baseManeuver = "Intercepting";
             }
             if (courseCorrection)
             {
                 _toggles["CourseCorrection"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                baseManeuver = "Performaing course correction";
             }
             if (moonReturn)
             {
                 _toggles["MoonReturn"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                baseManeuver = "Performaing moon return";
             }
             if (matchVelocity)
             {
                 _toggles["MatchVelocity"] = true;
                 options.Add(TimeReference["CLOSEST_APPROACH"]); //"At Closest Approach"
                 options.Add(TimeReference["X_FROM_NOW"]); //"After Fixed Time"
+                baseManeuver = "Matching velocity";
             }
             if (planetaryXfer)
             {
-                _toggles["planetaryXfer"] = true;
+                _toggles["PlanetaryXfer"] = true;
                 options.Add(TimeReference["COMPUTED"]); //"At Optimal Time"
+                baseManeuver = "Performaing planetary transfer";
             }
+            if (!options.Contains(selectedOption))
+                selectedOption = options[0];
         }
     }
 
-    private void handleButtons()
+    public void MakeNode()
     {
-        if (makeNode || launchMNC || executeNode)
+        if (circularize|| newPe || newAp || newPeAp || newInc || newLAN || newNodeLon || newSMA || matchPlane || hohmannXfer || courseCorrection || interceptTgt || matchVelocity || moonReturn || planetaryXfer )
         {
             bool pass;
-            // TimeSelector timeSelector;
 
-            if (makeNode)
+            if (circularize) // Working
             {
-                if (circAp) // Working
-                {
-                    pass = CircularizeAtAP(-0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (circPe) // Working
-                {
-                    pass = CircularizeAtPe(-0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (circularize) // Working
-                {
-                    // pass = CircularizeNow(-0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (newPe) // Working
-                {
-                    // pass = SetNewPe(targetPeR, - 0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (newAp) // Working
-                {
-                    // pass = SetNewAp(targetApR, - 0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
-                {
-                    // pass = Ellipticize(targetApR1 , targetPeR1, - 0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (newLAN) // Untested
-                {
-                    pass = SetNewLAN(targetLAN, -0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (newInc) // Working
-                {
-                    pass = SetInclination(targetInc, -0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (matchPlane) // Working
-                {
-                    pass = MatchPlanesAtAN(-0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (matchPlanesD) // Working
-                {
-                    pass = MatchPlanesAtDN(-0.5);
-                    // if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (hohmannT) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
-                {
-                    pass = HohmannTransfer(-0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (interceptTgt) // Experimental
-                {
-                    pass = InterceptTgtAtUT(interceptT, -0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (courseCorrection) // Experimental Works at least some times...
-                {
-                    pass = CourseCorrection(-0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
-                {
-                    pass = MoonReturn(-0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (matchVelocity) // Experimental
-                {
-                    pass = MatchVelocityAtCA(-0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (matchVNow) // Experimental
-                {
-                    pass = MatchVelocityNow(-0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
-                else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-                {
-                    pass = PlanetaryXfer(-0.5);
-                    if (pass && autoLaunchMNC.Value) callMNC();
-                }
+                pass = Circularize(requestedBurnTime, -0.5);
+                // if (pass && autoLaunchMNC.Value) callMNC();
             }
-            else if (launchMNC) callMNC();
-            else if (executeNode) callK2D2();
+            else if (newPe) // Working
+            {
+                pass = SetNewPe(requestedBurnTime, targetPeR, - 0.5);
+                // if (pass && autoLaunchMNC.Value) callMNC();
+            }
+            else if (newAp) // Working
+            {
+                pass = SetNewAp(requestedBurnTime, targetApR, - 0.5);
+                // if (pass && autoLaunchMNC.Value) callMNC();
+            }
+            else if (newPeAp) // Working: Not perfect, but pretty good results nevertheless
+            {
+                pass = Ellipticize(requestedBurnTime, targetApR, targetPeR, - 0.5);
+                // if (pass && autoLaunchMNC.Value) callMNC();
+            }
+            else if (newInc) // Working
+            {
+                pass = SetInclination(requestedBurnTime, FPSettings.target_inc_deg, -0.5);
+                // if (pass && autoLaunchMNC.Value) callMNC();
+            }
+            else if (newLAN) // Untested
+            {
+                pass = SetNewLAN(requestedBurnTime, FPSettings.target_lan_deg, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (newNodeLon) // Untested
+            {
+                pass = SetNodeLongitude(requestedBurnTime, FPSettings.target_node_long_deg, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (newSMA) // Untested
+            {
+                pass = SetNewSMA(requestedBurnTime, targetSMA, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (matchPlane) // Working
+            {
+                pass = MatchPlanes(requestedBurnTime, -0.5);
+                // if (pass && autoLaunchMNC.Value) callMNC();
+            }
+            else if (hohmannXfer) // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
+            {
+                pass = HohmannTransfer(requestedBurnTime, - 0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (interceptTgt) // Experimental
+            {
+                pass = InterceptTgt(requestedBurnTime, FPSettings.interceptT, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (courseCorrection) // Experimental Works at least some times...
+            {
+                pass = CourseCorrection(requestedBurnTime, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (moonReturn) // Works - but may give poor Pe, including potentially lithobreaking
+            {
+                pass = MoonReturn(requestedBurnTime, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (matchVelocity) // Experimental
+            {
+                pass = MatchVelocity(requestedBurnTime, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
+            else if (planetaryXfer) // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
+            {
+                pass = PlanetaryXfer(requestedBurnTime, -0.5);
+                if (pass && autoLaunchMNC.Value) other_mods.callMNC();
+            }
         }
     }
 
@@ -2070,7 +1730,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // NodeManagerPlugin.Instance.RefreshNodes();
         yield return (object)new WaitForFixedUpdate();
 
-        //List<ManeuverNodeData> patchList = 
+        //List<ManeuverNodeData> patchList =
         //    Game.SpaceSimulation.Maneuvers.GetNodesForVessel(activeVessel.SimulationObject.GlobalId);
 
         Logger.LogDebug($"TestPerturbedOrbit: patchList.Count = {NodeManagerPlugin.Instance.Nodes.Count}");
@@ -2102,10 +1762,4 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             Logger.LogDebug($"hypotheticalOrbit:{hypotheticalOrbit}");
         }
     }
-}
-
-public class Toggle
-{
-    public string name { get; set; }
-    public bool selected { get; set; }
 }
