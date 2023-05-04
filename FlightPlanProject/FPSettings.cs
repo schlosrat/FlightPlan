@@ -84,4 +84,15 @@ public class FPSettings
         get => s_settings_file.GetDouble("timeOffset", 30);
         set { s_settings_file.SetDouble("timeOffset", value); }
     }
+
+    public static double occ_mod_atm
+    {
+        get => s_settings_file.GetDouble("occ_mod_atm", 0.75);
+        set { s_settings_file.SetDouble("occ_mod_atm", value); }
+    }
+    public static double occ_mod_vac
+    {
+        get => s_settings_file.GetDouble("occ_mod_vac", 0.9);
+        set { s_settings_file.SetDouble("occ_mod_vac", value); }
+    }
 }
