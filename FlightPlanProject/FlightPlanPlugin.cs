@@ -203,6 +203,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     void Awake()
     {
   
+
     }
 
     void Update()
@@ -212,7 +213,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             ToggleButton(!interfaceEnabled);
             Logger.LogInfo("Update: UI toggled with hotkey");
         }
-    }
+
+        if (main_ui != null)
+            main_ui.Update();
+    }  
 
     void save_rect_pos()
     {
@@ -786,8 +790,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             return false;
         }
     }
-
-
 
     private IEnumerator TestPerturbedOrbit(PatchedConicsOrbit o, double burnUT, Vector3d dV)
     {

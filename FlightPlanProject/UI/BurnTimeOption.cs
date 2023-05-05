@@ -112,6 +112,7 @@ internal class BurnTimeOption
         GUILayout.BeginHorizontal();
         GUILayout.Label("Burn : ");
 
+
         if (UI_Tools.SmallButton(text_time_ref[ FlightPlanUI.time_ref ]))
             is_active = options.Count > 0;
 

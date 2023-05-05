@@ -45,6 +45,7 @@ public class OwnshipManeuversPage : BasePageContent
     public override void onGUI()
     {
         FPStyles.DrawSectionHeader("Ownship Maneuvers");
+        BurnTimeOption.Instance.OptionSelectionGUI();
         main_ui.DrawToggleButton("Circularize", ManeuverType.circularize);
         // GUILayout.EndHorizontal();
 
@@ -86,10 +87,11 @@ public class TargetPage : BasePageContent
     public override void onGUI()
     {
         FPStyles.DrawSectionHeader("Maneuvers Relative to Target");
+
+        BurnTimeOption.Instance.OptionSelectionGUI();
+
         main_ui.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
-
         main_ui.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
-
         main_ui.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
 
         if (plugin.experimental.Value)
@@ -99,8 +101,6 @@ public class TargetPage : BasePageContent
         }
     }
 }
-
-
 
 public class InterplanetaryPage : BasePageContent
 {
@@ -118,6 +118,7 @@ public class InterplanetaryPage : BasePageContent
     public override void onGUI()
     {
         FPStyles.DrawSectionHeader("Interplanetary Maneuvers");
+        BurnTimeOption.Instance.OptionSelectionGUI();
         main_ui.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
     }
 }
@@ -125,7 +126,7 @@ public class InterplanetaryPage : BasePageContent
 
 public class MoonPage : BasePageContent
 {
-    public override string Name => "Target";
+    public override string Name => "Moon";
 
     public override bool isActive
     {

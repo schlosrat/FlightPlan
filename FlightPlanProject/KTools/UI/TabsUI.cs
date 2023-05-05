@@ -134,8 +134,8 @@ public class TabsUI
             return;
         }
 
-        current_index = GeneralTools.ClampInt(current_index, 0, filtered_pages.Count - 1);
         int result = DrawTabs(current_index);
+        result = GeneralTools.ClampInt(result, 0, filtered_pages.Count - 1);
         if (result != current_index)
         {
             current_page.UIVisible = false;
