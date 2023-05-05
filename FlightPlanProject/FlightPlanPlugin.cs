@@ -840,7 +840,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         if (stopString.Length < 1)
             stopString = runString;
-        button = UI_Tools.ToggleButton(button, runString, stopString);
+        button = UI_Tools.SmallToggleButton(button, runString, stopString);
     }
 
     private double DrawLabelWithTextField(string entryName, double value, string unit = "")
@@ -879,7 +879,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.BeginHorizontal();
         if (stopString.Length < 1)
             stopString = runString;
-        button = UI_Tools.ToggleButton(button, runString, stopString);
+        button = UI_Tools.SmallToggleButton(button, runString, stopString);
         GUILayout.Space(10);
 
         value = UI_Fields.DoubleField(runString, value);
@@ -902,7 +902,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         var status_style = FPStyles.status;
         //if (status == Status.VIRGIN)
-        //    status_style = FPStyles.label;
+        //    status_style = FPStyles.label;  
         if (status == Status.OK)
             status_style.normal.textColor = new Color(0, 1, 0, transparency); // FPStyles.phase_ok;
         if (status == Status.WARNING)

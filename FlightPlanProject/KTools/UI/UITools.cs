@@ -95,7 +95,7 @@ public class TopButtons
     static public bool Button(string txt)
     {
         position.x -= space;
-        return GUI.Button(position, txt, GenericStyle.icon_button);
+        return GUI.Button(position, txt, GenericStyle.small_button);
     }
     static public bool Button(Texture2D icon)
     {
@@ -112,7 +112,7 @@ public class TopButtons
     static public bool Toggle(bool value, Texture2D icon)
     {
         position.x -= space;
-        return GUI.Toggle(position, value, icon, GenericStyle.small_button);
+        return GUI.Toggle(position, value, icon, GenericStyle.icon_button);
     }
 }
 
@@ -151,7 +151,7 @@ public class UI_Tools
             return GUILayout.Toggle(is_on, txt, GenericStyle.toggle);
     }
 
-    public static bool ToggleButton(bool is_on, string txt_run, string txt_stop)
+    public static bool BigToggleButton(bool is_on, string txt_run, string txt_stop)
     {
         // int height_bt = 30;
         int min_width_bt = 150;
@@ -162,6 +162,19 @@ public class UI_Tools
         is_on = GUILayout.Toggle(is_on, txt, GenericStyle.big_button, GUILayout.MinWidth(min_width_bt));
         // GUILayout.FlexibleSpace();
         // GUILayout.EndHorizontal();
+        return is_on;
+    }
+
+
+    public static bool SmallToggleButton(bool is_on, string txt_run, string txt_stop)
+    {
+        // int height_bt = 30;
+        int min_width_bt = 150;
+
+        var txt = is_on ? txt_stop : txt_run;
+        
+        is_on = GUILayout.Toggle(is_on, txt, GenericStyle.small_button, GUILayout.MinWidth(min_width_bt));
+      
         return is_on;
     }
 

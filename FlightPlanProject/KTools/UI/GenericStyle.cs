@@ -240,7 +240,7 @@ public class GenericStyle
         setFromOn(small_button);
 
         small_button.border = new RectOffset(5, 5, 5, 5);
-        small_button.padding = new RectOffset(5, 5, 5, 5);
+        small_button.padding = new RectOffset(2, 2, 2, 2);
         small_button.overflow = new RectOffset(0, 0, 0, 0);
         small_button.alignment = TextAnchor.MiddleCenter;
 
@@ -259,6 +259,9 @@ public class GenericStyle
         big_button.overflow = new RectOffset(0, 0, 0, 0);
         // big_button.fontSize = 20;
         big_button.alignment = TextAnchor.MiddleCenter;
+
+
+
 
         // Small Button
         icon_button = new GUIStyle(small_button);
