@@ -125,7 +125,7 @@ public class FPOtherModsInterface
                 k2d2FlyNodeMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), null);
                 checkK2D2status = true;
 
-                FPStatus.K2D2Status(FlightPlanUI.instance.maneuver_description, FlightPlanPlugin.Instance.currentNode.BurnDuration);
+                FPStatus.K2D2Status(FlightPlanUI.Instance.maneuver_description, FlightPlanPlugin.Instance.currentNode.BurnDuration);
             }
         }
     }
@@ -155,7 +155,7 @@ public class FPOtherModsInterface
         GUILayout.BeginHorizontal();
 
         if (FPStyles.SquareButton("Make\nNode"))
-            FlightPlanPlugin.Instance.MakeNode();
+            FlightPlanUI.Instance.MakeNode();
 
         if (MNCLoaded && mncVerCheck >= 0)
         {

@@ -30,17 +30,29 @@ namespace FlightPlan;
 
 public class FlightPlanUI
 {
-    public static FlightPlanUI instance;
-
-
+    private static FlightPlanUI _instance;
+    public static FlightPlanUI Instance { get => _instance; }
 
     public FlightPlanUI(FlightPlanPlugin main_plugin)
     {
-        instance = this;
+        _instance = this;
         this.plugin = main_plugin;
         body_selection = new BodySelection(main_plugin);
         burn_options = new BurnTimeOption();
     }
+
+    public ManeuverType maneuver_type = ManeuverType.None;
+
+    public static TimeRef time_ref = TimeRef.None;
+
+    public void SetManeuverType(ManeuverType type)
+    {
+        maneuver_type = type;
+        maneuver_type_desc = BurnTimeOption.Instance.setOptionsList(type);
+    }
+
+    public string maneuver_type_desc;
+
 
     FlightPlanPlugin plugin;
 
@@ -49,10 +61,7 @@ public class FlightPlanUI
     BodySelection body_selection;
     BurnTimeOption burn_options;
 
-    
     int spacingAfterEntry = 5;
-
-   
 
     private void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
     {
@@ -132,18 +141,17 @@ public class FlightPlanUI
         return value;
     }
 
-
     void DrawToggleButton(string txt, ManeuverType maneuveur_type)
     {
-        bool active = FlightPlanPlugin.Instance.maneuver_type == maneuveur_type;
+        bool active = maneuver_type == maneuveur_type;
 
         bool result = UI_Tools.SmallToggleButton(active, txt, txt);
         if (result != active)
         {
             if (!active)
-                FlightPlanPlugin.Instance.SetManeuverType(maneuveur_type);
+                SetManeuverType(maneuveur_type);
             else
-                FlightPlanPlugin.Instance.SetManeuverType(ManeuverType.None);
+                SetManeuverType(ManeuverType.None);
         }
     }
 
@@ -172,12 +180,12 @@ public class FlightPlanUI
         // GUILayout.EndHorizontal();
 
         FPSettings.pe_altitude_km = DrawToggleButtonWithTextField("New Pe", ManeuverType.newPe, FPSettings.pe_altitude_km, "km");
-        plugin.targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
+        targetPeR = FPSettings.pe_altitude_km * 1000 + referenceBody.radius;
 
         if (orbit.eccentricity < 1)
         {
             FPSettings.ap_altitude_km = DrawToggleButtonWithTextField("New Ap", ManeuverType.newAp, FPSettings.ap_altitude_km, "km");
-            plugin.targetApR = FPSettings.ap_altitude_km * 1000 + referenceBody.radius;
+            targetApR = FPSettings.ap_altitude_km * 1000 + referenceBody.radius;
 
             DrawToggleButton("New Pe & Ap", ManeuverType.newPeAp);
         }
@@ -192,7 +200,7 @@ public class FlightPlanUI
         }
 
         FPSettings.target_sma_km = DrawToggleButtonWithTextField("New SMA", ManeuverType.newSMA, FPSettings.target_sma_km, "km");
-        plugin.targetSMA = FPSettings.target_sma_km * 1000 + referenceBody.radius;
+        targetSMA = FPSettings.target_sma_km * 1000 + referenceBody.radius;
 
         if (plugin.currentTarget != null)
         {
@@ -244,16 +252,16 @@ public class FlightPlanUI
 
                 var parentPlanet = referenceBody.Orbit.referenceBody;
                 FPSettings.mr_altitude_km = DrawToggleButtonWithTextField("Moon Return", ManeuverType.moonReturn, FPSettings.mr_altitude_km, "km");
-                plugin.targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
+                targetMRPeR = FPSettings.mr_altitude_km * 1000 + parentPlanet.radius;
             }
         }
 
         // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
-        if (BurnTimeOption.selected == TimeRef.ALTITUDE)
+        if (time_ref == TimeRef.ALTITUDE)
         {
             FPSettings.altitude_km = DrawLabelWithTextField("Maneuver Altitude", FPSettings.altitude_km, "km");
         }
-        if (BurnTimeOption.selected == TimeRef.X_FROM_NOW)
+        if (time_ref == TimeRef.X_FROM_NOW)
         {
             FPSettings.timeOffset = DrawLabelWithTextField("Time From Now", FPSettings.timeOffset, "s");
         }
@@ -267,7 +275,7 @@ public class FlightPlanUI
         DrawGUIStatus(UT);
 
         // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the orbit
-        if (BurnTimeOption.selected == TimeRef.ALTITUDE)
+        if (time_ref == TimeRef.ALTITUDE)
         {
             if (FPSettings.altitude_km * 1000 < orbit.Periapsis)
             {
@@ -283,12 +291,13 @@ public class FlightPlanUI
             }
         }
 
-        maneuver_description = $"{plugin.maneuver_type_desc} {BurnTimeOption.selected}";
+        maneuver_description = $"{maneuver_type_desc} {BurnTimeOption.TimeRefDesc}";
 
-        BurnTimeOption.instance.setBurnTime();
+        BurnTimeOption.Instance.setBurnTime();
     }
 
     public string maneuver_description;
+
 
     public FPOtherModsInterface other_mods = null;
 
@@ -308,6 +317,76 @@ public class FlightPlanUI
         other_mods.OnGUI( plugin.currentNode);
         GUILayout.Space(spacingAfterEntry);
     }
+
+
+// Radius Computed from Inputs
+    public double targetPeR;
+    public double targetApR;
+    public double targetSMA;
+    public double targetMRPeR;
+
+    public void MakeNode()
+    {
+        if (maneuver_type == ManeuverType.None)
+            return;
+
+        var requestedBurnTime = BurnTimeOption.requestedBurnTime;
+
+        bool pass = false;
+        switch (maneuver_type)
+        {
+        case ManeuverType.circularize: // Working
+            pass = plugin.Circularize(requestedBurnTime, -0.5);
+            break;
+        case ManeuverType.newPe: // Working
+            pass = plugin.SetNewPe(requestedBurnTime, targetPeR, -0.5);
+            break;
+        case ManeuverType.newAp:// Working
+            pass = plugin.SetNewAp(requestedBurnTime, targetApR, -0.5);
+            break;
+        case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
+            pass = plugin.Ellipticize(requestedBurnTime, targetApR, targetPeR, -0.5);
+            break;
+        case ManeuverType.newInc:// Working
+            pass = plugin.SetInclination(requestedBurnTime, FPSettings.target_inc_deg, -0.5);
+            break;
+        case ManeuverType.newLAN: // Untested
+            pass = plugin.SetNewLAN(requestedBurnTime, FPSettings.target_lan_deg, -0.5);
+            break;
+        case ManeuverType.newNodeLon: // Untested
+            pass = plugin.SetNodeLongitude(requestedBurnTime, FPSettings.target_node_long_deg, -0.5);
+            break;
+        case ManeuverType.newSMA: // Untested
+            pass = plugin.SetNewSMA(requestedBurnTime, targetSMA, -0.5);
+            break;
+        case ManeuverType.matchPlane: // Working
+            pass = plugin.MatchPlanes(time_ref, -0.5);
+            break;
+        case ManeuverType.hohmannXfer: // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
+            pass = plugin.HohmannTransfer(requestedBurnTime, -0.5);
+            break;
+        case ManeuverType.interceptTgt: // Experimental
+            pass = plugin.InterceptTgt(requestedBurnTime, FPSettings.interceptT, -0.5);
+            break;
+        case ManeuverType.courseCorrection: // Experimental Works at least some times...
+            pass = plugin.CourseCorrection(requestedBurnTime, -0.5);
+            break;
+        case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
+            pass = plugin.MoonReturn(requestedBurnTime, targetMRPeR, -0.5);
+            break;
+        case ManeuverType.matchVelocity: // Experimental
+            pass = plugin.MatchVelocity(requestedBurnTime, -0.5);
+            break;
+        case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
+            pass = plugin.PlanetaryXfer(requestedBurnTime, -0.5);
+            break;
+        }
+
+        if (pass && plugin.autoLaunchMNC.Value)
+            FPOtherModsInterface.instance.callMNC();
+    }
+    
+
 
 
 }

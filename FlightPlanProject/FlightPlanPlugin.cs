@@ -50,6 +50,27 @@ public enum ManeuverType
     planetaryXfer
 }
 
+/// <summary>
+///  The selected time Reference
+/// </summary>
+public enum TimeRef
+{
+    None,
+    COMPUTED,
+    APOAPSIS,
+    PERIAPSIS,
+    CLOSEST_APPROACH,
+    EQ_ASCENDING,
+    EQ_DESCENDING,
+    REL_ASCENDING,
+    REL_DESCENDING,
+    X_FROM_NOW,
+    ALTITUDE,
+    EQ_NEAREST_AD,
+    EQ_HIGHEST_AD,
+    REL_NEAREST_AD,
+    REL_HIGHEST_AD
+}
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 [BepInDependency(SpaceWarpPlugin.ModGuid, SpaceWarpPlugin.ModVer)]
@@ -73,6 +94,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private Rect windowRect = Rect.zero;
     private int windowWidth = 250; //384px on 1920x1080
 
+   
 
     public FlightPlanUI main_ui;
 
@@ -85,12 +107,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     internal SimulationObjectModel currentTarget;
     internal ManeuverNodeData currentNode = null;
     List<ManeuverNodeData> activeNodes;
-
-    // Radius Computed from Inputs
-    public double targetPeR;
-    public double targetApR;
-    public double targetSMA;
-    public double targetMRPeR;
 
     private GameInstance game;
 
@@ -326,12 +342,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"Circularize {BurnTimeOption.selected}");
+        Logger.LogDebug($"Circularize {BurnTimeOption.TimeRefDesc}");
         //var startTimeOffset = 60;
         //var burnUT = UT + startTimeOffset;
         var deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnUT);
 
-        FPStatus.Ok($"Ready to Circularize {BurnTimeOption.selected}");
+        FPStatus.Ok($"Ready to Circularize {BurnTimeOption.TimeRefDesc}");
 
         if (deltaV != Vector3d.zero)
         {
@@ -350,7 +366,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewPe {BurnTimeOption.selected}");
+        Logger.LogDebug($"SetNewPe {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Pe");
         //var TimeToAp = orbit.TimeToAp;
         //double burnUT, e;
@@ -361,7 +377,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //    burnUT = UT + 30;
 
 
-        FPStatus.Ok($"Ready to Change Pe {BurnTimeOption.selected}");
+        FPStatus.Ok($"Ready to Change Pe {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: targetPeR {newPe} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
         // Debug.Log($"Seeking Solution: targetPeR {targetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.referenceBody.radius} m");
@@ -383,12 +399,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewAp {BurnTimeOption.selected}");
+        Logger.LogDebug($"SetNewAp {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
         //var TimeToPe = orbit.TimeToPe;
         //var burnUT = UT + TimeToPe;
 
-        FPStatus.Ok($"Ready to Change Ap {BurnTimeOption.selected}");
+        FPStatus.Ok($"Ready to Change Ap {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: targetApR {newAp} m, currentApR {orbit.Apoapsis} m");
         var deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(orbit, burnUT, newAp);
@@ -409,10 +425,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"Ellipticize: Set New Pe and Ap {BurnTimeOption.selected}");
+        Logger.LogDebug($"Ellipticize: Set New Pe and Ap {BurnTimeOption.TimeRefDesc}");
 
 
-        FPStatus.Ok($"Ready to Ellipticize {BurnTimeOption.selected}");
+        FPStatus.Ok($"Ready to Ellipticize {BurnTimeOption.TimeRefDesc}");
 
         if (newPe > newAp)
         {
@@ -440,11 +456,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetInclination: Set New Inclination {inclination}° {BurnTimeOption.selected}");
+        Logger.LogDebug($"SetInclination: Set New Inclination {inclination}° {BurnTimeOption.TimeRefDesc}");
         // double burnUT, TAN, TDN;
         Vector3d deltaV;
 
-        FPStatus.Ok($"Ready to Change Inclination {BurnTimeOption.selected}");
+        FPStatus.Ok($"Ready to Change Inclination {BurnTimeOption.TimeRefDesc}");
 
         deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(orbit, burnUT, inclination);
         if (deltaV != Vector3d.zero)
@@ -464,12 +480,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {BurnTimeOption.selected}");
+        Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = UT + 30;
 
-        FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.selected}");
+        FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: newLANvalue {newLANvalue}°");
         var deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(orbit, burnUT, newLANvalue);
@@ -490,12 +506,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {BurnTimeOption.selected}");
+        Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = UT + 30;
 
-        FPStatus.Warning($"Experimental Node Longitude Change {BurnTimeOption.selected}");
+        FPStatus.Warning($"Experimental Node Longitude Change {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: newNodeLongValue {newNodeLongValue}°");
         var deltaV = OrbitalManeuverCalculator.DeltaVToShiftNodeLongitude(orbit, burnUT, newNodeLongValue);
@@ -516,12 +532,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"SetNewSMA {BurnTimeOption.selected}");
+        Logger.LogDebug($"SetNewSMA {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = UT + 30;
 
-        FPStatus.Error($"Ready to Change SMA Change {BurnTimeOption.selected}");
+        FPStatus.Error($"Ready to Change SMA Change {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: newSMA {newSMA} m");
         var deltaV = OrbitalManeuverCalculator.DeltaVForSemiMajorAxis(orbit, burnUT, newSMA);
@@ -537,29 +553,29 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
     
-    public bool MatchPlanes(double burnUT, double burnOffsetFactor)
+    public bool MatchPlanes(TimeRef time_ref, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchPlanes: Match Planes with {currentTarget.Name} {BurnTimeOption.selected}");
+        Logger.LogDebug($"MatchPlanes: Match Planes with {currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
         double burnUTout = UT + 1;
 
-        FPStatus.Ok($"Ready to Match Planes with {currentTarget.Name} {BurnTimeOption.selected}");
+        FPStatus.Ok($"Ready to Match Planes with {currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
 
         Vector3d deltaV = Vector3d.zero;
-        if (BurnTimeOption.selected == TimeRef.REL_ASCENDING)
+        if (time_ref == TimeRef.REL_ASCENDING)
             deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
-        else if (BurnTimeOption.selected == TimeRef.REL_DESCENDING)
+        else if (time_ref == TimeRef.REL_DESCENDING)
             deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
-        else if (BurnTimeOption.selected == TimeRef.REL_NEAREST_AD)
+        else if (time_ref == TimeRef.REL_NEAREST_AD)
         {
             if (orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT) < orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT))
                 deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
             else
                 deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(orbit, currentTarget.Orbit as PatchedConicsOrbit, UT, out burnUTout);
         }
-        else if (BurnTimeOption.selected == TimeRef.REL_HIGHEST_AD)
+        else if (time_ref == TimeRef.REL_HIGHEST_AD)
         {
             var anTime = orbit.TimeOfAscendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
             var dnTime = orbit.TimeOfDescendingNode(currentTarget.Orbit as PatchedConicsOrbit, UT);
@@ -585,12 +601,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name} {BurnTimeOption.selected}");
+        Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Hohmann Transfer");
         double burnUTout;
         Vector3d deltaV;
 
-     
         FPStatus.Warning($"Ready to Transfer to {currentTarget.Name} ?");
 
         bool simpleTransfer = true;
@@ -616,7 +631,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error($"Hohmann Transfer to {currentTarget.Name}: Solution Not Found !");         
+            FPStatus.Error($"Hohmann Transfer to {currentTarget.Name}: Solution Not Found !");
             return false;
         }
     }
@@ -630,7 +645,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"InterceptTgt: Intercept {currentTarget.Name} {BurnTimeOption.selected}");
+        Logger.LogDebug($"InterceptTgt: Intercept {currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
         // var burnUT = UT + 30;
         var interceptUT = UT + tgtUT;
         double offsetDistance;
@@ -660,7 +675,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name} {BurnTimeOption.selected}");
+        Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
         double burnUTout;
         Vector3d deltaV;
 
@@ -690,12 +705,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool MoonReturn(double burnUT, double burnOffsetFactor)
+    public bool MoonReturn(double burnUT, double targetMRPeR, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name} {BurnTimeOption.selected}");
+        Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name} {BurnTimeOption.TimeRefDesc}");
         var e = orbit.eccentricity;
 
         FPStatus.Warning($"Ready to Return from {orbit.referenceBody.Name} ?");
@@ -729,7 +744,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"MatchVelocity: Match Velocity with {currentTarget.Name} {BurnTimeOption.selected}");
+        Logger.LogDebug($"MatchVelocity: Match Velocity with {currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
 
         FPStatus.Warning($"Experimental Velocity Match with {currentTarget.Name} Ready");
 
@@ -752,7 +767,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = activeVessel.Orbit;
 
-        Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name} {BurnTimeOption.selected}");
+        Logger.LogDebug($"PlanetaryXfer: Transfer to {currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
         double burnUTout, burnUT2;
         bool syncPhaseAngle = true;
 
@@ -772,76 +787,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public void SetManeuverType(ManeuverType type)
-    {
-        maneuver_type = type;
-        BurnTimeOption.instance.setOptionsList(type);
-    }
-   
-    public ManeuverType maneuver_type = ManeuverType.None;
-    public string maneuver_type_desc;
 
-    public void MakeNode()
-    {
-        if (maneuver_type == ManeuverType.None)
-            return;
 
-        var requestedBurnTime = BurnTimeOption.requestedBurnTime;
-
-        bool pass = false;
-        switch (maneuver_type)
-        {
-        case ManeuverType.circularize: // Working
-            pass = Circularize(requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.newPe: // Working
-            pass = SetNewPe(requestedBurnTime, targetPeR, -0.5);
-            break;
-        case ManeuverType.newAp:// Working
-            pass = SetNewAp(requestedBurnTime, targetApR, -0.5);
-            break;
-        case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
-            pass = Ellipticize(requestedBurnTime, targetApR, targetPeR, -0.5);
-            break;
-        case ManeuverType.newInc:// Working
-            pass = SetInclination(requestedBurnTime, FPSettings.target_inc_deg, -0.5);
-            break;
-        case ManeuverType.newLAN: // Untested
-            pass = SetNewLAN(requestedBurnTime, FPSettings.target_lan_deg, -0.5);
-            break;
-        case ManeuverType.newNodeLon: // Untested
-            pass = SetNodeLongitude(requestedBurnTime, FPSettings.target_node_long_deg, -0.5);
-            break;
-        case ManeuverType.newSMA: // Untested
-            pass = SetNewSMA(requestedBurnTime, targetSMA, -0.5);
-            break;
-        case ManeuverType.matchPlane: // Working
-            pass = MatchPlanes(requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.hohmannXfer: // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
-            pass = HohmannTransfer(requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.interceptTgt: // Experimental
-            pass = InterceptTgt(requestedBurnTime, FPSettings.interceptT, -0.5);
-            break;
-        case ManeuverType.courseCorrection: // Experimental Works at least some times...
-            pass = CourseCorrection(requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
-            pass = MoonReturn(requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.matchVelocity: // Experimental
-            pass = MatchVelocity(requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-            pass = PlanetaryXfer(requestedBurnTime, -0.5);
-            break;
-        }
-
-        if (pass && autoLaunchMNC.Value)
-            FPOtherModsInterface.instance.callMNC();
-    }
-    
     private IEnumerator TestPerturbedOrbit(PatchedConicsOrbit o, double burnUT, Vector3d dV)
     {
         // This code compares the orbit info returned from a PerturbedOrbit orbit call with the
