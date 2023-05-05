@@ -3,7 +3,6 @@
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
-using FlightPlan.KTools.UI;
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
 
@@ -19,10 +18,16 @@ using UnityEngine;
 using NodeManager;
 using KSP.Game;
 
+
 namespace FlightPlan;
 
 public class FPOtherModsInterface
 {
+    public static FPOtherModsInterface instance = null;
+ 
+
+
+
     ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanPlugin.OtherModsInterface");
 
     // Reflection access variables for launching MNC & K2-D2
@@ -94,6 +99,8 @@ public class FPOtherModsInterface
         }
         // else K2D2Loaded = false;
         Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
+
+        instance = this;
     }
 
     public void callMNC()
@@ -117,9 +124,8 @@ public class FPOtherModsInterface
             {
                 k2d2FlyNodeMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), null);
                 checkK2D2status = true;
-                // Extend the status time to encompass the maneuver
-                FlightPlanPlugin.Instance.statusTime = FlightPlanPlugin.Instance.currentNode.Time + FlightPlanPlugin.Instance.currentNode.BurnDuration;
-                FlightPlanPlugin.Instance.statusText = FlightPlanPlugin.Instance.maneuver;
+
+                FPStatus.K2D2Status(FlightPlanUI.instance.maneuver_description, FlightPlanPlugin.Instance.currentNode.BurnDuration);
             }
         }
     }

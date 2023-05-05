@@ -12,7 +12,7 @@ public class UI_Fields
     static bool _inputState = true;
 
 
-    public static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("K2D2.MainUI");
+    public static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("KTools.UI_Fields");
 
     static public bool GameInputState
     {
