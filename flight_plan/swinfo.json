@@ -16,7 +16,7 @@
         {
             "id": "NodeManager",
             "version": {
-                "min": "0.5.2",
+                "min": "0.5.3",
                 "max": "*"
             }
         }
