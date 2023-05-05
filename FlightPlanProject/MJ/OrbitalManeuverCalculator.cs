@@ -153,21 +153,33 @@ namespace MuMech
             if (raising)
             {
                 maxDeltaV = 0.25;
-                /*
+
                 // Old Way: This can sometimes give Finite Check failures from BrentRoot due to poorly set max
                 //put an upper bound on the required deltaV:
-                while (o.PerturbedOrbit(UT, maxDeltaV * burnDirection).Periapsis < newPeR)
+                PatchedConicsOrbit testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
+                while (testOrbit.Periapsis < newPeR)
                 {
                     minDeltaV = maxDeltaV; //narrow the range
                     maxDeltaV *= 2;
+                    try { testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); }
+                    catch (Exception e)
+                    {
+                        maxDeltaV = minDeltaV;
+                        minDeltaV *= 0.5;
+                        FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Unable to find good maxDeltaV {e}");
+                        break;
+                    }
                     if (maxDeltaV > 100000) break; //a safety precaution
                 }
-                */
+                FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV = {maxDeltaV}");
 
+                // THIS WAY IS WRONG! It makes no sense to limit delta v based on escape velocity when adjusting Pe.
+                // An escape velocity check makes sense when raising Ap, not when raising or lowering Pe
                 // New way: This prevents Finite Check failures from BrentRoot by finding a better max
                 // Max Delta-V based on escape velocity
-                var maxDeltaVCap = EscapeVelocity(o.referenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude - MuUtils.DBL_EPSILON;
+                // var maxDeltaVCap = EscapeVelocity(o.referenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude - MuUtils.DBL_EPSILON;
 
+                /*
                 double lastMax = maxDeltaV;
                 double riseFactor = 2;
                 var testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
@@ -208,7 +220,7 @@ namespace MuMech
                 if (testOrbit.eccentricity >= 1 || maxDeltaV < minDeltaV) // We got done in a bad way...
                 {
                     FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Unable to find a maxDeltaV that gets to an Periapsis above {newPeR}");
-                }
+                } */
             }
             else
             {
