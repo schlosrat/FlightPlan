@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FlightPlan.KTools;
 
-public class GeneralSettings
+public class KBaseSettings
 {
     public static SettingsFile sfile = null;
     public static string s_settings_path;
@@ -16,8 +16,6 @@ public class GeneralSettings
     // each setting is defined by an accessor pointing on s_settings_file
     // the convertion to type is made here
     // this way we can have any kind of settings without hard work
-
-
 
     public static int window_x_pos
     {

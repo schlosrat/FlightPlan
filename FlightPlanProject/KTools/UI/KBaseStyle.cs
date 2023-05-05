@@ -4,7 +4,7 @@ using SpaceWarp.API.UI;
 
 namespace FlightPlan.KTools.UI;
 
-public class GenericStyle
+public class KBaseStyle
 {
     public static bool Init()
     {

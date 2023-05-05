@@ -163,7 +163,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         base.OnInitialized();
 
-        GeneralSettings.Init(SettingsPath);
+        KBaseSettings.Init(SettingsPath);
 
         Instance = this;
 
@@ -248,8 +248,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     void save_rect_pos()
     {
-        GeneralSettings.window_x_pos = (int)windowRect.xMin;
-        GeneralSettings.window_y_pos = (int)windowRect.yMin;
+        KBaseSettings.window_x_pos = (int)windowRect.xMin;
+        KBaseSettings.window_y_pos = (int)windowRect.yMin;
     }
 
     /// <summary>
@@ -278,7 +278,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         {
             FPStyles.Init();
             WindowTool.check_main_window_pos(ref windowRect);
-            GUI.skin = GenericStyle.skin;
+            GUI.skin = KBaseStyle.skin;
 
             windowRect = GUILayout.Window(
                 GUIUtility.GetControlID(FocusType.Passive),
@@ -310,10 +310,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void FillWindow(int windowID)
     {
         TopButtons.Init(windowRect.width);
-        if ( TopButtons.Button(GenericStyle.cross))
+        if ( TopButtons.Button(KBaseStyle.cross))
             CloseWindow();
 
-        GUI.Label(new Rect(9, 2, 29, 29), GenericStyle.icon, GenericStyle.icons_label);
+        GUI.Label(new Rect(9, 2, 29, 29), KBaseStyle.icon, KBaseStyle.icons_label);
         
         if (selectingBody)
         {
@@ -788,7 +788,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void DrawSectionHeader(string sectionName, string value = "", float labelWidth = -1, GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
-        if (valueStyle == null) valueStyle = GenericStyle.label;
+        if (valueStyle == null) valueStyle = KBaseStyle.label;
         GUILayout.BeginHorizontal();
         // Don't need popout buttons for ROC
         // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);

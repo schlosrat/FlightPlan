@@ -147,20 +147,21 @@ public class FPOtherModsInterface
     public void OnGUI(ManeuverNodeData currentNode)
     {
         GUILayout.BeginHorizontal();
-        if (FlightPlan.KTools.UI.UI_Tools.BigButton("Make\nNode"))
+
+        if (FPStyles.SquareButton("Make\nNode"))
             FlightPlanPlugin.Instance.MakeNode();
 
         if (MNCLoaded && mncVerCheck >= 0)
         {
             GUILayout.FlexibleSpace();
-            if (FlightPlan.KTools.UI.UI_Tools.BigIconButton(FPStyles.mnc_icon))
+            if (FPStyles.SquareButton(FPStyles.mnc_icon))
                 callMNC();
         }
 
         if (K2D2Loaded && currentNode != null)
         {
             GUILayout.FlexibleSpace();
-            if (FlightPlan.KTools.UI.UI_Tools.BigIconButton(FPStyles.k2d2_big_icon))
+            if (FPStyles.SquareButton(FPStyles.k2d2_big_icon))
                 callK2D2();
         }
         GUILayout.EndHorizontal();

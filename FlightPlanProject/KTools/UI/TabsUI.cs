@@ -46,7 +46,7 @@ public class TabsUI
     // must be called after adding pages
     private bool TabButton(bool is_current, bool isActive, string txt)
     {
-        GUIStyle style = isActive ? GenericStyle.tab_active : GenericStyle.tab_normal;
+        GUIStyle style = isActive ? KBaseStyle.tab_active : KBaseStyle.tab_normal;
         return GUILayout.Toggle(is_current, txt, style);
     }
 
@@ -67,7 +67,7 @@ public class TabsUI
             {
                 var page = filtered_pages[index];
                 float minWidth, maxWidth;
-                GenericStyle.tab_normal.CalcMinMaxWidth(new GUIContent(page.Name, ""), out minWidth, out maxWidth);
+                KBaseStyle.tab_normal.CalcMinMaxWidth(new GUIContent(page.Name, ""), out minWidth, out maxWidth);
                 tabs_Width.Add(minWidth);
             }
         }
@@ -109,7 +109,7 @@ public class TabsUI
 
     public void Init()
     {
-        current_page = pages[GeneralSettings.main_tab_index];
+        current_page = pages[KBaseSettings.main_tab_index];
         current_page.UIVisible = true;
     }
 
@@ -126,7 +126,7 @@ public class TabsUI
 
     public void onGUI()
     {
-        int current_index = GeneralSettings.main_tab_index;
+        int current_index = KBaseSettings.main_tab_index;
 
         if (filtered_pages.Count == 0 )
         {
@@ -139,7 +139,7 @@ public class TabsUI
         if (result != current_index)
         {
             current_page.UIVisible = false;
-            GeneralSettings.main_tab_index = result;
+            KBaseSettings.main_tab_index = result;
             current_page = filtered_pages[result];
             current_page.UIVisible = true;
         }
