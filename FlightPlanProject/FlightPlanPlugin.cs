@@ -284,8 +284,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         GUI.Label(new Rect(9, 2, 29, 29), KBaseStyle.icon, KBaseStyle.icons_label);
 
-        // handleButtons();
-
         currentNode = getCurrentNode();
 
         main_ui.OnGUI();
@@ -447,7 +445,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error("Set New Pe and Ap: Solution Not Found !");
+            FPStatus.Error("Set New Pe and Ap: Solution Not Found!");
             return false;
         }
     }
@@ -471,7 +469,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error("Set New Inclination: Solution Not Found !");
+            FPStatus.Error("Set New Inclination: Solution Not Found!");
             return false;
         }
     }
@@ -497,7 +495,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error("Set New LAN: Solution Not Found !");
+            FPStatus.Error("Set New LAN: Solution Not Found!");
             return false;
         }
     }
@@ -523,7 +521,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error("Shift Node Longitude: Solution Not Found !");
+            FPStatus.Error("Shift Node Longitude: Solution Not Found!");
             return false;
         }
     }
@@ -554,6 +552,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
     
+    // No longer takes double burnUT. Need to sort out how this can be called as an API method
     public bool MatchPlanes(TimeRef time_ref, double burnOffsetFactor)
     {
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -592,7 +591,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error($"Match Planes with {currentTarget.Name} at AN: Solution Not Found !");
+            FPStatus.Error($"Match Planes with {currentTarget.Name} at AN: Solution Not Found!");
             return false;
         }
     }
@@ -607,7 +606,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double burnUTout;
         Vector3d deltaV;
 
-        FPStatus.Warning($"Ready to Transfer to {currentTarget.Name} ?");
+        FPStatus.Warning($"Ready to Transfer to {currentTarget.Name}?");
 
         bool simpleTransfer = true;
         bool intercept_only = true;
@@ -632,7 +631,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error($"Hohmann Transfer to {currentTarget.Name}: Solution Not Found !");
+            FPStatus.Error($"Hohmann Transfer to {currentTarget.Name}: Solution Not Found!");
             return false;
         }
     }
@@ -666,7 +665,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error($"Intercept {currentTarget.Name}: No Solution Found !");
+            FPStatus.Error($"Intercept {currentTarget.Name}: No Solution Found!");
             return false;
         }
     }
@@ -701,7 +700,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         else
         {
-            FPStatus.Error($"Course Correction for tragetory to {currentTarget.Name}: No Solution Found !");
+            FPStatus.Error($"Course Correction for tragetory to {currentTarget.Name}: No Solution Found!");
             return false;
         }
     }
@@ -714,7 +713,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Logger.LogDebug($"MoonReturn: Return from {orbit.referenceBody.Name} {BurnTimeOption.TimeRefDesc}");
         var e = orbit.eccentricity;
 
-        FPStatus.Warning($"Ready to Return from {orbit.referenceBody.Name} ?");
+        FPStatus.Warning($"Ready to Return from {orbit.referenceBody.Name}?");
 
         if (e > 0.2)
         {
@@ -734,7 +733,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             }
             else
             {
-                FPStatus.Error("Moon Return: No Solution Found !");
+                FPStatus.Error("Moon Return: No Solution Found!");
                 return false;
             }
         }

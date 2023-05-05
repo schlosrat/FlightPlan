@@ -1,5 +1,3 @@
-
-
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
@@ -17,7 +15,6 @@ using System.Reflection;
 using UnityEngine;
 using NodeManager;
 using KSP.Game;
-
 
 namespace FlightPlan;
 
