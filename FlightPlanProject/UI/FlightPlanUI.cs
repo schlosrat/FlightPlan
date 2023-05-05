@@ -1,12 +1,9 @@
 ﻿using BepInEx.Logging;
 using FPUtilities;
 using KSP.Game;
-using MuMech;
 using UnityEngine;
 using FlightPlan.KTools.UI;
 using KSP.Sim.impl;
-using KSP.Sim;
-
 
 namespace FlightPlan;
 

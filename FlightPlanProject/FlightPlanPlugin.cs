@@ -20,12 +20,9 @@ using UnityEngine;
 
 using FlightPlan.KTools.UI;
 using FlightPlan.KTools;
-using K2D2;
 using Microsoft.CodeAnalysis;
 
-
 namespace FlightPlan;
-
 
 /// <summary>
 ///  The selected mode in UI
