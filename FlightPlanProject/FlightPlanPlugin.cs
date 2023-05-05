@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using FlightPlan.UI;
+
 using FPUtilities;
 using HarmonyLib;
 using KSP.Game;
@@ -17,6 +17,9 @@ using SpaceWarp.API.UI.Appbar;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
+
+using FlightPlan.KTools.UI;
+using FlightPlan.KTools;
 
 namespace FlightPlan;
 
@@ -184,7 +187,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         base.OnInitialized();
 
-        FPSettings.Init(SettingsPath);
+        KBaseSettings.Init(SettingsPath);
 
         Instance = this;
 
@@ -269,8 +272,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     void save_rect_pos()
     {
-        FPSettings.window_x_pos = (int)windowRect.xMin;
-        FPSettings.window_y_pos = (int)windowRect.yMin;
+        KBaseSettings.window_x_pos = (int)windowRect.xMin;
+        KBaseSettings.window_y_pos = (int)windowRect.yMin;
     }
 
     private double occModCalc(bool hasAtmo)
@@ -363,8 +366,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         if (interfaceEnabled && GUIenabled && activeVessel != null)
         {
             FPStyles.Init();
-            FlightPlan.UI.UIWindow.check_main_window_pos(ref windowRect);
-            GUI.skin = FPStyles.skin;
+            WindowTool.check_main_window_pos(ref windowRect);
+            GUI.skin = KBaseStyle.skin;
 
             windowRect = GUILayout.Window(
                 GUIUtility.GetControlID(FocusType.Passive),
@@ -396,10 +399,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void FillWindow(int windowID)
     {
         TopButtons.Init(windowRect.width);
-        if ( TopButtons.IconButton(FPStyles.cross))
+        if ( TopButtons.Button(KBaseStyle.cross))
             CloseWindow();
 
-        GUI.Label(new Rect(9, 2, 29, 29), FPStyles.icon, FPStyles.icons_label);
+        GUI.Label(new Rect(9, 2, 29, 29), KBaseStyle.icon, KBaseStyle.icons_label);
 
         DrawEntry("Situation", String.Format("{0} {1}", SituationToString(activeVessel.Situation), activeVessel.mainBody.bodyName));
 
@@ -891,7 +894,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void DrawSectionHeader(string sectionName, string value = "", float labelWidth = -1, GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
-        if (valueStyle == null) valueStyle = FPStyles.label;
+        if (valueStyle == null) valueStyle = KBaseStyle.label;
         GUILayout.BeginHorizontal();
         // Don't need popout buttons for ROC
         // isPopout = isPopout ? !CloseButton() : UI_Tools.SmallButton("⇖", popoutBtnStyle);
@@ -951,14 +954,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private void DrawButton(string buttonStr, ref bool button)
     {
-        button = UI_Tools.Button(buttonStr);
+        button = UI_Tools.SmallButton(buttonStr);
     }
 
     private void DrawToggleButton(string runString, ref bool button, string stopString = "")
     {
         if (stopString.Length < 1)
             stopString = runString;
-        button = UI_Tools.ToggleButton(button, runString, stopString);
+        button = UI_Tools.SmallToggleButton(button, runString, stopString);
     }
 
     private double DrawLabelWithTextField(string entryName, double value, string unit = "")
@@ -979,7 +982,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private double DrawButtonWithTextField(string entryName, ref bool button, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        button = UI_Tools.Button(entryName);
+        button = UI_Tools.SmallButton(entryName);
         GUILayout.Space(10);
 
         value = UI_Fields.DoubleField(entryName, value);
@@ -997,7 +1000,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         GUILayout.BeginHorizontal();
         if (stopString.Length < 1)
             stopString = runString;
-        button = UI_Tools.ToggleButton(button, runString, stopString);
+        button = UI_Tools.SmallToggleButton(button, runString, stopString);
         GUILayout.Space(10);
 
         value = UI_Fields.DoubleField(runString, value);
@@ -1020,7 +1023,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         var status_style = FPStyles.status;
         //if (status == Status.VIRGIN)
-        //    status_style = FPStyles.label;
+        //    status_style = FPStyles.label;  
         if (status == Status.OK)
             status_style.normal.textColor = new Color(0, 1, 0, transparency); // FPStyles.phase_ok;
         if (status == Status.WARNING)

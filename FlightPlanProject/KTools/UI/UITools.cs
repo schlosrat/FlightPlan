@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-namespace FlightPlan.UI;
+namespace FlightPlan.KTools.UI;
 
-public class FoldOut
+public class SimpleAccordion
 {
     public delegate void onChapterUI();
 
@@ -33,7 +33,7 @@ public class FoldOut
         for (int i = 0; i < chapters.Count; i++)
         {
             Chapter chapter = chapters[i];
-            var style = chapter.opened ? FPStyles.foldout_open : FPStyles.foldout_close;
+            var style = chapter.opened ? KBaseStyle.foldout_open : KBaseStyle.foldout_close;
             if (GUILayout.Button(chapter.Title, style))
             {
                 chapter.opened = !chapter.opened;
@@ -95,24 +95,24 @@ public class TopButtons
     static public bool Button(string txt)
     {
         position.x -= space;
-        return GUI.Button(position, txt, FPStyles.icon_button);
+        return GUI.Button(position, txt, KBaseStyle.small_button);
     }
-    static public bool IconButton(Texture2D icon)
+    static public bool Button(Texture2D icon)
     {
         position.x -= space;
-        return GUI.Button(position, icon, FPStyles.icon_button);
+        return GUI.Button(position, icon, KBaseStyle.icon_button);
     }
 
     static public bool Toggle(bool value, string txt)
     {
         position.x -= space;
-        return GUI.Toggle(position, value, txt, FPStyles.icon_button);
+        return GUI.Toggle(position, value, txt, KBaseStyle.small_button);
     }
 
     static public bool Toggle(bool value, Texture2D icon)
     {
         position.x -= space;
-        return GUI.Toggle(position, value, icon, FPStyles.icon_button);
+        return GUI.Toggle(position, value, icon, KBaseStyle.icon_button);
     }
 }
 
@@ -123,7 +123,7 @@ public class TopButtons
 public class UI_Tools
 {
 
-    public static int GetEnumValue<T>(T inputEnum) where T: struct, IConvertible
+    public static int GetEnumValue<T>(T inputEnum) where T : struct, IConvertible
     {
         Type t = typeof(T);
         if (!t.IsEnum)
@@ -140,107 +140,122 @@ public class UI_Tools
         UI_Tools.Label(label);
         int result = GUILayout.SelectionGrid(int_value, labels, labels.Length);
 
-        return (TEnum) Enum.ToObject(typeof(TEnum), result);
+        return (TEnum)Enum.ToObject(typeof(TEnum), result);
     }
 
     public static bool Toggle(bool is_on, string txt, string tooltip = null)
     {
         if (tooltip != null)
-            return GUILayout.Toggle(is_on, new GUIContent(txt, tooltip), FPStyles.toggle);
+            return GUILayout.Toggle(is_on, new GUIContent(txt, tooltip), KBaseStyle.toggle);
         else
-            return GUILayout.Toggle(is_on, txt, FPStyles.toggle);
+            return GUILayout.Toggle(is_on, txt, KBaseStyle.toggle);
     }
 
-    public static bool ToggleButton(bool is_on, string txt_run, string txt_stop)
+    public static bool BigToggleButton(bool is_on, string txt_run, string txt_stop)
     {
-        int height_bt = 30;
+        // int height_bt = 30;
         int min_width_bt = 150;
 
         var txt = is_on ? txt_stop : txt_run;
         // GUILayout.BeginHorizontal();
         // GUILayout.FlexibleSpace();
-        is_on = GUILayout.Toggle(is_on, txt, FPStyles.big_button, GUILayout.Height(height_bt), GUILayout.MinWidth(min_width_bt));
+        is_on = GUILayout.Toggle(is_on, txt, KBaseStyle.big_button, GUILayout.MinWidth(min_width_bt));
         // GUILayout.FlexibleSpace();
         // GUILayout.EndHorizontal();
         return is_on;
     }
 
-    public static bool Button(string txt)
+
+    public static bool SmallToggleButton(bool is_on, string txt_run, string txt_stop)
     {
-        return GUILayout.Button(txt, FPStyles.big_button);
+        // int height_bt = 30;
+        int min_width_bt = 150;
+
+        var txt = is_on ? txt_stop : txt_run;
+        
+        is_on = GUILayout.Toggle(is_on, txt, KBaseStyle.small_button, GUILayout.MinWidth(min_width_bt));
+      
+        return is_on;
+    }
+
+    public static bool BigButton(string txt)
+    {
+        // int height_bt = 30;
+        int min_width_bt = 150;
+
+        return GUILayout.Button(txt, KBaseStyle.big_button, GUILayout.MinWidth(min_width_bt));
     }
 
     public static bool SmallButton(string txt)
     {
-        return GUILayout.Button(txt, FPStyles.small_button);
+        return GUILayout.Button(txt, KBaseStyle.small_button);
     }
-     
-    public static bool BigButton(string txt)
+
+    public static bool BigIconButton(string txt)
     {
-        return GUILayout.Button(txt, FPStyles.bigicon_button);
+        return GUILayout.Button(txt, KBaseStyle.bigicon_button);
     }
 
     public static bool ListButton(string txt)
     {
-        return GUILayout.Button(txt, FPStyles.button, GUILayout.ExpandWidth(true));
+        return GUILayout.Button(txt, KBaseStyle.button, GUILayout.ExpandWidth(true));
     }
 
     public static bool miniToggle(bool value, string txt, string tooltip)
     {
-        return GUILayout.Toggle(value, new GUIContent(txt, tooltip), FPStyles.small_button, GUILayout.Height(20));
+        return GUILayout.Toggle(value, new GUIContent(txt, tooltip), KBaseStyle.small_button, GUILayout.Height(20));
     }
 
     public static bool miniButton(string txt, string tooltip = "")
     {
-        return GUILayout.Button(new GUIContent(txt, tooltip), FPStyles.small_button, GUILayout.Height(20));
+        return GUILayout.Button(new GUIContent(txt, tooltip), KBaseStyle.small_button, GUILayout.Height(20));
     }
 
     public static bool ToolTipButton(string tooltip)
     {
-        return GUILayout.Button(new GUIContent("?", tooltip), FPStyles.small_button, GUILayout.Width(16), GUILayout.Height(20));
+        return GUILayout.Button(new GUIContent("?", tooltip), KBaseStyle.small_button, GUILayout.Width(16), GUILayout.Height(20));
     }
 
     static public bool BigIconButton(Texture2D icon)
     {
-        return GUILayout.Button(icon, FPStyles.bigicon_button);
+        return GUILayout.Button(icon, KBaseStyle.bigicon_button);
     }
-
 
     public static void Title(string txt)
     {
-        GUILayout.Label($"<b>{txt}</b>", FPStyles.title);
+        GUILayout.Label($"<b>{txt}</b>", KBaseStyle.title);
     }
 
     public static void Label(string txt)
     {
-        GUILayout.Label(txt, FPStyles.label);
+        GUILayout.Label(txt, KBaseStyle.label);
     }
 
     public static void OK(string txt)
     {
-        GUILayout.Label(txt, FPStyles.phase_ok);
+        GUILayout.Label(txt, KBaseStyle.phase_ok);
     }
 
     public static void Warning(string txt)
     {
-        GUILayout.Label(txt, FPStyles.phase_warning);
+        GUILayout.Label(txt, KBaseStyle.phase_warning);
     }
 
     public static void Error(string txt)
     {
-        GUILayout.Label(txt, FPStyles.phase_error);
+        GUILayout.Label(txt, KBaseStyle.phase_error);
     }
 
 
 
     public static void Console(string txt)
     {
-        GUILayout.Label(txt, FPStyles.console_text);
+        GUILayout.Label(txt, KBaseStyle.console_text);
     }
 
     public static void Mid(string txt)
     {
-        GUILayout.Label(txt, FPStyles.mid_text);
+        GUILayout.Label(txt, KBaseStyle.mid_text);
     }
 
 
@@ -249,9 +264,9 @@ public class UI_Tools
     {
         string content = txt + $" : {value} " + postfix;
 
-        GUILayout.Label(content, FPStyles.slider_text);
+        GUILayout.Label(content, KBaseStyle.slider_text);
         GUILayout.BeginHorizontal();
-        value = (int) GUILayout.HorizontalSlider((int) value, min, max, FPStyles.slider_line, FPStyles.slider_node);
+        value = (int)GUILayout.HorizontalSlider((int)value, min, max, KBaseStyle.slider_line, KBaseStyle.slider_node);
         if (value < min) value = min;
         if (value > max) value = max;
 
@@ -265,23 +280,23 @@ public class UI_Tools
 
     public static float HeadingSlider(string txt, float value, string tooltip = "")
     {
-        string value_str = value.ToString("N"+1);
-        string content =  $"{txt} : {value_str} °";
-        GUILayout.Label(content, FPStyles.slider_text);
+        string value_str = value.ToString("N" + 1);
+        string content = $"{txt} : {value_str} °";
+        GUILayout.Label(content, KBaseStyle.slider_text);
         GUILayout.BeginHorizontal();
-        value = GUILayout.HorizontalSlider( value, -180, 180, FPStyles.slider_line, FPStyles.slider_node);
+        value = GUILayout.HorizontalSlider(value, -180, 180, KBaseStyle.slider_line, KBaseStyle.slider_node);
 
         int step = 45;
         float precision = 5;
-        int index = Mathf.RoundToInt( value / step);
+        int index = Mathf.RoundToInt(value / step);
         float rounded = index * step;
 
-        float delta = Mathf.Abs( rounded - value);
+        float delta = Mathf.Abs(rounded - value);
         if (delta < precision)
             value = rounded;
 
         index = index + 4;
-        string[] directions = {"S", "SW", "W", "NW", "N", "NE", "E", "SE", "S", "??" };
+        string[] directions = { "S", "SW", "W", "NW", "N", "NE", "E", "SE", "S", "??" };
         GUILayout.Label(directions[index], GUILayout.Width(15));
         if (!string.IsNullOrEmpty(tooltip))
         {
@@ -296,33 +311,30 @@ public class UI_Tools
 
     public static void Separator()
     {
-        GUILayout.Box("", FPStyles.separator);
+        GUILayout.Box("", KBaseStyle.separator);
     }
 
     public static void ProgressBar(double value, double min, double max)
     {
-        ProgressBar((float) value, (float) min, (float) max);
+        ProgressBar((float)value, (float)min, (float)max);
     }
 
     public static void ProgressBar(float value, float min, float max)
     {
         var ratio = Mathf.InverseLerp(min, max, value);
 
-        GUILayout.Box("", FPStyles.progress_bar_empty, GUILayout.ExpandWidth(true));
+        GUILayout.Box("", KBaseStyle.progress_bar_empty, GUILayout.ExpandWidth(true));
         var lastrect = GUILayoutUtility.GetLastRect();
 
         lastrect.width = Mathf.Clamp(lastrect.width * ratio, 4, 10000000);
-        GUI.Box(lastrect, "", FPStyles.progress_bar_full);
+        GUI.Box(lastrect, "", KBaseStyle.progress_bar_full);
     }
-
-
-
 
     public static float FloatSlider(float value, float min, float max, string tooltip = "")
     {
         // simple float slider
         GUILayout.BeginHorizontal();
-        value = GUILayout.HorizontalSlider( value, min, max, FPStyles.slider_line, FPStyles.slider_node);
+        value = GUILayout.HorizontalSlider(value, min, max, KBaseStyle.slider_line, KBaseStyle.slider_node);
 
         if (!string.IsNullOrEmpty(tooltip))
         {
@@ -337,11 +349,11 @@ public class UI_Tools
     public static float FloatSliderTxt(string txt, float value, float min, float max, string postfix = "", string tooltip = "", int precision = 2)
     {
         // simple float slider with a printed value
-        string value_str = value.ToString("N"+precision);
+        string value_str = value.ToString("N" + precision);
 
-        string content =  $"{txt} : {value_str} {postfix}";
+        string content = $"{txt} : {value_str} {postfix}";
 
-        GUILayout.Label(content, FPStyles.slider_text);
+        GUILayout.Label(content, KBaseStyle.slider_text);
         value = FloatSlider(value, min, max, tooltip);
         return value;
     }
@@ -364,6 +376,5 @@ public class UI_Tools
             GUILayout.MinWidth(250),
             GUILayout.Height(height));
     }
-
 }
 

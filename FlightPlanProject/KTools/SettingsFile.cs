@@ -8,20 +8,20 @@ using BepInEx.Logging;
 
 using System.Threading;
 
-namespace FlightPlan.Tools;
+namespace FlightPlan.KTools;
 
 public class SettingsFile
 {
     protected string file_path = "";
     Dictionary<string, string> data = new Dictionary<string, string>();
 
-        public SettingsFile(string file_path)
+    public SettingsFile(string file_path)
     {
-        this.file_path = file_path; 
+        this.file_path = file_path;
         Load();
     }
 
-    public ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FP.SettingsFile");
+    public ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("K2D2.SettingsFile");
 
     protected void Load()
     {
@@ -251,7 +251,7 @@ public class SettingsFile
         return result;
     }
 
-        /// <summary>
+    /// <summary>
     /// Set the parameter using Vector3 value
     /// the value is saved at once
     /// </summary>
@@ -261,7 +261,7 @@ public class SettingsFile
         SetString(name, text);
     }
 
-        /// <summary>
+    /// <summary>
     /// Get the parameter using Vector3d value
     ///  if not found or on parsing error, it is replaced and saved at once
     /// </summary>
@@ -304,4 +304,4 @@ public class SettingsFile
         SetString(name, text);
     }
 }
-    
+
