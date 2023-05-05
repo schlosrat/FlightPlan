@@ -17,5 +17,7 @@ if not exist %DEST_PATH% mkdir %DEST_PATH%
 @REM dir %SOURCE_DIR%
 @REM dir %DEST_PATH%
 
+rd /s/q %DEST_PATH%/assets
+
 xcopy /Y /s /d %SOURCE_DIR% %DEST_PATH%
 

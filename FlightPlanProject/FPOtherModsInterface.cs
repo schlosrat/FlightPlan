@@ -3,7 +3,7 @@
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
-using FlightPlan.UI;
+using FlightPlan.KTools.UI;
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
 
@@ -147,20 +147,21 @@ public class FPOtherModsInterface
     public void OnGUI(ManeuverNodeData currentNode)
     {
         GUILayout.BeginHorizontal();
-        if (FlightPlan.UI.UI_Tools.BigButton("Make\nNode"))
+
+        if (FPStyles.SquareButton("Make\nNode"))
             FlightPlanPlugin.Instance.MakeNode();
 
         if (MNCLoaded && mncVerCheck >= 0)
         {
             GUILayout.FlexibleSpace();
-            if (FlightPlan.UI.UI_Tools.BigIconButton(FPStyles.mnc_icon))
+            if (FPStyles.SquareButton(FPStyles.mnc_icon))
                 callMNC();
         }
 
         if (K2D2Loaded && currentNode != null)
         {
             GUILayout.FlexibleSpace();
-            if (FlightPlan.UI.UI_Tools.BigIconButton(FPStyles.k2d2_big_icon))
+            if (FPStyles.SquareButton(FPStyles.k2d2_big_icon))
                 callK2D2();
         }
         GUILayout.EndHorizontal();
@@ -169,7 +170,7 @@ public class FPOtherModsInterface
         {
             getK2D2Status();
             GUILayout.BeginHorizontal();
-            FlightPlan.UI.UI_Tools.Label($"K2D2: {k2d2Status}");
+            FlightPlan.KTools.UI.UI_Tools.Label($"K2D2: {k2d2Status}");
             GUILayout.EndHorizontal();
         }
     }

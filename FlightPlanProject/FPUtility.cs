@@ -179,42 +179,6 @@ public static class FPUtility
         catch { return false; }
     }
 
-    public static Vector2 ClampToScreen(Vector2 position, Vector2 size)
-    {
-        float x = Mathf.Clamp(position.x, 0, Screen.width - size.x);
-        float y = Mathf.Clamp(position.y, 0, Screen.height - size.y);
-        return new Vector2(x, y);
-    }
-
-    /// <summary>
-    /// Check if focus is on an editable text field. If it is, disable input controls. If it's not, reenable controls.
-    /// </summary>
-    /// <param name="gameInputState">If input is currently enabled or disabled</param>
-    /// <param name="showGuiFlight">If MainGui window is opened</param>
-    /// <returns>True = input is enabled. False = input is disabled</returns>
-    internal static bool ToggleGameInputOnControlInFocus(bool gameInputState, bool showGuiFlight)
-    {
-        if (gameInputState)
-        {
-            if (InputDisableWindowAbbreviation == GUI.GetNameOfFocusedControl() || InputDisableWindowName == GUI.GetNameOfFocusedControl())
-            {
-                GameManager.Instance.Game.Input.Disable();
-                return false;
-            }
-
-            return true;
-        }
-        else
-        {
-            if ((InputDisableWindowAbbreviation != GUI.GetNameOfFocusedControl() && InputDisableWindowName != GUI.GetNameOfFocusedControl()) || !showGuiFlight)
-            {
-                GameManager.Instance.Game.Input.Enable();
-                return true;
-            }
-
-            return false;
-        }
-    }
 
     internal static (int major, int minor, int patch)? GetModVersion(string modId)
     {

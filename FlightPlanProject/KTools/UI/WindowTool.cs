@@ -1,9 +1,9 @@
 using UnityEngine;
-using FlightPlan.Tools;
+using FlightPlan.KTools;
 
-namespace FlightPlan.UI;
+namespace FlightPlan.KTools.UI;
 
-public class UIWindow
+public class WindowTool
 {
     /// <summary>
     ///  checks if the window is in screen
@@ -39,8 +39,8 @@ public class UIWindow
     {
         if (window_frame == Rect.zero)
         {
-            int x_pos = FPSettings.window_x_pos;
-            int y_pos = FPSettings.window_y_pos;
+            int x_pos = KBaseSettings.window_x_pos;
+            int y_pos = KBaseSettings.window_y_pos;
 
             if (x_pos == -1)
             {
