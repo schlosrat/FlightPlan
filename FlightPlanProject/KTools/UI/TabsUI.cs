@@ -47,7 +47,7 @@ public class TabsUI
     private bool TabButton(bool is_current, bool isActive, string txt)
     {
         GUIStyle style = isActive ? KBaseStyle.tab_active : KBaseStyle.tab_normal;
-        return GUILayout.Toggle(is_current, txt, style);
+        return GUILayout.Toggle(is_current, txt, style, GUILayout.ExpandWidth(true));
     }
 
     List<float> tabs_Width = new List<float>();
@@ -96,10 +96,10 @@ public class TabsUI
             }
         }
 
-        if (xPos < max_width * 0.7f)
+      /*  if (xPos < max_width * 0.7f)
         {
             GUILayout.FlexibleSpace();
-        }
+        }*/
         GUILayout.EndHorizontal();
 
         UI_Tools.Separator();
@@ -133,8 +133,16 @@ public class TabsUI
             UI_Tools.Error("NO active Tab tage !!!");
             return;
         }
-
-        int result = DrawTabs(current_index);
+        int result = current_index;
+        if (filtered_pages.Count == 1)
+        {
+            result = 0;
+        }
+        else
+        {
+            result = DrawTabs(current_index);
+        }
+        
         result = GeneralTools.ClampInt(result, 0, filtered_pages.Count - 1);
         if (result != current_index)
         {

@@ -97,7 +97,7 @@ public class KBaseStyle
 
         window.border = new RectOffset(25, 25, 35, 25);
         window.margin = new RectOffset(0, 0, 0, 0);
-        window.padding = new RectOffset(20, 13, 44, 17);
+        window.padding = new RectOffset(10, 10, 44, 10);
         window.overflow = new RectOffset(0, 0, 0, 0);
 
         // window.fontSize = 20;
@@ -283,6 +283,7 @@ public class KBaseStyle
         tab_normal.overflow = new RectOffset(0, 0, 0, 0);
         // big_button.fontSize = 20;
         tab_normal.alignment = TextAnchor.MiddleCenter;
+        tab_normal.stretchWidth = true;
 
         tab_normal.normal.background = AssetsLoader.loadIcon("Tab_Normal");
         setAllFromNormal(tab_normal);
