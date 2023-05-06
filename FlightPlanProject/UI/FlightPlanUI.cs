@@ -67,6 +67,21 @@ public class FlightPlanUI
 
     int spacingAfterEntry = 5;
 
+    private void DrawEntry(string entryName, string value, string unit = "")
+    {
+        GUILayout.BeginHorizontal();
+        UI_Tools.Label(entryName);
+        GUILayout.FlexibleSpace();
+        UI_Tools.Label(value);
+        if (unit.Length > 0)
+        {
+            GUILayout.Space(5);
+            UI_Tools.Label(unit);
+        }
+        GUILayout.EndHorizontal();
+        GUILayout.Space(spacingAfterEntry);
+    }
+
     private void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
@@ -181,7 +196,7 @@ public class FlightPlanUI
         createTabs();
 
         // All tabs get the current situation
-        DrawEntry("Situation", String.Format("{0} {1}", SituationToString(activeVessel.Situation), activeVessel.mainBody.bodyName));
+        DrawEntry("Situation", String.Format("{0} {1}", SituationToString(FlightPlanPlugin.Instance.activeVessel.Situation), FlightPlanPlugin.Instance.activeVessel.mainBody.bodyName));
 
         if (body_selection.listGui())
             return;
