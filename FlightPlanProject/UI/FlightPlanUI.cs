@@ -184,6 +184,7 @@ public class FlightPlanUI
             tabs.pages.Add(new TargetPage());
             tabs.pages.Add(new InterplanetaryPage());
             tabs.pages.Add(new MoonPage());
+            tabs.pages.Add(new ResonantOrbitPage());
 
             tabs.Init();
 
@@ -222,8 +223,8 @@ public class FlightPlanUI
             FPSettings.timeOffset = DrawLabelWithTextField("Time From Now", FPSettings.timeOffset, "s");
         }
 
-        var UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        // if (statusText == "Virgin") statusTime = UT;
+        // Draw the GUI status at the end of this tab
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         if (plugin.currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN)
         {
             FPStatus.Ok("");
