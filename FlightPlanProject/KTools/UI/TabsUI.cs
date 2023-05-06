@@ -12,6 +12,12 @@ public interface PageContent
         get;
     }
 
+    // Icon drawn in the Tab button
+    public GUIContent Icon
+    {
+        get;
+    }
+
     // if is isRunning, UI is drawn lighted
     public bool isRunning
     {
@@ -44,10 +50,13 @@ public class TabsUI
     PageContent current_page = null;
 
     // must be called after adding pages
-    private bool TabButton(bool is_current, bool isActive, string txt)
+    private bool TabButton(bool is_current, bool isActive, string txt, GUIContent icon)
     {
         GUIStyle style = isActive ? KBaseStyle.tab_active : KBaseStyle.tab_normal;
-        return GUILayout.Toggle(is_current, txt, style, GUILayout.ExpandWidth(true));
+        if (icon == null)
+            return GUILayout.Toggle(is_current, txt, style, GUILayout.ExpandWidth(true));
+        else
+            return GUILayout.Toggle(is_current, icon, style, GUILayout.ExpandWidth(true));
     }
 
     List<float> tabs_Width = new List<float>();
@@ -88,7 +97,7 @@ public class TabsUI
             xPos += width;
 
             bool is_current = current == index;
-            if (TabButton(is_current, page.isRunning, page.Name))
+            if (TabButton(is_current, page.isRunning, page.Name, page.Icon))
             {
                 if (!is_current)
 
