@@ -164,7 +164,7 @@ namespace MechJebLib.Maths
         {
             double sma = SmaFromStateVectors(mu, r, v);
             if (sma < 0)
-                throw new Exception("cannot find period of hyperbolic orbit, sma = " + sma);
+                throw new Exception("cannot find period of hyperbolic Orbit, sma = " + sma);
             return TAU * Math.Sqrt(sma * sma * sma / mu);
         }
 
@@ -373,7 +373,7 @@ namespace MechJebLib.Maths
         /// </summary>
         /// <param name="rotationPeriod">Rotation period of the central body (seconds).</param>
         /// <param name="latitude">Latitude of the launch site (degrees).</param>
-        /// <param name="celestialLongitude">Celestial longitude of the current position of the launch site.</param>
+        /// <param name="celestialLongitude">Celestial longitude of the current Position of the launch site.</param>
         /// <param name="lan">Longitude of the Ascending Node of the target plane (degrees).</param>
         /// <param name="inc">Inclination of the target plane (degrees).</param>
         public static (double time, double inclination) MinimumTimeToPlane(double rotationPeriod, double latitude, double celestialLongitude,
@@ -389,7 +389,7 @@ namespace MechJebLib.Maths
         /// </summary>
         /// <param name="rotationPeriod">Rotation period of the central body (seconds).</param>
         /// <param name="latitude">Latitude of the launch site (degrees).</param>
-        /// <param name="celestialLongitude">Celestial longitude of the current position of the launch site (degrees).</param>
+        /// <param name="celestialLongitude">Celestial longitude of the current Position of the launch site (degrees).</param>
         /// <param name="lan">Longitude of the Ascending Node of the target plane (degrees).</param>
         /// <param name="inc">Inclination of the target plane (degrees).</param>
         public static double TimeToPlane(double rotationPeriod, double latitude, double celestialLongitude, double lan, double inc)
@@ -564,7 +564,7 @@ namespace MechJebLib.Maths
 
         /// <summary>
         ///     Returns the vector delta V required to be applied in the prograde (or retrograde) direction
-        ///     to change the orbit Apoapsis to the desired value.
+        ///     to change the Orbit Apoapsis to the desired value.
         /// </summary>
         /// <param name="mu">Gravitational parameter</param>
         /// <param name="r">Current radius</param>
@@ -652,7 +652,7 @@ namespace MechJebLib.Maths
 
                 if (ecc < 1)
                 {
-                    // elliptic orbit
+                    // elliptic Orbit
                     s    = ecc * Math.Sin(eanom);
                     c    = ecc * Math.Cos(eanom);
                     f    = eanom - s - xma;
@@ -662,7 +662,7 @@ namespace MechJebLib.Maths
                 }
                 else
                 {
-                    // hyperbolic orbit
+                    // hyperbolic Orbit
                     s    = ecc * Math.Sinh(eanom);
                     c    = ecc * Math.Cosh(eanom);
                     f    = s - eanom - xma;

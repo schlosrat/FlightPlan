@@ -7,64 +7,63 @@ namespace FlightPlan.KTools.UI;
 
 public class UI_Fields
 {
-    public static Dictionary<string, string> temp_dict = new Dictionary<string, string>();
-    public static List<string> inputFields = new List<string>();
-    static bool _inputState = true;
+    public static Dictionary<string, string> TempDict = new Dictionary<string, string>();
+    public static List<string> InputFields = new List<string>();
+    static bool InputState = true;
 
 
-    public static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("KTools.UI_Fields");
+    public static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("KTools.UI_Fields");
 
     static public bool GameInputState
     {
-        get { return _inputState; }
+        get { return InputState; }
         set
         {
-            if (_inputState != value)
+            if (InputState != value)
             {
-                logger.LogWarning("input mode changed");
+                Logger.LogWarning("input mode changed");
 
                 if (value)
                     GameManager.Instance.Game.Input.Enable();
                 else
                     GameManager.Instance.Game.Input.Disable();
             }
-            _inputState = value;
+            InputState = value;
         }
     }
 
     static public void CheckEditor()
     {
-        GameInputState = !inputFields.Contains(GUI.GetNameOfFocusedControl());
+        GameInputState = !InputFields.Contains(GUI.GetNameOfFocusedControl());
     }
 
     public static double DoubleField(string entryName, double value, GUIStyle thisStyle = null)
     {
-        string text_value;
-        if (temp_dict.ContainsKey(entryName))
+        string _textValue;
+        if (TempDict.ContainsKey(entryName))
             // always use temp value
-            text_value = temp_dict[entryName];
+            _textValue = TempDict[entryName];
         else
-            text_value = value.ToString();
+            _textValue = value.ToString();
 
-        if (!inputFields.Contains(entryName))
-            inputFields.Add(entryName);
+        if (!InputFields.Contains(entryName))
+            InputFields.Add(entryName);
 
-        Color normal = GUI.color;
-        double num = 0;
-        bool parsed = double.TryParse(text_value, out num);
-        if (!parsed) GUI.color = Color.red;
+        Color _normal = GUI.color;
+        bool _parsed = double.TryParse(_textValue, out double num);
+        if (!_parsed) GUI.color = Color.red;
 
         GUI.SetNextControlName(entryName);
         if (thisStyle != null)
-            text_value = GUILayout.TextField(text_value, thisStyle, GUILayout.Width(100));
+            _textValue = GUILayout.TextField(_textValue, thisStyle, GUILayout.Width(100));
         else
-            text_value = GUILayout.TextField(text_value, GUILayout.Width(100));
+            _textValue = GUILayout.TextField(_textValue, GUILayout.Width(100));
 
-        GUI.color = normal;
+        GUI.color = _normal;
 
         // save filtered temp value
-        temp_dict[entryName] = text_value;
-        if (parsed)
+        TempDict[entryName] = _textValue;
+        if (_parsed)
             return num;
 
         return value;
@@ -73,14 +72,14 @@ public class UI_Fields
     /// Simple Integer Field. for the moment there is a trouble. keys are sent to KSP2 events if focus is in the field
     public static int IntField(string entryName, string label, int value, int min, int max, string tooltip = "")
     {
-        string text_value = value.ToString();
+        string _textValue = value.ToString();
 
-        if (temp_dict.ContainsKey(entryName))
+        if (TempDict.ContainsKey(entryName))
             // always use temp value
-            text_value = temp_dict[entryName];
+            _textValue = TempDict[entryName];
 
-        if (!inputFields.Contains(entryName))
-            inputFields.Add(entryName);
+        if (!InputFields.Contains(entryName))
+            InputFields.Add(entryName);
 
         GUILayout.BeginHorizontal();
 
@@ -90,28 +89,27 @@ public class UI_Fields
         }
 
         GUI.SetNextControlName(entryName);
-        var typed_text = GUILayout.TextField(text_value, GUILayout.Width(100));
-        typed_text = Regex.Replace(typed_text, @"[^\d-]+", "");
+        string _typedText = GUILayout.TextField(_textValue, GUILayout.Width(100));
+        _typedText = Regex.Replace(_typedText, @"[^\d-]+", "");
 
         // save filtered temp value
-        temp_dict[entryName] = typed_text;
+        TempDict[entryName] = _typedText;
+        bool _ok = true;
 
-        int result = value;
-        bool ok = true;
-        if (!int.TryParse(typed_text, out result))
+        if (!int.TryParse(_typedText, out int _result))
         {
-            ok = false;
+            _ok = false;
         }
-        if (result < min) {
-            ok = false;
-            result = value;
+        if (_result < min) {
+            _ok = false;
+            _result = value;
         }
-        else if (result > max) {
-            ok = false;
-            result = value;
+        else if (_result > max) {
+            _ok = false;
+            _result = value;
         }
 
-        if (!ok)
+        if (!_ok)
             GUILayout.Label("!!!", GUILayout.Width(30));
 
         if (!string.IsNullOrEmpty(tooltip))
@@ -120,6 +118,6 @@ public class UI_Fields
         }
 
         GUILayout.EndHorizontal();
-        return result;
+        return _result;
     }
 }

@@ -50,7 +50,7 @@ public partial class alglib
         N       -   number of nodes of the quadrature formula, N>=1
 
     OUTPUT PARAMETERS:
-        Info    -   error code:
+        Info    -   Error code:
                     * -3    internal eigenproblem solver hasn't converged
                     * -2    Beta[i]<=0
                     * -1    incorrect N was passed
@@ -105,7 +105,7 @@ public partial class alglib
                     (including the left and right boundary nodes).
 
     OUTPUT PARAMETERS:
-        Info    -   error code:
+        Info    -   Error code:
                     * -3    internal eigenproblem solver hasn't converged
                     * -2    Beta[i]<=0
                     * -1    incorrect N was passed
@@ -159,7 +159,7 @@ public partial class alglib
                     (including the left boundary node).
 
     OUTPUT PARAMETERS:
-        Info    -   error code:
+        Info    -   Error code:
                     * -3    internal eigenproblem solver hasn't converged
                     * -2    Beta[i]<=0
                     * -1    incorrect N was passed
@@ -196,8 +196,8 @@ public partial class alglib
         N           -   number of nodes, >=1
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
-                        * -4    an  error   was   detected   when  calculating
+        Info        -   Error code:
+                        * -4    an  Error   was   detected   when  calculating
                                 weights/nodes.  N  is  too  large   to  obtain
                                 weights/nodes  with  high   enough   accuracy.
                                 Try  to   use   multiple   precision  version.
@@ -238,8 +238,8 @@ public partial class alglib
         Beta        -   power-law coefficient, Beta>-1
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
-                        * -4    an  error  was   detected   when   calculating
+        Info        -   Error code:
+                        * -4    an  Error  was   detected   when   calculating
                                 weights/nodes. Alpha or  Beta  are  too  close
                                 to -1 to obtain weights/nodes with high enough
                                 accuracy, or, may be, N is too large.  Try  to
@@ -280,8 +280,8 @@ public partial class alglib
         Alpha       -   power-law coefficient, Alpha>-1
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
-                        * -4    an  error  was   detected   when   calculating
+        Info        -   Error code:
+                        * -4    an  Error  was   detected   when   calculating
                                 weights/nodes. Alpha is too  close  to  -1  to
                                 obtain weights/nodes with high enough accuracy
                                 or, may  be,  N  is  too  large.  Try  to  use
@@ -321,8 +321,8 @@ public partial class alglib
         N           -   number of nodes, >=1
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
-                        * -4    an  error  was   detected   when   calculating
+        Info        -   Error code:
+                        * -4    an  Error  was   detected   when   calculating
                                 weights/nodes.  May be, N is too large. Try to
                                 use multiple precision version.
                         * -3    internal eigenproblem solver hasn't converged
@@ -384,7 +384,7 @@ public partial class alglib
                         N =  2*K+1.
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
+        Info        -   Error code:
                         * -5    no real and positive Gauss-Kronrod formula can
                                 be created for such a weight function  with  a
                                 given number of nodes.
@@ -432,8 +432,8 @@ public partial class alglib
         N           -   number of Kronrod nodes, must be odd number, >=3.
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
-                        * -4    an  error   was   detected   when  calculating
+        Info        -   Error code:
+                        * -4    an  Error   was   detected   when  calculating
                                 weights/nodes.  N  is  too  large   to  obtain
                                 weights/nodes  with  high   enough   accuracy.
                                 Try  to   use   multiple   precision  version.
@@ -480,11 +480,11 @@ public partial class alglib
         Beta        -   power-law coefficient, Beta>-1
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
+        Info        -   Error code:
                         * -5    no real and positive Gauss-Kronrod formula can
                                 be created for such a weight function  with  a
                                 given number of nodes.
-                        * -4    an  error  was   detected   when   calculating
+                        * -4    an  Error  was   detected   when   calculating
                                 weights/nodes. Alpha or  Beta  are  too  close
                                 to -1 to obtain weights/nodes with high enough
                                 accuracy, or, may be, N is too large.  Try  to
@@ -531,8 +531,8 @@ public partial class alglib
         N           -   number of Kronrod nodes, must be odd number, >=3.
 
     OUTPUT PARAMETERS:
-        Info        -   error code:
-                        * -4    an  error   was   detected   when  calculating
+        Info        -   Error code:
+                        * -4    an  Error   was   detected   when  calculating
                                 weights/nodes.  N  is  too  large   to  obtain
                                 weights/nodes  with  high   enough   accuracy.
                                 Try  to   use   multiple   precision  version.
@@ -851,7 +851,7 @@ public partial class alglib
     public static void autogkintegrate(autogkstate state, integrator1_func func, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'autogkintegrate()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'autogkintegrate()' (func is null)");
         while( alglib.autogkiteration(state, _params) )
         {
             if( state.needf )
@@ -859,7 +859,7 @@ public partial class alglib
                 func(state.innerobj.x, state.innerobj.xminusa, state.innerobj.bminusx, ref state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: unexpected error in 'autogksolve'");
+            throw new alglibexception("ALGLIB: unexpected Error in 'autogksolve'");
         }
     }
     
@@ -921,7 +921,7 @@ public partial class alglib
             N       -   number of nodes of the quadrature formula, N>=1
 
         OUTPUT PARAMETERS:
-            Info    -   error code:
+            Info    -   Error code:
                         * -3    internal eigenproblem solver hasn't converged
                         * -2    Beta[i]<=0
                         * -1    incorrect N was passed
@@ -1024,7 +1024,7 @@ public partial class alglib
                         (including the left and right boundary nodes).
 
         OUTPUT PARAMETERS:
-            Info    -   error code:
+            Info    -   Error code:
                         * -3    internal eigenproblem solver hasn't converged
                         * -2    Beta[i]<=0
                         * -1    incorrect N was passed
@@ -1203,7 +1203,7 @@ public partial class alglib
                         (including the left boundary node).
 
         OUTPUT PARAMETERS:
-            Info    -   error code:
+            Info    -   Error code:
                         * -3    internal eigenproblem solver hasn't converged
                         * -2    Beta[i]<=0
                         * -1    incorrect N was passed
@@ -1308,8 +1308,8 @@ public partial class alglib
             N           -   number of nodes, >=1
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
-                            * -4    an  error   was   detected   when  calculating
+            Info        -   Error code:
+                            * -4    an  Error   was   detected   when  calculating
                                     weights/nodes.  N  is  too  large   to  obtain
                                     weights/nodes  with  high   enough   accuracy.
                                     Try  to   use   multiple   precision  version.
@@ -1386,8 +1386,8 @@ public partial class alglib
             Beta        -   power-law coefficient, Beta>-1
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
-                            * -4    an  error  was   detected   when   calculating
+            Info        -   Error code:
+                            * -4    an  Error  was   detected   when   calculating
                                     weights/nodes. Alpha or  Beta  are  too  close
                                     to -1 to obtain weights/nodes with high enough
                                     accuracy, or, may be, N is too large.  Try  to
@@ -1483,8 +1483,8 @@ public partial class alglib
             Alpha       -   power-law coefficient, Alpha>-1
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
-                            * -4    an  error  was   detected   when   calculating
+            Info        -   Error code:
+                            * -4    an  Error  was   detected   when   calculating
                                     weights/nodes. Alpha is too  close  to  -1  to
                                     obtain weights/nodes with high enough accuracy
                                     or, may  be,  N  is  too  large.  Try  to  use
@@ -1570,8 +1570,8 @@ public partial class alglib
             N           -   number of nodes, >=1
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
-                            * -4    an  error  was   detected   when   calculating
+            Info        -   Error code:
+                            * -4    an  Error  was   detected   when   calculating
                                     weights/nodes.  May be, N is too large. Try to
                                     use multiple precision version.
                             * -3    internal eigenproblem solver hasn't converged
@@ -1666,7 +1666,7 @@ public partial class alglib
                             N =  2*K+1.
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
+            Info        -   Error code:
                             * -5    no real and positive Gauss-Kronrod formula can
                                     be created for such a weight function  with  a
                                     given number of nodes.
@@ -1906,8 +1906,8 @@ public partial class alglib
             N           -   number of Kronrod nodes, must be odd number, >=3.
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
-                            * -4    an  error   was   detected   when  calculating
+            Info        -   Error code:
+                            * -4    an  Error   was   detected   when  calculating
                                     weights/nodes.  N  is  too  large   to  obtain
                                     weights/nodes  with  high   enough   accuracy.
                                     Try  to   use   multiple   precision  version.
@@ -1962,11 +1962,11 @@ public partial class alglib
             Beta        -   power-law coefficient, Beta>-1
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
+            Info        -   Error code:
                             * -5    no real and positive Gauss-Kronrod formula can
                                     be created for such a weight function  with  a
                                     given number of nodes.
-                            * -4    an  error  was   detected   when   calculating
+                            * -4    an  Error  was   detected   when   calculating
                                     weights/nodes. Alpha or  Beta  are  too  close
                                     to -1 to obtain weights/nodes with high enough
                                     accuracy, or, may be, N is too large.  Try  to
@@ -2079,8 +2079,8 @@ public partial class alglib
             N           -   number of Kronrod nodes, must be odd number, >=3.
 
         OUTPUT PARAMETERS:
-            Info        -   error code:
-                            * -4    an  error   was   detected   when  calculating
+            Info        -   Error code:
+                            * -4    an  Error   was   detected   when  calculating
                                     weights/nodes.  N  is  too  large   to  obtain
                                     weights/nodes  with  high   enough   accuracy.
                                     Try  to   use   multiple   precision  version.
@@ -3211,10 +3211,10 @@ public partial class alglib
 
         /*************************************************************************
         Internal AutoGK subroutine
-        eps<0   - error
+        eps<0   - Error
         eps=0   - automatic eps selection
 
-        width<0 -   error
+        width<0 -   Error
         width=0 -   no width requirements
         *************************************************************************/
         private static void autogkinternalprepare(double a,
@@ -3381,7 +3381,7 @@ public partial class alglib
             
             //
             // First, prepare heap
-            // * column 0   -   absolute error
+            // * column 0   -   absolute Error
             // * column 1   -   integral of a F(x) (calculated using Kronrod extension nodes)
             // * column 2   -   integral of a |F(x)| (calculated using modified rect. method)
             // * column 3   -   left boundary of a subinterval
@@ -3555,7 +3555,7 @@ public partial class alglib
             }
             
             //
-            // Exclude interval with maximum absolute error
+            // Exclude interval with maximum absolute Error
             //
             mheappop(ref state.heap, state.heapused, state.heapwidth, _params);
             state.sumerr = state.sumerr-state.heap[state.heapused-1,0];

@@ -15,85 +15,88 @@ public class FlightPlanUI
     public FlightPlanUI(FlightPlanPlugin main_plugin)
     {
         _instance = this;
-        this.plugin = main_plugin;
-        body_selection = new BodySelection(main_plugin);
-        burn_options = new BurnTimeOption();
+        this.Plugin = main_plugin;
+        BodySelection = new BodySelection(main_plugin);
+        BurnOptions = new BurnTimeOption();
     }
 
-    TabsUI tabs = new TabsUI();
+    TabsUI Tabs = new TabsUI();
 
-    public PatchedConicsOrbit orbit;
-    public CelestialBodyComponent referenceBody;
+    public PatchedConicsOrbit Orbit;
+    public CelestialBodyComponent ReferenceBody;
 
     public void Update()
     {
-        if (init_done)
+        if (InitDone)
         {
-            referenceBody = null;
-            orbit = null;
-            var vessel = FlightPlanPlugin.Instance.activeVessel;
+            ReferenceBody = null;
+            Orbit = null;
+            var vessel = FlightPlanPlugin.Instance._activeVessel;
             if (vessel == null)
                 return;
 
-            orbit = vessel.Orbit;
-            if (orbit != null)
-                referenceBody = orbit.referenceBody;
+            Orbit = vessel.Orbit;
+            if (Orbit != null)
+                ReferenceBody = Orbit.referenceBody;
            
 
-            tabs.Update();
+            Tabs.Update();
         }
    
     }
 
-    public ManeuverType maneuver_type = ManeuverType.None;
+    public ManeuverType ManeuverType = ManeuverType.None;
 
-    public static TimeRef time_ref = TimeRef.None;
+    public static TimeRef TimeRef = TimeRef.None;
 
     public void SetManeuverType(ManeuverType type)
     {
-        maneuver_type = type;
-        maneuver_type_desc = BurnTimeOption.Instance.setOptionsList(type);
+        ManeuverType = type;
+        ManeuverTypeDesc = BurnTimeOption.Instance.SetOptionsList(type);
     }
 
-    public string maneuver_type_desc;
+    public string ManeuverTypeDesc;
 
 
-    FlightPlanPlugin plugin;
+    FlightPlanPlugin Plugin;
 
     public ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanUI");
 
-    BodySelection body_selection;
-    BurnTimeOption burn_options;
+    BodySelection BodySelection; // Name this something clearer to distinguish it from the type/class?
+    BurnTimeOption BurnOptions;
 
-    int spacingAfterEntry = 5;
+    // int spacingAfterEntry = 5;
 
     public void DrawSoloToggle(string toggleStr, ref bool toggle)
     {
-        GUILayout.Space(FPStyles.spacingAfterSection);
+        GUILayout.Space(FPStyles.SpacingAfterSection);
         GUILayout.BeginHorizontal();
-        toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.toggle); // was section_toggle
+        toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.Toggle); // was section_toggle
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
-        GUILayout.Space(-FPStyles.spacingAfterSection);
+        GUILayout.Space(-FPStyles.SpacingAfterSection);
     }
 
-    public bool DrawSoloToggle(string toggleStr, bool toggle, bool error=true)
+    public bool DrawSoloToggle(string toggleStr, bool toggle, bool error=false)
     {
-        GUILayout.Space(FPStyles.spacingAfterSection);
+        GUILayout.Space(FPStyles.SpacingAfterSection);
         GUILayout.BeginHorizontal();
         if (error)
-            toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.toggle_error);
+        {
+            GUILayout.Toggle(toggle, toggleStr, KBaseStyle.ToggleError);
+            toggle = false;
+        }
         else
-            toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.toggle);
+            toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.Toggle);
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
-        GUILayout.Space(-FPStyles.spacingAfterSection);
+        GUILayout.Space(-FPStyles.SpacingAfterSection);
         return toggle;
     }
 
     //public void DrawToggleButton(string txt, ManeuverType maneuveur_type)
     //{
-    //    bool active = maneuver_type == maneuveur_type;
+    //    bool active = ManeuverType == maneuveur_type;
 
     //    bool result = UI_Tools.SmallToggleButton(active, txt, txt);
     //    if (result != active)
@@ -117,7 +120,7 @@ public class FlightPlanUI
             UI_Tools.Label(unit);
         }
         GUILayout.EndHorizontal();
-        GUILayout.Space(FPStyles.spacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
     }
 
     public void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
@@ -130,54 +133,64 @@ public class FlightPlanUI
         GUILayout.Space(5);
         UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
-        GUILayout.Space(FPStyles.spacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
     }
 
-    public void DrawEntry2Button(string entryName, ref bool button1, string button1Str, ref bool button2, string button2Str, string value, string unit = "")
+    public void DrawEntry2Button(string entryName, ref bool button1, string button1Str, ref bool button2, string button2Str, string value, string unit = "", string divider = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Console(entryName);
         GUILayout.FlexibleSpace();
         button1 = UI_Tools.CtrlButton(button1Str);
+        if (divider.Length > 0)
+            UI_Tools.Console(divider);
         button2 = UI_Tools.CtrlButton(button2Str);
         UI_Tools.Console(value);
         GUILayout.Space(5);
         UI_Tools.Console(unit);
         GUILayout.EndHorizontal();
-        GUILayout.Space(FPStyles.spacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
     }
 
     public void DrawEntryTextField(string entryName, ref string textEntry, string unit = "")
     {
-        double num;
         Color normal;
 
         GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, KBaseStyle.nameLabelStyle);
+        UI_Tools.Label(entryName, KBaseStyle.NameLabelStyle); // 
         GUILayout.FlexibleSpace();
         normal = GUI.color;
-        bool parsed = double.TryParse(textEntry, out num);
+        bool parsed = double.TryParse(textEntry, out _);
         if (!parsed) GUI.color = Color.red;
         GUI.SetNextControlName(entryName);
-        textEntry = GUILayout.TextField(textEntry, KBaseStyle.textInputStyle);
+        textEntry = GUILayout.TextField(textEntry, KBaseStyle.TextInputStyle);
         GUI.color = normal;
         GUILayout.Space(5);
-        GUILayout.Label(unit, KBaseStyle.unitLabelStyle);
+        UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle); // was 
         GUILayout.EndHorizontal();
-        GUILayout.Space(FPStyles.spacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
     }
 
-    public double DrawEntryTextField(string entryName, double value, string unit = "")
+    public double DrawEntryTextField(string entryName, double value, string unit = "", GUIStyle thisStyle = null)
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Label(entryName, KBaseStyle.nameLabelStyle);
+        if (thisStyle == null)
+            UI_Tools.Label(entryName);
+        else
+            UI_Tools.Label(entryName, KBaseStyle.NameLabelStyle);
         GUILayout.FlexibleSpace();
         GUI.SetNextControlName(entryName);
-        value = UI_Fields.DoubleField(entryName, value, KBaseStyle.textInputStyle);
-        GUILayout.Space(5);
-        GUILayout.Label(unit, KBaseStyle.unitLabelStyle);
+        if (thisStyle == null)
+            value = UI_Fields.DoubleField(entryName, value, KBaseStyle.TextInputStyle);
+        else
+            value = UI_Fields.DoubleField(entryName, value, thisStyle);
+        GUILayout.Space(3);
+        if (thisStyle == null)
+            UI_Tools.Label(unit); // , KBaseStyle.UnitLabelStyle
+        else
+            UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle);
         GUILayout.EndHorizontal();
-        GUILayout.Space(FPStyles.spacingAfterEntry);
+        GUILayout.Space(-FPStyles.SpacingAfterEntry);
         return value;
     }
 
@@ -192,17 +205,13 @@ public class FlightPlanUI
         GUILayout.Space(3);
         UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
-
-        GUILayout.Space(spacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
         return value;
     }
 
-    public double DrawToggleButtonWithTextField(string runString, ManeuverType type, double value, string unit = "", string stopString = "")
+    public double DrawToggleButtonWithTextField(string runString, ManeuverType type, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
-        if (stopString.Length < 1)
-            stopString = runString;
-
 
         DrawToggleButton(runString, type);
         GUILayout.Space(10);
@@ -213,22 +222,32 @@ public class FlightPlanUI
         UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
 
-        GUILayout.Space(spacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
         return value;
     }
 
-    public void DrawToggleButton(string txt, ManeuverType maneuveur_type)
+    public void DrawToggleButtonWithLabel(string runString, ManeuverType type, string label = "", string unit = "", int widthOverride = 0)
     {
-        bool active = maneuver_type == maneuveur_type;
+        GUILayout.BeginHorizontal();
 
-        bool result = UI_Tools.SmallToggleButton(active, txt, txt);
-        if (result != active)
-        {
-            if (!active)
-                SetManeuverType(maneuveur_type);
-            else
-                SetManeuverType(ManeuverType.None);
-        }
+        DrawToggleButton(runString, type, widthOverride);
+        GUILayout.Space(10);
+
+        UI_Tools.Label(label);
+
+        GUILayout.Space(3);
+        UI_Tools.Label(unit);
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
+    }
+
+
+    public void DrawToggleButton(string txt, ManeuverType this_maneuver_type, int widthOverride = 0)
+    {
+        bool active = ManeuverType == this_maneuver_type;
+        bool result = UI_Tools.SmallToggleButton(active, txt, txt, widthOverride);
+        if (result != active) { SetManeuverType(result ? this_maneuver_type : ManeuverType.None); }
     }
 
     private string SituationToString(VesselSituations situation)
@@ -246,89 +265,89 @@ public class FlightPlanUI
         };
     }
 
-    bool init_done = false;
+    bool InitDone = false;
 
-    void createTabs()
+    void CreateTabs()
     {
-        if (!init_done)
+        if (!InitDone)
         {
-            tabs.pages.Add(new OwnshipManeuversPage());
-            tabs.pages.Add(new TargetPage());
-            tabs.pages.Add(new InterplanetaryPage());
-            tabs.pages.Add(new MoonPage());
-            tabs.pages.Add(new ResonantOrbitPage());
+            Tabs.Pages.Add(new OwnshipManeuversPage());
+            Tabs.Pages.Add(new TargetPage());
+            Tabs.Pages.Add(new InterplanetaryPage());
+            Tabs.Pages.Add(new MoonPage());
+            Tabs.Pages.Add(new ResonantOrbitPage());
 
-            tabs.Init();
+            Tabs.Init();
 
-            init_done = true;
+            InitDone = true;
         }
     }
 
     public void OnGUI()
     {
-        createTabs();
+        CreateTabs();
 
-        // All tabs get the current situation
-        DrawEntry("Situation", String.Format("{0} {1}", SituationToString(FlightPlanPlugin.Instance.activeVessel.Situation), FlightPlanPlugin.Instance.activeVessel.mainBody.bodyName));
+        // All Tabs get the current situation
+        DrawEntry("Situation", String.Format("{0} {1}", SituationToString(FlightPlanPlugin.Instance._activeVessel.Situation), FlightPlanPlugin.Instance._activeVessel.mainBody.bodyName));
 
-        if (body_selection.listGui())
+        if (BodySelection.ListGUI())
             return;
 
-        if (burn_options.listGui())
+        if (BurnOptions.ListGUI())
             return;
 
         // game = GameManager.Instance.Game;
-        //activeNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
-        //currentNode = (activeNodes.Count() > 0) ? activeNodes[0] : null;
+        //ActiveNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
+        //CurrentNode = (ActiveNodes.Count() > 0) ? ActiveNodes[0] : null;
         FPUtility.RefreshActiveVesselAndCurrentManeuver();
         
-        body_selection.BodySelectionGUI();
-        tabs.onGUI();
+        BodySelection.BodySelectionGUI();
+        Tabs.OnGUI();
 
         // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
-        if (time_ref == TimeRef.ALTITUDE)
+        if (TimeRef == TimeRef.ALTITUDE)
         {
-            FPSettings.altitude_km = DrawLabelWithTextField("Maneuver Altitude", FPSettings.altitude_km, "km");
+            FPSettings.Altitude_km = DrawLabelWithTextField("Maneuver Altitude", FPSettings.Altitude_km, "km");
         }
-        if (time_ref == TimeRef.X_FROM_NOW)
+        if (TimeRef == TimeRef.X_FROM_NOW)
         {
-            FPSettings.timeOffset = DrawLabelWithTextField("Time From Now", FPSettings.timeOffset, "s");
+            FPSettings.TimeOffset = DrawLabelWithTextField("Time From Now", FPSettings.TimeOffset, "s");
         }
 
-        // Draw the GUI status at the end of this tab
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        if (plugin.currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN)
+        // Draw the GUI Status at the end of this tab
+        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        if (Plugin._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN)
         {
             FPStatus.Ok("");
         }
-        DrawGUIStatus(UT);
+        DrawGUIStatus(_UT);
 
-        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the orbit
-        if (time_ref == TimeRef.ALTITUDE)
+        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the Orbit
+        if (TimeRef == TimeRef.ALTITUDE)
         {
-            if (FPSettings.altitude_km * 1000 < orbit.Periapsis)
+            if (FPSettings.Altitude_km * 1000 < Orbit.Periapsis)
             {
-                FPSettings.altitude_km = Math.Ceiling(orbit.Periapsis) / 1000;
+                FPSettings.Altitude_km = Math.Ceiling(Orbit.Periapsis) / 1000;
                 if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
-                    UI_Fields.temp_dict["Maneuver Altitude"] = FPSettings.altitude_km.ToString();
+                    UI_Fields.TempDict["Maneuver Altitude"] = FPSettings.Altitude_km.ToString();
             }
-            if (orbit.eccentricity < 1 && FPSettings.altitude_km * 1000 > orbit.Apoapsis)
+            if (Orbit.eccentricity < 1 && FPSettings.Altitude_km * 1000 > Orbit.Apoapsis)
             {
-                FPSettings.altitude_km = Math.Floor(orbit.Apoapsis) / 1000;
+                FPSettings.Altitude_km = Math.Floor(Orbit.Apoapsis) / 1000;
                 if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
-                    UI_Fields.temp_dict["Maneuver Altitude"] = FPSettings.altitude_km.ToString();
+                    UI_Fields.TempDict["Maneuver Altitude"] = FPSettings.Altitude_km.ToString();
             }
         }
 
-        maneuver_description = $"{maneuver_type_desc} {BurnTimeOption.TimeRefDesc}";
+        ManeuverDescription = $"{ManeuverTypeDesc} {BurnTimeOption.TimeRefDesc}";
 
-        BurnTimeOption.Instance.setBurnTime();
+        BurnTimeOption.Instance.SetBurnTime();
     }
 
-    public string maneuver_description;
+    public string ManeuverDescription;
 
 
-    public FPOtherModsInterface other_mods = null;
+    public FPOtherModsInterface OtherMods = null;
 
     private void DrawGUIStatus(double UT)
     {
@@ -336,90 +355,90 @@ public class FlightPlanUI
 
         // Indication to User that its safe to type, or why vessel controls aren't working
 
-        if (other_mods == null)
+        if (OtherMods == null)
         {
             // init mode detection only when first needed
-            other_mods = new FPOtherModsInterface();
-            other_mods.CheckModsVersions();
+            OtherMods = new FPOtherModsInterface();
+            OtherMods.CheckModsVersions();
         }
 
-        other_mods.OnGUI( plugin.currentNode);
-        GUILayout.Space(spacingAfterEntry);
+        OtherMods.OnGUI( Plugin._currentNode);
+        GUILayout.Space(FPStyles.SpacingAfterEntry);
     }
 
     // Radius Computed from Inputs
-    public double targetPeR;
-    public double targetApR;
-    public double targetSMA;
-    public double targetMRPeR;
+    public double TargetPeR;
+    public double TargetApR;
+    public double TargetSMA;
+    public double TargetMRPeR;
 
     /// <summary>
-    /// final creation of the Node by calling the main plugin
+    /// final creation of the Node by calling the main Plugin
     /// </summary>
     public void MakeNode()
     {
-        if (maneuver_type == ManeuverType.None)
+        if (ManeuverType == ManeuverType.None)
             return;
 
-        var requestedBurnTime = BurnTimeOption.requestedBurnTime;
+        double _requestedBurnTime = BurnTimeOption.RequestedBurnTime;
 
-        bool pass = false;
-        switch (maneuver_type)
+        bool _pass = false;
+        switch (ManeuverType)
         {
         case ManeuverType.circularize: // Working
-            pass = plugin.Circularize(requestedBurnTime, -0.5);
+            _pass = Plugin.Circularize(_requestedBurnTime, -0.5);
             break;
         case ManeuverType.newPe: // Working
-            pass = plugin.SetNewPe(requestedBurnTime, targetPeR, -0.5);
+            _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
             break;
         case ManeuverType.newAp:// Working
-            pass = plugin.SetNewAp(requestedBurnTime, targetApR, -0.5);
+            _pass = Plugin.SetNewAp(_requestedBurnTime, TargetApR, -0.5);
             break;
         case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
-            pass = plugin.Ellipticize(requestedBurnTime, targetApR, targetPeR, -0.5);
+            _pass = Plugin.Ellipticize(_requestedBurnTime, TargetApR, TargetPeR, -0.5);
             break;
         case ManeuverType.newInc:// Working
-            pass = plugin.SetInclination(requestedBurnTime, FPSettings.target_inc_deg, -0.5);
+            _pass = Plugin.SetInclination(_requestedBurnTime, FPSettings.TargetInc_deg, -0.5);
             break;
         case ManeuverType.newLAN: // Untested
-            pass = plugin.SetNewLAN(requestedBurnTime, FPSettings.target_lan_deg, -0.5);
+            _pass = Plugin.SetNewLAN(_requestedBurnTime, FPSettings.TargetLAN_deg, -0.5);
             break;
         case ManeuverType.newNodeLon: // Untested
-            pass = plugin.SetNodeLongitude(requestedBurnTime, FPSettings.target_node_long_deg, -0.5);
+            _pass = Plugin.SetNodeLongitude(_requestedBurnTime, FPSettings.TargetNodeLong_deg, -0.5);
             break;
         case ManeuverType.newSMA: // Untested
-            pass = plugin.SetNewSMA(requestedBurnTime, targetSMA, -0.5);
+            _pass = Plugin.SetNewSMA(_requestedBurnTime, TargetSMA, -0.5);
             break;
         case ManeuverType.matchPlane: // Working
-            pass = plugin.MatchPlanes(time_ref, -0.5);
+            _pass = Plugin.MatchPlanes(TimeRef, -0.5);
             break;
-        case ManeuverType.hohmannXfer: // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
-            pass = plugin.HohmannTransfer(requestedBurnTime, -0.5);
+        case ManeuverType.hohmannXfer: // Works if we start in a good enough Orbit (reasonably circular, close to target's orbital plane)
+            _pass = Plugin.HohmannTransfer(_requestedBurnTime, -0.5);
             break;
         case ManeuverType.interceptTgt: // Experimental
-            pass = plugin.InterceptTgt(requestedBurnTime, FPSettings.interceptT, -0.5);
+            _pass = Plugin.InterceptTgt(_requestedBurnTime, FPSettings.InterceptTime, -0.5);
             break;
         case ManeuverType.courseCorrection: // Experimental Works at least some times...
-            pass = plugin.CourseCorrection(requestedBurnTime, -0.5);
+            _pass = Plugin.CourseCorrection(_requestedBurnTime, -0.5);
             break;
         case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
-            pass = plugin.MoonReturn(requestedBurnTime, targetMRPeR, -0.5);
+            _pass = Plugin.MoonReturn(_requestedBurnTime, TargetMRPeR, -0.5);
             break;
         case ManeuverType.matchVelocity: // Experimental
-            pass = plugin.MatchVelocity(requestedBurnTime, -0.5);
+            _pass = Plugin.MatchVelocity(_requestedBurnTime, -0.5);
             break;
         case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-            pass = plugin.PlanetaryXfer(requestedBurnTime, -0.5);
+            _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
             break;
         case ManeuverType.fixAp: // Working
-            pass = plugin.SetNewAp(requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
+            _pass = Plugin.SetNewAp(_requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
             break;
         case ManeuverType.fixPe: // Working
-            pass = plugin.SetNewPe(requestedBurnTime, ResonantOrbitPage.Pe2, - 0.5);
+            _pass = Plugin.SetNewPe(_requestedBurnTime, ResonantOrbitPage.Pe2, - 0.5);
             break;
         }
 
-        if (pass && plugin.autoLaunchMNC.Value)
-            FPOtherModsInterface.instance.callMNC();
+        if (_pass && Plugin._autoLaunchMNC.Value)
+            FPOtherModsInterface.instance.CallMNC();
     }
 }

@@ -7,13 +7,13 @@ namespace FlightPlan;
 
 public class BodySelection
 {
-    FlightPlanPlugin plugin;
+    FlightPlanPlugin Plugin;
     private bool selecting = false;
     private Vector2 scrollPositionBodies;
 
     public BodySelection(FlightPlanPlugin main_plugin)
     {
-        this.plugin = main_plugin;
+        this.Plugin = main_plugin;
     }
 
     void listSubBodies(CelestialBodyComponent body, int level)
@@ -25,8 +25,8 @@ public class BodySelection
             if (UI_Tools.ListButton(sub.Name))
             {
                 selecting = false;
-                plugin.activeVessel.SetTargetByID(sub.GlobalId);
-                plugin.currentTarget = plugin.activeVessel.TargetObject;
+                Plugin._activeVessel.SetTargetByID(sub.GlobalId);
+                Plugin._currentTarget = Plugin._activeVessel.TargetObject;
             }
 
             GUILayout.EndHorizontal();
@@ -34,17 +34,17 @@ public class BodySelection
         }
     }
 
-    internal bool listGui()
+    internal bool ListGUI()
     {
         if (!selecting)
             return false;
 
         //bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
 
-        CelestialBodyComponent root_body = plugin.activeVessel.mainBody;
-        while (root_body.referenceBody != null)
+        CelestialBodyComponent _rootBody = Plugin._activeVessel.mainBody;
+        while (_rootBody.referenceBody != null)
         {
-            root_body = root_body.referenceBody;
+            _rootBody = _rootBody.referenceBody;
         }
 
         // bodies = GameManager.Instance.Game.SpaceSimulation.GetAllObjectsWithComponent<CelestialBodyComponent>();
@@ -62,7 +62,7 @@ public class BodySelection
         //GUI.SetNextControlName("Select Target");
         scrollPositionBodies = UI_Tools.BeginScrollView(scrollPositionBodies, 300);
 
-        listSubBodies(root_body, 0);
+        listSubBodies(_rootBody, 0);
 
         GUILayout.EndScrollView();
 
@@ -71,16 +71,16 @@ public class BodySelection
 
     public void BodySelectionGUI()
     {
-        string tgtName;
-        if (plugin.currentTarget == null)
-            tgtName = "None";
+        string _tgtName;
+        if (Plugin._currentTarget == null)
+            _tgtName = "None";
         else
-            tgtName = plugin.currentTarget.Name;
+            _tgtName = Plugin._currentTarget.Name;
 
         GUILayout.BeginHorizontal();
         GUILayout.Label("Target : ");
 
-        if (UI_Tools.SmallButton(tgtName))
+        if (UI_Tools.SmallButton(_tgtName))
             selecting = true;
 
         GUILayout.EndHorizontal();

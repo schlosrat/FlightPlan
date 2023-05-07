@@ -104,7 +104,7 @@ public partial class alglib
       continuity violation (test #1)
 
     Following set of report fields deals with errors in the gradient:
-    * badgradsuspected - is a flad which is set upon discovering an  error  in
+    * badgradsuspected - is a flad which is set upon discovering an  Error  in
       the analytic gradient supplied by user
     * badgradfidx - index  of   the  function  with bad gradient (0 for target
       function, 1 or higher for nonlinear constraints)
@@ -120,7 +120,7 @@ public partial class alglib
       The  element  of  badgraduser[] with index [badgradfidx,badgradvidx]  is
       assumed to be wrong.
 
-    More detailed error log can  be  obtained  from  optimizer  by  explicitly
+    More detailed Error log can  be  obtained  from  optimizer  by  explicitly
     requesting reports for tests C0.0, C1.0, C1.1.
 
       -- ALGLIB --
@@ -203,7 +203,7 @@ public partial class alglib
       values at these points; f[i] is evaluated in x0+stp[i]*d.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     You can plot function values stored in stp[]  and  f[]  arrays  and  study
@@ -288,7 +288,7 @@ public partial class alglib
       values at these points; f[i] is evaluated in x0+stp[i]*d.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     You can plot function values stored in stp[]  and  f[]  arrays  and  study
@@ -384,7 +384,7 @@ public partial class alglib
       vidx-th component of the gradient.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     You can plot function values stored in stp[]  and  g[]  arrays  and  study
@@ -1048,7 +1048,7 @@ public partial class alglib
     public static void minlbfgsoptimize(minlbfgsstate state, ndimensional_func func, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'minlbfgsoptimize()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlbfgsoptimize()' (func is null)");
         while( alglib.minlbfgsiteration(state, _params) )
         {
             if( state.needf )
@@ -1062,7 +1062,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minlbfgsoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minlbfgsoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -1075,7 +1075,7 @@ public partial class alglib
     public static void minlbfgsoptimize(minlbfgsstate state, ndimensional_grad grad, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( grad==null )
-            throw new alglibexception("ALGLIB: error in 'minlbfgsoptimize()' (grad is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlbfgsoptimize()' (grad is null)");
         while( alglib.minlbfgsiteration(state, _params) )
         {
             if( state.needfg )
@@ -1089,7 +1089,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minlbfgsoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minlbfgsoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -1104,7 +1104,7 @@ public partial class alglib
     (note: future versions may also perform check  at  the  final  point)  and
     compares numerical gradient with analytic one provided by you.
 
-    If difference is too large, an error flag is set and optimization  session
+    If difference is too large, an Error flag is set and optimization  session
     continues. After optimization session is over, you can retrieve the report
     which  stores  both  gradients  and  specific  components  highlighted  as
     suspicious by the OptGuard.
@@ -1213,7 +1213,7 @@ public partial class alglib
 
     Another frequent situation is when you try to optimize something involving
     lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-    coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+    coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
     stop right after encountering nonsmoothness, well before reaching solution.
 
     OptGuard integrity checker helps you to catch such situations: it monitors
@@ -1292,7 +1292,7 @@ public partial class alglib
     === ADDITIONAL REPORTS/LOGS ==============================================
 
     Several different tests are performed to catch C0/C1 errors, you can  find
-    out specific test signaled error by looking to:
+    out specific test signaled Error by looking to:
     * rep.nonc0test0positive, for non-C0 test #0
     * rep.nonc1test0positive, for non-C1 test #0
     * rep.nonc1test1positive, for non-C1 test #1
@@ -1301,7 +1301,7 @@ public partial class alglib
     means of:
     * minlbfgsoptguardnonc1test0results()
     * minlbfgsoptguardnonc1test1results()
-    which return detailed error reports, specific points where discontinuities
+    which return detailed Error reports, specific points where discontinuities
     were found, and so on.
 
     ==========================================================================
@@ -1319,7 +1319,7 @@ public partial class alglib
           The reason  is  that  you  need  to  make several evaluations around
           nonsmoothness  in  order  to  accumulate  enough  information  about
           function curvature. Say, if you start right from the nonsmooth point,
-          optimizer simply won't get enough data to understand what  is  going
+          optimizer simply won't get enough Data to understand what  is  going
           wrong before it terminates due to abrupt changes in the  derivative.
           It is also  possible  that  "unlucky"  step  will  move  us  to  the
           termination too quickly.
@@ -1370,7 +1370,7 @@ public partial class alglib
       values at these points; f[i] is evaluated in x0+stp[i]*d.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -1436,7 +1436,7 @@ public partial class alglib
       vidx-th component of the gradient.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -1568,7 +1568,7 @@ public partial class alglib
     should be called from user-supplied callback when user decides that it  is
     time to "smoothly" terminate optimization process.  As  result,  optimizer
     stops at point which was "current accepted" when termination  request  was
-    submitted and returns error code 8 (successful termination).
+    submitted and returns Error code 8 (successful termination).
 
     INPUT PARAMETERS:
         State   -   optimizer structure
@@ -1708,7 +1708,7 @@ public partial class alglib
     ADDITIONAL FIELDS
 
     There are additional fields which can be used for debugging:
-    * DebugEqErr                error in the equality constraints (2-norm)
+    * DebugEqErr                Error in the equality constraints (2-norm)
     * DebugFS                   f, calculated at projection of initial point
                                 to the feasible set
     * DebugFF                   f, calculated at the final point
@@ -2259,7 +2259,7 @@ public partial class alglib
 
     When  non-boundary  constraints  are  present,  you  have to either a) use
     preconditioner, or b) use upper limit on step length.  YOU CAN'T USE BOTH!
-    In this case algorithm will terminate with appropriate error code.
+    In this case algorithm will terminate with appropriate Error code.
 
     INPUT PARAMETERS:
         State   -   structure which stores algorithm state
@@ -2360,7 +2360,7 @@ public partial class alglib
     public static void minbleicoptimize(minbleicstate state, ndimensional_func func, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'minbleicoptimize()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'minbleicoptimize()' (func is null)");
         while( alglib.minbleiciteration(state, _params) )
         {
             if( state.needf )
@@ -2374,7 +2374,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minbleicoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minbleicoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -2387,7 +2387,7 @@ public partial class alglib
     public static void minbleicoptimize(minbleicstate state, ndimensional_grad grad, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( grad==null )
-            throw new alglibexception("ALGLIB: error in 'minbleicoptimize()' (grad is null)");
+            throw new alglibexception("ALGLIB: Error in 'minbleicoptimize()' (grad is null)");
         while( alglib.minbleiciteration(state, _params) )
         {
             if( state.needfg )
@@ -2401,7 +2401,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minbleicoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minbleicoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -2416,7 +2416,7 @@ public partial class alglib
     (note: future versions may also perform check  at  the  final  point)  and
     compares numerical gradient with analytic one provided by you.
 
-    If difference is too large, an error flag is set and optimization  session
+    If difference is too large, an Error flag is set and optimization  session
     continues. After optimization session is over, you can retrieve the report
     which  stores  both  gradients  and  specific  components  highlighted  as
     suspicious by the OptGuard.
@@ -2525,7 +2525,7 @@ public partial class alglib
 
     Another frequent situation is when you try to optimize something involving
     lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-    coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+    coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
     stop right after encountering nonsmoothness, well before reaching solution.
 
     OptGuard integrity checker helps you to catch such situations: it monitors
@@ -2604,7 +2604,7 @@ public partial class alglib
     === ADDITIONAL REPORTS/LOGS ==============================================
 
     Several different tests are performed to catch C0/C1 errors, you can  find
-    out specific test signaled error by looking to:
+    out specific test signaled Error by looking to:
     * rep.nonc0test0positive, for non-C0 test #0
     * rep.nonc1test0positive, for non-C1 test #0
     * rep.nonc1test1positive, for non-C1 test #1
@@ -2613,7 +2613,7 @@ public partial class alglib
     means of:
     * minbleicoptguardnonc1test0results()
     * minbleicoptguardnonc1test1results()
-    which return detailed error reports, specific points where discontinuities
+    which return detailed Error reports, specific points where discontinuities
     were found, and so on.
 
     ==========================================================================
@@ -2631,7 +2631,7 @@ public partial class alglib
           The reason  is  that  you  need  to  make several evaluations around
           nonsmoothness  in  order  to  accumulate  enough  information  about
           function curvature. Say, if you start right from the nonsmooth point,
-          optimizer simply won't get enough data to understand what  is  going
+          optimizer simply won't get enough Data to understand what  is  going
           wrong before it terminates due to abrupt changes in the  derivative.
           It is also  possible  that  "unlucky"  step  will  move  us  to  the
           termination too quickly.
@@ -2682,7 +2682,7 @@ public partial class alglib
       values at these points; f[i] is evaluated in x0+stp[i]*d.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -2748,7 +2748,7 @@ public partial class alglib
       vidx-th component of the gradient.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -2878,7 +2878,7 @@ public partial class alglib
     should be called from user-supplied callback when user decides that it  is
     time to "smoothly" terminate optimization process.  As  result,  optimizer
     stops at point which was "current accepted" when termination  request  was
-    submitted and returns error code 8 (successful termination).
+    submitted and returns Error code 8 (successful termination).
 
     INPUT PARAMETERS:
         State   -   optimizer structure
@@ -3010,11 +3010,11 @@ public partial class alglib
       degenerate problems)
 
     Two arrays of multipliers are returned:
-    * LagBC is array[N] which is loaded with multipliers from box constraints;
+    * LagBC is array[N] which is Loaded with multipliers from box constraints;
       LagBC[i]>0 means that I-th constraint is at the  upper bound, LagBC[I]<0
       means that I-th constraint is at the lower bound, LagBC[I]=0 means  that
       I-th box constraint is inactive.
-    * LagLC is array[MSparse+MDense] which is  loaded  with  multipliers  from
+    * LagLC is array[MSparse+MDense] which is  Loaded  with  multipliers  from
       general  linear  constraints  (former  MSparse  elements  corresponds to
       sparse part of the constraint matrix, latter MDense are  for  the  dense
       constraints, as was specified by user).
@@ -3033,7 +3033,7 @@ public partial class alglib
     * C is a linear term
     * H is a quadratic term
     * Xs is a solution, and X0 is an origin term (zero by default)
-    * Ei is a vector with 1.0 at position I and 0 in other positions
+    * Ei is a vector with 1.0 at Position I and 0 in other positions
     * Ai is an I-th row of linear constraint matrix
 
     NOTE: methods  from  IPM  family  may  also  return  meaningful   Lagrange
@@ -3378,7 +3378,7 @@ public partial class alglib
     This function sets automatic evaluation of variable scaling.
 
     IMPORTANT: this function works only for  matrices  with positive  diagonal
-               elements! Zero or negative elements will  result  in  -9  error
+               elements! Zero or negative elements will  result  in  -9  Error
                code  being  returned.  Specify  scale  vector  manually   with
                minqpsetscale() in such cases.
 
@@ -5409,7 +5409,7 @@ public partial class alglib
     public static void minlmoptimize(minlmstate state, ndimensional_fvec  fvec, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( fvec==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (fvec is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (fvec is null)");
         while( alglib.minlmiteration(state, _params) )
         {
             if( state.needfi )
@@ -5423,7 +5423,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -5436,9 +5436,9 @@ public partial class alglib
     public static void minlmoptimize(minlmstate state, ndimensional_fvec  fvec, ndimensional_jac  jac, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( fvec==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (fvec is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (fvec is null)");
         if( jac==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (jac is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (jac is null)");
         while( alglib.minlmiteration(state, _params) )
         {
             if( state.needfi )
@@ -5457,7 +5457,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -5470,11 +5470,11 @@ public partial class alglib
     public static void minlmoptimize(minlmstate state, ndimensional_func func, ndimensional_grad grad, ndimensional_hess hess, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (func is null)");
         if( grad==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (grad is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (grad is null)");
         if( hess==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (hess is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (hess is null)");
         while( alglib.minlmiteration(state, _params) )
         {
             if( state.needf )
@@ -5498,7 +5498,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -5511,9 +5511,9 @@ public partial class alglib
     public static void minlmoptimize(minlmstate state, ndimensional_func func, ndimensional_jac  jac, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (func is null)");
         if( jac==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (jac is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (jac is null)");
         while( alglib.minlmiteration(state, _params) )
         {
             if( state.needf )
@@ -5532,7 +5532,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -5545,11 +5545,11 @@ public partial class alglib
     public static void minlmoptimize(minlmstate state, ndimensional_func func, ndimensional_grad grad, ndimensional_jac  jac, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (func is null)");
         if( grad==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (grad is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (grad is null)");
         if( jac==null )
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize()' (jac is null)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize()' (jac is null)");
         while( alglib.minlmiteration(state, _params) )
         {
             if( state.needf )
@@ -5573,7 +5573,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minlmoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minlmoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -5588,7 +5588,7 @@ public partial class alglib
     point (note: future versions may also perform check  at  the final  point)
     and compares numerical Jacobian with analytic one provided by you.
 
-    If difference is too large, an error flag is set and optimization  session
+    If difference is too large, an Error flag is set and optimization  session
     continues. After optimization session is over, you can retrieve the report
     which stores  both  Jacobians,  and  specific  components  highlighted  as
     suspicious by the OptGuard.
@@ -5659,7 +5659,7 @@ public partial class alglib
 
           The reason is that unlike line search methods LM optimizer does  not
           perform extensive evaluations along the line. Thus, we simply do not
-          have enough data to catch C0/C1-violations.
+          have enough Data to catch C0/C1-violations.
 
     This check is activated with  minlmoptguardgradient() function.
 
@@ -5792,7 +5792,7 @@ public partial class alglib
     should be called from user-supplied callback when user decides that it  is
     time to "smoothly" terminate optimization process.  As  result,  optimizer
     stops at point which was "current accepted" when termination  request  was
-    submitted and returns error code 8 (successful termination).
+    submitted and returns Error code 8 (successful termination).
 
     INPUT PARAMETERS:
         State   -   optimizer structure
@@ -6574,7 +6574,7 @@ public partial class alglib
     public static void mincgoptimize(mincgstate state, ndimensional_func func, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'mincgoptimize()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'mincgoptimize()' (func is null)");
         while( alglib.mincgiteration(state, _params) )
         {
             if( state.needf )
@@ -6588,7 +6588,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'mincgoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'mincgoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -6601,7 +6601,7 @@ public partial class alglib
     public static void mincgoptimize(mincgstate state, ndimensional_grad grad, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( grad==null )
-            throw new alglibexception("ALGLIB: error in 'mincgoptimize()' (grad is null)");
+            throw new alglibexception("ALGLIB: Error in 'mincgoptimize()' (grad is null)");
         while( alglib.mincgiteration(state, _params) )
         {
             if( state.needfg )
@@ -6615,7 +6615,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'mincgoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'mincgoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -6630,7 +6630,7 @@ public partial class alglib
     (note: future versions may also perform check  at  the  final  point)  and
     compares numerical gradient with analytic one provided by you.
 
-    If difference is too large, an error flag is set and optimization  session
+    If difference is too large, an Error flag is set and optimization  session
     continues. After optimization session is over, you can retrieve the report
     which  stores  both  gradients  and  specific  components  highlighted  as
     suspicious by the OptGuard.
@@ -6739,7 +6739,7 @@ public partial class alglib
 
     Another frequent situation is when you try to optimize something involving
     lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-    coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+    coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
     stop right after encountering nonsmoothness, well before reaching solution.
 
     OptGuard integrity checker helps you to catch such situations: it monitors
@@ -6818,7 +6818,7 @@ public partial class alglib
     === ADDITIONAL REPORTS/LOGS ==============================================
 
     Several different tests are performed to catch C0/C1 errors, you can  find
-    out specific test signaled error by looking to:
+    out specific test signaled Error by looking to:
     * rep.nonc0test0positive, for non-C0 test #0
     * rep.nonc1test0positive, for non-C1 test #0
     * rep.nonc1test1positive, for non-C1 test #1
@@ -6827,7 +6827,7 @@ public partial class alglib
     means of:
     * mincgoptguardnonc1test0results()
     * mincgoptguardnonc1test1results()
-    which return detailed error reports, specific points where discontinuities
+    which return detailed Error reports, specific points where discontinuities
     were found, and so on.
 
     ==========================================================================
@@ -6845,7 +6845,7 @@ public partial class alglib
           The reason  is  that  you  need  to  make several evaluations around
           nonsmoothness  in  order  to  accumulate  enough  information  about
           function curvature. Say, if you start right from the nonsmooth point,
-          optimizer simply won't get enough data to understand what  is  going
+          optimizer simply won't get enough Data to understand what  is  going
           wrong before it terminates due to abrupt changes in the  derivative.
           It is also  possible  that  "unlucky"  step  will  move  us  to  the
           termination too quickly.
@@ -6896,7 +6896,7 @@ public partial class alglib
       values at these points; f[i] is evaluated in x0+stp[i]*d.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -6962,7 +6962,7 @@ public partial class alglib
       vidx-th component of the gradient.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -7092,7 +7092,7 @@ public partial class alglib
     should be called from user-supplied callback when user decides that it  is
     time to "smoothly" terminate optimization process.  As  result,  optimizer
     stops at point which was "current accepted" when termination  request  was
-    submitted and returns error code 8 (successful termination).
+    submitted and returns Error code 8 (successful termination).
 
     INPUT PARAMETERS:
         State   -   optimizer structure
@@ -7196,9 +7196,9 @@ public partial class alglib
                                 * stats[i]<0  =>  constraint at lower bound
                                 * stats[i]=0  =>  constraint is inactive, basic
                                                   variable
-    * primalerror               primal feasibility error
-    * dualerror                 dual feasibility error
-    * slackerror                complementary slackness error
+    * primalerror               primal feasibility Error
+    * dualerror                 dual feasibility Error
+    * slackerror                complementary slackness Error
     * iterationscount           iteration count
     * terminationtype           completion code (see below)
 
@@ -7223,7 +7223,7 @@ public partial class alglib
 
     where
     * C is a cost vector (linear term)
-    * Ei is a vector with 1.0 at position I and 0 in other positions
+    * Ei is a vector with 1.0 at Position I and 0 in other positions
     * Ai is an I-th row of linear constraint matrix
     *************************************************************************/
     public class minlpreport : alglibobject
@@ -7329,7 +7329,7 @@ public partial class alglib
                     * zero value means that solver automatically selects good
                       value (can be different in different ALGLIB versions)
                     * default value is zero
-                    Algorithm stops when relative error is less than Eps.
+                    Algorithm stops when relative Error is less than Eps.
 
     ===== TRACING DSS SOLVER =================================================
 
@@ -7390,7 +7390,7 @@ public partial class alglib
                     * zero value means that solver automatically selects good
                       value (can be different in different ALGLIB versions)
                     * default value is zero
-                    Algorithm  stops  when  primal  error  AND  dual error AND
+                    Algorithm  stops  when  primal  Error  AND  dual Error AND
                     duality gap are less than Eps.
 
     ===== TRACING IPM SOLVER =================================================
@@ -7515,7 +7515,7 @@ public partial class alglib
     different constraints for different variables).
 
     The default state of constraints is to have all variables fixed  at  zero.
-    You have to overwrite it by your own constraint vector. Constraint  status
+    You have to overwrite it by your own constraint vector. Constraint  Status
     is preserved until constraints are  explicitly  overwritten  with  another
     minlpsetbc()  call,   overwritten   with  minlpsetbcall(),  or   partially
     overwritten with minlmsetbci() call.
@@ -7567,7 +7567,7 @@ public partial class alglib
     same constraints for all variables)
 
     The default state of constraints is to have all variables fixed  at  zero.
-    You have to overwrite it by your own constraint vector. Constraint  status
+    You have to overwrite it by your own constraint vector. Constraint  Status
     is preserved until constraints are  explicitly  overwritten  with  another
     minlpsetbc() call or partially overwritten with minlpsetbcall().
 
@@ -8376,7 +8376,7 @@ public partial class alglib
     You may combine boundary constraints with  general  linear ones - and with
     nonlinear ones! Boundary constraints are  handled  more  efficiently  than
     other types.  Thus,  if  your  problem  has  mixed  constraints,  you  may
-    explicitly specify some of them as boundary and save some time/space.
+    explicitly specify some of them as boundary and save some time/SPACE.
 
     INPUT PARAMETERS:
         State   -   structure stores algorithm state
@@ -9352,7 +9352,7 @@ public partial class alglib
     public static void minnlcoptimize(minnlcstate state, ndimensional_fvec  fvec, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( fvec==null )
-            throw new alglibexception("ALGLIB: error in 'minnlcoptimize()' (fvec is null)");
+            throw new alglibexception("ALGLIB: Error in 'minnlcoptimize()' (fvec is null)");
         while( alglib.minnlciteration(state, _params) )
         {
             if( state.needfi )
@@ -9366,7 +9366,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minnlcoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minnlcoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -9379,7 +9379,7 @@ public partial class alglib
     public static void minnlcoptimize(minnlcstate state, ndimensional_jac  jac, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( jac==null )
-            throw new alglibexception("ALGLIB: error in 'minnlcoptimize()' (jac is null)");
+            throw new alglibexception("ALGLIB: Error in 'minnlcoptimize()' (jac is null)");
         while( alglib.minnlciteration(state, _params) )
         {
             if( state.needfij )
@@ -9393,7 +9393,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minnlcoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minnlcoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -9409,7 +9409,7 @@ public partial class alglib
     point) and compares numerical gradient/Jacobian with analytic one provided
     by you.
 
-    If difference is too large, an error flag is set and optimization  session
+    If difference is too large, an Error flag is set and optimization  session
     continues. After optimization session is over, you can retrieve the report
     which stores both gradients/Jacobians, and specific components highlighted
     as suspicious by the OptGuard.
@@ -9522,7 +9522,7 @@ public partial class alglib
 
     Another frequent situation is when you try to optimize something involving
     lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-    coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+    coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
     stop right after encountering nonsmoothness, well before reaching solution.
 
     OptGuard integrity checker helps you to catch such situations: it monitors
@@ -9602,7 +9602,7 @@ public partial class alglib
     === ADDITIONAL REPORTS/LOGS ==============================================
 
     Several different tests are performed to catch C0/C1 errors, you can  find
-    out specific test signaled error by looking to:
+    out specific test signaled Error by looking to:
     * rep.nonc0test0positive, for non-C0 test #0
     * rep.nonc1test0positive, for non-C1 test #0
     * rep.nonc1test1positive, for non-C1 test #1
@@ -9611,7 +9611,7 @@ public partial class alglib
     means of:
     * minnlcoptguardnonc1test0results()
     * minnlcoptguardnonc1test1results()
-    which return detailed error reports, specific points where discontinuities
+    which return detailed Error reports, specific points where discontinuities
     were found, and so on.
 
     ==========================================================================
@@ -9629,7 +9629,7 @@ public partial class alglib
           The reason  is  that  you  need  to  make several evaluations around
           nonsmoothness  in  order  to  accumulate  enough  information  about
           function curvature. Say, if you start right from the nonsmooth point,
-          optimizer simply won't get enough data to understand what  is  going
+          optimizer simply won't get enough Data to understand what  is  going
           wrong before it terminates due to abrupt changes in the  derivative.
           It is also  possible  that  "unlucky"  step  will  move  us  to  the
           termination too quickly.
@@ -9682,7 +9682,7 @@ public partial class alglib
       values at these points; f[i] is evaluated in x0+stp[i]*d.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -9750,7 +9750,7 @@ public partial class alglib
       vidx-th component of the gradient.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -9871,7 +9871,7 @@ public partial class alglib
     should be called from user-supplied callback when user decides that it  is
     time to "smoothly" terminate optimization process.  As  result,  optimizer
     stops at point which was "current accepted" when termination  request  was
-    submitted and returns error code 8 (successful termination).
+    submitted and returns Error code 8 (successful termination).
 
     INPUT PARAMETERS:
         State   -   optimizer structure
@@ -10551,7 +10551,7 @@ public partial class alglib
                       linear constraints)
                     * if you specify zero value for problem with at least  one
                       nonlinear  constraint,  algorithm  will  terminate  with
-                      error code -1.
+                      Error code -1.
 
     ALGORITHM OUTLINE
 
@@ -10596,7 +10596,7 @@ public partial class alglib
                       * 'PREC.F6'   to output in  6-digit fixed-point format
     * 'AGS.DETAILED.SAMPLE'-
                       for output of points being visited ,  search  directions
-                      and gradient sample. May take a LOT of  space ,  do  not
+                      and gradient sample. May take a LOT of  SPACE ,  do  not
                       use it on problems with more that several tens of vars.
                       This  symbol   also    implicitly   defines   'AGS'  and
                       'AGS.DETAILED'.
@@ -10656,7 +10656,7 @@ public partial class alglib
     should be called from user-supplied callback when user decides that it  is
     time to "smoothly" terminate optimization process.  As  result,  optimizer
     stops at point which was "current accepted" when termination  request  was
-    submitted and returns error code 8 (successful termination).
+    submitted and returns Error code 8 (successful termination).
 
     INPUT PARAMETERS:
         State   -   optimizer structure
@@ -10757,7 +10757,7 @@ public partial class alglib
     public static void minnsoptimize(minnsstate state, ndimensional_fvec  fvec, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( fvec==null )
-            throw new alglibexception("ALGLIB: error in 'minnsoptimize()' (fvec is null)");
+            throw new alglibexception("ALGLIB: Error in 'minnsoptimize()' (fvec is null)");
         while( alglib.minnsiteration(state, _params) )
         {
             if( state.needfi )
@@ -10771,7 +10771,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minnsoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minnsoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -10784,7 +10784,7 @@ public partial class alglib
     public static void minnsoptimize(minnsstate state, ndimensional_jac  jac, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( jac==null )
-            throw new alglibexception("ALGLIB: error in 'minnsoptimize()' (jac is null)");
+            throw new alglibexception("ALGLIB: Error in 'minnsoptimize()' (jac is null)");
         while( alglib.minnsiteration(state, _params) )
         {
             if( state.needfij )
@@ -10798,7 +10798,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minnsoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minnsoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -11203,7 +11203,7 @@ public partial class alglib
     public static void minasaoptimize(minasastate state, ndimensional_grad grad, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( grad==null )
-            throw new alglibexception("ALGLIB: error in 'minasaoptimize()' (grad is null)");
+            throw new alglibexception("ALGLIB: Error in 'minasaoptimize()' (grad is null)");
         while( alglib.minasaiteration(state, _params) )
         {
             if( state.needfg )
@@ -11217,7 +11217,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minasaoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minasaoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -11893,7 +11893,7 @@ public partial class alglib
     public static void minbcoptimize(minbcstate state, ndimensional_func func, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'minbcoptimize()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'minbcoptimize()' (func is null)");
         while( alglib.minbciteration(state, _params) )
         {
             if( state.needf )
@@ -11907,7 +11907,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minbcoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minbcoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -11920,7 +11920,7 @@ public partial class alglib
     public static void minbcoptimize(minbcstate state, ndimensional_grad grad, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( grad==null )
-            throw new alglibexception("ALGLIB: error in 'minbcoptimize()' (grad is null)");
+            throw new alglibexception("ALGLIB: Error in 'minbcoptimize()' (grad is null)");
         while( alglib.minbciteration(state, _params) )
         {
             if( state.needfg )
@@ -11934,7 +11934,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'minbcoptimize' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'minbcoptimize' (some derivatives were not provided?)");
         }
     }
 
@@ -11949,7 +11949,7 @@ public partial class alglib
     (note: future versions may also perform check  at  the  final  point)  and
     compares numerical gradient with analytic one provided by you.
 
-    If difference is too large, an error flag is set and optimization  session
+    If difference is too large, an Error flag is set and optimization  session
     continues. After optimization session is over, you can retrieve the report
     which  stores  both  gradients  and  specific  components  highlighted  as
     suspicious by the OptGuard.
@@ -12058,7 +12058,7 @@ public partial class alglib
 
     Another frequent situation is when you try to optimize something involving
     lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-    coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+    coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
     stop right after encountering nonsmoothness, well before reaching solution.
 
     OptGuard integrity checker helps you to catch such situations: it monitors
@@ -12137,7 +12137,7 @@ public partial class alglib
     === ADDITIONAL REPORTS/LOGS ==============================================
 
     Several different tests are performed to catch C0/C1 errors, you can  find
-    out specific test signaled error by looking to:
+    out specific test signaled Error by looking to:
     * rep.nonc0test0positive, for non-C0 test #0
     * rep.nonc1test0positive, for non-C1 test #0
     * rep.nonc1test1positive, for non-C1 test #1
@@ -12146,7 +12146,7 @@ public partial class alglib
     means of:
     * minbcoptguardnonc1test0results()
     * minbcoptguardnonc1test1results()
-    which return detailed error reports, specific points where discontinuities
+    which return detailed Error reports, specific points where discontinuities
     were found, and so on.
 
     ==========================================================================
@@ -12164,7 +12164,7 @@ public partial class alglib
           The reason  is  that  you  need  to  make several evaluations around
           nonsmoothness  in  order  to  accumulate  enough  information  about
           function curvature. Say, if you start right from the nonsmooth point,
-          optimizer simply won't get enough data to understand what  is  going
+          optimizer simply won't get enough Data to understand what  is  going
           wrong before it terminates due to abrupt changes in the  derivative.
           It is also  possible  that  "unlucky"  step  will  move  us  to  the
           termination too quickly.
@@ -12215,7 +12215,7 @@ public partial class alglib
       values at these points; f[i] is evaluated in x0+stp[i]*d.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -12281,7 +12281,7 @@ public partial class alglib
       vidx-th component of the gradient.
     * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
       between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-      with  most  likely  position  of  the  violation  between  stpidxa+1 and
+      with  most  likely  Position  of  the  violation  between  stpidxa+1 and
       stpidxa+2.
 
     ==========================================================================
@@ -12409,7 +12409,7 @@ public partial class alglib
     should be called from user-supplied callback when user decides that it  is
     time to "smoothly" terminate optimization process.  As  result,  optimizer
     stops at point which was "current accepted" when termination  request  was
-    submitted and returns error code 8 (successful termination).
+    submitted and returns Error code 8 (successful termination).
 
     INPUT PARAMETERS:
         State   -   optimizer structure
@@ -12479,15 +12479,15 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function serializes data structure to string.
+    This function serializes Data structure to string.
     
     Important properties of s_out:
     * it contains alphanumeric characters, dots, underscores, minus signs
     * these symbols are grouped into words, which are separated by spaces
       and Windows-style (CR+LF) newlines
     * although  serializer  uses  spaces and CR+LF as separators, you can 
-      replace any separator character by arbitrary combination of spaces,
-      tabs, Windows or Unix newlines. It allows flexible reformatting  of
+      replace any Separator character by arbitrary combination of spaces,
+      Tabs, Windows or Unix newlines. It allows flexible reformatting  of
       the  string  in  case you want to include it into text or XML file. 
       But you should not insert separators into the middle of the "words"
       nor you should change case of letters.
@@ -12511,7 +12511,7 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function unserializes data structure from string.
+    This function unserializes Data structure from string.
     *************************************************************************/
     public static void lptestproblemunserialize(string s_in, out lptestproblem obj)
     {
@@ -12524,7 +12524,7 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function serializes data structure to stream.
+    This function serializes Data structure to stream.
     
     Data stream generated by this function is same as  string  representation
     generated  by  string  version  of  serializer - alphanumeric characters,
@@ -12546,7 +12546,7 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function unserializes data structure from stream.
+    This function unserializes Data structure from stream.
     *************************************************************************/
     public static void lptestproblemunserialize(System.IO.Stream stream_in, out lptestproblem obj)
     {
@@ -12840,7 +12840,7 @@ public partial class alglib
           continuity violation (test #1)
 
         Following set of report fields deals with errors in the gradient:
-        * badgradsuspected - is a flad which is set upon discovering an  error  in
+        * badgradsuspected - is a flad which is set upon discovering an  Error  in
           the analytic gradient supplied by user
         * badgradfidx - index  of   the  function  with bad gradient (0 for target
           function, 1 or higher for nonlinear constraints)
@@ -12856,7 +12856,7 @@ public partial class alglib
           The  element  of  badgraduser[] with index [badgradfidx,badgradvidx]  is
           assumed to be wrong.
 
-        More detailed error log can  be  obtained  from  optimizer  by  explicitly
+        More detailed Error log can  be  obtained  from  optimizer  by  explicitly
         requesting reports for tests C0.0, C1.0, C1.1.
 
           -- ALGLIB --
@@ -12945,7 +12945,7 @@ public partial class alglib
           values at these points; f[i] is evaluated in x0+stp[i]*d.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
 
         You can plot function values stored in stp[]  and  f[]  arrays  and  study
@@ -13032,7 +13032,7 @@ public partial class alglib
           values at these points; f[i] is evaluated in x0+stp[i]*d.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
 
         You can plot function values stored in stp[]  and  f[]  arrays  and  study
@@ -13130,7 +13130,7 @@ public partial class alglib
           vidx-th component of the gradient.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
 
         You can plot function values stored in stp[]  and  g[]  arrays  and  study
@@ -14139,7 +14139,7 @@ public partial class alglib
 
             for(i=0; i<=nmain-1; i++)
             {
-                alglib.ap.assert((!havebl[i] || !havebu[i]) || (double)(bl[i])<=(double)(bu[i]), "ProjectGradientIntoBC: internal error (infeasible constraints)");
+                alglib.ap.assert((!havebl[i] || !havebu[i]) || (double)(bl[i])<=(double)(bu[i]), "ProjectGradientIntoBC: internal Error (infeasible constraints)");
                 if( (havebl[i] && (double)(x[i])<=(double)(bl[i])) && (double)(g[i])>(double)(0) )
                 {
                     g[i] = 0;
@@ -14505,7 +14505,7 @@ public partial class alglib
         * inactive - when we are not at the boundary
 
         You should note that antigradient direction is NOT taken into account when
-        we make decions on the constraint status.
+        we make decions on the constraint Status.
 
         INPUT PARAMETERS
             X           -   array[NMain+NSlack], final point.
@@ -14597,7 +14597,7 @@ public partial class alglib
                             contain coefficients before X[], last  column  contain
                             right part.
             K           -   number of linear constraints
-            EpsI        -   infeasibility (error in the right part) allowed in the
+            EpsI        -   infeasibility (Error in the right part) allowed in the
                             solution
 
         OUTPUT PARAMETERS:
@@ -14771,7 +14771,7 @@ public partial class alglib
             {
                 
                 //
-                // Dynamically adjust infeasibility error tolerance
+                // Dynamically adjust infeasibility Error tolerance
                 //
                 infeasibilityincreasetolerance = Math.Max(ablasf.rmaxabsv(nmain+nslack, x, _params), 1)*(1000+nmain)*math.machineepsilon;
                 
@@ -14786,12 +14786,12 @@ public partial class alglib
                     //
                     // Calculate MX - maximum term in the left part
                     //
-                    // Terminate if error in the right part is not greater than 100*Eps*MX.
+                    // Terminate if Error in the right part is not greater than 100*Eps*MX.
                     //
                     // IMPORTANT: we must perform check for non-strict inequality, i.e. to use <= instead of <.
                     //            it will allow us to easily handle situations with zero rows of CE.
                     //
-                    // NOTE:      it is important to calculate feasibility error with dedicated
+                    // NOTE:      it is important to calculate feasibility Error with dedicated
                     //            function. Once we had a situation when usage of "inline" code
                     //            resulted in different numerical values calculated at different
                     //            parts of program for exactly same X. However, this value is
@@ -14856,7 +14856,7 @@ public partial class alglib
                     //
                     // Bound step subject to constraints which can be activated,
                     // run Armijo search with increasing step size.
-                    // Search is terminated when feasibility error stops to decrease.
+                    // Search is terminated when feasibility Error stops to decrease.
                     //
                     // NOTE: it is important to test for "stops to decrease" instead
                     // of "starts to increase" in order to correctly handle cases with
@@ -15258,9 +15258,9 @@ public partial class alglib
                 //
                 // Stage 2: gradient projection algorithm (GPA)
                 //
-                // * calculate feasibility error (with respect to linear equality constraints)
+                // * calculate feasibility Error (with respect to linear equality constraints)
                 // * calculate gradient G of F, project it into feasible area (G => PG)
-                // * exit if norm(PG) is exactly zero or feasibility error is smaller than EpsC
+                // * exit if norm(PG) is exactly zero or feasibility Error is smaller than EpsC
                 // * let XM be exact minimum of F along -PG (XM may be infeasible).
                 //   calculate MaxStepLen = largest step in direction of -PG which retains feasibility.
                 // * perform bounded step from X to XN:
@@ -15281,7 +15281,7 @@ public partial class alglib
                 {
                     
                     //
-                    // calculate feasibility error and G
+                    // calculate feasibility Error and G
                     //
                     feasibilityerrorgrad(ce, x, nmain, nslack, k, ref feaserr, g, ref tmpk, _params);
                     
@@ -15385,11 +15385,11 @@ public partial class alglib
                 //
                 // Stage 3: decide to stop algorithm or not to stop
                 //
-                // 1. we can stop when last GPA run did NOT changed constraints status.
+                // 1. we can stop when last GPA run did NOT changed constraints Status.
                 //    It means that we've found final set of the active constraints even
                 //    before GPA made its run. And it means that Newton step moved us to
                 //    the minimum subject to the present constraints.
-                //    Depending on feasibility error, True or False is returned.
+                //    Depending on feasibility Error, True or False is returned.
                 //
                 feaserr = feasibilityerror(ce, x, nmain, nslack, k, ref tmpk, _params);
                 feaserr1 = feaserr;
@@ -15418,7 +15418,7 @@ public partial class alglib
                 
                 //
                 // Block below is never executed; it is necessary just to avoid
-                // "unreachable code" warning about automatically generated code.
+                // "unreachable code" Warning about automatically generated code.
                 //
                 // We just need a way to transfer control to the end of the function,
                 // even a fake way which is never actually traversed.
@@ -15473,16 +15473,16 @@ public partial class alglib
 
             
             //
-            // Rescale input data to [0,1]
+            // Rescale input Data to [0,1]
             //
             df = width*df;
             df0 = width*df0;
             df1 = width*df1;
             
             //
-            // Compute error scale, two sources are used:
+            // Compute Error scale, two sources are used:
             // * magnitudes of derivatives and secants
-            // * magnitudes of input data times sqrt(machine_epsilon)
+            // * magnitudes of input Data times sqrt(machine_epsilon)
             //
             s = 0.0;
             s = Math.Max(s, Math.Abs(df0));
@@ -15593,17 +15593,17 @@ public partial class alglib
             //
             // Error estimates:
             //
-            // * error in D1=d'*(A*x+b) is estimated as
+            // * Error in D1=d'*(A*x+b) is estimated as
             //   ED1 = eps*MAX_ABS(D)*(MAX_ABS(X)*ENORM(A)+MAX_ABS(B))
-            // * error in D2=0.5*d'*A*d is estimated as
+            // * Error in D2=0.5*d'*A*d is estimated as
             //   ED2 = eps*MAX_ABS(D)^2*ENORM(A)
             //
             // Here ENORM(A) is some pseudo-norm which reflects the way numerical
-            // error accumulates during addition. Two ways of accumulation are
+            // Error accumulates during addition. Two ways of accumulation are
             // possible - worst case (errors always increase) and mean-case (errors
             // may cancel each other). We calculate geometrical average of both:
-            // * ENORM_WORST(A) = SUM(|A[i,j]|)         error in N-term sum grows as O(N)
-            // * ENORM_MEAN(A)  = SQRT(SUM(A[i,j]^2))   error in N-term sum grows as O(sqrt(N))
+            // * ENORM_WORST(A) = SUM(|A[i,j]|)         Error in N-term sum grows as O(N)
+            // * ENORM_MEAN(A)  = SQRT(SUM(A[i,j]^2))   Error in N-term sum grows as O(sqrt(N))
             // * ENORM(A)       = SQRT(ENORM_WORST(A),ENORM_MEAN(A))
             //
             eps = 4*math.machineepsilon;
@@ -15830,7 +15830,7 @@ public partial class alglib
         the help of Woodbury matrix identity.
 
         It should be used as follows:
-        * PrepareLowRankPreconditioner() call PREPARES data structure
+        * PrepareLowRankPreconditioner() call PREPARES Data structure
         * subsequent calls to ApplyLowRankPreconditioner() APPLY preconditioner to
           user-specified search direction.
 
@@ -15890,7 +15890,7 @@ public partial class alglib
                 {
                     continue;
                 }
-                alglib.ap.assert((double)(v)>(double)(0), "PrepareLowRankPreconditioner: internal error");
+                alglib.ap.assert((double)(v)>(double)(0), "PrepareLowRankPreconditioner: internal Error");
                 
                 //
                 // Copy non-zero update to buffer
@@ -15949,7 +15949,7 @@ public partial class alglib
             }
             ablas.rmatrixgemm(k, k, n, 1.0, buf.bufw, 0, 0, 0, buf.bufw, 0, 0, 1, 1.0, buf.bufz, 0, 0, _params);
             b = trfac.spdmatrixcholeskyrec(ref buf.bufz, 0, k, true, ref buf.tmp, _params);
-            alglib.ap.assert(b, "PrepareLowRankPreconditioner: internal error (Cholesky failure)");
+            alglib.ap.assert(b, "PrepareLowRankPreconditioner: internal Error (Cholesky failure)");
             ablas.rmatrixlefttrsm(k, n, buf.bufz, 0, 0, true, false, 1, buf.v, 0, 0, _params);
             for(i=0; i<=k-1; i++)
             {
@@ -17461,7 +17461,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        This function calculates feasibility error (square root of sum of  squared
+        This function calculates feasibility Error (square root of sum of  squared
         errors) for a Kx(NMain+NSlack) system of linear equalities.
             
         INPUT PARAMETERS:
@@ -17506,8 +17506,8 @@ public partial class alglib
 
 
         /*************************************************************************
-        This function calculates feasibility error (square root of sum of  squared
-        errors) for a Kx(NMain+NSlack)  system  of  linear  equalities  and  error
+        This function calculates feasibility Error (square root of sum of  squared
+        errors) for a Kx(NMain+NSlack)  system  of  linear  equalities  and  Error
         gradient (with respect to x)
             
         INPUT PARAMETERS:
@@ -17521,7 +17521,7 @@ public partial class alglib
 
         RESULT:
             Err     -   Sqrt(SUM(Err^2))
-            Grad    -   error gradient with respect to X, array[NMain+NSlack]
+            Grad    -   Error gradient with respect to X, array[NMain+NSlack]
             
           -- ALGLIB --
              Copyright 17.09.2015 by Bochkanov Sergey
@@ -17647,7 +17647,7 @@ public partial class alglib
         the line search log are studied, gradient is not used).
 
         An interval between F[StpIdx+0] and F[StpIdx+5]is  tested for  continuity.
-        An normalized error metric (Lipschitz constant growth for the  derivative)
+        An normalized Error metric (Lipschitz constant growth for the  derivative)
         for the interval in question is calculated. Values above  50  are  a  good
         indication of the discontinuity.
 
@@ -17839,7 +17839,7 @@ public partial class alglib
         components from the line search log are studied for continuity).
 
         An interval between F[StpIdx+0] and F[StpIdx+3]is  tested for  continuity.
-        An normalized error metric (Lipschitz constant growth for the  derivative)
+        An normalized Error metric (Lipschitz constant growth for the  derivative)
         for the interval in question is calculated. Values above  50  are  a  good
         indication of the discontinuity.
 
@@ -19573,7 +19573,7 @@ public partial class alglib
         (note: future versions may also perform check  at  the  final  point)  and
         compares numerical gradient with analytic one provided by you.
 
-        If difference is too large, an error flag is set and optimization  session
+        If difference is too large, an Error flag is set and optimization  session
         continues. After optimization session is over, you can retrieve the report
         which  stores  both  gradients  and  specific  components  highlighted  as
         suspicious by the OptGuard.
@@ -19680,7 +19680,7 @@ public partial class alglib
 
         Another frequent situation is when you try to optimize something involving
         lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-        coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+        coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
         stop right after encountering nonsmoothness, well before reaching solution.
 
         OptGuard integrity checker helps you to catch such situations: it monitors
@@ -19734,7 +19734,7 @@ public partial class alglib
         === ADDITIONAL REPORTS/LOGS ==============================================
             
         Several different tests are performed to catch C0/C1 errors, you can  find
-        out specific test signaled error by looking to:
+        out specific test signaled Error by looking to:
         * rep.nonc0test0positive, for non-C0 test #0
         * rep.nonc1test0positive, for non-C1 test #0
         * rep.nonc1test1positive, for non-C1 test #1
@@ -19743,7 +19743,7 @@ public partial class alglib
         means of:
         * minlbfgsoptguardnonc1test0results()
         * minlbfgsoptguardnonc1test1results()
-        which return detailed error reports, specific points where discontinuities
+        which return detailed Error reports, specific points where discontinuities
         were found, and so on.
 
         ==========================================================================
@@ -19761,7 +19761,7 @@ public partial class alglib
               The reason  is  that  you  need  to  make several evaluations around
               nonsmoothness  in  order  to  accumulate  enough  information  about
               function curvature. Say, if you start right from the nonsmooth point,
-              optimizer simply won't get enough data to understand what  is  going
+              optimizer simply won't get enough Data to understand what  is  going
               wrong before it terminates due to abrupt changes in the  derivative.
               It is also  possible  that  "unlucky"  step  will  move  us  to  the
               termination too quickly.
@@ -19808,7 +19808,7 @@ public partial class alglib
           values at these points; f[i] is evaluated in x0+stp[i]*d.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -19870,7 +19870,7 @@ public partial class alglib
           vidx-th component of the gradient.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -20011,7 +20011,7 @@ public partial class alglib
         should be called from user-supplied callback when user decides that it  is
         time to "smoothly" terminate optimization process.  As  result,  optimizer
         stops at point which was "current accepted" when termination  request  was
-        submitted and returns error code 8 (successful termination).
+        submitted and returns Error code 8 (successful termination).
 
         INPUT PARAMETERS:
             State   -   optimizer structure
@@ -20615,7 +20615,7 @@ public partial class alglib
         This subroutine evaluates model at X. Active constraints are ignored.
         It returns:
             R   -   model value
-            Noise-  estimate of the numerical noise in data
+            Noise-  estimate of the numerical noise in Data
 
           -- ALGLIB --
              Copyright 12.06.2012 by Bochkanov Sergey
@@ -21142,7 +21142,7 @@ public partial class alglib
         purpose of this function  is  to  check  correctness  of  CQMRebuild()  by
         comparing results of this function with ones obtained by CQMEval(),  which
         is  used  as  reference  point. The  idea is that significant deviation in
-        results  of  these  two  functions  is  evidence  of  some  error  in  the
+        results  of  these  two  functions  is  evidence  of  some  Error  in  the
         CQMRebuild().
 
         NOTE: suffix T denotes that temporaries marked by T-prefix are used. There
@@ -21184,7 +21184,7 @@ public partial class alglib
             {
                 if( !s.activeset[i] )
                 {
-                    alglib.ap.assert(j<nfree, "CQMDebugConstrainedEvalT: internal error");
+                    alglib.ap.assert(j<nfree, "CQMDebugConstrainedEvalT: internal Error");
                     s.txc[j] = x[i];
                     j = j+1;
                 }
@@ -21266,7 +21266,7 @@ public partial class alglib
         this function is to check correctness of CQMRebuild() by comparing results
         of this function with  ones  obtained  by  CQMEval(),  which  is  used  as
         reference  point.  The  idea  is  that significant deviation in results of
-        these two functions is evidence of some error in the CQMRebuild().
+        these two functions is evidence of some Error in the CQMRebuild().
 
         NOTE: suffix E denotes that effective matrices. There is one more  variant
               of this function, which uses temporary matrices built by
@@ -21307,7 +21307,7 @@ public partial class alglib
             {
                 if( !s.activeset[i] )
                 {
-                    alglib.ap.assert(j<nfree, "CQMDebugConstrainedEvalE: internal error");
+                    alglib.ap.assert(j<nfree, "CQMDebugConstrainedEvalE: internal Error");
                     s.txc[j] = x[i];
                     j = j+1;
                 }
@@ -21475,12 +21475,12 @@ public partial class alglib
                     // Below comes first part of the work - generation of TQ2:
                     // * we pass through rows of A and copy I-th row into upper block (Aff/Afc) or
                     //   lower one (Acf/Acc) of TQ2, depending on presence of X[i] in the active set.
-                    //   RIdx0 variable contains current position for insertion into upper block,
-                    //   RIdx1 contains current position for insertion into lower one.
+                    //   RIdx0 variable contains current Position for insertion into upper block,
+                    //   RIdx1 contains current Position for insertion into lower one.
                     // * within each row, we copy J-th element into left half (Aff/Acf) or right
                     //   one (Afc/Acc), depending on presence of X[j] in the active set. CIdx0
-                    //   contains current position for insertion into left block, CIdx1 contains
-                    //   position for insertion into right one.
+                    //   contains current Position for insertion into left block, CIdx1 contains
+                    //   Position for insertion into right one.
                     // * during copying, we multiply elements by alpha and add diagonal matrix D.
                     //
                     ridx0 = 0;
@@ -21656,8 +21656,8 @@ public partial class alglib
                 // * other steps are performed only for K>0 and Theta>0
                 // * we pass through columns of Q and copy I-th column into left block (Qf) or
                 //   right one (Qc) of TK2, depending on presence of X[i] in the active set.
-                //   CIdx0 variable contains current position for insertion into upper block,
-                //   CIdx1 contains current position for insertion into lower one.
+                //   CIdx0 variable contains current Position for insertion into upper block,
+                //   CIdx1 contains current Position for insertion into lower one.
                 // * we calculate Qc*xc-r and store it into Tmp0
                 // * we calculate TK0 and TK1
                 // * we multiply leading part of TK2 which stores Qf by sqrt(theta)
@@ -21902,7 +21902,7 @@ public partial class alglib
             }
             
             //
-            // Change cache status - everything is cached 
+            // Change cache Status - everything is cached 
             //
             s.ismaintermchanged = false;
             s.issecondarytermchanged = false;
@@ -22430,7 +22430,7 @@ public partial class alglib
             }
             
             //
-            // First round of normalization - normalize row 2-norms subject to limited amplification status
+            // First round of normalization - normalize row 2-norms subject to limited amplification Status
             //
             maxnrm2 = 0;
             for(i=0; i<=msparse-1; i++)
@@ -22873,9 +22873,9 @@ public partial class alglib
         /*************************************************************************
         This subroutine is used to initialize SNNLS solver.
 
-        By default, empty NNLS problem is produced, but we allocated enough  space
+        By default, empty NNLS problem is produced, but we allocated enough  SPACE
         to store problems with NSMax+NDMax columns and  NRMax  rows.  It  is  good
-        place to provide algorithm with initial estimate of the space requirements,
+        place to provide algorithm with initial estimate of the SPACE requirements,
         although you may underestimate problem size or even pass zero estimates  -
         in this case buffer variables will be resized automatically  when  you set
         NNLS problem.
@@ -23488,7 +23488,7 @@ public partial class alglib
                 // Apply rotation to I-th row and corresponding row of
                 // regularizer. Here V is diagonal element of I-th row,
                 // which is set to 1.0 or 0.0 depending on variable
-                // status (constrained or not).
+                // Status (constrained or not).
                 //
                 v = 1.0;
                 if( s.nnc[i] && (double)(x[i])==(double)(0.0) )
@@ -23644,11 +23644,11 @@ public partial class alglib
             double v = 0;
             double vv = 0;
 
-            alglib.ap.assert(ns>=0, "TRDFixVariable: integrity error");
-            alglib.ap.assert(nd>=0, "TRDFixVariable: integrity error");
-            alglib.ap.assert(ns+nd>0, "TRDFixVariable: integrity error");
-            alglib.ap.assert(idx>=0, "TRDFixVariable: integrity error");
-            alglib.ap.assert(idx<ns+nd, "TRDFixVariable: integrity error");
+            alglib.ap.assert(ns>=0, "TRDFixVariable: integrity Error");
+            alglib.ap.assert(nd>=0, "TRDFixVariable: integrity Error");
+            alglib.ap.assert(ns+nd>0, "TRDFixVariable: integrity Error");
+            alglib.ap.assert(idx>=0, "TRDFixVariable: integrity Error");
+            alglib.ap.assert(idx<ns+nd, "TRDFixVariable: integrity Error");
             apserv.rvectorsetlengthatleast(ref tmp, nd, _params);
             
             //
@@ -24749,8 +24749,8 @@ public partial class alglib
             {
                 if( state.cstatus[i]<=0 )
                 {
-                    alglib.ap.assert(!state.hasbndl[i] || (double)(state.xc[i])>=(double)(state.bndl[i]), "SASExploreDirection: internal error - infeasible X");
-                    alglib.ap.assert(!state.hasbndu[i] || (double)(state.xc[i])<=(double)(state.bndu[i]), "SASExploreDirection: internal error - infeasible X");
+                    alglib.ap.assert(!state.hasbndl[i] || (double)(state.xc[i])>=(double)(state.bndl[i]), "SASExploreDirection: internal Error - infeasible X");
+                    alglib.ap.assert(!state.hasbndu[i] || (double)(state.xc[i])<=(double)(state.bndu[i]), "SASExploreDirection: internal Error - infeasible X");
                     if( state.hasbndl[i] && (double)(d[i])<(double)(0) )
                     {
                         prevmax = stpmax;
@@ -24833,7 +24833,7 @@ public partial class alglib
            SASExploreDirection() function.
 
         Step may activate one constraint. It is assumed than XN  is  approximately
-        feasible (small error as  large  as several  ulps  is  possible).   Strict
+        feasible (small Error as  large  as several  ulps  is  possible).   Strict
         feasibility  with  respect  to  bound  constraints  is  enforced    during
         activation, feasibility with respect to general linear constraints is  not
         enforced.
@@ -24923,7 +24923,7 @@ public partial class alglib
                     
                     //
                     // CIdx in [0,N-1] means that bound constraint was activated.
-                    // We activate it explicitly to avoid situation when roundoff-error
+                    // We activate it explicitly to avoid situation when roundoff-Error
                     // prevents us from moving EXACTLY to x=CVal.
                     //
                     state.xc[cidx] = cval;
@@ -24955,7 +24955,7 @@ public partial class alglib
             }
             
             //
-            // Determine return status:
+            // Determine return Status:
             // * -1 in case no constraints were activated
             // *  0 in case only "candidate" constraints were activated
             // * +1 in case at least one "non-candidate" constraint was activated
@@ -24977,7 +24977,7 @@ public partial class alglib
                 //   positive (=we are at the boundary, constraint is activated).
                 //
                 // * for boundary constraints previous criterion won't work. Each variable
-                //   has two constraints, and simply checking their status is not enough -
+                //   has two constraints, and simply checking their Status is not enough -
                 //   we have to correctly identify cases when we leave one boundary
                 //   (PrevActiveSet[i]=0) and move to another boundary (CStatus[i]>0).
                 //   Such cases can be identified if we compare previous X with new X.
@@ -26232,8 +26232,8 @@ public partial class alglib
             double v = 0;
             int i_ = 0;
 
-            alglib.ap.assert(state.algostate==1, "SAS: internal error in ConstrainedDescent() - not in optimization mode");
-            alglib.ap.assert(state.basisisready, "SAS: internal error in ConstrainedDescent() - no basis");
+            alglib.ap.assert(state.algostate==1, "SAS: internal Error in ConstrainedDescent() - not in optimization mode");
+            alglib.ap.assert(state.basisisready, "SAS: internal Error in ConstrainedDescent() - no basis");
             n = state.n;
             apserv.rvectorsetlengthatleast(ref d, n, _params);
             
@@ -26564,7 +26564,7 @@ public partial class alglib
             //
             // NOTE: for preconditioned setting A is replaced by A*H^(-0.5), G is
             //       replaced by G*H^(-0.5). We apply this scaling at the last stage,
-            //       before passing data to NNLS solver.
+            //       before passing Data to NNLS solver.
             //
             // Minimization is performed subject to non-negativity constraints on
             // lambda[i] corresponding to inequality constraints. Inequality constraints
@@ -27077,7 +27077,7 @@ public partial class alglib
             alglib.ap.assert(settings.cgphase || settings.cnphase, "QQPOptimize: both phases (CG and Newton) are inactive");
             
             //
-            // Allocate data structures
+            // Allocate Data structures
             //
             apserv.rvectorsetlengthatleast(ref sstate.bndl, n, _params);
             apserv.rvectorsetlengthatleast(ref sstate.bndu, n, _params);
@@ -27633,7 +27633,7 @@ public partial class alglib
                         //
                         if( d2est>0 )
                         {
-                            alglib.ap.assert((double)(d1)<(double)(0), "QQPOptimize: internal error");
+                            alglib.ap.assert((double)(d1)<(double)(0), "QQPOptimize: internal Error");
                             fullstp = -(d1/(2*d2));
                             needact = (double)(fullstp)>=(double)(stpmax);
                             if( needact )
@@ -27655,7 +27655,7 @@ public partial class alglib
                         }
                         else
                         {
-                            alglib.ap.assert(cidx>=0, "QQPOptimize: internal error");
+                            alglib.ap.assert(cidx>=0, "QQPOptimize: internal Error");
                             alglib.ap.assert(alglib.ap.len(sstate.stpbuf)>=2, "QQPOptimize: StpBuf overflow");
                             reststp = stpmax;
                             fullstp = stpmax;
@@ -27775,7 +27775,7 @@ public partial class alglib
                             //
                             // Positive definite matrix, we can perform Newton step
                             //
-                            alglib.ap.assert((double)(d1)<(double)(0), "QQPOptimize: internal error");
+                            alglib.ap.assert((double)(d1)<(double)(0), "QQPOptimize: internal Error");
                             fullstp = -(d1/(2*d2));
                             sactivesets.sasexploredirection(sstate.sas, sstate.dc, ref stpmax, ref cidx, ref cval, _params);
                             needact = (double)(fullstp)>=(double)(stpmax);
@@ -27844,7 +27844,7 @@ public partial class alglib
                                 cgmax = settings.cgmaxits;
                                 break;
                             }
-                            alglib.ap.assert((double)(stpmax)>(double)(0), "QQPOptimize: internal error");
+                            alglib.ap.assert((double)(stpmax)>(double)(0), "QQPOptimize: internal Error");
                             f0 = projectedtargetfunction(sstate, sstate.sas.xc, sstate.dc, 0.0, ref sstate.tmp0, ref sstate.tmp1, _params);
                             f1 = projectedtargetfunction(sstate, sstate.sas.xc, sstate.dc, stpmax, ref sstate.tmp0, ref sstate.tmp1, _params);
                             if( (double)(f1)>=(double)(f0) )
@@ -28356,7 +28356,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        This function prepares data for  constrained  Newton  step  for  penalized
+        This function prepares Data for  constrained  Newton  step  for  penalized
         quadratic model of the form
 
             f(x) = 0.5*x'*A*x + b'*x + penaltyfactor*0.5*(C*x-b)'*(C*x-b)
@@ -28449,8 +28449,8 @@ public partial class alglib
             }
             for(i=0; i<=n-1; i++)
             {
-                alglib.ap.assert(!sstate.havebndl[i] || (double)(sstate.sas.xc[i])>=(double)(sstate.bndl[i]), "CNewtonBuild: internal error");
-                alglib.ap.assert(!sstate.havebndu[i] || (double)(sstate.sas.xc[i])<=(double)(sstate.bndu[i]), "CNewtonBuild: internal error");
+                alglib.ap.assert(!sstate.havebndl[i] || (double)(sstate.sas.xc[i])>=(double)(sstate.bndl[i]), "CNewtonBuild: internal Error");
+                alglib.ap.assert(!sstate.havebndu[i] || (double)(sstate.sas.xc[i])<=(double)(sstate.bndu[i]), "CNewtonBuild: internal Error");
                 b = false;
                 b = b || (sstate.havebndl[i] && (double)(sstate.sas.xc[i])==(double)(sstate.bndl[i]));
                 b = b || (sstate.havebndu[i] && (double)(sstate.sas.xc[i])==(double)(sstate.bndu[i]));
@@ -28465,7 +28465,7 @@ public partial class alglib
                     ridx0 = ridx0+1;
                 }
             }
-            alglib.ap.assert(ridx0==ridx1+1, "CNewtonBuild: internal error");
+            alglib.ap.assert(ridx0==ridx1+1, "CNewtonBuild: internal Error");
             nfree = ridx0;
             sstate.nfree = nfree;
             if( nfree==0 )
@@ -28560,7 +28560,7 @@ public partial class alglib
             //
             if( sstate.akind==1 )
             {
-                alglib.ap.assert(sparsesolver==2, "CNewtonBuild: internal error");
+                alglib.ap.assert(sparsesolver==2, "CNewtonBuild: internal Error");
                 
                 //
                 // Copy sparse A to Z and fill rows/columns corresponding to active
@@ -28616,7 +28616,7 @@ public partial class alglib
             //
             // Unexpected :)
             //
-            alglib.ap.assert(false, "CNewtonBuild: internal error");
+            alglib.ap.assert(false, "CNewtonBuild: internal Error");
             return result;
         }
 
@@ -28711,8 +28711,8 @@ public partial class alglib
             for(k=0; k<=nfree-1; k++)
             {
                 i = sstate.yidx[k];
-                alglib.ap.assert(!sstate.havebndl[i] || (double)(sstate.sas.xc[i])>=(double)(sstate.bndl[i]), "CNewtonUpdate: internal error");
-                alglib.ap.assert(!sstate.havebndu[i] || (double)(sstate.sas.xc[i])<=(double)(sstate.bndu[i]), "CNewtonUpdate: internal error");
+                alglib.ap.assert(!sstate.havebndl[i] || (double)(sstate.sas.xc[i])>=(double)(sstate.bndl[i]), "CNewtonUpdate: internal Error");
+                alglib.ap.assert(!sstate.havebndu[i] || (double)(sstate.sas.xc[i])<=(double)(sstate.bndu[i]), "CNewtonUpdate: internal Error");
                 b = false;
                 b = b || (sstate.havebndl[i] && (double)(sstate.sas.xc[i])==(double)(sstate.bndl[i]));
                 b = b || (sstate.havebndu[i] && (double)(sstate.sas.xc[i])==(double)(sstate.bndu[i]));
@@ -28727,7 +28727,7 @@ public partial class alglib
                     ridx0 = ridx0+1;
                 }
             }
-            alglib.ap.assert(ridx0==ridx1+1, "CNewtonUpdate: internal error");
+            alglib.ap.assert(ridx0==ridx1+1, "CNewtonUpdate: internal Error");
             ntofix = nfree-ridx0;
             if( ntofix==0 || ntofix==nfree )
             {
@@ -28775,7 +28775,7 @@ public partial class alglib
             //
             // Unexpected :)
             //
-            alglib.ap.assert(false, "CNewtonUpdate: internal error");
+            alglib.ap.assert(false, "CNewtonUpdate: internal Error");
             return result;
         }
 
@@ -28889,7 +28889,7 @@ public partial class alglib
                 result = true;
                 return result;
             }
-            alglib.ap.assert(false, "CNewtonStep: internal error");
+            alglib.ap.assert(false, "CNewtonStep: internal Error");
             return result;
         }
 
@@ -29354,7 +29354,7 @@ public partial class alglib
                 {
                     
                     //
-                    // Preallocate space for ExA and for QQP solver; we do not allocate
+                    // Preallocate SPACE for ExA and for QQP solver; we do not allocate
                     // array[NTotal,NTotal] from the start because NTotal can be much
                     // larger than NMain for problems with large amount of inequality
                     // constraints, and we usually need NWork=O(NMain).
@@ -29517,9 +29517,9 @@ public partial class alglib
                 {
                     
                     //
-                    // Calculate I-th feasibility error in V using formula for distance
+                    // Calculate I-th feasibility Error in V using formula for distance
                     // between point and line (here we calculate actual distance between
-                    // XN and hyperplane Ci'*XN=Bi, which is different from error Ci'*XN-Bi).
+                    // XN and hyperplane Ci'*XN=Bi, which is different from Error Ci'*XN-Bi).
                     //
                     v = 0;
                     vv = 0;
@@ -29939,7 +29939,7 @@ public partial class alglib
             // size.
             //
             // Another approach is to use initial values of X and L (X0 and L0)
-            // as starting point, and to solve for "offset" from (X0, L0):
+            // as starting point, and to solve for "Offset" from (X0, L0):
             //
             //        [ X0+X1 ]
             //     A1*[       ] = b1
@@ -29953,10 +29953,10 @@ public partial class alglib
             //
             // In such formulation components of X1 which correspond to active
             // constraints on variables are "frozen" at value 0 (because we have
-            // equality constraint, offset from constrained value have to be zero).
+            // equality constraint, Offset from constrained value have to be zero).
             //
             // Thus, we can rewrite corresponding columns of A1 with zeros - and
-            // use this space to store (0 ... 0 -1 0 ... 0)', which is used to
+            // use this SPACE to store (0 ... 0 -1 0 ... 0)', which is used to
             // account for Lagrange multipliers for "simple" constraints.
             //
             nqrcols = ntotal+ktotal;
@@ -30867,7 +30867,7 @@ public partial class alglib
         ADDITIONAL FIELDS
 
         There are additional fields which can be used for debugging:
-        * DebugEqErr                error in the equality constraints (2-norm)
+        * DebugEqErr                Error in the equality constraints (2-norm)
         * DebugFS                   f, calculated at projection of initial point
                                     to the feasible set
         * DebugFF                   f, calculated at the final point
@@ -31510,7 +31510,7 @@ public partial class alglib
 
         When  non-boundary  constraints  are  present,  you  have to either a) use
         preconditioner, or b) use upper limit on step length.  YOU CAN'T USE BOTH!
-        In this case algorithm will terminate with appropriate error code.
+        In this case algorithm will terminate with appropriate Error code.
 
         INPUT PARAMETERS:
             State   -   structure which stores algorithm state
@@ -32194,7 +32194,7 @@ public partial class alglib
                 }
                 goto lbl_40;
             }
-            alglib.ap.assert((double)(v)>(double)(0), "MinBLEIC: internal error");
+            alglib.ap.assert((double)(v)>(double)(0), "MinBLEIC: internal Error");
             if( (double)(state.lastscaledgoodstep)>(double)(0) && (double)(v)>(double)(0) )
             {
                 state.stp = state.lastscaledgoodstep/v;
@@ -32662,7 +32662,7 @@ public partial class alglib
                 {
                     
                     //
-                    // Strange internal error in LBFGS - either YK=0
+                    // Strange internal Error in LBFGS - either YK=0
                     // (which should not have been) or (SK,YK)=0 (again,
                     // unexpected). It should not take place because
                     // MCINFO=1, which signals "good" step. But just
@@ -32672,7 +32672,7 @@ public partial class alglib
                     goto lbl_40;
                 }
                 state.bufrho[state.bufsize-1] = 1/v;
-                alglib.ap.assert(state.bufsize<=m, "MinBLEIC: internal error");
+                alglib.ap.assert(state.bufsize<=m, "MinBLEIC: internal Error");
                 
                 //
                 // Update length of the good step
@@ -32821,7 +32821,7 @@ public partial class alglib
         (note: future versions may also perform check  at  the  final  point)  and
         compares numerical gradient with analytic one provided by you.
 
-        If difference is too large, an error flag is set and optimization  session
+        If difference is too large, an Error flag is set and optimization  session
         continues. After optimization session is over, you can retrieve the report
         which  stores  both  gradients  and  specific  components  highlighted  as
         suspicious by the OptGuard.
@@ -32928,7 +32928,7 @@ public partial class alglib
 
         Another frequent situation is when you try to optimize something involving
         lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-        coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+        coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
         stop right after encountering nonsmoothness, well before reaching solution.
 
         OptGuard integrity checker helps you to catch such situations: it monitors
@@ -32982,7 +32982,7 @@ public partial class alglib
         === ADDITIONAL REPORTS/LOGS ==============================================
             
         Several different tests are performed to catch C0/C1 errors, you can  find
-        out specific test signaled error by looking to:
+        out specific test signaled Error by looking to:
         * rep.nonc0test0positive, for non-C0 test #0
         * rep.nonc1test0positive, for non-C1 test #0
         * rep.nonc1test1positive, for non-C1 test #1
@@ -32991,7 +32991,7 @@ public partial class alglib
         means of:
         * minbleicoptguardnonc1test0results()
         * minbleicoptguardnonc1test1results()
-        which return detailed error reports, specific points where discontinuities
+        which return detailed Error reports, specific points where discontinuities
         were found, and so on.
 
         ==========================================================================
@@ -33009,7 +33009,7 @@ public partial class alglib
               The reason  is  that  you  need  to  make several evaluations around
               nonsmoothness  in  order  to  accumulate  enough  information  about
               function curvature. Say, if you start right from the nonsmooth point,
-              optimizer simply won't get enough data to understand what  is  going
+              optimizer simply won't get enough Data to understand what  is  going
               wrong before it terminates due to abrupt changes in the  derivative.
               It is also  possible  that  "unlucky"  step  will  move  us  to  the
               termination too quickly.
@@ -33056,7 +33056,7 @@ public partial class alglib
           values at these points; f[i] is evaluated in x0+stp[i]*d.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -33118,7 +33118,7 @@ public partial class alglib
           vidx-th component of the gradient.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -33293,7 +33293,7 @@ public partial class alglib
         should be called from user-supplied callback when user decides that it  is
         time to "smoothly" terminate optimization process.  As  result,  optimizer
         stops at point which was "current accepted" when termination  request  was
-        submitted and returns error code 8 (successful termination).
+        submitted and returns Error code 8 (successful termination).
 
         INPUT PARAMETERS:
             State   -   optimizer structure
@@ -33977,7 +33977,7 @@ public partial class alglib
                 // solver.
                 //
                 // NOTE: such termination is "emergency" only when viewed from
-                //       BLEIC's position. QP solver sees such termination as
+                //       BLEIC's Position. QP solver sees such termination as
                 //       routine one, triggered by QP's stopping criteria.
                 //
                 minbleic.minbleicemergencytermination(sstate.solver, _params);
@@ -35252,11 +35252,11 @@ public partial class alglib
         INPUT PARAMETERS:
             State               -   instance initialized with one of the initialization
                                     functions
-            EpsP                -   maximum primal error allowed in the  solution,
+            EpsP                -   maximum primal Error allowed in the  solution,
                                     EpsP>=0. Zero will be  automatically  replaced
                                     by recommended default value,  which is  equal
                                     to 10*Sqrt(Epsilon) in the current version
-            EpsD                -   maximum  dual  error allowed in the  solution,
+            EpsD                -   maximum  dual  Error allowed in the  solution,
                                     EpsP>=0. Zero will be  automatically  replaced
                                     by recommended default value,  which is  equal
                                     to 10*Sqrt(Epsilon) in the current version
@@ -35384,7 +35384,7 @@ public partial class alglib
             //
             // Some integrity checks:
             // * we need PrimalStagnationLen<DualStagnationLen in order to be able to correctly
-            //   detect infeasible instances (stagnated dual error is present in both infeasible
+            //   detect infeasible instances (stagnated dual Error is present in both infeasible
             //   and unbounded instances, so we should check for primal stagnation a few iters
             //   before checking for dual stagnation)
             //
@@ -35467,7 +35467,7 @@ public partial class alglib
                 }
                 
                 //
-                // Check regularization status, terminate if overregularized
+                // Check regularization Status, terminate if overregularized
                 //
                 if( (double)(dampeps)>=(double)(maxdampeps) )
                 {
@@ -35715,7 +35715,7 @@ public partial class alglib
                     {
                         if( state.dotrace )
                         {
-                            alglib.ap.trace(System.String.Format("> primal error stagnated for {0,0:d} its, stopping at the best point found so far\n", primalstagnationlen));
+                            alglib.ap.trace(System.String.Format("> primal Error stagnated for {0,0:d} its, stopping at the best point found so far\n", primalstagnationlen));
                         }
                         break;
                     }
@@ -35731,7 +35731,7 @@ public partial class alglib
                     {
                         if( state.dotrace )
                         {
-                            alglib.ap.trace(System.String.Format("> dual error stagnated for {0,0:d} its, stopping at the best point found so far\n", dualstagnationlen));
+                            alglib.ap.trace(System.String.Format("> dual Error stagnated for {0,0:d} its, stopping at the best point found so far\n", dualstagnationlen));
                         }
                         break;
                     }
@@ -35797,7 +35797,7 @@ public partial class alglib
                 apserv.touchreal(ref bestegap, _params);
                 
                 //
-                // If no error flags were set yet, check solution quality
+                // If no Error flags were set yet, check solution quality
                 //
                 bady = bigy;
                 bady = Math.Max(bady, ygrowth*y0nrm);
@@ -35819,7 +35819,7 @@ public partial class alglib
                     terminationtype = -2;
                     if( state.dotrace )
                     {
-                        alglib.ap.trace("> primal error at the best point is too high, declaring infeasibility/unboundedness\n");
+                        alglib.ap.trace("> primal Error at the best point is too high, declaring infeasibility/unboundedness\n");
                     }
                 }
                 if( terminationtype>0 && (double)(bestedual)>=(double)(dualinfeasible1) )
@@ -35827,7 +35827,7 @@ public partial class alglib
                     terminationtype = -2;
                     if( state.dotrace )
                     {
-                        alglib.ap.trace("> dual error at the best point is too high, declaring infeasibility/unboundedness\n");
+                        alglib.ap.trace("> dual Error at the best point is too high, declaring infeasibility/unboundedness\n");
                     }
                 }
             }
@@ -36241,7 +36241,7 @@ public partial class alglib
 
         Returns True on success, False on LDLT failure.
 
-        On success outputs diagonal reproduction error ErrSq, and sum of squared
+        On success outputs diagonal reproduction Error ErrSq, and sum of squared
         diagonal elements SumSq
 
           -- ALGLIB --
@@ -37370,7 +37370,7 @@ public partial class alglib
                 {
                     if( state.dotrace )
                     {
-                        alglib.ap.trace(System.String.Format("LDLT-diag-err= {0,0:E3} (diagonal reproduction error)\n", Math.Sqrt(errsq/(1+sumsq))));
+                        alglib.ap.trace(System.String.Format("LDLT-diag-err= {0,0:E3} (diagonal reproduction Error)\n", Math.Sqrt(errsq/(1+sumsq))));
                     }
                     result = false;
                     return result;
@@ -37427,7 +37427,7 @@ public partial class alglib
                         }
                     }
                     alglib.ap.trace(System.String.Format("max(|L|)     = {0,0:E3}\n", v));
-                    alglib.ap.trace(System.String.Format("diag-err     = {0,0:E3} (diagonal reproduction error)\n", Math.Sqrt(errsq/(1+sumsq))));
+                    alglib.ap.trace(System.String.Format("diag-err     = {0,0:E3} (diagonal reproduction Error)\n", Math.Sqrt(errsq/(1+sumsq))));
                 }
             }
             
@@ -38099,7 +38099,7 @@ public partial class alglib
         /*************************************************************************
         This function performs IPM step, updates  iteration  counts  and  performs
         following additional checks:
-        * it monitors status of box/linear constraints  and  smoothly  drops  ones
+        * it monitors Status of box/linear constraints  and  smoothly  drops  ones
           with too large bounds (a variable or linear sum is well below constraint
           bound for several iterations)
 
@@ -38314,7 +38314,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Evaluate progress so far, outputs trace data, if requested to do so.
+        Evaluate progress so far, outputs trace Data, if requested to do so.
 
           -- ALGLIB --
              Copyright 01.11.2019 by Bochkanov Sergey
@@ -38401,11 +38401,11 @@ public partial class alglib
                         state.tmplaggrad[i] = v;
                     }
                 }
-                alglib.ap.trace("--- printing raw data (prior to applying variable scales and shifting by XOrigin) ------------------\n");
+                alglib.ap.trace("--- printing raw Data (prior to applying variable scales and shifting by XOrigin) ------------------\n");
                 alglib.ap.trace("X (raw)         = ");
                 apserv.tracevectorunscaledunshiftedautoprec(state.current.x, n, state.scl, true, state.xorigin, true, _params);
                 alglib.ap.trace("\n");
-                alglib.ap.trace("--- printing scaled data (after applying variable scales and shifting by XOrigin) ------------------\n");
+                alglib.ap.trace("--- printing scaled Data (after applying variable scales and shifting by XOrigin) ------------------\n");
                 alglib.ap.trace("> reporting X, Lagrangian gradient\n");
                 alglib.ap.trace("Xnew            = ");
                 apserv.tracevectorautoprec(state.current.x, 0, n, _params);
@@ -38690,7 +38690,7 @@ public partial class alglib
         /*************************************************************************
         Subtracts KKT*cand from already computed RHS.
 
-        A pair of RhsCompute/RhsSubtract calls results in  residual  being  loaded
+        A pair of RhsCompute/RhsSubtract calls results in  residual  being  Loaded
         into the RHS structure.
 
         INPUT PARAMETERS:
@@ -39314,11 +39314,11 @@ public partial class alglib
           degenerate problems)
 
         Two arrays of multipliers are returned:
-        * LagBC is array[N] which is loaded with multipliers from box constraints;
+        * LagBC is array[N] which is Loaded with multipliers from box constraints;
           LagBC[i]>0 means that I-th constraint is at the  upper bound, LagBC[I]<0
           means that I-th constraint is at the lower bound, LagBC[I]=0 means  that
           I-th box constraint is inactive.
-        * LagLC is array[MSparse+MDense] which is  loaded  with  multipliers  from
+        * LagLC is array[MSparse+MDense] which is  Loaded  with  multipliers  from
           general  linear  constraints  (former  MSparse  elements  corresponds to
           sparse part of the constraint matrix, latter MDense are  for  the  dense
           constraints, as was specified by user).
@@ -39337,7 +39337,7 @@ public partial class alglib
         * C is a linear term
         * H is a quadratic term
         * Xs is a solution, and X0 is an origin term (zero by default)
-        * Ei is a vector with 1.0 at position I and 0 in other positions
+        * Ei is a vector with 1.0 at Position I and 0 in other positions
         * Ai is an I-th row of linear constraint matrix
 
         NOTE: methods  from  IPM  family  may  also  return  meaningful   Lagrange
@@ -39757,7 +39757,7 @@ public partial class alglib
         This function sets automatic evaluation of variable scaling.
 
         IMPORTANT: this function works only for  matrices  with positive  diagonal
-                   elements! Zero or negative elements will  result  in  -9  error
+                   elements! Zero or negative elements will  result  in  -9  Error
                    code  being  returned.  Specify  scale  vector  manually   with
                    minqpsetscale() in such cases.
 
@@ -41215,7 +41215,7 @@ public partial class alglib
             // (no need to care about degenerate cases).
             //
             // Append rows to SparseC:
-            // * append data
+            // * append Data
             // * sort in place
             // * merge duplicate indexes
             // * compute DIdx and UIdx
@@ -41392,7 +41392,7 @@ public partial class alglib
             // (no need to care about degenerate cases).
             //
             // Append rows to SparseC:
-            // * append data
+            // * append Data
             // * compute DIdx and UIdx
             //
             //
@@ -41601,7 +41601,7 @@ public partial class alglib
                     //
                     // Diagonal is used for scaling:
                     // * unpack
-                    // * convert to scale, return error on failure
+                    // * convert to scale, return Error on failure
                     //
                     if( state.akind==0 )
                     {
@@ -43468,7 +43468,7 @@ public partial class alglib
             state.needf = false;
             goto lbl_35;
         lbl_34:
-            alglib.ap.assert(state.hasfi, "MinLM: internal error 2!");
+            alglib.ap.assert(state.hasfi, "MinLM: internal Error 2!");
             state.needfi = true;
             state.rstate.stage = 2;
             goto lbl_rcomm;
@@ -43545,7 +43545,7 @@ public partial class alglib
             // We may either calculate brand new model or update old one.
             //
             // Before this block we have:
-            // * State.XBase            - current position.
+            // * State.XBase            - current Position.
             // * State.DeltaX           - if DeltaXReady is True
             // * State.DeltaF           - if DeltaFReady is True
             //
@@ -43577,7 +43577,7 @@ public partial class alglib
             // Optimization using F values only.
             // Use finite differences to estimate Jacobian.
             //
-            alglib.ap.assert(state.hasfi, "MinLMIteration: internal error when estimating Jacobian (no f[])");
+            alglib.ap.assert(state.hasfi, "MinLMIteration: internal Error when estimating Jacobian (no f[])");
             k = 0;
         lbl_44:
             if( k>n-1 )
@@ -43732,7 +43732,7 @@ public partial class alglib
             {
                 t += state.deltax[i_]*state.deltax[i_];
             }
-            alglib.ap.assert((double)(t)!=(double)(0), "MinLM: internal error (T=0)");
+            alglib.ap.assert((double)(t)!=(double)(0), "MinLM: internal Error (T=0)");
             for(i=0; i<=m-1; i++)
             {
                 v = 0.0;
@@ -43839,14 +43839,14 @@ public partial class alglib
             {
                 goto lbl_48;
             }
-            alglib.ap.assert(state.hasfi || state.hasf, "MinLM: internal error 2!");
+            alglib.ap.assert(state.hasfi || state.hasf, "MinLM: internal Error 2!");
             state.repnfunc = state.repnfunc+1;
             clearrequestfields(state, _params);
             if( !state.finderstate.needfi )
             {
                 goto lbl_49;
             }
-            alglib.ap.assert(state.hasfi, "MinLM: internal error 2!");
+            alglib.ap.assert(state.hasfi, "MinLM: internal Error 2!");
             for(i_=0; i_<=n-1;i_++)
             {
                 state.x[i_] = state.finderstate.x[i_];
@@ -43866,7 +43866,7 @@ public partial class alglib
             {
                 goto lbl_51;
             }
-            alglib.ap.assert(state.hasf, "MinLM: internal error 2!");
+            alglib.ap.assert(state.hasf, "MinLM: internal Error 2!");
             for(i_=0; i_<=n-1;i_++)
             {
                 state.x[i_] = state.finderstate.x[i_];
@@ -43879,7 +43879,7 @@ public partial class alglib
             state.finderstate.f = state.f;
             goto lbl_47;
         lbl_51:
-            alglib.ap.assert(false, "MinLM: internal error 2!");
+            alglib.ap.assert(false, "MinLM: internal Error 2!");
             goto lbl_47;
         lbl_48:
             if( state.userterminationneeded )
@@ -44126,7 +44126,7 @@ public partial class alglib
             // We may either calculate brand new model or update old one.
             //
             // Before this block we have:
-            // * State.XBase            - current position.
+            // * State.XBase            - current Position.
             // * State.DeltaX           - if DeltaXReady is True
             // * State.DeltaF           - if DeltaFReady is True
             //
@@ -44166,7 +44166,7 @@ public partial class alglib
             // Optimization using F values only.
             // Use finite differences to estimate Jacobian.
             //
-            alglib.ap.assert(state.hasfi, "MinLMIteration: internal error when estimating Jacobian (no f[])");
+            alglib.ap.assert(state.hasfi, "MinLMIteration: internal Error when estimating Jacobian (no f[])");
             k = 0;
         lbl_81:
             if( k>n-1 )
@@ -44321,7 +44321,7 @@ public partial class alglib
             {
                 t += state.deltax[i_]*state.deltax[i_];
             }
-            alglib.ap.assert((double)(t)!=(double)(0), "MinLM: internal error (T=0)");
+            alglib.ap.assert((double)(t)!=(double)(0), "MinLM: internal Error (T=0)");
             for(i=0; i<=m-1; i++)
             {
                 v = 0.0;
@@ -44387,7 +44387,7 @@ public partial class alglib
             {
                 goto lbl_84;
             }
-            alglib.ap.assert(!state.hasfi, "MinLMIteration: internal error (HasFI is True in Hessian-based mode)");
+            alglib.ap.assert(!state.hasfi, "MinLMIteration: internal Error (HasFI is True in Hessian-based mode)");
             
             //
             // Obtain F, G, H
@@ -44655,7 +44655,7 @@ public partial class alglib
             // We prefer (a) because we may need Fi vector for additional
             // iterations
             //
-            alglib.ap.assert(state.hasfi || state.hasf, "MinLM: internal error 2!");
+            alglib.ap.assert(state.hasfi || state.hasf, "MinLM: internal Error 2!");
             for(i_=0; i_<=n-1;i_++)
             {
                 state.x[i_] = state.xbase[i_];
@@ -44941,7 +44941,7 @@ public partial class alglib
         point (note: future versions may also perform check  at  the final  point)
         and compares numerical Jacobian with analytic one provided by you.
 
-        If difference is too large, an error flag is set and optimization  session
+        If difference is too large, an Error flag is set and optimization  session
         continues. After optimization session is over, you can retrieve the report
         which stores  both  Jacobians,  and  specific  components  highlighted  as
         suspicious by the OptGuard.
@@ -45010,7 +45010,7 @@ public partial class alglib
               
               The reason is that unlike line search methods LM optimizer does  not
               perform extensive evaluations along the line. Thus, we simply do not
-              have enough data to catch C0/C1-violations.
+              have enough Data to catch C0/C1-violations.
 
         This check is activated with  minlmoptguardgradient() function.
 
@@ -45157,7 +45157,7 @@ public partial class alglib
         should be called from user-supplied callback when user decides that it  is
         time to "smoothly" terminate optimization process.  As  result,  optimizer
         stops at point which was "current accepted" when termination  request  was
-        submitted and returns error code 8 (successful termination).
+        submitted and returns Error code 8 (successful termination).
 
         INPUT PARAMETERS:
             State   -   optimizer structure
@@ -47541,7 +47541,7 @@ public partial class alglib
         (note: future versions may also perform check  at  the  final  point)  and
         compares numerical gradient with analytic one provided by you.
 
-        If difference is too large, an error flag is set and optimization  session
+        If difference is too large, an Error flag is set and optimization  session
         continues. After optimization session is over, you can retrieve the report
         which  stores  both  gradients  and  specific  components  highlighted  as
         suspicious by the OptGuard.
@@ -47648,7 +47648,7 @@ public partial class alglib
 
         Another frequent situation is when you try to optimize something involving
         lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-        coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+        coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
         stop right after encountering nonsmoothness, well before reaching solution.
 
         OptGuard integrity checker helps you to catch such situations: it monitors
@@ -47702,7 +47702,7 @@ public partial class alglib
         === ADDITIONAL REPORTS/LOGS ==============================================
             
         Several different tests are performed to catch C0/C1 errors, you can  find
-        out specific test signaled error by looking to:
+        out specific test signaled Error by looking to:
         * rep.nonc0test0positive, for non-C0 test #0
         * rep.nonc1test0positive, for non-C1 test #0
         * rep.nonc1test1positive, for non-C1 test #1
@@ -47711,7 +47711,7 @@ public partial class alglib
         means of:
         * mincgoptguardnonc1test0results()
         * mincgoptguardnonc1test1results()
-        which return detailed error reports, specific points where discontinuities
+        which return detailed Error reports, specific points where discontinuities
         were found, and so on.
 
         ==========================================================================
@@ -47729,7 +47729,7 @@ public partial class alglib
               The reason  is  that  you  need  to  make several evaluations around
               nonsmoothness  in  order  to  accumulate  enough  information  about
               function curvature. Say, if you start right from the nonsmooth point,
-              optimizer simply won't get enough data to understand what  is  going
+              optimizer simply won't get enough Data to understand what  is  going
               wrong before it terminates due to abrupt changes in the  derivative.
               It is also  possible  that  "unlucky"  step  will  move  us  to  the
               termination too quickly.
@@ -47776,7 +47776,7 @@ public partial class alglib
           values at these points; f[i] is evaluated in x0+stp[i]*d.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -47838,7 +47838,7 @@ public partial class alglib
           vidx-th component of the gradient.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -47978,7 +47978,7 @@ public partial class alglib
         should be called from user-supplied callback when user decides that it  is
         time to "smoothly" terminate optimization process.  As  result,  optimizer
         stops at point which was "current accepted" when termination  request  was
-        submitted and returns error code 8 (successful termination).
+        submitted and returns Error code 8 (successful termination).
 
         INPUT PARAMETERS:
             State   -   optimizer structure
@@ -48210,7 +48210,7 @@ public partial class alglib
                 }
                 return;
             }
-            alglib.ap.assert(state.prectype==2, "MinCG: internal error (unexpected PrecType)");
+            alglib.ap.assert(state.prectype==2, "MinCG: internal Error (unexpected PrecType)");
             
             //
             // handle part common for VCnt=0 and VCnt<>0
@@ -48302,7 +48302,7 @@ public partial class alglib
                 }
                 return result;
             }
-            alglib.ap.assert(state.prectype==2, "MinCG: internal error (unexpected PrecType)");
+            alglib.ap.assert(state.prectype==2, "MinCG: internal Error (unexpected PrecType)");
             
             //
             // low rank preconditioning
@@ -49103,7 +49103,7 @@ public partial class alglib
             state.xupdated = false;
             
             //
-            // Initialize algorithm data:
+            // Initialize algorithm Data:
             // * Lagrangian and "Big C" estimates
             // * trust region
             // * initial function scales (vector of 1's)
@@ -49246,11 +49246,11 @@ public partial class alglib
                 alglib.ap.trace(System.String.Format("\n=== OUTER ITERATION {0,5:d} STARTED ==================================================================\n", state.repiterationscount));
                 if( dodetailedtrace )
                 {
-                    alglib.ap.trace("> printing raw data (prior to applying variable and function scales)\n");
+                    alglib.ap.trace("> printing raw Data (prior to applying variable and function scales)\n");
                     alglib.ap.trace("X (raw)       = ");
                     apserv.tracevectorunscaledunshiftedautoprec(state.step0x, n, state.s, true, state.s, false, _params);
                     alglib.ap.trace("\n");
-                    alglib.ap.trace("> printing scaled data (after applying variable and function scales)\n");
+                    alglib.ap.trace("> printing scaled Data (after applying variable and function scales)\n");
                     alglib.ap.trace("X (scaled)    = ");
                     apserv.tracevectorautoprec(state.step0x, 0, n, _params);
                     alglib.ap.trace("\n");
@@ -49561,7 +49561,7 @@ public partial class alglib
             //
             // NOTE: because sparserawlc object stores only linear constraint
             //       (linearizations of nonlinear ones are not stored) we
-            //       allocate only minimum necessary space.
+            //       allocate only minimum necessary SPACE.
             //
             nnz = 0;
             for(i=0; i<=nec+nic-1; i++)
@@ -51787,7 +51787,7 @@ public partial class alglib
         INPUT PARAMETERS:
             Info        -   presolve info structure
             X           -   array[NNew], transformed solution (primal variables)
-            Stats       -   array[NNew+MNew], transformed constraint status (negative -
+            Stats       -   array[NNew+MNew], transformed constraint Status (negative -
                             at lower bound, positive -  at  upper  bound,  zero  -
                             inactive).
             LagBC       -   array[NNew], transformed Lagrange multipliers
@@ -51795,7 +51795,7 @@ public partial class alglib
                             
         OUTPUT PARAMETERS:
             X           -   array[NOld], original solution (primal variables)
-            Stats       -   array[NOld+MOld], original constraint status
+            Stats       -   array[NOld+MOld], original constraint Status
             LagBC       -   array[NOld], Lagrange multipliers
             LagLC       -   array[KOld], Lagrange multipliers
             
@@ -53270,7 +53270,7 @@ public partial class alglib
         It assumes that problem state is at least ssValidXN. After call to this
         function the problem state is set to ssValid.
 
-        This function returns dual feasibility error after dual feasibility correction.
+        This function returns dual feasibility Error after dual feasibility correction.
 
         NOTE: this function expects that both nonbasic and basic components are
               stored in XA[]. XB[] array is not referenced.
@@ -53355,7 +53355,7 @@ public partial class alglib
                 }
                 
                 //
-                // Non-boxed variables, compute dual feasibility error
+                // Non-boxed variables, compute dual feasibility Error
                 //
                 if( bndt==ccfixed )
                 {
@@ -54715,8 +54715,8 @@ public partial class alglib
         * lower bound in S.BndLB[I]=S.BndL[K]
         * upper bound in S.BndUB[I]=S.BndU[K]
         * bound type in  S.BndTB[I]=S.BndT[K]
-        * lower bound primal error tolerance in S.BndTolLB[I] (nonnegative)
-        * upper bound primal error tolerance in S.BndTolLB[I] (nonnegative).
+        * lower bound primal Error tolerance in S.BndTolLB[I] (nonnegative)
+        * upper bound primal Error tolerance in S.BndTolLB[I] (nonnegative).
 
           -- ALGLIB --
              Copyright 18.07.2020 by Bochkanov Sergey
@@ -55432,7 +55432,7 @@ public partial class alglib
                 {
                     
                     //
-                    // Set error flag and generate some point to return
+                    // Set Error flag and generate some point to return
                     //
                     if( state.dotrace )
                     {
@@ -56708,8 +56708,8 @@ public partial class alglib
                     //
                     // Modify L with permutation which moves D-th row/column to the end:
                     // * rows 0...D-1 are left intact
-                    // * rows D+1...M-1 are moved one position up, with columns 0..D-1
-                    //   retained as is, and columns D+1...M-1 being moved one position left.
+                    // * rows D+1...M-1 are moved one Position up, with columns 0..D-1
+                    //   retained as is, and columns D+1...M-1 being moved one Position left.
                     // * last row is filled by permutation/modification of AlphaQim
                     // Determine FT update coefficients in the process.
                     //
@@ -57464,7 +57464,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Downgrades problem state to the specified one (if status is lower than one
+        Downgrades problem state to the specified one (if Status is lower than one
         specified by user, nothing is changed)
 
           -- ALGLIB --
@@ -57544,7 +57544,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Returns True for dual feasible basis (some minor dual feasibility error is
+        Returns True for dual feasible basis (some minor dual feasibility Error is
         allowed), False otherwise
 
           -- ALGLIB --
@@ -57598,7 +57598,7 @@ public partial class alglib
 
         /*************************************************************************
         Applies inverse cyclic permutation of [D,M-1) (element D is moved to the end, the
-        rest of elements is shifted one position backward) to the already existing
+        rest of elements is shifted one Position backward) to the already existing
         permutation.
 
           -- ALGLIB --
@@ -58113,9 +58113,9 @@ public partial class alglib
                                     * stats[i]<0  =>  constraint at lower bound
                                     * stats[i]=0  =>  constraint is inactive, basic
                                                       variable
-        * primalerror               primal feasibility error
-        * dualerror                 dual feasibility error
-        * slackerror                complementary slackness error
+        * primalerror               primal feasibility Error
+        * dualerror                 dual feasibility Error
+        * slackerror                complementary slackness Error
         * iterationscount           iteration count
         * terminationtype           completion code (see below)
 
@@ -58140,7 +58140,7 @@ public partial class alglib
             
         where
         * C is a cost vector (linear term)
-        * Ei is a vector with 1.0 at position I and 0 in other positions
+        * Ei is a vector with 1.0 at Position I and 0 in other positions
         * Ai is an I-th row of linear constraint matrix
         *************************************************************************/
         public class minlpreport : apobject
@@ -58274,7 +58274,7 @@ public partial class alglib
                         * zero value means that solver automatically selects good
                           value (can be different in different ALGLIB versions)
                         * default value is zero
-                        Algorithm stops when relative error is less than Eps.
+                        Algorithm stops when relative Error is less than Eps.
 
         ===== TRACING DSS SOLVER =================================================
 
@@ -58338,7 +58338,7 @@ public partial class alglib
                         * zero value means that solver automatically selects good
                           value (can be different in different ALGLIB versions)
                         * default value is zero
-                        Algorithm  stops  when  primal  error  AND  dual error AND
+                        Algorithm  stops  when  primal  Error  AND  dual Error AND
                         duality gap are less than Eps.
 
         ===== TRACING IPM SOLVER =================================================
@@ -58453,7 +58453,7 @@ public partial class alglib
         different constraints for different variables).
 
         The default state of constraints is to have all variables fixed  at  zero.
-        You have to overwrite it by your own constraint vector. Constraint  status
+        You have to overwrite it by your own constraint vector. Constraint  Status
         is preserved until constraints are  explicitly  overwritten  with  another
         minlpsetbc()  call,   overwritten   with  minlpsetbcall(),  or   partially
         overwritten with minlmsetbci() call.
@@ -58514,7 +58514,7 @@ public partial class alglib
         same constraints for all variables)
 
         The default state of constraints is to have all variables fixed  at  zero.
-        You have to overwrite it by your own constraint vector. Constraint  status
+        You have to overwrite it by your own constraint vector. Constraint  Status
         is preserved until constraints are  explicitly  overwritten  with  another
         minlpsetbc() call or partially overwritten with minlpsetbcall().
 
@@ -59043,7 +59043,7 @@ public partial class alglib
             // (no need to care about degenerate cases).
             //
             // Append rows to A:
-            // * append data
+            // * append Data
             // * sort in place
             // * merge duplicate indexes
             // * compute DIdx and UIdx
@@ -60258,7 +60258,7 @@ public partial class alglib
             state.xupdated = false;
             
             //
-            // Initialize algorithm data:
+            // Initialize algorithm Data:
             // * Lagrangian and "Big C" estimates
             // * trust region
             // * initial function scales (vector of 1's)
@@ -60410,11 +60410,11 @@ public partial class alglib
                 alglib.ap.trace(System.String.Format("\n=== OUTER ITERATION {0,5:d} STARTED ==================================================================\n", state.repouteriterationscount));
                 if( dodetailedtrace )
                 {
-                    alglib.ap.trace("> printing raw data (prior to applying variable and function scales)\n");
+                    alglib.ap.trace("> printing raw Data (prior to applying variable and function scales)\n");
                     alglib.ap.trace("X (raw)       = ");
                     apserv.tracevectorunscaledunshiftedautoprec(state.step0x, n, state.s, true, state.s, false, _params);
                     alglib.ap.trace("\n");
-                    alglib.ap.trace("> printing scaled data (after applying variable and function scales)\n");
+                    alglib.ap.trace("> printing scaled Data (after applying variable and function scales)\n");
                     alglib.ap.trace("X (scaled)    = ");
                     apserv.tracevectorautoprec(state.step0x, 0, n, _params);
                     alglib.ap.trace("\n");
@@ -60887,7 +60887,7 @@ public partial class alglib
             //
             // NOTE: because sparserawlc object stores only linear constraint
             //       (linearizations of nonlinear ones are not stored) we
-            //       allocate only minimum necessary space.
+            //       allocate only minimum necessary SPACE.
             //
             nnz = 0;
             for(i=0; i<=nec+nic-1; i++)
@@ -62765,9 +62765,9 @@ public partial class alglib
         lbl_8:
             
             //
-            // Check status of the termination request
+            // Check Status of the termination request
             // Update current point
-            // Update constraint status.
+            // Update constraint Status.
             // Report iteration.
             //
             if( userterminationneeded )
@@ -63892,7 +63892,7 @@ public partial class alglib
         You may combine boundary constraints with  general  linear ones - and with
         nonlinear ones! Boundary constraints are  handled  more  efficiently  than
         other types.  Thus,  if  your  problem  has  mixed  constraints,  you  may
-        explicitly specify some of them as boundary and save some time/space.
+        explicitly specify some of them as boundary and save some time/SPACE.
 
         INPUT PARAMETERS:
             State   -   structure stores algorithm state
@@ -65778,7 +65778,7 @@ public partial class alglib
         point) and compares numerical gradient/Jacobian with analytic one provided
         by you.
 
-        If difference is too large, an error flag is set and optimization  session
+        If difference is too large, an Error flag is set and optimization  session
         continues. After optimization session is over, you can retrieve the report
         which stores both gradients/Jacobians, and specific components highlighted
         as suspicious by the OptGuard.
@@ -65889,7 +65889,7 @@ public partial class alglib
 
         Another frequent situation is when you try to optimize something involving
         lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-        coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+        coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
         stop right after encountering nonsmoothness, well before reaching solution.
 
         OptGuard integrity checker helps you to catch such situations: it monitors
@@ -65944,7 +65944,7 @@ public partial class alglib
         === ADDITIONAL REPORTS/LOGS ==============================================
             
         Several different tests are performed to catch C0/C1 errors, you can  find
-        out specific test signaled error by looking to:
+        out specific test signaled Error by looking to:
         * rep.nonc0test0positive, for non-C0 test #0
         * rep.nonc1test0positive, for non-C1 test #0
         * rep.nonc1test1positive, for non-C1 test #1
@@ -65953,7 +65953,7 @@ public partial class alglib
         means of:
         * minnlcoptguardnonc1test0results()
         * minnlcoptguardnonc1test1results()
-        which return detailed error reports, specific points where discontinuities
+        which return detailed Error reports, specific points where discontinuities
         were found, and so on.
 
         ==========================================================================
@@ -65971,7 +65971,7 @@ public partial class alglib
               The reason  is  that  you  need  to  make several evaluations around
               nonsmoothness  in  order  to  accumulate  enough  information  about
               function curvature. Say, if you start right from the nonsmooth point,
-              optimizer simply won't get enough data to understand what  is  going
+              optimizer simply won't get enough Data to understand what  is  going
               wrong before it terminates due to abrupt changes in the  derivative.
               It is also  possible  that  "unlucky"  step  will  move  us  to  the
               termination too quickly.
@@ -66020,7 +66020,7 @@ public partial class alglib
           values at these points; f[i] is evaluated in x0+stp[i]*d.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -66084,7 +66084,7 @@ public partial class alglib
           vidx-th component of the gradient.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -66225,7 +66225,7 @@ public partial class alglib
         should be called from user-supplied callback when user decides that it  is
         time to "smoothly" terminate optimization process.  As  result,  optimizer
         stops at point which was "current accepted" when termination  request  was
-        submitted and returns error code 8 (successful termination).
+        submitted and returns Error code 8 (successful termination).
 
         INPUT PARAMETERS:
             State   -   optimizer structure
@@ -67160,7 +67160,7 @@ public partial class alglib
             //
             // Routine body
             //
-            alglib.ap.assert(state.solvertype==0, "MinNLC: internal error");
+            alglib.ap.assert(state.solvertype==0, "MinNLC: internal Error");
             n = state.n;
             nec = state.nec;
             nic = state.nic;
@@ -67320,7 +67320,7 @@ public partial class alglib
             }
             
             //
-            // Store data for estimation of Hessian norm:
+            // Store Data for estimation of Hessian norm:
             // * current point (re-scaled)
             // * gradient of the target function (re-scaled, unmodified)
             //
@@ -67420,7 +67420,7 @@ public partial class alglib
                 
                 //
                 // XK/GK store beginning of current line search, and XK1/GK1
-                // store data for the end of the line search:
+                // store Data for the end of the line search:
                 // * first, we Assert() that XK1 (last point where function
                 //   was evaluated) is same as AULOptimizer.X (what is
                 //   reported by RComm interface
@@ -67552,7 +67552,7 @@ public partial class alglib
                 // constraints. These coefficients have limited growth/decay
                 // per iteration which helps to stabilize algorithm.
                 //
-                alglib.ap.assert((double)(aulmaxgrowth)>(double)(1.0), "MinNLC: integrity error");
+                alglib.ap.assert((double)(aulmaxgrowth)>(double)(1.0), "MinNLC: integrity Error");
                 if( state.hasbndl[i] )
                 {
                     minnlcinequalityshiftfunction((state.xc[i]-state.scaledbndl[i])*state.rho+1, ref p, ref dp, ref d2p, _params);
@@ -68595,7 +68595,7 @@ public partial class alglib
                           linear constraints)
                         * if you specify zero value for problem with at least  one
                           nonlinear  constraint,  algorithm  will  terminate  with
-                          error code -1.
+                          Error code -1.
 
         ALGORITHM OUTLINE
 
@@ -68640,7 +68640,7 @@ public partial class alglib
                           * 'PREC.F6'   to output in  6-digit fixed-point format
         * 'AGS.DETAILED.SAMPLE'-
                           for output of points being visited ,  search  directions
-                          and gradient sample. May take a LOT of  space ,  do  not
+                          and gradient sample. May take a LOT of  SPACE ,  do  not
                           use it on problems with more that several tens of vars.
                           This  symbol   also    implicitly   defines   'AGS'  and
                           'AGS.DETAILED'.
@@ -68699,7 +68699,7 @@ public partial class alglib
         should be called from user-supplied callback when user decides that it  is
         time to "smoothly" terminate optimization process.  As  result,  optimizer
         stops at point which was "current accepted" when termination  request  was
-        submitted and returns error code 8 (successful termination).
+        submitted and returns Error code 8 (successful termination).
 
         INPUT PARAMETERS:
             State   -   optimizer structure
@@ -69406,7 +69406,7 @@ public partial class alglib
             //
             // Routine body
             //
-            alglib.ap.assert(state.solvertype==0, "MinNS: internal error");
+            alglib.ap.assert(state.solvertype==0, "MinNS: internal Error");
             n = state.n;
             nec = state.nec;
             nic = state.nic;
@@ -69601,7 +69601,7 @@ public partial class alglib
             // First phase of iteration - central point:
             //
             // 1. evaluate function at central point - first entry in sample.
-            //    Its status is ignored, it is always recalculated.
+            //    Its Status is ignored, it is always recalculated.
             // 2. report point and check gradient/function value for NAN/INF
             // 3. check penalty coefficients for linear terms; increase them
             //    if directional derivative of function being optimized (not
@@ -69697,8 +69697,8 @@ public partial class alglib
                 state.repterminationtype = -8;
                 goto lbl_5;
             }
-            alglib.ap.assert((double)(state.agspenaltylevel)>(double)(1.0), "MinNS: integrity error");
-            alglib.ap.assert((double)(state.agspenaltyincrease)>(double)(state.agspenaltylevel), "MinNS: integrity error");
+            alglib.ap.assert((double)(state.agspenaltylevel)>(double)(1.0), "MinNS: integrity Error");
+            alglib.ap.assert((double)(state.agspenaltyincrease)>(double)(state.agspenaltylevel), "MinNS: integrity Error");
             if( (double)(Math.Sqrt(ablasf.rdotv2(n, state.rawg, _params))*state.agspenaltylevel)>(double)(state.rholinear) )
             {
                 state.rholinear = Math.Sqrt(ablasf.rdotv2(n, state.rawg, _params))*state.agspenaltyincrease;
@@ -69717,11 +69717,11 @@ public partial class alglib
             {
                 if( dodetailedtrace )
                 {
-                    alglib.ap.trace("> printing raw data (prior to applying variable and function scales)\n");
+                    alglib.ap.trace("> printing raw Data (prior to applying variable and function scales)\n");
                     alglib.ap.trace("X (raw)       = ");
                     apserv.tracevectorunscaledunshiftedautoprec(state.xc, n, state.s, true, state.s, false, _params);
                     alglib.ap.trace("\n");
-                    alglib.ap.trace("> printing scaled data (after applying variable and function scales)\n");
+                    alglib.ap.trace("> printing scaled Data (after applying variable and function scales)\n");
                     alglib.ap.trace("X (scaled)    = ");
                     apserv.tracevectorautoprec(state.xc, 0, n, _params);
                     alglib.ap.trace("\n");
@@ -69848,7 +69848,7 @@ public partial class alglib
             {
                 
                 //
-                // Undistorted position
+                // Undistorted Position
                 //
                 state.samplex[i,j] = state.xc[j];
                 
@@ -69915,12 +69915,12 @@ public partial class alglib
                 
                 //
                 // For J-th element in gradient sample, process all of its components
-                // and modify them according to status of box constraints
+                // and modify them according to Status of box constraints
                 //
                 for(i=0; i<=n-1; i++)
                 {
-                    alglib.ap.assert(!state.hasbndl[i] || (double)(state.xc[i])>=(double)(state.scaledbndl[i]), "MinNS: integrity error");
-                    alglib.ap.assert(!state.hasbndu[i] || (double)(state.xc[i])<=(double)(state.scaledbndu[i]), "MinNS: integrity error");
+                    alglib.ap.assert(!state.hasbndl[i] || (double)(state.xc[i])>=(double)(state.scaledbndl[i]), "MinNS: integrity Error");
+                    alglib.ap.assert(!state.hasbndu[i] || (double)(state.xc[i])<=(double)(state.scaledbndu[i]), "MinNS: integrity Error");
                     state.samplegmbc[j,i] = state.samplegm[j,i];
                     if( (state.hasbndl[i] && state.hasbndu[i]) && (double)(state.scaledbndl[i])==(double)(state.scaledbndu[i]) )
                     {
@@ -70118,7 +70118,7 @@ public partial class alglib
                     alglib.ap.trace("\n");
                 }
             }
-            alglib.ap.assert((double)(dnrminf)>(double)(0), "MinNS: integrity error (2752)");
+            alglib.ap.assert((double)(dnrminf)>(double)(0), "MinNS: integrity Error (2752)");
             alpha = recommendedstep/dnrminf;
             alphadecreased = false;
             backtrackits = 0;
@@ -70168,7 +70168,7 @@ public partial class alglib
             //
             // Check sufficient decrease condition
             //
-            alglib.ap.assert((double)(dnrminf)>(double)(0), "MinNS: integrity error (9642)");
+            alglib.ap.assert((double)(dnrminf)>(double)(0), "MinNS: integrity Error (9642)");
             if( (double)(state.samplef[maxsamplesize])<=(double)(state.samplef[0]-alpha*state.agsdecrease*dhd) )
             {
                 goto lbl_12;
@@ -70394,7 +70394,7 @@ public partial class alglib
             n = nsample;
             
             //
-            // Allocate arrays, prepare data
+            // Allocate arrays, prepare Data
             //
             apserv.rvectorsetlengthatleast(ref coeffs, n, _params);
             apserv.rvectorsetlengthatleast(ref state.xc, n, _params);
@@ -70797,7 +70797,7 @@ public partial class alglib
                 }
                 
                 //
-                // Compare status of boundary constraints - if nothing changed during
+                // Compare Status of boundary constraints - if nothing changed during
                 // last outer iteration, TermCnt is increased. Otherwise it is reset
                 // to zero.
                 //
@@ -71988,7 +71988,7 @@ public partial class alglib
             }
             
             //
-            // preprocess data: bound State.XN so it belongs to the
+            // preprocess Data: bound State.XN so it belongs to the
             // feasible set and store it in the State.X
             //
             for(i=0; i<=n-1; i++)
@@ -72007,7 +72007,7 @@ public partial class alglib
             state.needfg = false;
             
             //
-            // postprocess data: zero components of G corresponding to
+            // postprocess Data: zero components of G corresponding to
             // the active constraints
             //
             for(i=0; i<=n-1; i++)
@@ -72228,7 +72228,7 @@ public partial class alglib
             // Line search may result in:
             // * maximum feasible step being taken (already processed)
             // * point satisfying Wolfe conditions
-            // * some kind of error (CG is restarted by assigning 0.0 to Beta)
+            // * some kind of Error (CG is restarted by assigning 0.0 to Beta)
             //
             if( mcinfo==1 )
             {
@@ -74635,7 +74635,7 @@ public partial class alglib
             {
                 
                 //
-                // Strange internal error in LBFGS - either YK=0
+                // Strange internal Error in LBFGS - either YK=0
                 // (which should not have been) or (SK,YK)=0 (again,
                 // unexpected). It should not take place because
                 // MCINFO=1, which signals "good" step. But just
@@ -74645,7 +74645,7 @@ public partial class alglib
                 goto lbl_60;
             }
             state.bufrho[state.bufsize-1] = 1/v;
-            alglib.ap.assert(state.bufsize<=m, "MinBC: internal error");
+            alglib.ap.assert(state.bufsize<=m, "MinBC: internal Error");
             v = 0;
             vv = 0;
             for(i=0; i<=n-1; i++)
@@ -74734,7 +74734,7 @@ public partial class alglib
         (note: future versions may also perform check  at  the  final  point)  and
         compares numerical gradient with analytic one provided by you.
 
-        If difference is too large, an error flag is set and optimization  session
+        If difference is too large, an Error flag is set and optimization  session
         continues. After optimization session is over, you can retrieve the report
         which  stores  both  gradients  and  specific  components  highlighted  as
         suspicious by the OptGuard.
@@ -74841,7 +74841,7 @@ public partial class alglib
 
         Another frequent situation is when you try to optimize something involving
         lots of min() and max() operations, i.e. nonsmooth target. Although not  a
-        coding error, it is nonsmoothness anyway - and smooth  optimizers  usually
+        coding Error, it is nonsmoothness anyway - and smooth  optimizers  usually
         stop right after encountering nonsmoothness, well before reaching solution.
 
         OptGuard integrity checker helps you to catch such situations: it monitors
@@ -74895,7 +74895,7 @@ public partial class alglib
         === ADDITIONAL REPORTS/LOGS ==============================================
             
         Several different tests are performed to catch C0/C1 errors, you can  find
-        out specific test signaled error by looking to:
+        out specific test signaled Error by looking to:
         * rep.nonc0test0positive, for non-C0 test #0
         * rep.nonc1test0positive, for non-C1 test #0
         * rep.nonc1test1positive, for non-C1 test #1
@@ -74904,7 +74904,7 @@ public partial class alglib
         means of:
         * minbcoptguardnonc1test0results()
         * minbcoptguardnonc1test1results()
-        which return detailed error reports, specific points where discontinuities
+        which return detailed Error reports, specific points where discontinuities
         were found, and so on.
 
         ==========================================================================
@@ -74922,7 +74922,7 @@ public partial class alglib
               The reason  is  that  you  need  to  make several evaluations around
               nonsmoothness  in  order  to  accumulate  enough  information  about
               function curvature. Say, if you start right from the nonsmooth point,
-              optimizer simply won't get enough data to understand what  is  going
+              optimizer simply won't get enough Data to understand what  is  going
               wrong before it terminates due to abrupt changes in the  derivative.
               It is also  possible  that  "unlucky"  step  will  move  us  to  the
               termination too quickly.
@@ -74969,7 +74969,7 @@ public partial class alglib
           values at these points; f[i] is evaluated in x0+stp[i]*d.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -75031,7 +75031,7 @@ public partial class alglib
           vidx-th component of the gradient.
         * stpidxa, stpidxb - we  suspect  that  function  violates  C1  continuity
           between steps #stpidxa and #stpidxb (usually we have  stpidxb=stpidxa+3,
-          with  most  likely  position  of  the  violation  between  stpidxa+1 and
+          with  most  likely  Position  of  the  violation  between  stpidxa+1 and
           stpidxa+2.
           
         ==========================================================================
@@ -75195,7 +75195,7 @@ public partial class alglib
         should be called from user-supplied callback when user decides that it  is
         time to "smoothly" terminate optimization process.  As  result,  optimizer
         stops at point which was "current accepted" when termination  request  was
-        submitted and returns error code 8 (successful termination).
+        submitted and returns Error code 8 (successful termination).
 
         INPUT PARAMETERS:
             State   -   optimizer structure

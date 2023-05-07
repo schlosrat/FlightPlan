@@ -24,13 +24,13 @@ namespace MechJebLib.Maths
     {
         /*
          * mu = gravitational parameter of central body
-         * r1 = position at t0
+         * r1 = Position at t0
          * v1 = velocity at t0
-         * r2 = position at t1
+         * r2 = Position at t1
          * tof  = time of flight (t1 - t0) (+ posigrade "shortway", - retrograde "longway")
          * nrev = number of full revolutions (+ left-branch, - right-branch for nrev != 0)
-         * Vi = initial velocity vector of transfer orbit
-         * Vf = final velocity vector of transfer orbit
+         * Vi = initial velocity vector of transfer Orbit
+         * Vf = final velocity vector of transfer Orbit
          */
 
         public static void Solve(double mu, V3 r1, V3 v1, V3 r2, double tof, int nrev, out V3 Vi, out V3 Vf)
@@ -60,11 +60,11 @@ namespace MechJebLib.Maths
 
             double theta = SafeAcos(V3.Dot(ux1, ux2));
 
-            /* calculate the angle between the orbit normal of the initial orbit and the fundamental reference plane */
+            /* calculate the angle between the Orbit normal of the initial Orbit and the fundamental reference plane */
 
             double angle_to_on = SafeAcos(V3.Dot(ur1xv1, uz1));
 
-            /* if angle to orbit normal is greater than 90 degrees and posigrade orbit, then flip the orbit normal and the transfer angle */
+            /* if angle to Orbit normal is greater than 90 degrees and posigrade Orbit, then flip the Orbit normal and the transfer angle */
 
             if (angle_to_on > 0.5 * PI && tof > 0.0)
             {
@@ -99,7 +99,7 @@ namespace MechJebLib.Maths
                 }
             }
 
-            /* compute transfer orbit initial and final velocity vectors */
+            /* compute transfer Orbit initial and final velocity vectors */
 
             if (nrev > 0 && n > 1)
             {

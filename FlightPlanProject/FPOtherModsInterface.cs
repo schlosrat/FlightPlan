@@ -25,120 +25,120 @@ public class FPOtherModsInterface
     ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanPlugin.OtherModsInterface");
 
     // Reflection access variables for launching MNC & K2-D2
-    private bool MNCLoaded, K2D2Loaded, checkK2D2status  = false;
-    private PluginInfo MNC, K2D2_info;
-    private Version mncMinVersion, k2d2MinVersion;
-    private int mncVerCheck, k2d2VerCheck;
-    private string k2d2Status;
-    Type k2d2Type, mncType;
-    PropertyInfo k2d2PropertyInfo, mncPropertyInfo;
-    MethodInfo k2d2GetStatusMethodInfo, k2d2FlyNodeMethodInfo, k2d2ToggleMethodInfo, mncLaunchMNCMethodInfo;
-    object k2d2Instance, mncInstance;
-    Texture2D mnc_button_tex, k2d2_button_tex;
-    GUIContent mnc_button_tex_con, k2d2_button_tex_con;
+    private bool _mncLoaded, _k2d2Loaded, _checkK2D2status  = false;
+    private PluginInfo _mncInfo, _k2d2Info;
+    private Version _mncMinVersion, _k2d2MinVersion;
+    private int _mncVerCheck, _k2d2VerCheck;
+    private string _k2d2Status;
+    Type K2D2Type, MNCType;
+    PropertyInfo K2D2PropertyInfo, MNCPropertyInfo;
+    MethodInfo K2D2GetStatusMethodInfo, K2D2FlyNodeMethodInfo, K2D2ToggleMethodInfo, MNCLaunchMNCMethodInfo;
+    object K2D2Instance, MNCInstance;
+    Texture2D mncButtonTex, k2d2ButtonTex;
+    GUIContent MNCButtonTexCon, K2D2ButtonTexCon;
 
-    private bool launchMNC, executeNode;
+    private bool _launchMNC, _executeNode;
 
     public void CheckModsVersions()
     {
         Logger.LogInfo($"ManeuverNodeControllerMod.ModGuid = {ManeuverNodeControllerMod.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out MNC))
+        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out _mncInfo))
         {
-            MNCLoaded = true;
+            _mncLoaded = true;
             Logger.LogInfo("Maneuver Node Controller installed and available");
-            Logger.LogInfo($"MNC = {MNC}");
-            // mncVersion = MNC.Metadata.Version;
-            mncMinVersion = new Version(0, 8, 3);
-            mncVerCheck = MNC.Metadata.Version.CompareTo(mncMinVersion);
-            Logger.LogInfo($"mncVerCheck = {mncVerCheck}");
+            Logger.LogInfo($"_mncInfo = {_mncInfo}");
+            // mncVersion = _mncInfo.Metadata.Version;
+            _mncMinVersion = new Version(0, 8, 3);
+            _mncVerCheck = _mncInfo.Metadata.Version.CompareTo(_mncMinVersion);
+            Logger.LogInfo($"_mncVerCheck = {_mncVerCheck}");
 
-            // Get MNC buton icon
-            mnc_button_tex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/mnc_icon_white_50.png");
-            mnc_button_tex_con = new GUIContent(mnc_button_tex, "Launch Maneuver Node Controller");
+            // Get _mncInfo buton Icon
+            mncButtonTex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/mnc_icon_white_50.png");
+            MNCButtonTexCon = new GUIContent(mncButtonTex, "Launch Maneuver Node Controller");
 
             // Reflections method to attempt the same thing more cleanly
-            mncType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
-            mncPropertyInfo = mncType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            mncInstance = mncPropertyInfo.GetValue(null);
-            mncLaunchMNCMethodInfo = mncPropertyInfo!.PropertyType.GetMethod("LaunchMNC");
+            MNCType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {ManeuverNodeControllerMod.ModGuid}");
+            MNCPropertyInfo = MNCType!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            MNCInstance = MNCPropertyInfo.GetValue(null);
+            MNCLaunchMNCMethodInfo = MNCPropertyInfo!.PropertyType.GetMethod("LaunchMNC");
         }
-        // else MNCLoaded = false;
-        Logger.LogInfo($"MNCLoaded = {MNCLoaded}");
+        // else _mncLoaded = false;
+        Logger.LogInfo($"_mncLoaded = {_mncLoaded}");
 
         Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out K2D2_info))
+        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out _k2d2Info))
         {
-            K2D2_info = Chainloader.PluginInfos[K2D2_Plugin.ModGuid];
+            _k2d2Info = Chainloader.PluginInfos[K2D2_Plugin.ModGuid];
 
-            K2D2Loaded = true;
+            _k2d2Loaded = true;
             Logger.LogInfo("K2-D2 installed and available");
-            Logger.LogInfo($"K2D2 = {K2D2_info}");
-            k2d2MinVersion = new Version(0, 8, 1);
-            k2d2VerCheck = K2D2_info.Metadata.Version.CompareTo(k2d2MinVersion);
-            Logger.LogInfo($"k2d2VerCheck = {k2d2VerCheck}");
-            string tooltip;
-            if (k2d2VerCheck >= 0) tooltip = "Have K2-D2 Execute this node";
-            else tooltip = "Launch K2-D2";
+            Logger.LogInfo($"K2D2 = {_k2d2Info}");
+            _k2d2MinVersion = new Version(0, 8, 1);
+            _k2d2VerCheck = _k2d2Info.Metadata.Version.CompareTo(_k2d2MinVersion);
+            Logger.LogInfo($"_k2d2VerCheck = {_k2d2VerCheck}");
+            string _toolTip;
+            if (_k2d2VerCheck >= 0) _toolTip = "Have K2-D2 Execute this node";
+            else _toolTip = "Launch K2-D2";
 
-            // Get K2-D2 buton icon
-            k2d2_button_tex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/k2d2_icon.png");
-            k2d2_button_tex_con = new GUIContent(k2d2_button_tex, tooltip);
+            // Get K2-D2 buton Icon
+            k2d2ButtonTex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/k2d2_icon.png");
+            K2D2ButtonTexCon = new GUIContent(k2d2ButtonTex, _toolTip);
 
-            k2d2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
-            k2d2PropertyInfo = k2d2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-            k2d2Instance = k2d2PropertyInfo.GetValue(null);
-            k2d2ToggleMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("ToggleAppBarButton");
-            k2d2FlyNodeMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("FlyNode");
-            k2d2GetStatusMethodInfo = k2d2PropertyInfo!.PropertyType.GetMethod("GetStatus");
+            K2D2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2_Plugin.ModGuid}");
+            K2D2PropertyInfo = K2D2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            K2D2Instance = K2D2PropertyInfo.GetValue(null);
+            K2D2ToggleMethodInfo = K2D2PropertyInfo!.PropertyType.GetMethod("ToggleAppBarButton");
+            K2D2FlyNodeMethodInfo = K2D2PropertyInfo!.PropertyType.GetMethod("FlyNode");
+            K2D2GetStatusMethodInfo = K2D2PropertyInfo!.PropertyType.GetMethod("GetStatus");
         }
-        // else K2D2Loaded = false;
-        Logger.LogInfo($"K2D2Loaded = {K2D2Loaded}");
+        // else _k2d2Loaded = false;
+        Logger.LogInfo($"_k2d2Loaded = {_k2d2Loaded}");
 
         instance = this;
     }
 
-    public void callMNC()
+    public void CallMNC()
     {
-        if (MNCLoaded && mncVerCheck >= 0)
+        if (_mncLoaded && _mncVerCheck >= 0)
         {
-            mncLaunchMNCMethodInfo!.Invoke(mncPropertyInfo.GetValue(null), null);
+            MNCLaunchMNCMethodInfo!.Invoke(MNCPropertyInfo.GetValue(null), null);
         }
     }
 
-    public void callK2D2()
+    public void CallK2D2()
     {
-        if (K2D2Loaded)
+        if (_k2d2Loaded)
         {
             // Reflections method to attempt the same thing more cleanly
-            if (k2d2VerCheck < 0)
+            if (_k2d2VerCheck < 0)
             {
-                k2d2ToggleMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), new object[] { true });
+                K2D2ToggleMethodInfo!.Invoke(K2D2PropertyInfo.GetValue(null), new object[] { true });
             }
             else
             {
-                k2d2FlyNodeMethodInfo!.Invoke(k2d2PropertyInfo.GetValue(null), null);
-                checkK2D2status = true;
+                K2D2FlyNodeMethodInfo!.Invoke(K2D2PropertyInfo.GetValue(null), null);
+                _checkK2D2status = true;
 
-                FPStatus.K2D2Status(FlightPlanUI.Instance.maneuver_description, FlightPlanPlugin.Instance.currentNode.BurnDuration);
+                FPStatus.K2D2Status(FlightPlanUI.Instance.ManeuverDescription, FlightPlanPlugin.Instance._currentNode.BurnDuration);
             }
         }
     }
 
-    private void getK2D2Status()
+    private void GetK2D2Status()
     {
-        if (K2D2Loaded)
+        if (_k2d2Loaded)
         {
-            if (k2d2VerCheck >= 0)
+            if (_k2d2VerCheck >= 0)
             {
-                k2d2Status = (string)k2d2GetStatusMethodInfo!.Invoke(k2d2Instance, null);
+                _k2d2Status = (string)K2D2GetStatusMethodInfo!.Invoke(K2D2Instance, null);
 
-                if (k2d2Status == "Done")
+                if (_k2d2Status == "Done")
                 {
-                    if (FlightPlanPlugin.Instance.currentNode.Time < GameManager.Instance.Game.UniverseModel.UniversalTime)
+                    if (FlightPlanPlugin.Instance._currentNode.Time < GameManager.Instance.Game.UniverseModel.UniversalTime)
                     {
                         NodeManagerPlugin.Instance.DeleteNodes(0);
                     }
-                    checkK2D2status = false;
+                    _checkK2D2status = false;
                 }
             }
         }
@@ -151,26 +151,26 @@ public class FPOtherModsInterface
         if (FPStyles.SquareButton("Make\nNode"))
             FlightPlanUI.Instance.MakeNode();
 
-        if (MNCLoaded && mncVerCheck >= 0)
+        if (_mncLoaded && _mncVerCheck >= 0)
         {
             GUILayout.FlexibleSpace();
-            if (FPStyles.SquareButton(FPStyles.mnc_icon))
-                callMNC();
+            if (FPStyles.SquareButton(FPStyles.MNCIcon))
+                CallMNC();
         }
 
-        if (K2D2Loaded && currentNode != null)
+        if (_k2d2Loaded && currentNode != null)
         {
             GUILayout.FlexibleSpace();
-            if (FPStyles.SquareButton(FPStyles.k2d2_big_icon))
-                callK2D2();
+            if (FPStyles.SquareButton(FPStyles.K2D2BigIcon))
+                CallK2D2();
         }
         GUILayout.EndHorizontal();
 
-        if (checkK2D2status)
+        if (_checkK2D2status)
         {
-            getK2D2Status();
+            GetK2D2Status();
             GUILayout.BeginHorizontal();
-            FlightPlan.KTools.UI.UI_Tools.Label($"K2D2: {k2d2Status}");
+            FlightPlan.KTools.UI.UI_Tools.Label($"K2D2: {_k2d2Status}");
             GUILayout.EndHorizontal();
         }
     }
