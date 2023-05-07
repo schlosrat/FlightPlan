@@ -67,7 +67,45 @@ public class FlightPlanUI
 
     int spacingAfterEntry = 5;
 
-    private void DrawEntry(string entryName, string value, string unit = "")
+    public void DrawSoloToggle(string toggleStr, ref bool toggle)
+    {
+        GUILayout.Space(FPStyles.spacingAfterSection);
+        GUILayout.BeginHorizontal();
+        toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.toggle); // was section_toggle
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+        GUILayout.Space(-FPStyles.spacingAfterSection);
+    }
+
+    public bool DrawSoloToggle(string toggleStr, bool toggle, bool error=true)
+    {
+        GUILayout.Space(FPStyles.spacingAfterSection);
+        GUILayout.BeginHorizontal();
+        if (error)
+            toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.toggle_error);
+        else
+            toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.toggle);
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+        GUILayout.Space(-FPStyles.spacingAfterSection);
+        return toggle;
+    }
+
+    //public void DrawToggleButton(string txt, ManeuverType maneuveur_type)
+    //{
+    //    bool active = maneuver_type == maneuveur_type;
+
+    //    bool result = UI_Tools.SmallToggleButton(active, txt, txt);
+    //    if (result != active)
+    //    {
+    //        if (!active)
+    //            SetManeuverType(maneuveur_type);
+    //        else
+    //            SetManeuverType(ManeuverType.None);
+    //    }
+    //}
+
+    public void DrawEntry(string entryName, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Label(entryName);
@@ -82,12 +120,12 @@ public class FlightPlanUI
         GUILayout.Space(spacingAfterEntry);
     }
 
-    private void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
+    public void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Label(entryName);
         GUILayout.FlexibleSpace();
-        button = UI_Tools.SmallButton(buttonStr);
+        button = UI_Tools.CtrlButton(buttonStr);
         UI_Tools.Label(value);
         GUILayout.Space(5);
         UI_Tools.Label(unit);
@@ -95,13 +133,13 @@ public class FlightPlanUI
         GUILayout.Space(spacingAfterEntry);
     }
 
-    private void DrawEntry2Button(string entryName, ref bool button1, string button1Str, ref bool button2, string button2Str, string value, string unit = "")
+    public void DrawEntry2Button(string entryName, ref bool button1, string button1Str, ref bool button2, string button2Str, string value, string unit = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Console(entryName);
         GUILayout.FlexibleSpace();
-        button1 = UI_Tools.SmallButton(button1Str);
-        button2 = UI_Tools.SmallButton(button2Str);
+        button1 = UI_Tools.CtrlButton(button1Str);
+        button2 = UI_Tools.CtrlButton(button2Str);
         UI_Tools.Console(value);
         GUILayout.Space(5);
         UI_Tools.Console(unit);
@@ -109,7 +147,41 @@ public class FlightPlanUI
         GUILayout.Space(spacingAfterEntry);
     }
 
-    private double DrawLabelWithTextField(string entryName, double value, string unit = "")
+    public void DrawEntryTextField(string entryName, ref string textEntry, string unit = "")
+    {
+        double num;
+        Color normal;
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(entryName, KBaseStyle.nameLabelStyle);
+        GUILayout.FlexibleSpace();
+        normal = GUI.color;
+        bool parsed = double.TryParse(textEntry, out num);
+        if (!parsed) GUI.color = Color.red;
+        GUI.SetNextControlName(entryName);
+        textEntry = GUILayout.TextField(textEntry, KBaseStyle.textInputStyle);
+        GUI.color = normal;
+        GUILayout.Space(5);
+        GUILayout.Label(unit, KBaseStyle.unitLabelStyle);
+        GUILayout.EndHorizontal();
+        GUILayout.Space(FPStyles.spacingAfterEntry);
+    }
+
+    public double DrawEntryTextField(string entryName, double value, string unit = "")
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(entryName, KBaseStyle.nameLabelStyle);
+        GUILayout.FlexibleSpace();
+        GUI.SetNextControlName(entryName);
+        value = UI_Fields.DoubleField(entryName, value, KBaseStyle.textInputStyle);
+        GUILayout.Space(5);
+        GUILayout.Label(unit, KBaseStyle.unitLabelStyle);
+        GUILayout.EndHorizontal();
+        GUILayout.Space(FPStyles.spacingAfterEntry);
+        return value;
+    }
+
+    public double DrawLabelWithTextField(string entryName, double value, string unit = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Label(entryName);
@@ -339,10 +411,15 @@ public class FlightPlanUI
         case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
             pass = plugin.PlanetaryXfer(requestedBurnTime, -0.5);
             break;
+        case ManeuverType.fixAp: // Working
+            pass = plugin.SetNewAp(requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
+            break;
+        case ManeuverType.fixPe: // Working
+            pass = plugin.SetNewPe(requestedBurnTime, ResonantOrbitPage.Pe2, - 0.5);
+            break;
         }
 
         if (pass && plugin.autoLaunchMNC.Value)
             FPOtherModsInterface.instance.callMNC();
     }
-
 }
