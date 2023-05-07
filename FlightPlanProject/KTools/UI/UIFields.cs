@@ -55,9 +55,9 @@ public class UI_Fields
 
         GUI.SetNextControlName(entryName);
         if (thisStyle != null)
-            _textValue = GUILayout.TextField(_textValue, thisStyle, GUILayout.Width(100));
+            _textValue = GUILayout.TextField(_textValue, thisStyle, GUILayout.Width(90));
         else
-            _textValue = GUILayout.TextField(_textValue, GUILayout.Width(100));
+            _textValue = GUILayout.TextField(_textValue, GUILayout.Width(90));
 
         GUI.color = _normal;
 
