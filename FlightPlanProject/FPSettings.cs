@@ -65,11 +65,36 @@ public class FPSettings
         set { KBaseSettings.sfile.SetDouble("timeOffset", value); }
     }
 
+    public static int num_sats
+    {
+        get => KBaseSettings.sfile.GetInt("num_sats", 3);
+        set { KBaseSettings.sfile.SetInt("num_sats", value); }
+    }
+
+    public static int num_orbits
+    {
+        get => KBaseSettings.sfile.GetInt("num_orbits", 1);
+        set { KBaseSettings.sfile.SetInt("num_orbits", value); }
+    }
+
+    public static bool dive_orbit
+    {
+        get => KBaseSettings.sfile.GetBool("dive_orbit", true);
+        set { KBaseSettings.sfile.SetBool("dive_orbit", value); }
+    }
+
+    public static bool occlusion
+    {
+        get => KBaseSettings.sfile.GetBool("occlusion", true);
+        set { KBaseSettings.sfile.SetBool("occlusion", value); }
+    }
+
     public static double occ_mod_atm
     {
         get => KBaseSettings.sfile.GetDouble("occ_mod_atm", 0.75);
         set { KBaseSettings.sfile.SetDouble("occ_mod_atm", value); }
     }
+
     public static double occ_mod_vac
     {
         get => KBaseSettings.sfile.GetDouble("occ_mod_vac", 0.9);
