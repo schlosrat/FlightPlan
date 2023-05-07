@@ -98,19 +98,22 @@ public class KBaseStyle
             padding = new RectOffset(10, 10, 0, 0),
             contentOffset = new Vector2(0, 2),
             fixedHeight = 18,
-            fixedWidth = 100, //(float)(_windowWidth / 4),
+            fixedWidth = 90, //(float)(_windowWidth / 4),
             clipping = TextClipping.Overflow,
-            margin = new RectOffset(0, 0, 10, 0)
+            margin = new RectOffset(0, 0, 2, 0)
         };
 
         NameLabelStyle = new GUIStyle(GUI.skin.GetStyle("Label")); // was (_spaceWarpUISkin.Label);
-        NameLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
+        // NameLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
+        NameLabelStyle.border = new RectOffset(0, 0, 5, 5);
+        NameLabelStyle.padding = new RectOffset(0, 0, 4, 4);
+        NameLabelStyle.overflow = new RectOffset(0, 0, 0, 0);
 
         ValueLabelStyle = new GUIStyle(GUI.skin.GetStyle("Label")) // was (_spaceWarpUISkin.Label)
         {
             alignment = TextAnchor.MiddleRight
         };
-        ValueLabelStyle.normal.textColor = new Color(.6f, .7f, 1, 1);
+        // ValueLabelStyle.normal.textColor = new Color(.6f, .7f, 1, 1);
 
         UnitLabelStyle = new GUIStyle(ValueLabelStyle)
         {
@@ -118,6 +121,9 @@ public class KBaseStyle
             alignment = TextAnchor.MiddleLeft
         };
         UnitLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
+        UnitLabelStyle.border = new RectOffset(0, 0, 5, 5);
+        UnitLabelStyle.padding = new RectOffset(0, 0, 4, 4);
+        UnitLabelStyle.overflow = new RectOffset(0, 0, 0, 0);
 
         UnitColorHex = ColorUtility.ToHtmlStringRGBA(UnitLabelStyle.normal.textColor);
 
