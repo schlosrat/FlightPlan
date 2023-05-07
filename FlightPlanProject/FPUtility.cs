@@ -54,10 +54,10 @@ public static class FPUtility
     //    return result;
     //}
 
-    //public static string MetersToDistanceString(double heightInMeters)
-    //{
-    //    return $"{heightInMeters:N0}";
-    //}
+    public static string MetersToDistanceString(double heightInMeters)
+    {
+        return $"{heightInMeters:N0}";
+    }
 
     public static string SecondsToTimeString(double seconds, bool addSpacing = true, bool returnLastUnit = false)
     {
