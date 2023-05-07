@@ -37,7 +37,7 @@ public class UI_Fields
         GameInputState = !inputFields.Contains(GUI.GetNameOfFocusedControl());
     }
 
-    public static double DoubleField(string entryName, double value)
+    public static double DoubleField(string entryName, double value, GUIStyle thisStyle = null)
     {
         string text_value;
         if (temp_dict.ContainsKey(entryName))
@@ -55,7 +55,10 @@ public class UI_Fields
         if (!parsed) GUI.color = Color.red;
 
         GUI.SetNextControlName(entryName);
-        text_value = GUILayout.TextField(text_value, GUILayout.Width(100));
+        if (thisStyle != null)
+            text_value = GUILayout.TextField(text_value, thisStyle, GUILayout.Width(100));
+        else
+            text_value = GUILayout.TextField(text_value, GUILayout.Width(100));
 
         GUI.color = normal;
 
