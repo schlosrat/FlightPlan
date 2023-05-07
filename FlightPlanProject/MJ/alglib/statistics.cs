@@ -853,7 +853,7 @@ public partial class alglib
                 * if not given, automatically determined from input size
 
     OUTPUT PARAMETERS:
-        C   -   array[M1,M2], cross-covariance matrix (zero if N=0 or N=1)
+        C   -   array[M1,M2], Cross-covariance matrix (zero if N=0 or N=1)
 
       -- ALGLIB --
          Copyright 28.10.2010 by Bochkanov Sergey
@@ -903,7 +903,7 @@ public partial class alglib
     }
     
     /*************************************************************************
-    Pearson product-moment cross-correlation matrix
+    Pearson product-moment Cross-correlation matrix
 
       ! COMMERCIAL EDITION OF ALGLIB:
       !
@@ -936,7 +936,7 @@ public partial class alglib
                 * if not given, automatically determined from input size
 
     OUTPUT PARAMETERS:
-        C   -   array[M1,M2], cross-correlation matrix (zero if N=0 or N=1)
+        C   -   array[M1,M2], Cross-correlation matrix (zero if N=0 or N=1)
 
       -- ALGLIB --
          Copyright 28.10.2010 by Bochkanov Sergey
@@ -986,7 +986,7 @@ public partial class alglib
     }
     
     /*************************************************************************
-    Spearman's rank cross-correlation matrix
+    Spearman's rank Cross-correlation matrix
 
       ! COMMERCIAL EDITION OF ALGLIB:
       !
@@ -1019,7 +1019,7 @@ public partial class alglib
                 * if not given, automatically determined from input size
 
     OUTPUT PARAMETERS:
-        C   -   array[M1,M2], cross-correlation matrix (zero if N=0 or N=1)
+        C   -   array[M1,M2], Cross-correlation matrix (zero if N=0 or N=1)
 
       -- ALGLIB --
          Copyright 28.10.2010 by Bochkanov Sergey
@@ -1069,10 +1069,10 @@ public partial class alglib
     }
     
     /*************************************************************************
-    This function replaces data in XY by their ranks:
+    This function replaces Data in XY by their ranks:
     * XY is processed row-by-row
     * rows are processed separately
-    * tied data are correctly handled (tied ranks are calculated)
+    * tied Data are correctly handled (tied ranks are calculated)
     * ranking starts from 0, ends at NFeatures-1
     * sum of within-row values is equal to (NFeatures-1)*NFeatures/2
 
@@ -1093,7 +1093,7 @@ public partial class alglib
         NFeatures-  number of features
 
     OUTPUT PARAMETERS:
-        XY      -   data are replaced by their within-row ranks;
+        XY      -   Data are replaced by their within-row ranks;
                     ranking starts from 0, ends at NFeatures-1
 
       -- ALGLIB --
@@ -1138,10 +1138,10 @@ public partial class alglib
     }
     
     /*************************************************************************
-    This function replaces data in XY by their CENTERED ranks:
+    This function replaces Data in XY by their CENTERED ranks:
     * XY is processed row-by-row
     * rows are processed separately
-    * tied data are correctly handled (tied ranks are calculated)
+    * tied Data are correctly handled (tied ranks are calculated)
     * centered ranks are just usual ranks, but centered in such way  that  sum
       of within-row values is equal to 0.0.
     * centering is performed by subtracting mean from each row, i.e it changes
@@ -1164,7 +1164,7 @@ public partial class alglib
         NFeatures-  number of features
 
     OUTPUT PARAMETERS:
-        XY      -   data are replaced by their within-row ranks;
+        XY      -   Data are replaced by their within-row ranks;
                     ranking starts from 0, ends at NFeatures-1
 
       -- ALGLIB --
@@ -1378,7 +1378,7 @@ public partial class alglib
 
     Accuracy of the approximation used (5<=N<=1951):
 
-    p-value  	    relative error (5<=N<=1951)
+    p-value  	    relative Error (5<=N<=1951)
     [1, 0.1]            < 1%
     [0.1, 0.01]         < 2%
     [0.01, 0.001]       < 6%
@@ -1555,7 +1555,7 @@ public partial class alglib
     calculate p-values with two decimal places in interval [0.0001, 1].
 
     "Two decimal places" does not sound very impressive, but in  practice  the
-    relative error of less than 1% is enough to make a decision.
+    relative Error of less than 1% is enough to make a decision.
 
     There is no approximation outside the [0.0001, 1] interval. Therefore,  if
     the significance level outlies this interval, the test returns 0.0001.
@@ -1603,7 +1603,7 @@ public partial class alglib
         * X and Y are continuous distributions (or discrete distributions well-
           approximating continuous distributions)
         * distributions of X and Y have the  same  shape.  The  only  possible
-          difference is their position (i.e. the value of the median)
+          difference is their Position (i.e. the value of the median)
         * the number of elements in each sample is not less than 5
         * the scale of measurement should be ordinal, interval or ratio  (i.e.
           the test could not be applied to nominal variables).
@@ -2963,7 +2963,7 @@ public partial class alglib
             c = new double[m, m];
             
             //
-            // Replace data with ranks
+            // Replace Data with ranks
             //
             xc = new double[m, n];
             ablas.rmatrixtranspose(n, m, x, 0, 0, xc, 0, 0, _params);
@@ -3090,7 +3090,7 @@ public partial class alglib
                     * if not given, automatically determined from input size
 
         OUTPUT PARAMETERS:
-            C   -   array[M1,M2], cross-covariance matrix (zero if N=0 or N=1)
+            C   -   array[M1,M2], Cross-covariance matrix (zero if N=0 or N=1)
 
           -- ALGLIB --
              Copyright 28.10.2010 by Bochkanov Sergey
@@ -3236,14 +3236,14 @@ public partial class alglib
             }
             
             //
-            // calculate cross-covariance matrix
+            // calculate Cross-covariance matrix
             //
             ablas.rmatrixgemm(m1, m2, n, (double)1/(double)(n-1), x, 0, 0, 1, y, 0, 0, 0, 0.0, c, 0, 0, _params);
         }
 
 
         /*************************************************************************
-        Pearson product-moment cross-correlation matrix
+        Pearson product-moment Cross-correlation matrix
 
           ! COMMERCIAL EDITION OF ALGLIB:
           ! 
@@ -3276,7 +3276,7 @@ public partial class alglib
                     * if not given, automatically determined from input size
 
         OUTPUT PARAMETERS:
-            C   -   array[M1,M2], cross-correlation matrix (zero if N=0 or N=1)
+            C   -   array[M1,M2], Cross-correlation matrix (zero if N=0 or N=1)
 
           -- ALGLIB --
              Copyright 28.10.2010 by Bochkanov Sergey
@@ -3439,7 +3439,7 @@ public partial class alglib
             }
             
             //
-            // calculate cross-covariance matrix
+            // calculate Cross-covariance matrix
             //
             ablas.rmatrixgemm(m1, m2, n, (double)1/(double)(n-1), x, 0, 0, 1, y, 0, 0, 0, 0.0, c, 0, 0, _params);
             
@@ -3480,7 +3480,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Spearman's rank cross-correlation matrix
+        Spearman's rank Cross-correlation matrix
 
           ! COMMERCIAL EDITION OF ALGLIB:
           ! 
@@ -3513,7 +3513,7 @@ public partial class alglib
                     * if not given, automatically determined from input size
 
         OUTPUT PARAMETERS:
-            C   -   array[M1,M2], cross-correlation matrix (zero if N=0 or N=1)
+            C   -   array[M1,M2], Cross-correlation matrix (zero if N=0 or N=1)
 
           -- ALGLIB --
              Copyright 28.10.2010 by Bochkanov Sergey
@@ -3578,7 +3578,7 @@ public partial class alglib
             c = new double[m1, m2];
             
             //
-            // Replace data with ranks
+            // Replace Data with ranks
             //
             xc = new double[m1, n];
             yc = new double[m2, n];
@@ -3663,7 +3663,7 @@ public partial class alglib
             }
             
             //
-            // calculate cross-covariance matrix
+            // calculate Cross-covariance matrix
             //
             ablas.rmatrixgemm(m1, m2, n, (double)1/(double)(n-1), xc, 0, 0, 0, yc, 0, 0, 1, 0.0, c, 0, 0, _params);
             
@@ -3704,10 +3704,10 @@ public partial class alglib
 
 
         /*************************************************************************
-        This function replaces data in XY by their ranks:
+        This function replaces Data in XY by their ranks:
         * XY is processed row-by-row
         * rows are processed separately
-        * tied data are correctly handled (tied ranks are calculated)
+        * tied Data are correctly handled (tied ranks are calculated)
         * ranking starts from 0, ends at NFeatures-1
         * sum of within-row values is equal to (NFeatures-1)*NFeatures/2
 
@@ -3728,7 +3728,7 @@ public partial class alglib
             NFeatures-  number of features
 
         OUTPUT PARAMETERS:
-            XY      -   data are replaced by their within-row ranks;
+            XY      -   Data are replaced by their within-row ranks;
                         ranking starts from 0, ends at NFeatures-1
 
           -- ALGLIB --
@@ -3787,10 +3787,10 @@ public partial class alglib
 
 
         /*************************************************************************
-        This function replaces data in XY by their CENTERED ranks:
+        This function replaces Data in XY by their CENTERED ranks:
         * XY is processed row-by-row
         * rows are processed separately
-        * tied data are correctly handled (tied ranks are calculated)
+        * tied Data are correctly handled (tied ranks are calculated)
         * centered ranks are just usual ranks, but centered in such way  that  sum
           of within-row values is equal to 0.0.
         * centering is performed by subtracting mean from each row, i.e it changes
@@ -3813,7 +3813,7 @@ public partial class alglib
             NFeatures-  number of features
 
         OUTPUT PARAMETERS:
-            XY      -   data are replaced by their within-row ranks;
+            XY      -   Data are replaced by their within-row ranks;
                         ranking starts from 0, ends at NFeatures-1
 
           -- ALGLIB --
@@ -3926,7 +3926,7 @@ public partial class alglib
             BasecaseCost-minimum cost of the problem which will be split
 
         OUTPUT PARAMETERS:
-            XY      -   data in [I0,I1) are replaced by their within-row ranks;
+            XY      -   Data in [I0,I1) are replaced by their within-row ranks;
                         ranking starts from 0, ends at NFeatures-1
 
           -- ALGLIB --
@@ -3946,7 +3946,7 @@ public partial class alglib
             double problemcost = 0;
             int im = 0;
 
-            alglib.ap.assert(i1>=i0, "RankDataRec: internal error");
+            alglib.ap.assert(i1>=i0, "RankDataRec: internal Error");
             
             //
             // Try to activate parallelism
@@ -3998,7 +3998,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Basecase code for RankData(), performs actual work on subset of data using
+        Basecase code for RankData(), performs actual work on subset of Data using
         temporary buffer passed as parameter.
 
         INPUT PARAMETERS:
@@ -4017,7 +4017,7 @@ public partial class alglib
                         allocates/reuses buffers).
 
         OUTPUT PARAMETERS:
-            XY      -   data in [I0,I1) are replaced by their within-row ranks;
+            XY      -   Data in [I0,I1) are replaced by their within-row ranks;
                         ranking starts from 0, ends at NFeatures-1
 
           -- ALGLIB --
@@ -4035,7 +4035,7 @@ public partial class alglib
             int i = 0;
             int i_ = 0;
 
-            alglib.ap.assert(i1>=i0, "RankDataBasecase: internal error");
+            alglib.ap.assert(i1>=i0, "RankDataBasecase: internal Error");
             if( alglib.ap.len(buf1.ra0)<nfeatures )
             {
                 buf1.ra0 = new double[nfeatures];
@@ -4794,7 +4794,7 @@ public partial class alglib
 
         Accuracy of the approximation used (5<=N<=1951):
 
-        p-value  	    relative error (5<=N<=1951)
+        p-value  	    relative Error (5<=N<=1951)
         [1, 0.1]            < 1%
         [0.1, 0.01]         < 2%
         [0.01, 0.001]       < 6%
@@ -7277,7 +7277,7 @@ public partial class alglib
         calculate p-values with two decimal places in interval [0.0001, 1].
 
         "Two decimal places" does not sound very impressive, but in  practice  the
-        relative error of less than 1% is enough to make a decision.
+        relative Error of less than 1% is enough to make a decision.
 
         There is no approximation outside the [0.0001, 1] interval. Therefore,  if
         the significance level outlies this interval, the test returns 0.0001.
@@ -13538,7 +13538,7 @@ public partial class alglib
             * X and Y are continuous distributions (or discrete distributions well-
               approximating continuous distributions)
             * distributions of X and Y have the  same  shape.  The  only  possible
-              difference is their position (i.e. the value of the median)
+              difference is their Position (i.e. the value of the median)
             * the number of elements in each sample is not less than 5
             * the scale of measurement should be ordinal, interval or ratio  (i.e.
               the test could not be applied to nominal variables).

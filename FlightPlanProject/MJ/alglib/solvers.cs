@@ -2748,7 +2748,7 @@ public partial class alglib
     use this structure).
 
     Following fields can be accessed by users:
-    * TerminationType (specific error codes depend on the solver  being  used,
+    * TerminationType (specific Error codes depend on the solver  being  used,
       with positive values ALWAYS signaling  that something useful is returned
       in X, and negative values ALWAYS meaning critical failures.
     * NMV - number of matrix-vector products performed (0 for direct solvers)
@@ -2806,7 +2806,7 @@ public partial class alglib
                     * rep.terminationtype>0    =>  solution
                     * rep.terminationtype=-3   =>  filled by zeros
         Rep     -   solver report, following fields are set:
-                    * rep.terminationtype - solver status; >0 for success,
+                    * rep.terminationtype - solver Status; >0 for success,
                       set to -3 on failure (degenerate or non-SPD system).
 
       -- ALGLIB --
@@ -2845,7 +2845,7 @@ public partial class alglib
                     * rep.terminationtype>0    =>  solution
                     * rep.terminationtype=-3   =>  filled by zeros
         Rep     -   solver report, following fields are set:
-                    * rep.terminationtype - solver status; >0 for success,
+                    * rep.terminationtype - solver Status; >0 for success,
                       set to -3 on failure (degenerate or non-SPD system).
 
       -- ALGLIB --
@@ -2884,7 +2884,7 @@ public partial class alglib
                     * rep.terminationtype>0    =>  solution
                     * rep.terminationtype=-3   =>  filled by zeros
         Rep     -   solver report, following fields are set:
-                    * rep.terminationtype - solver status; >0 for success,
+                    * rep.terminationtype - solver Status; >0 for success,
                       set to -3 on failure (degenerate or non-SPD system).
 
       -- ALGLIB --
@@ -2921,7 +2921,7 @@ public partial class alglib
                     * rep.terminationtype>0    =>  solution
                     * rep.terminationtype=-3   =>  filled by zeros
         Rep     -   solver report, following fields are set:
-                    * rep.terminationtype - solver status; >0 for success,
+                    * rep.terminationtype - solver Status; >0 for success,
                       set to -3 on failure (degenerate system).
 
       -- ALGLIB --
@@ -2961,7 +2961,7 @@ public partial class alglib
                     * rep.terminationtype>0    =>  solution
                     * rep.terminationtype=-3   =>  filled by zeros
         Rep     -   solver report, following fields are set:
-                    * rep.terminationtype - solver status; >0 for success,
+                    * rep.terminationtype - solver Status; >0 for success,
                       set to -3 on failure (degenerate system).
 
       -- ALGLIB --
@@ -3328,7 +3328,7 @@ public partial class alglib
 
     NOTE: the  solver  behavior is ill-defined  for  a  situation  when a  SPD
           solver is used on indefinite matrix. It  may solve the problem up to
-          desired precision (sometimes, rarely)  or  return  with  error  code
+          desired precision (sometimes, rarely)  or  return  with  Error  code
           signalling violation of underlying assumptions.
 
     INPUT PARAMETERS:
@@ -3372,7 +3372,7 @@ public partial class alglib
                symmetric solver like CG,  or  not.  However,  using  symmetric
                solvers on nonsymmetric problems is  dangerous.  It  may  solve
                the problem up  to  desired  precision  (sometimes,  rarely) or
-               terminate with error code signalling  violation  of  underlying
+               terminate with Error code signalling  violation  of  underlying
                assumptions.
 
     INPUT PARAMETERS:
@@ -3616,7 +3616,7 @@ public partial class alglib
         State           -   solver running in out-of-core mode
         X               -   possibly  preallocated   storage;  reallocated  if
                             needed, left unchanged, if large enough  to  store
-                            request data.
+                            request Data.
 
     OUTPUT PARAMETERS:
         X               -   array[N] or larger, leading N elements are  filled
@@ -3762,7 +3762,7 @@ public partial class alglib
     or when processing an out-of-core request.
 
     As result, solver  stops  at  point  which  was  "current  accepted"  when
-    the termination request was submitted and returns error code 8 (successful
+    the termination request was submitted and returns Error code 8 (successful
     termination).  Such   termination   is  a smooth  process  which  properly
     deallocates all temporaries.
 
@@ -4278,7 +4278,7 @@ public partial class alglib
     
     /*************************************************************************
     This function initializes linear LSQR Solver.  It  provides  exactly  same
-    functionality as linlsqrcreate(), but reuses  previously  allocated  space
+    functionality as linlsqrcreate(), but reuses  previously  allocated  SPACE
     as much as possible.
 
     INPUT PARAMETERS:
@@ -4537,7 +4537,7 @@ public partial class alglib
     because it is already busy working on LSQR).
 
     As result, solver  stops  at  point  which  was  "current  accepted"  when
-    termination  request  was  submitted  and returns error code 8 (successful
+    termination  request  was  submitted  and returns Error code 8 (successful
     termination).  Such   termination   is  a smooth  process  which  properly
     deallocates all temporaries.
 
@@ -4663,7 +4663,7 @@ public partial class alglib
         * for some xs in XS there exist such neighbourhood N(xs) that:
           * vector function F(x) and its Jacobian J(x) are continuously
             differentiable on N
-          * ||F(x)|| provides local error bound on N, i.e. there  exists  such
+          * ||F(x)|| provides local Error bound on N, i.e. there  exists  such
             c1, that ||F(x)||>c1*distance(x,XS)
     Note that these conditions are much more weaker than usual non-singularity
     conditions. For example, algorithm will converge for any  affine  function
@@ -4691,7 +4691,7 @@ public partial class alglib
 
 
     INPUT PARAMETERS:
-        N       -   space dimension, N>1:
+        N       -   SPACE dimension, N>1:
                     * if provided, only leading N elements of X are used
                     * if not provided, determined automatically from size of X
         M       -   system size
@@ -4879,9 +4879,9 @@ public partial class alglib
     public static void nleqsolve(nleqstate state, ndimensional_func func, ndimensional_jac  jac, ndimensional_rep rep, object obj, alglib.xparams _params)
     {
         if( func==null )
-            throw new alglibexception("ALGLIB: error in 'nleqsolve()' (func is null)");
+            throw new alglibexception("ALGLIB: Error in 'nleqsolve()' (func is null)");
         if( jac==null )
-            throw new alglibexception("ALGLIB: error in 'nleqsolve()' (jac is null)");
+            throw new alglibexception("ALGLIB: Error in 'nleqsolve()' (jac is null)");
         while( alglib.nleqiteration(state, _params) )
         {
             if( state.needf )
@@ -4900,7 +4900,7 @@ public partial class alglib
                     rep(state.innerobj.x, state.innerobj.f, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: error in 'nleqsolve' (some derivatives were not provided?)");
+            throw new alglibexception("ALGLIB: Error in 'nleqsolve' (some derivatives were not provided?)");
         }
     }
 
@@ -5133,7 +5133,7 @@ public partial class alglib
                     c[i,ne-1] = -a[i];
                 }
                 status = evd.rmatrixevd(c, ne, 0, ref wr, ref wi, ref vl, ref vr, _params);
-                alglib.ap.assert(status, "PolynomialSolve: inernal error - EVD solver failed");
+                alglib.ap.assert(status, "PolynomialSolve: inernal Error - EVD solver failed");
                 for(i=0; i<=ne-1; i++)
                 {
                     x[i].x = wr[i];
@@ -5521,7 +5521,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -5932,7 +5932,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -6189,7 +6189,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -6305,7 +6305,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -6735,7 +6735,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -7069,7 +7069,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -7251,7 +7251,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -7667,7 +7667,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -8007,7 +8007,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -8419,7 +8419,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -8847,7 +8847,7 @@ public partial class alglib
             //
             // This cycle is executed until one of two things happens:
             // 1. maximum number of iterations reached
-            // 2. last iteration decreased error to the lower limit
+            // 2. last iteration decreased Error to the lower limit
             //
             utb = new double[nsv];
             sutb = new double[nsv];
@@ -9021,7 +9021,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -9174,7 +9174,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -9268,7 +9268,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -9360,7 +9360,7 @@ public partial class alglib
                 //
                 // This cycle is executed until one of two things happens:
                 // 1. maximum number of iterations reached
-                // 2. last iteration decreased error to the lower limit
+                // 2. last iteration decreased Error to the lower limit
                 //
                 if( havea )
                 {
@@ -9453,7 +9453,7 @@ public partial class alglib
 
             
             //
-            // prepare: check inputs, allocate space...
+            // prepare: check inputs, allocate SPACE...
             //
             if( n<=0 || m<=0 )
             {
@@ -9862,7 +9862,7 @@ public partial class alglib
         use this structure).
 
         Following fields can be accessed by users:
-        * TerminationType (specific error codes depend on the solver  being  used,
+        * TerminationType (specific Error codes depend on the solver  being  used,
           with positive values ALWAYS signaling  that something useful is returned
           in X, and negative values ALWAYS meaning critical failures.
         * NMV - number of matrix-vector products performed (0 for direct solvers)
@@ -9915,7 +9915,7 @@ public partial class alglib
                         * rep.terminationtype>0    =>  solution
                         * rep.terminationtype=-3   =>  filled by zeros
             Rep     -   solver report, following fields are set:
-                        * rep.terminationtype - solver status; >0 for success,
+                        * rep.terminationtype - solver Status; >0 for success,
                           set to -3 on failure (degenerate or non-SPD system).
 
           -- ALGLIB --
@@ -9989,7 +9989,7 @@ public partial class alglib
                         * rep.terminationtype>0    =>  solution
                         * rep.terminationtype=-3   =>  filled by zeros
             Rep     -   solver report, following fields are set:
-                        * rep.terminationtype - solver status; >0 for success,
+                        * rep.terminationtype - solver Status; >0 for success,
                           set to -3 on failure (degenerate or non-SPD system).
 
           -- ALGLIB --
@@ -10073,7 +10073,7 @@ public partial class alglib
                         * rep.terminationtype>0    =>  solution
                         * rep.terminationtype=-3   =>  filled by zeros
             Rep     -   solver report, following fields are set:
-                        * rep.terminationtype - solver status; >0 for success,
+                        * rep.terminationtype - solver Status; >0 for success,
                           set to -3 on failure (degenerate or non-SPD system).
 
           -- ALGLIB --
@@ -10147,7 +10147,7 @@ public partial class alglib
                         * rep.terminationtype>0    =>  solution
                         * rep.terminationtype=-3   =>  filled by zeros
             Rep     -   solver report, following fields are set:
-                        * rep.terminationtype - solver status; >0 for success,
+                        * rep.terminationtype - solver Status; >0 for success,
                           set to -3 on failure (degenerate system).
 
           -- ALGLIB --
@@ -10231,7 +10231,7 @@ public partial class alglib
                         * rep.terminationtype>0    =>  solution
                         * rep.terminationtype=-3   =>  filled by zeros
             Rep     -   solver report, following fields are set:
-                        * rep.terminationtype - solver status; >0 for success,
+                        * rep.terminationtype - solver Status; >0 for success,
                           set to -3 on failure (degenerate system).
 
           -- ALGLIB --
@@ -10809,7 +10809,7 @@ public partial class alglib
 
         NOTE: the  solver  behavior is ill-defined  for  a  situation  when a  SPD
               solver is used on indefinite matrix. It  may solve the problem up to
-              desired precision (sometimes, rarely)  or  return  with  error  code
+              desired precision (sometimes, rarely)  or  return  with  Error  code
               signalling violation of underlying assumptions.
 
         INPUT PARAMETERS:
@@ -10889,7 +10889,7 @@ public partial class alglib
                    symmetric solver like CG,  or  not.  However,  using  symmetric
                    solvers on nonsymmetric problems is  dangerous.  It  may  solve
                    the problem up  to  desired  precision  (sometimes,  rarely) or
-                   terminate with error code signalling  violation  of  underlying
+                   terminate with Error code signalling  violation  of  underlying
                    assumptions.
 
         INPUT PARAMETERS:
@@ -11163,7 +11163,7 @@ public partial class alglib
             State           -   solver running in out-of-core mode
             X               -   possibly  preallocated   storage;  reallocated  if
                                 needed, left unchanged, if large enough  to  store
-                                request data.
+                                request Data.
             
         OUTPUT PARAMETERS:
             X               -   array[N] or larger, leading N elements are  filled
@@ -11307,7 +11307,7 @@ public partial class alglib
         or when processing an out-of-core request.
 
         As result, solver  stops  at  point  which  was  "current  accepted"  when
-        the termination request was submitted and returns error code 8 (successful
+        the termination request was submitted and returns Error code 8 (successful
         termination).  Such   termination   is  a smooth  process  which  properly
         deallocates all temporaries.
 
@@ -12438,7 +12438,7 @@ public partial class alglib
             }
             
             //
-            //prepere data for next iteration
+            //prepere Data for next iteration
             //
             for(i=0; i<=state.n-1; i++)
             {
@@ -12962,7 +12962,7 @@ public partial class alglib
 
         /*************************************************************************
         This function initializes linear LSQR Solver.  It  provides  exactly  same
-        functionality as linlsqrcreate(), but reuses  previously  allocated  space
+        functionality as linlsqrcreate(), but reuses  previously  allocated  SPACE
         as much as possible.
           
         INPUT PARAMETERS:
@@ -13482,7 +13482,7 @@ public partial class alglib
             //
             // This tricky  formula  is  necessary  because  simply  writing
             // State.R2:=State.PhiBarIP1*State.PhiBarIP1 does NOT guarantees
-            // monotonic decrease of R2. Roundoff error combined with 80-bit
+            // monotonic decrease of R2. Roundoff Error combined with 80-bit
             // precision used internally by Intel chips allows R2 to increase
             // slightly in some rare, but possible cases. This property is
             // undesirable, so we prefer to guard against R increase.
@@ -13913,7 +13913,7 @@ public partial class alglib
         because it is already busy working on LSQR).
 
         As result, solver  stops  at  point  which  was  "current  accepted"  when
-        termination  request  was  submitted  and returns error code 8 (successful
+        termination  request  was  submitted  and returns Error code 8 (successful
         termination).  Such   termination   is  a smooth  process  which  properly
         deallocates all temporaries.
 
@@ -14073,7 +14073,7 @@ public partial class alglib
             * for some xs in XS there exist such neighbourhood N(xs) that:
               * vector function F(x) and its Jacobian J(x) are continuously
                 differentiable on N
-              * ||F(x)|| provides local error bound on N, i.e. there  exists  such
+              * ||F(x)|| provides local Error bound on N, i.e. there  exists  such
                 c1, that ||F(x)||>c1*distance(x,XS)
         Note that these conditions are much more weaker than usual non-singularity
         conditions. For example, algorithm will converge for any  affine  function
@@ -14101,7 +14101,7 @@ public partial class alglib
 
 
         INPUT PARAMETERS:
-            N       -   space dimension, N>1:
+            N       -   SPACE dimension, N>1:
                         * if provided, only leading N elements of X are used
                         * if not provided, determined automatically from size of X
             M       -   system size
@@ -14524,7 +14524,7 @@ public partial class alglib
             
             //
             // Accept step:
-            // * new position
+            // * new Position
             // * new function value
             //
             state.fbase = state.f;

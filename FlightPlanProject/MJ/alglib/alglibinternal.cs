@@ -312,8 +312,8 @@ public partial class alglib
 
             Abs(Val-RefVal)>Tol*Max(Abs(RefVal),S)
             
-        This function is used to test relative error in Val against  RefVal,  with
-        relative error being replaced by absolute when scale  of  RefVal  is  less
+        This function is used to test relative Error in Val against  RefVal,  with
+        relative Error being replaced by absolute when scale  of  RefVal  is  less
         than S.
 
         This function returns value of COND.
@@ -708,7 +708,7 @@ public partial class alglib
             int i = 0;
             bool nonsorted = new bool();
 
-            alglib.ap.assert(n>=1, "APSERVAreDistinct: internal error (N<1)");
+            alglib.ap.assert(n>=1, "APSERVAreDistinct: internal Error (N<1)");
             if( n==1 )
             {
                 
@@ -728,7 +728,7 @@ public partial class alglib
                 b = Math.Max(b, x[i]);
                 nonsorted = nonsorted || (double)(x[i-1])>=(double)(x[i]);
             }
-            alglib.ap.assert(!nonsorted, "APSERVAreDistinct: internal error (not sorted)");
+            alglib.ap.assert(!nonsorted, "APSERVAreDistinct: internal Error (not sorted)");
             for(i=1; i<=n-1; i++)
             {
                 if( (double)((x[i]-a)/(b-a)+1)==(double)((x[i-1]-a)/(b-a)+1) )
@@ -1332,7 +1332,7 @@ public partial class alglib
             int i = 0;
             double v = 0;
 
-            alglib.ap.assert(n>=0, "APSERVIsFiniteVector: internal error (N<0)");
+            alglib.ap.assert(n>=0, "APSERVIsFiniteVector: internal Error (N<0)");
             if( n==0 )
             {
                 result = true;
@@ -1366,7 +1366,7 @@ public partial class alglib
             bool result = new bool();
             int i = 0;
 
-            alglib.ap.assert(n>=0, "APSERVIsFiniteCVector: internal error (N<0)");
+            alglib.ap.assert(n>=0, "APSERVIsFiniteCVector: internal Error (N<0)");
             for(i=0; i<=n-1; i++)
             {
                 if( !math.isfinite(z[i].x) || !math.isfinite(z[i].y) )
@@ -1396,8 +1396,8 @@ public partial class alglib
             int i = 0;
             int j = 0;
 
-            alglib.ap.assert(n>=0, "APSERVIsFiniteMatrix: internal error (N<0)");
-            alglib.ap.assert(m>=0, "APSERVIsFiniteMatrix: internal error (M<0)");
+            alglib.ap.assert(n>=0, "APSERVIsFiniteMatrix: internal Error (N<0)");
+            alglib.ap.assert(m>=0, "APSERVIsFiniteMatrix: internal Error (M<0)");
             if( m==0 || n==0 )
             {
                 result = true;
@@ -1439,8 +1439,8 @@ public partial class alglib
             int i = 0;
             int j = 0;
 
-            alglib.ap.assert(n>=0, "APSERVIsFiniteCMatrix: internal error (N<0)");
-            alglib.ap.assert(m>=0, "APSERVIsFiniteCMatrix: internal error (M<0)");
+            alglib.ap.assert(n>=0, "APSERVIsFiniteCMatrix: internal Error (N<0)");
+            alglib.ap.assert(m>=0, "APSERVIsFiniteCMatrix: internal Error (M<0)");
             for(i=0; i<=m-1; i++)
             {
                 for(j=0; j<=n-1; j++)
@@ -1475,7 +1475,7 @@ public partial class alglib
             int j2 = 0;
             int j = 0;
 
-            alglib.ap.assert(n>=0, "APSERVIsFiniteRTRMatrix: internal error (N<0)");
+            alglib.ap.assert(n>=0, "APSERVIsFiniteRTRMatrix: internal Error (N<0)");
             if( n==0 )
             {
                 result = true;
@@ -1530,7 +1530,7 @@ public partial class alglib
             int j2 = 0;
             int j = 0;
 
-            alglib.ap.assert(n>=0, "APSERVIsFiniteCTRMatrix: internal error (N<0)");
+            alglib.ap.assert(n>=0, "APSERVIsFiniteCTRMatrix: internal Error (N<0)");
             for(i=0; i<=n-1; i++)
             {
                 if( isupper )
@@ -1573,8 +1573,8 @@ public partial class alglib
             int i = 0;
             int j = 0;
 
-            alglib.ap.assert(n>=0, "APSERVIsFiniteOrNaNMatrix: internal error (N<0)");
-            alglib.ap.assert(m>=0, "APSERVIsFiniteOrNaNMatrix: internal error (M<0)");
+            alglib.ap.assert(n>=0, "APSERVIsFiniteOrNaNMatrix: internal Error (N<0)");
+            alglib.ap.assert(m>=0, "APSERVIsFiniteOrNaNMatrix: internal Error (M<0)");
             for(i=0; i<=m-1; i++)
             {
                 for(j=0; j<=n-1; j++)
@@ -1830,7 +1830,7 @@ public partial class alglib
         {
             k = 0;
 
-            alglib.ap.assert((double)(a)<(double)(b), "APPeriodicMap: internal error!");
+            alglib.ap.assert((double)(a)<(double)(b), "APPeriodicMap: internal Error!");
             k = (int)Math.Floor((x-a)/(b-a));
             x = x-k*(b-a);
             while( (double)(x)<(double)(a) )
@@ -2956,10 +2956,10 @@ public partial class alglib
             alglib.ap.assert(cc>=2, "TiledSplit: integrity check failed");
             task0 = idivup(cc, 2, _params)*tilesize;
             task1 = tasksize-task0;
-            alglib.ap.assert(task0>=1, "TiledSplit: internal error");
-            alglib.ap.assert(task1>=1, "TiledSplit: internal error");
-            alglib.ap.assert(task0%tilesize==0, "TiledSplit: internal error");
-            alglib.ap.assert(task0>=task1, "TiledSplit: internal error");
+            alglib.ap.assert(task0>=1, "TiledSplit: internal Error");
+            alglib.ap.assert(task1>=1, "TiledSplit: internal Error");
+            alglib.ap.assert(task0%tilesize==0, "TiledSplit: internal Error");
+            alglib.ap.assert(task0>=task1, "TiledSplit: internal Error");
         }
 
 
@@ -2969,10 +2969,10 @@ public partial class alglib
         integer values, which identify it. Records are lexicographically sorted by
         header.
 
-        Records are identified by their index, not offset (offset = NRec*index).
+        Records are identified by their index, not Offset (Offset = NRec*index).
 
         This function searches A (records with indices [I0,I1)) for a record with
-        header B. It returns index of this record (not offset!), or -1 on failure.
+        header B. It returns index of this record (not Offset!), or -1 on failure.
 
           -- ALGLIB --
              Copyright 28.03.2011 by Bochkanov Sergey
@@ -3084,8 +3084,8 @@ public partial class alglib
                 task0 = tasksize-1;
                 task1 = 1;
             }
-            alglib.ap.assert(task0>=1, "SplitLengthEven: internal error");
-            alglib.ap.assert(task1>=1, "SplitLengthEven: internal error");
+            alglib.ap.assert(task0>=1, "SplitLengthEven: internal Error");
+            alglib.ap.assert(task1>=1, "SplitLengthEven: internal Error");
         }
 
 
@@ -3245,8 +3245,8 @@ public partial class alglib
                 task0 = task0-task0%chunksize;
             }
             task1 = tasksize-task0;
-            alglib.ap.assert(task0>=1, "SplitLength: internal error");
-            alglib.ap.assert(task1>=1, "SplitLength: internal error");
+            alglib.ap.assert(task0>=1, "SplitLength: internal Error");
+            alglib.ap.assert(task1>=1, "SplitLength: internal Error");
         }
 
 
@@ -6554,7 +6554,7 @@ public partial class alglib
 
         This function does NOT preallocate output matrix C, it MUST be preallocated
         by caller prior to calling this function. In case C does not have  enough
-        space to store result, exception will be generated.
+        SPACE to store result, exception will be generated.
 
         INPUT PARAMETERS
             M       -   matrix size, M>0
@@ -6562,23 +6562,23 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             OpTypeA -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
                         * 2 - conjugate transposition
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             OpTypeB -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
                         * 2 - conjugate transposition
             Beta    -   coefficient
             C       -   PREALLOCATED output matrix
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           -- ALGLIB routine --
              27.03.2013
@@ -6979,7 +6979,7 @@ public partial class alglib
 
         This function does NOT preallocate output matrix C, it MUST be preallocated
         by caller prior to calling this function. In case C does not have  enough
-        space to store result, exception will be generated.
+        SPACE to store result, exception will be generated.
 
         INPUT PARAMETERS
             M       -   matrix size, M>0
@@ -6987,21 +6987,21 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             OpTypeA -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             OpTypeB -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             Beta    -   coefficient
             C       -   PREALLOCATED output matrix
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           -- ALGLIB routine --
              27.03.2013
@@ -7115,15 +7115,15 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             Beta    -   coefficient
             C       -   PREALLOCATED output matrix
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           -- ALGLIB routine --
              27.03.2013
@@ -7192,7 +7192,7 @@ public partial class alglib
             int i_ = 0;
             int i1_ = 0;
 
-            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal error (Alpha=0)");
+            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal Error (Alpha=0)");
             
             //
             // if matrix size is zero
@@ -7385,15 +7385,15 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             Beta    -   coefficient
             C       -   PREALLOCATED output matrix
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           -- ALGLIB routine --
              27.03.2013
@@ -7462,7 +7462,7 @@ public partial class alglib
             int i_ = 0;
             int i1_ = 0;
 
-            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal error (Alpha=0)");
+            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal Error (Alpha=0)");
             
             //
             // if matrix size is zero
@@ -7651,15 +7651,15 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             Beta    -   coefficient
             C       -   PREALLOCATED output matrix
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           -- ALGLIB routine --
              27.03.2013
@@ -7728,7 +7728,7 @@ public partial class alglib
             int i_ = 0;
             int i1_ = 0;
 
-            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal error (Alpha=0)");
+            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal Error (Alpha=0)");
             
             //
             // if matrix size is zero
@@ -7918,15 +7918,15 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             Beta    -   coefficient
             C       -   PREALLOCATED output matrix
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           -- ALGLIB routine --
              27.03.2013
@@ -7995,7 +7995,7 @@ public partial class alglib
             int i_ = 0;
             int i1_ = 0;
 
-            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal error (Alpha=0)");
+            alglib.ap.assert((double)(alpha)!=(double)(0), "RMatrixGEMMK44V00: internal Error (Alpha=0)");
             
             //
             // if matrix size is zero
@@ -9354,7 +9354,7 @@ public partial class alglib
         NOTE:
 
         if function returned False, CholResult is NOT modified. Not ever referenced!
-        if function returned True, CholResult is set to status of Cholesky decomposition
+        if function returned True, CholResult is set to Status of Cholesky decomposition
         (True on succeess).
 
           -- ALGLIB routine --
@@ -9863,7 +9863,7 @@ public partial class alglib
 
         Algorithm outputs permutation tables using two formats:
         * as usual permutation of [0..N-1]. If P1[i]=j, then sorted A[i]  contains
-          value which was moved there from J-th position.
+          value which was moved there from J-th Position.
         * as a sequence of pairwise permutations. Sorted A[] may  be  obtained  by
           swaping A[i] and A[P2[i]] for all i from 0 to N-1.
           
@@ -9960,11 +9960,11 @@ public partial class alglib
             // General case, N>1: fill permutations table P2
             //
             // To fill P2 we maintain two arrays:
-            // * PV (Buf.IA0), Position(Value). PV[i] contains position of I-th key at the moment
-            // * VP (Buf.IA1), Value(Position). VP[i] contains key which has position I at the moment
+            // * PV (Buf.IA0), Position(Value). PV[i] contains Position of I-th key at the moment
+            // * VP (Buf.IA1), Value(Position). VP[i] contains key which has Position I at the moment
             //
             // At each step we making permutation of two items:
-            //   Left, which is given by position/value pair LP/LV
+            //   Left, which is given by Position/value pair LP/LV
             //   and Right, which is given by RP/RV
             // and updating PV[] and VP[] correspondingly.
             //
@@ -10721,7 +10721,7 @@ public partial class alglib
             // (add to the bottom, then move up)
             //
             // we don't write point to the heap
-            // until its final position is determined
+            // until its final Position is determined
             // (it allow us to reduce number of array access operations)
             //
             j = n;
@@ -10805,7 +10805,7 @@ public partial class alglib
             // * K2 -   second child (may not exists)
             //
             // we don't write point to the heap
-            // until its final position is determined
+            // until its final Position is determined
             // (it allow us to reduce number of array access operations)
             //
             j = 0;
@@ -11060,7 +11060,7 @@ public partial class alglib
                     //
                     // Search elements [I1..J-1] for place to insert Jth element.
                     //
-                    // This code stops immediately if we can leave A[J] at J-th position
+                    // This code stops immediately if we can leave A[J] at J-th Position
                     // (all elements have same value of A[J] larger than any of them)
                     //
                     tmpr = a[j];
@@ -11076,7 +11076,7 @@ public partial class alglib
                     k = tmpi;
                     
                     //
-                    // Insert Jth element into Kth position
+                    // Insert Jth element into Kth Position
                     //
                     if( k!=j )
                     {
@@ -11243,7 +11243,7 @@ public partial class alglib
                     //
                     // Search elements [I1..J-1] for place to insert Jth element.
                     //
-                    // This code stops immediatly if we can leave A[J] at J-th position
+                    // This code stops immediatly if we can leave A[J] at J-th Position
                     // (all elements have same value of A[J] larger than any of them)
                     //
                     tmpr = a[j];
@@ -11259,7 +11259,7 @@ public partial class alglib
                     k = tmpi;
                     
                     //
-                    // Insert Jth element into Kth position
+                    // Insert Jth element into Kth Position
                     //
                     if( k!=j )
                     {
@@ -11423,7 +11423,7 @@ public partial class alglib
                     //
                     // Search elements [I1..J-1] for place to insert Jth element.
                     //
-                    // This code stops immediatly if we can leave A[J] at J-th position
+                    // This code stops immediatly if we can leave A[J] at J-th Position
                     // (all elements have same value of A[J] larger than any of them)
                     //
                     tmpr = a[j];
@@ -11439,7 +11439,7 @@ public partial class alglib
                     k = tmpi;
                     
                     //
-                    // Insert Jth element into Kth position
+                    // Insert Jth element into Kth Position
                     //
                     if( k!=j )
                     {
@@ -11748,7 +11748,7 @@ public partial class alglib
             {
                 return;
             }
-            alglib.ap.assert(i1-i2==j1-j2, "InplaceTranspose error: incorrect array size!");
+            alglib.ap.assert(i1-i2==j1-j2, "InplaceTranspose Error: incorrect array size!");
             for(i=i1; i<=i2-1; i++)
             {
                 j = j1+i-i1;
@@ -14479,7 +14479,7 @@ public partial class alglib
     public class xblas
     {
         /*************************************************************************
-        More precise dot-product. Absolute error of  subroutine  result  is  about
+        More precise dot-product. Absolute Error of  subroutine  result  is  about
         1 ulp of max(MX,V), where:
             MX = max( |a[i]*b[i]| )
             V  = |(a,b)|
@@ -14492,7 +14492,7 @@ public partial class alglib
 
         OUTPUT PARAMETERS
             R       -   (A,B)
-            RErr    -   estimate of error. This estimate accounts for both  errors
+            RErr    -   estimate of Error. This estimate accounts for both  errors
                         during  calculation  of  (A,B)  and  errors  introduced by
                         rounding of A and B to fit in double (about 1 ulp).
 
@@ -14543,7 +14543,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        More precise complex dot-product. Absolute error of  subroutine  result is
+        More precise complex dot-product. Absolute Error of  subroutine  result is
         about 1 ulp of max(MX,V), where:
             MX = max( |a[i]*b[i]| )
             V  = |(a,b)|
@@ -14556,7 +14556,7 @@ public partial class alglib
 
         OUTPUT PARAMETERS
             R       -   (A,B)
-            RErr    -   estimate of error. This estimate accounts for both  errors
+            RErr    -   estimate of Error. This estimate accounts for both  errors
                         during  calculation  of  (A,B)  and  errors  introduced by
                         rounding of A and B to fit in double (about 1 ulp).
 
@@ -14639,7 +14639,7 @@ public partial class alglib
             }
             
             //
-            // total error
+            // total Error
             //
             if( (double)(rerrx)==(double)(0) && (double)(rerry)==(double)(0) )
             {
@@ -14663,7 +14663,7 @@ public partial class alglib
             
         OUTPUT PARAMETERS:
             R   -   SUM(w[i])
-            RErr-   error estimate for R
+            RErr-   Error estimate for R
 
           -- ALGLIB --
              Copyright 24.08.2009 by Bochkanov Sergey
@@ -14753,7 +14753,7 @@ public partial class alglib
             //
             // find Chunk=2^M such that N*Chunk<2^29
             //
-            // we have chosen upper limit (2^29) with enough space left
+            // we have chosen upper limit (2^29) with enough SPACE left
             // to tolerate possible problems with rounding and N's close
             // to the limit, so we don't want to be very strict here.
             //
@@ -14798,7 +14798,7 @@ public partial class alglib
             }
             
             //
-            // correct error
+            // correct Error
             //
             rerr = Math.Max(rerr, Math.Abs(r)*math.machineepsilon);
         }
@@ -16290,7 +16290,7 @@ public partial class alglib
                     break;
                 }
             }
-            alglib.ap.assert(proot>=2, "FindPrimitiveRoot: internal error (root not found)");
+            alglib.ap.assert(proot>=2, "FindPrimitiveRoot: internal Error (root not found)");
             
             //
             // Use extended Euclidean algorithm to find multiplicative inverse of primitive root
@@ -16325,10 +16325,10 @@ public partial class alglib
             // Check results for consistency.
             //
             n2 = (n-1)*(n-1);
-            alglib.ap.assert(n2/(n-1)==n-1, "FindPrimitiveRoot: internal error");
-            alglib.ap.assert(proot*invproot/proot==invproot, "FindPrimitiveRoot: internal error");
-            alglib.ap.assert(proot*invproot/invproot==proot, "FindPrimitiveRoot: internal error");
-            alglib.ap.assert(proot*invproot%n==1, "FindPrimitiveRoot: internal error");
+            alglib.ap.assert(n2/(n-1)==n-1, "FindPrimitiveRoot: internal Error");
+            alglib.ap.assert(proot*invproot/proot==invproot, "FindPrimitiveRoot: internal Error");
+            alglib.ap.assert(proot*invproot/invproot==proot, "FindPrimitiveRoot: internal Error");
+            alglib.ap.assert(proot*invproot%n==1, "FindPrimitiveRoot: internal Error");
         }
 
 
@@ -16527,7 +16527,7 @@ public partial class alglib
         FORMAT OF THE DATA:
 
         Transformation plan works with row[1]*row[2]*row[3]  real  numbers,  which
-        are (in most cases) interpreted as sequence of complex numbers. These data
+        are (in most cases) interpreted as sequence of complex numbers. These Data
         are grouped as follows:
         * we have row[1] contiguous OPERANDS, which can be treated separately
         * each operand includes row[2] contiguous MICROVECTORS
@@ -16559,7 +16559,7 @@ public partial class alglib
 
         row[0]=+1:
         * "reference 1D complex FFT"
-        * we perform reference O(N^2) complex FFT on input data, which are treated
+        * we perform reference O(N^2) complex FFT on input Data, which are treated
           as row[1] arrays, each of row[2] complex numbers, and row[3] must be
           equal to 2
         * transformation is performed using temporary buffer
@@ -16567,10 +16567,10 @@ public partial class alglib
         row[0]=opBluesteinsFFT:
         * input array is handled with Bluestein's algorithm (by zero-padding to
           Param0 complex numbers).
-        * this plan calls Param0-point subplan which is located at offset Param1
-          (offset is measured with respect to location of the calling entry)
+        * this plan calls Param0-point subplan which is located at Offset Param1
+          (Offset is measured with respect to location of the calling entry)
         * this plan uses precomputed quantities stored in Plan.PrecR at
-          offset Param2.
+          Offset Param2.
         * transformation is performed using 4 temporary buffers, which are
           retrieved from Plan.BluesteinPool.
 
@@ -16582,16 +16582,16 @@ public partial class alglib
         row[0]=opRadersFFT:
         * input array is handled with Rader's algorithm (permutation and
           reduction to N-1-point FFT)
-        * this plan calls N-1-point subplan which is located at offset Param0
-          (offset is measured with respect to location of the calling entry)
+        * this plan calls N-1-point subplan which is located at Offset Param0
+          (Offset is measured with respect to location of the calling entry)
         * this plan uses precomputed primitive root and its inverse (modulo N)
           which are stored in Param1 and Param2.
-        * Param3 stores offset of the precomputed data for the plan
+        * Param3 stores Offset of the precomputed Data for the plan
         * plan length must be prime, (N-1)*(N-1) must fit into integer variable
 
         row[0]=-1
         * "complex transposition"
-        * input data are treated as row[1] independent arrays, which are processed
+        * input Data are treated as row[1] independent arrays, which are processed
           separately
         * each of operands is treated as matrix with row[4] rows and row[2]/row[4]
           columns. Each element of the matrix is microvector with row[3] components.
@@ -16599,7 +16599,7 @@ public partial class alglib
 
         row[0]=-2
         * "multiplication by twiddle factors of complex FFT"
-        * input data are treated as row[1] independent arrays, which are processed
+        * input Data are treated as row[1] independent arrays, which are processed
           separately
         * row[4] contains N1 - length of the "first FFT"  in  a  Cooley-Tukey  FFT
           algorithm
@@ -16616,15 +16616,15 @@ public partial class alglib
 
         row[0]=-4
         * "jump"
-        * param0 stores relative offset of the jump site
+        * param0 stores relative Offset of the jump site
           (+1 corresponds to the next entry)
 
         row[0]=-5
         * "parallel call"
-        * input data are treated as row[1] independent arrays
+        * input Data are treated as row[1] independent arrays
         * child subplan is applied independently for each of arrays - row[1] times
         * subplan length must be equal to row[2]*row[3]
-        * param0 stores relative offset of the child subplan site
+        * param0 stores relative Offset of the child subplan site
           (+1 corresponds to the next entry)
         * param1 stores approximate total cost of plan, measured in UNITS
           (1 UNIT = 100 KFLOPs). Plan cost must be rounded DOWN to nearest integer.
@@ -16777,11 +16777,11 @@ public partial class alglib
             alglib.smp.ae_shared_pool_set_seed(plan.bluesteinpool, bluesteinbuf);
             
             //
-            // Check that actual amount of precomputed space used by transformation
-            // plan is EXACTLY equal to amount of space allocated by us.
+            // Check that actual amount of precomputed SPACE used by transformation
+            // plan is EXACTLY equal to amount of SPACE allocated by us.
             //
-            alglib.ap.assert(precrptr==precrsize, "FTComplexFFTPlan: internal error (PrecRPtr<>PrecRSize)");
-            alglib.ap.assert(preciptr==precisize, "FTComplexFFTPlan: internal error (PrecRPtr<>PrecRSize)");
+            alglib.ap.assert(precrptr==precrsize, "FTComplexFFTPlan: internal Error (PrecRPtr<>PrecRSize)");
+            alglib.ap.assert(preciptr==precisize, "FTComplexFFTPlan: internal Error (PrecRPtr<>PrecRSize)");
         }
 
 
@@ -16791,7 +16791,7 @@ public partial class alglib
         INPUT PARAMETERS:
             Plan        -   transformation plan
             A           -   array, must be large enough for plan to work
-            OffsA       -   offset of the subarray to process
+            OffsA       -   Offset of the subarray to process
             RepCnt      -   repetition count (transformation is repeatedly applied
                             to subsequent subarrays)
             
@@ -16991,7 +16991,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        This function returns EXACT estimate of the space requirements for N-point
+        This function returns EXACT estimate of the SPACE requirements for N-point
         FFT. Internals of this function are highly dependent on details of different
         FFTs employed by this unit, so every time algorithm is changed this function
         has to be rewritten.
@@ -17078,21 +17078,21 @@ public partial class alglib
             RowPtr      -   index which points to past-the-last entry generated so far
             BluesteinSize-  amount of storage (in real numbers) required for Bluestein buffer
             PrecRPtr    -   pointer to unused part of precomputed real buffer (Plan.PrecR):
-                            * when this function stores some data to precomputed buffer,
+                            * when this function stores some Data to precomputed buffer,
                               it advances pointer.
                             * it is responsibility of the function to assert that
-                              Plan.PrecR has enough space to store data before actually
+                              Plan.PrecR has enough SPACE to store Data before actually
                               writing to buffer.
                             * it is responsibility of the caller to allocate enough
-                              space before calling this function
+                              SPACE before calling this function
             PrecIPtr    -   pointer to unused part of precomputed integer buffer (Plan.PrecI):
-                            * when this function stores some data to precomputed buffer,
+                            * when this function stores some Data to precomputed buffer,
                               it advances pointer.
                             * it is responsibility of the function to assert that
-                              Plan.PrecR has enough space to store data before actually
+                              Plan.PrecR has enough SPACE to store Data before actually
                               writing to buffer.
                             * it is responsibility of the caller to allocate enough
-                              space before calling this function
+                              SPACE before calling this function
             Plan        -   plan (generated so far)
             
         OUTPUT PARAMETERS:
@@ -17514,14 +17514,14 @@ public partial class alglib
             Plan        -   transformation plan
             SubPlan     -   subplan index
             A           -   array, must be large enough for plan to work
-            ABase       -   base offset in array A, this value points to start of
+            ABase       -   base Offset in array A, this value points to start of
                             subarray whose length is equal to length of the plan
-            AOffset     -   offset with respect to ABase, 0<=AOffset<PlanLength.
-                            This is an offset within large PlanLength-subarray of
+            AOffset     -   Offset with respect to ABase, 0<=AOffset<PlanLength.
+                            This is an Offset within large PlanLength-subarray of
                             the chunk to process.
             Buf         -   temporary buffer whose length is equal to plan length
                             (without taking into account RepCnt) or larger.
-            OffsBuf     -   offset in the buffer array
+            OffsBuf     -   Offset in the buffer array
             RepCnt      -   repetition count (transformation is repeatedly applied
                             to subsequent subarrays)
             
@@ -17717,7 +17717,7 @@ public partial class alglib
 
         INPUT PARAMETERS:
             A           -   array, must be large enough for plan to work
-            Offs        -   offset of the subarray to process
+            Offs        -   Offset of the subarray to process
             OperandsCnt -   operands count (see description of FastTransformPlan)
             OperandSize -   operand size (see description of FastTransformPlan)
             MicrovectorSize-microvector size (see description of FastTransformPlan)
@@ -17783,7 +17783,7 @@ public partial class alglib
 
         INPUT PARAMETERS:
             A           -   array, must be large enough for plan to work
-            Offs        -   offset of the subarray to process
+            Offs        -   Offset of the subarray to process
             OperandsCnt -   operands count (see description of FastTransformPlan)
             OperandSize -   operand size (see description of FastTransformPlan)
             MicrovectorSize-microvector size, must be 2
@@ -18111,7 +18111,7 @@ public partial class alglib
 
         INPUT PARAMETERS:
             A           -   array, must be large enough for plan to work
-            Offs        -   offset of the subarray to process
+            Offs        -   Offset of the subarray to process
             OperandsCnt -   operands count (see description of FastTransformPlan)
             OperandSize -   operand size (see description of FastTransformPlan)
             MicrovectorSize-microvector size, must be 1
@@ -18652,18 +18652,18 @@ public partial class alglib
 
 
         /*************************************************************************
-        This subroutine precomputes data for complex Bluestein's  FFT  and  writes
-        them to array PrecR[] at specified offset. It  is  responsibility  of  the
+        This subroutine precomputes Data for complex Bluestein's  FFT  and  writes
+        them to array PrecR[] at specified Offset. It  is  responsibility  of  the
         caller to make sure that PrecR[] is large enough.
 
         INPUT PARAMETERS:
             N           -   original size of the transform
             M           -   size of the "padded" Bluestein's transform
             PrecR       -   preallocated array
-            Offs        -   offset
+            Offs        -   Offset
             
         OUTPUT PARAMETERS:
-            PrecR       -   data at Offs:Offs+4*M-1 are modified:
+            PrecR       -   Data at Offs:Offs+4*M-1 are modified:
                             * PrecR[Offs:Offs+2*M-1] stores Z[k]=exp(i*pi*k^2/N)
                             * PrecR[Offs+2*M:Offs+4*M-1] stores FFT of the Z
                             Other parts of PrecR are unchanged.
@@ -18721,16 +18721,16 @@ public partial class alglib
         INPUT PARAMETERS:
             Plan        -   transformation plan
             A           -   array, must be large enough for plan to work
-            ABase       -   base offset in array A, this value points to start of
+            ABase       -   base Offset in array A, this value points to start of
                             subarray whose length is equal to length of the plan
-            AOffset     -   offset with respect to ABase, 0<=AOffset<PlanLength.
-                            This is an offset within large PlanLength-subarray of
+            AOffset     -   Offset with respect to ABase, 0<=AOffset<PlanLength.
+                            This is an Offset within large PlanLength-subarray of
                             the chunk to process.
             OperandsCnt -   number of repeated operands (length N each)
-            N           -   original data length (measured in complex numbers)
-            M           -   padded data length (measured in complex numbers)
-            PrecOffs    -   offset of the precomputed data for the plan
-            SubPlan     -   position of the length-M FFT subplan which is used by
+            N           -   original Data length (measured in complex numbers)
+            M           -   padded Data length (measured in complex numbers)
+            PrecOffs    -   Offset of the precomputed Data for the plan
+            SubPlan     -   Position of the length-M FFT subplan which is used by
                             transformation
             BufA        -   temporary buffer, at least 2*M elements
             BufB        -   temporary buffer, at least 2*M elements
@@ -18845,8 +18845,8 @@ public partial class alglib
 
 
         /*************************************************************************
-        This subroutine precomputes data for complex Rader's FFT and  writes  them
-        to array PrecR[] at specified offset. It  is  responsibility of the caller
+        This subroutine precomputes Data for complex Rader's FFT and  writes  them
+        to array PrecR[] at specified Offset. It  is  responsibility of the caller
         to make sure that PrecR[] is large enough.
 
         INPUT PARAMETERS:
@@ -18854,10 +18854,10 @@ public partial class alglib
             RQ          -   primitive root modulo N
             RIQ         -   inverse of primitive root modulo N
             PrecR       -   preallocated array
-            Offs        -   offset
+            Offs        -   Offset
             
         OUTPUT PARAMETERS:
-            PrecR       -   data at Offs:Offs+2*(N-1)-1 store FFT of Rader's factors,
+            PrecR       -   Data at Offs:Offs+2*(N-1)-1 store FFT of Rader's factors,
                             other parts of PrecR are unchanged.
                             
         NOTE: this function performs internal (N-1)-point FFT. It allocates temporary
@@ -18900,18 +18900,18 @@ public partial class alglib
 
         INPUT PARAMETERS:
             A           -   array, must be large enough for plan to work
-            ABase       -   base offset in array A, this value points to start of
+            ABase       -   base Offset in array A, this value points to start of
                             subarray whose length is equal to length of the plan
-            AOffset     -   offset with respect to ABase, 0<=AOffset<PlanLength.
-                            This is an offset within large PlanLength-subarray of
+            AOffset     -   Offset with respect to ABase, 0<=AOffset<PlanLength.
+                            This is an Offset within large PlanLength-subarray of
                             the chunk to process.
             OperandsCnt -   number of repeated operands (length N each)
-            N           -   original data length (measured in complex numbers)
-            SubPlan     -   position of the (N-1)-point FFT subplan which is used
+            N           -   original Data length (measured in complex numbers)
+            SubPlan     -   Position of the (N-1)-point FFT subplan which is used
                             by transformation
             RQ          -   primitive root modulo N
             RIQ         -   inverse of primitive root modulo N
-            PrecOffs    -   offset of the precomputed data for the plan
+            PrecOffs    -   Offset of the precomputed Data for the plan
             Buf         -   temporary array
             
         OUTPUT PARAMETERS:
@@ -19088,7 +19088,7 @@ public partial class alglib
             if( n>recursivethreshold )
             {
                 k = (int)Math.Ceiling(Math.Sqrt(n))+1;
-                alglib.ap.assert(k*k>=n, "FTFactorize: internal error during recursive factorization");
+                alglib.ap.assert(k*k>=n, "FTFactorize: internal Error during recursive factorization");
                 for(j=k; j>=2; j--)
                 {
                     if( n%j==0 )
@@ -19245,7 +19245,7 @@ public partial class alglib
             // during outer loop we update W[I,1].
             //
             //
-            alglib.ap.assert(updatetw>=2, "FFTTwCalc: internal error - UpdateTw<2");
+            alglib.ap.assert(updatetw>=2, "FFTTwCalc: internal Error - UpdateTw<2");
             updatetw2 = updatetw/2;
             halfn1 = n1/2;
             n = n1*n2;
@@ -19385,9 +19385,9 @@ public partial class alglib
 
         Write A^T to B, where:
         * A is m*n complex matrix stored in array A as pairs of real/image values,
-          beginning from AStart position, with AStride stride
+          beginning from AStart Position, with AStride stride
         * B is n*m complex matrix stored in array B as pairs of real/image values,
-          beginning from BStart position, with BStride stride
+          beginning from BStart Position, with BStride stride
         stride is measured in complex numbers, i.e. in real/image pairs.
 
           -- ALGLIB --
@@ -19483,7 +19483,7 @@ public partial class alglib
             ref int best,
             alglib.xparams _params)
         {
-            alglib.ap.assert(ftbasemaxsmoothfactor<=5, "FTBaseFindSmoothRec: internal error!");
+            alglib.ap.assert(ftbasemaxsmoothfactor<=5, "FTBaseFindSmoothRec: internal Error!");
             if( seed>=n )
             {
                 best = Math.Min(best, seed);

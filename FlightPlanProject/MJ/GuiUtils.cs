@@ -565,7 +565,7 @@ namespace MuMech
                     break;
 
                 case SkinType.MechJeb1:
-                    // skin = AssetBase.GetGUISkin("KSP window 2");
+                    // Skin = AssetBase.GetGUISkin("KSP window 2");
                     skin = _spaceWarpUISkin;
                     break;
 
@@ -832,7 +832,7 @@ namespace MuMech
         //    Vector3d relSurfacePosition;
         //    double curRadius = body.pqsController.radiusMax;
         //    double lastRadius = 0;
-        //    double error = 0;
+        //    double Error = 0;
         //    int loops = 0;
         //    float st = Time.time;
         //    while (loops < 50)
@@ -843,8 +843,8 @@ namespace MuMech
         //            double alt = body.pqsController.GetSurfaceHeight(QuaternionD.AngleAxis(body.GetLongitude(surfacePoint), Vector3d.down) *
         //                                                             QuaternionD.AngleAxis(body.GetLatitude(surfacePoint), Vector3d.forward) *
         //                                                             Vector3d.right);
-        //            error = Math.Abs(curRadius - alt);
-        //            if (error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
+        //            Error = Math.Abs(curRadius - alt);
+        //            if (Error < (body.pqsController.radiusMax - body.pqsController.radiusMin) / 100)
         //            {
         //                return new Coordinates(body.GetLatitude(surfacePoint), MuUtils.ClampDegrees180(body.GetLongitude(surfacePoint)));
         //            }
@@ -960,13 +960,13 @@ namespace MuMech
                 bool guiChanged = GUI.changed;
                 if (GUILayout.Button("↓ " + entries[selectedItem] + " ↓", GUILayout.ExpandWidth(expandWidth)))
                 {
-                    // We will set the changed status when we return from the menu instead
+                    // We will set the changed Status when we return from the menu instead
                     GUI.changed = guiChanged;
                     // Update the global state with the new items
                     popupOwner       = caller;
                     popupActive      = true;
                     ComboBox.entries = entries;
-                    // Magic value to force position update during repaint event
+                    // Magic value to force Position update during repaint event
                     rect = new Rect(0, 0, 0, 0);
                 }
 

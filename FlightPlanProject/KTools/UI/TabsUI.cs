@@ -1,30 +1,34 @@
 using UnityEngine;
 
-using FlightPlan.KTools;
-
 namespace FlightPlan.KTools.UI;
 
-public interface PageContent
+public interface IPageContent
 {
-    // Name drawn in the Tab button
+    // Name drawn in the Tab Button
     public string Name
     {
         get;
     }
 
-    // if is isRunning, UI is drawn lighted
-    public bool isRunning
+    // Icon drawn in the Tab Button
+    public GUIContent Icon
     {
         get;
     }
 
-    // if isActive Tab is visible
-    public bool isActive
+    // if is IsRunning, UI is drawn lighted
+    public bool IsRunning
     {
         get;
     }
 
-    // usefull to knows is current page is visible (you can switch off not needed updates if not set)
+    // if IsActive Tab is visible
+    public bool IsActive
+    {
+        get;
+    }
+
+    // usefull to knows is current _page is visible (you can switch off not needed updates if not set)
     public bool UIVisible
     {
         get;
@@ -32,71 +36,73 @@ public interface PageContent
     }
 
     // Main Page UI called Here
-    public void onGUI();
+    public void OnGUI();
 }
 
 public class TabsUI
 {
-    public List<PageContent> pages = new List<PageContent>();
+    public List<IPageContent> Pages = new();
 
-    private List<PageContent> filtered_pages = new List<PageContent>();
+    private List<IPageContent> _filteredPages = new();
 
-    PageContent current_page = null;
+    IPageContent CurrentPage = null;
 
-    // must be called after adding pages
-    private bool TabButton(bool is_current, bool isActive, string txt)
+    // must be called after adding Pages
+    private bool _tabButton(bool isCurrent, bool isActive, string txt, GUIContent icon)
     {
-        GUIStyle style = isActive ? KBaseStyle.tab_active : KBaseStyle.tab_normal;
-        return GUILayout.Toggle(is_current, txt, style, GUILayout.ExpandWidth(true));
+        GUIStyle _style = isActive ? KBaseStyle.TabActive : KBaseStyle.TabNormal;
+        if (icon == null)
+            return GUILayout.Toggle(isCurrent, txt, _style, GUILayout.ExpandWidth(true));
+        else
+            return GUILayout.Toggle(isCurrent, icon, _style, GUILayout.ExpandWidth(true));
     }
 
-    List<float> tabs_Width = new List<float>();
+    List<float> TabsWidth = new();
 
-    public int DrawTabs(int current, float max_width = 300)
+    public int DrawTabs(int current, float maxWidth = 300)
     {
-        current = GeneralTools.ClampInt(current, 0, filtered_pages.Count - 1);
+        current = GeneralTools.ClampInt(current, 0, _filteredPages.Count - 1);
         GUILayout.BeginHorizontal();
 
         int result = current;
 
         // compute sizes
-        if (tabs_Width.Count != filtered_pages.Count)
+        if (TabsWidth.Count != _filteredPages.Count)
         {
-            tabs_Width.Clear();
-            for (int index = 0; index < filtered_pages.Count; index++)
+            TabsWidth.Clear();
+            for (int index = 0; index < _filteredPages.Count; index++)
             {
-                var page = filtered_pages[index];
-                float minWidth, maxWidth;
-                KBaseStyle.tab_normal.CalcMinMaxWidth(new GUIContent(page.Name, ""), out minWidth, out maxWidth);
-                tabs_Width.Add(minWidth);
+                var page = _filteredPages[index];
+                KBaseStyle.TabNormal.CalcMinMaxWidth(new GUIContent(page.Name, ""), out float _minWidth, out _);
+                TabsWidth.Add(_minWidth);
             }
         }
-        float xPos = 0;
+        float _xPos = 0;
 
-        for (int index = 0; index < filtered_pages.Count; index++)
+        for (int index = 0; index < _filteredPages.Count; index++)
         {
-            var page = filtered_pages[index];
+            IPageContent _page = _filteredPages[index];
 
-            float width = tabs_Width[index];
+            float _width = TabsWidth[index];
 
-            if (xPos > max_width)
+            if (_xPos > maxWidth)
             {
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
-                xPos = 0;
+                _xPos = 0;
             }
-            xPos += width;
+            _xPos += _width;
 
-            bool is_current = current == index;
-            if (TabButton(is_current, page.isRunning, page.Name))
+            bool _isCurrent = current == index;
+            if (_tabButton(_isCurrent, _page.IsRunning, _page.Name, _page.Icon))
             {
-                if (!is_current)
+                if (!_isCurrent)
 
                     result = index;
             }
         }
 
-      /*  if (xPos < max_width * 0.7f)
+      /*  if (_xPos < _maxWidth * 0.7f)
         {
             GUILayout.FlexibleSpace();
         }*/
@@ -106,52 +112,56 @@ public class TabsUI
         return result;
     }
 
-
     public void Init()
     {
-        current_page = pages[KBaseSettings.main_tab_index];
-        current_page.UIVisible = true;
+        CurrentPage = Pages[KBaseSettings.MainTabIndex];
+        CurrentPage.UIVisible = true;
     }
 
-    // must be called to rebuild the filtered_pages list 
+    // must be called to rebuild the _filteredPages list 
     public void Update()
     {
-        filtered_pages = new List<PageContent>();
-        for (int index = 0; index < pages.Count; index++)
+        _filteredPages = new List<IPageContent>();
+        for (int index = 0; index < Pages.Count; index++)
         {
-            if (pages[index].isActive)
-                filtered_pages.Add(pages[index]);
+            if (Pages[index].IsActive)
+                _filteredPages.Add(Pages[index]);
         }
     }
 
-    public void onGUI()
+    public void OnGUI()
     {
-        int current_index = KBaseSettings.main_tab_index;
+        int _currentIndex = KBaseSettings.MainTabIndex;
 
-        if (filtered_pages.Count == 0 )
+        if (_filteredPages.Count == 0 )
         {
             UI_Tools.Error("NO active Tab tage !!!");
             return;
         }
-        int result = current_index;
-        if (filtered_pages.Count == 1)
+        int _result;
+        if (_filteredPages.Count == 1)
         {
-            result = 0;
+            _result = 0;
         }
         else
         {
-            result = DrawTabs(current_index);
+            _result = DrawTabs(_currentIndex);
         }
         
-        result = GeneralTools.ClampInt(result, 0, filtered_pages.Count - 1);
-        if (result != current_index)
+        _result = GeneralTools.ClampInt(_result, 0, _filteredPages.Count - 1);
+        IPageContent _page = _filteredPages[_result];
+
+        if (_page != CurrentPage)
         {
-            current_page.UIVisible = false;
-            KBaseSettings.main_tab_index = result;
-            current_page = filtered_pages[result];
-            current_page.UIVisible = true;
+            CurrentPage.UIVisible = false;
+            //KBaseSettings.MainTabIndex = _result;
+            //CurrentPage = _filteredPages[_result];
+            CurrentPage = _page;
+            CurrentPage.UIVisible = true;
         }
 
-        current_page.onGUI();
+        KBaseSettings.MainTabIndex = _result;
+
+        CurrentPage.OnGUI();
     }
 }

@@ -5,63 +5,99 @@ namespace FlightPlan;
 
 public class FPSettings
 {
-    public static double altitude_km
+    public static double Altitude_km
     {
-        get => KBaseSettings.sfile.GetDouble("altitude_km", 100);
-        set { KBaseSettings.sfile.SetDouble("altitude_km", value); }
+        get => KBaseSettings.SFile.GetDouble("Altitude_km", 100);
+        set { KBaseSettings.SFile.SetDouble("Altitude_km", value); }
     }
 
-    public static double ap_altitude_km
+    public static double ApAltitude_km
     {
-        get => KBaseSettings.sfile.GetDouble("ap_altitude_km", 200);
-        set { KBaseSettings.sfile.SetDouble("ap_altitude_km", value); }
+        get => KBaseSettings.SFile.GetDouble("ApAltitude_km", 200);
+        set { KBaseSettings.SFile.SetDouble("ApAltitude_km", value); }
     }
 
-    public static double pe_altitude_km
+    public static double PeAltitude_km
     {
-        get => KBaseSettings.sfile.GetDouble("pe_altitude_km", 100);
-        set { KBaseSettings.sfile.SetDouble("pe_altitude_km", value); }
+        get => KBaseSettings.SFile.GetDouble("PeAltitude_km", 100);
+        set { KBaseSettings.SFile.SetDouble("PeAltitude_km", value); }
     }
 
-    public static double mr_altitude_km
+    public static double MoonReturnAltitude_km
     {
-        get => KBaseSettings.sfile.GetDouble("mr_altitude_km", 100);
-        set { KBaseSettings.sfile.SetDouble("mr_altitude_km", value); }
+        get => KBaseSettings.SFile.GetDouble("MoonReturnAltitude_km", 100);
+        set { KBaseSettings.SFile.SetDouble("MoonReturnAltitude_km", value); }
     }
 
-    public static double target_sma_km
+    public static double TargetSMA_km
     {
-        get => KBaseSettings.sfile.GetDouble("target_sma_km", 100);
-        set { KBaseSettings.sfile.SetDouble("target_sma_km", value); }
+        get => KBaseSettings.SFile.GetDouble("TargetSMA_km", 100);
+        set { KBaseSettings.SFile.SetDouble("TargetSMA_km", value); }
     }
 
-    public static double target_inc_deg
+    public static double TargetInc_deg
     {
-        get => KBaseSettings.sfile.GetDouble("target_inc_deg", 0);
-        set { KBaseSettings.sfile.SetDouble("target_inc_deg", value); }
+        get => KBaseSettings.SFile.GetDouble("TargetInc_deg", 0);
+        set { KBaseSettings.SFile.SetDouble("TargetInc_deg", value); }
     }
 
-    public static double target_lan_deg
+    public static double TargetLAN_deg
     {
-        get => KBaseSettings.sfile.GetDouble("target_lan_deg", 0);
-        set { KBaseSettings.sfile.SetDouble("target_lan_deg", value); }
+        get => KBaseSettings.SFile.GetDouble("TargetLAN_deg", 0);
+        set { KBaseSettings.SFile.SetDouble("TargetLAN_deg", value); }
     }
 
-    public static double target_node_long_deg
+    public static double TargetNodeLong_deg
     {
-        get => KBaseSettings.sfile.GetDouble("target_node_long_deg", 0);
-        set { KBaseSettings.sfile.SetDouble("target_node_long_deg", value); }
+        get => KBaseSettings.SFile.GetDouble("TargetNodeLong_deg", 0);
+        set { KBaseSettings.SFile.SetDouble("TargetNodeLong_deg", value); }
     }
     
-    public static double interceptT
+    public static double InterceptTime
     {
-        get => KBaseSettings.sfile.GetDouble("interceptT", 0);
-        set { KBaseSettings.sfile.SetDouble("interceptT", value); }
+        get => KBaseSettings.SFile.GetDouble("InterceptTime", 0);
+        set { KBaseSettings.SFile.SetDouble("InterceptTime", value); }
     }
 
-    public static double timeOffset
+    public static double TimeOffset
     {
-        get => KBaseSettings.sfile.GetDouble("timeOffset", 30);
-        set { KBaseSettings.sfile.SetDouble("timeOffset", value); }
+        get => KBaseSettings.SFile.GetDouble("TimeOffset", 30);
+        set { KBaseSettings.SFile.SetDouble("TimeOffset", value); }
+    }
+
+    public static int NumSats
+    {
+        get => KBaseSettings.SFile.GetInt("NumSats", 3);
+        set { KBaseSettings.SFile.SetInt("NumSats", value); }
+    }
+
+    public static int NumOrbits
+    {
+        get => KBaseSettings.SFile.GetInt("NumOrbits", 1);
+        set { KBaseSettings.SFile.SetInt("NumOrbits", value); }
+    }
+
+    public static bool DiveOrbit
+    {
+        get => KBaseSettings.SFile.GetBool("DiveOrbit", true);
+        set { KBaseSettings.SFile.SetBool("DiveOrbit", value); }
+    }
+
+    public static bool Occlusion
+    {
+        get => KBaseSettings.SFile.GetBool("Occlusion", true);
+        set { KBaseSettings.SFile.SetBool("Occlusion", value); }
+    }
+
+    public static double OccModAtm
+    {
+        get => KBaseSettings.SFile.GetDouble("OccModAtm", 0.75);
+        set { KBaseSettings.SFile.SetDouble("OccModAtm", value); }
+    }
+
+    public static double OccModVac
+    {
+        get => KBaseSettings.SFile.GetDouble("OccModVac", 0.9);
+        set { KBaseSettings.SFile.SetDouble("OccModVac", value); }
     }
 }

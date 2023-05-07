@@ -643,7 +643,7 @@ public partial class alglib
 
     
     /*************************************************************************
-    1-dimensional complex cross-correlation.
+    1-dimensional complex Cross-correlation.
 
     For given Pattern/Signal returns corr(Pattern,Signal) (non-circular).
 
@@ -654,7 +654,7 @@ public partial class alglib
     IMPORTANT:
         for  historical reasons subroutine accepts its parameters in  reversed
         order: CorrC1D(Signal, Pattern) = Pattern x Signal (using  traditional
-        definition of cross-correlation, denoting cross-correlation as "x").
+        definition of Cross-correlation, denoting Cross-correlation as "x").
 
     INPUT PARAMETERS
         Signal  -   array[0..N-1] - complex function to be transformed,
@@ -665,7 +665,7 @@ public partial class alglib
         M       -   problem size
 
     OUTPUT PARAMETERS
-        R       -   cross-correlation, array[0..N+M-2]:
+        R       -   Cross-correlation, array[0..N+M-2]:
                     * positive lags are stored in R[0..N-1],
                       R[i] = sum(conj(pattern[j])*signal[i+j]
                     * negative lags are stored in R[N..N+M-2],
@@ -691,7 +691,7 @@ public partial class alglib
     }
     
     /*************************************************************************
-    1-dimensional circular complex cross-correlation.
+    1-dimensional circular complex Cross-correlation.
 
     For given Pattern/Signal returns corr(Pattern,Signal) (circular).
     Algorithm has linearithmic complexity for any M/N.
@@ -699,7 +699,7 @@ public partial class alglib
     IMPORTANT:
         for  historical reasons subroutine accepts its parameters in  reversed
         order:   CorrC1DCircular(Signal, Pattern) = Pattern x Signal    (using
-        traditional definition of cross-correlation, denoting cross-correlation
+        traditional definition of Cross-correlation, denoting Cross-correlation
         as "x").
 
     INPUT PARAMETERS
@@ -730,7 +730,7 @@ public partial class alglib
     }
     
     /*************************************************************************
-    1-dimensional real cross-correlation.
+    1-dimensional real Cross-correlation.
 
     For given Pattern/Signal returns corr(Pattern,Signal) (non-circular).
 
@@ -741,7 +741,7 @@ public partial class alglib
     IMPORTANT:
         for  historical reasons subroutine accepts its parameters in  reversed
         order: CorrR1D(Signal, Pattern) = Pattern x Signal (using  traditional
-        definition of cross-correlation, denoting cross-correlation as "x").
+        definition of Cross-correlation, denoting Cross-correlation as "x").
 
     INPUT PARAMETERS
         Signal  -   array[0..N-1] - real function to be transformed,
@@ -752,7 +752,7 @@ public partial class alglib
         M       -   problem size
 
     OUTPUT PARAMETERS
-        R       -   cross-correlation, array[0..N+M-2]:
+        R       -   Cross-correlation, array[0..N+M-2]:
                     * positive lags are stored in R[0..N-1],
                       R[i] = sum(pattern[j]*signal[i+j]
                     * negative lags are stored in R[N..N+M-2],
@@ -778,7 +778,7 @@ public partial class alglib
     }
     
     /*************************************************************************
-    1-dimensional circular real cross-correlation.
+    1-dimensional circular real Cross-correlation.
 
     For given Pattern/Signal returns corr(Pattern,Signal) (circular).
     Algorithm has linearithmic complexity for any M/N.
@@ -786,7 +786,7 @@ public partial class alglib
     IMPORTANT:
         for  historical reasons subroutine accepts its parameters in  reversed
         order:   CorrR1DCircular(Signal, Pattern) = Pattern x Signal    (using
-        traditional definition of cross-correlation, denoting cross-correlation
+        traditional definition of Cross-correlation, denoting Cross-correlation
         as "x").
 
     INPUT PARAMETERS
@@ -885,7 +885,7 @@ public partial class alglib
             // Generate plan and execute it.
             //
             // Plan is a combination of a successive factorizations of N and
-            // precomputed data. It is much like a FFTW plan, but is not stored
+            // precomputed Data. It is much like a FFTW plan, but is not stored
             // between subroutine calls and is much simpler.
             //
             ftbase.ftcomplexfftplan(n, 1, plan, _params);
@@ -2858,7 +2858,7 @@ public partial class alglib
             //
             if( alg==1 )
             {
-                alglib.ap.assert(m+n-1>2, "ConvR1DX: internal error!");
+                alglib.ap.assert(m+n-1>2, "ConvR1DX: internal Error!");
                 if( (circular && ftbase.ftbaseissmooth(m, _params)) && m%2==0 )
                 {
                     
@@ -2992,7 +2992,7 @@ public partial class alglib
             //
             if( alg==2 )
             {
-                alglib.ap.assert((q+n-1)%2==0, "ConvR1DX: internal error!");
+                alglib.ap.assert((q+n-1)%2==0, "ConvR1DX: internal Error!");
                 buf = new double[q+n-1];
                 buf2 = new double[q+n-1];
                 buf3 = new double[q+n-1];
@@ -3096,7 +3096,7 @@ public partial class alglib
     public class corr
     {
         /*************************************************************************
-        1-dimensional complex cross-correlation.
+        1-dimensional complex Cross-correlation.
 
         For given Pattern/Signal returns corr(Pattern,Signal) (non-circular).
 
@@ -3107,7 +3107,7 @@ public partial class alglib
         IMPORTANT:
             for  historical reasons subroutine accepts its parameters in  reversed
             order: CorrC1D(Signal, Pattern) = Pattern x Signal (using  traditional
-            definition of cross-correlation, denoting cross-correlation as "x").
+            definition of Cross-correlation, denoting Cross-correlation as "x").
 
         INPUT PARAMETERS
             Signal  -   array[0..N-1] - complex function to be transformed,
@@ -3118,7 +3118,7 @@ public partial class alglib
             M       -   problem size
 
         OUTPUT PARAMETERS
-            R       -   cross-correlation, array[0..N+M-2]:
+            R       -   Cross-correlation, array[0..N+M-2]:
                         * positive lags are stored in R[0..N-1],
                           R[i] = sum(conj(pattern[j])*signal[i+j]
                         * negative lags are stored in R[N..N+M-2],
@@ -3171,7 +3171,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        1-dimensional circular complex cross-correlation.
+        1-dimensional circular complex Cross-correlation.
 
         For given Pattern/Signal returns corr(Pattern,Signal) (circular).
         Algorithm has linearithmic complexity for any M/N.
@@ -3179,7 +3179,7 @@ public partial class alglib
         IMPORTANT:
             for  historical reasons subroutine accepts its parameters in  reversed
             order:   CorrC1DCircular(Signal, Pattern) = Pattern x Signal    (using
-            traditional definition of cross-correlation, denoting cross-correlation
+            traditional definition of Cross-correlation, denoting Cross-correlation
             as "x").
 
         INPUT PARAMETERS
@@ -3271,7 +3271,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        1-dimensional real cross-correlation.
+        1-dimensional real Cross-correlation.
 
         For given Pattern/Signal returns corr(Pattern,Signal) (non-circular).
 
@@ -3282,7 +3282,7 @@ public partial class alglib
         IMPORTANT:
             for  historical reasons subroutine accepts its parameters in  reversed
             order: CorrR1D(Signal, Pattern) = Pattern x Signal (using  traditional
-            definition of cross-correlation, denoting cross-correlation as "x").
+            definition of Cross-correlation, denoting Cross-correlation as "x").
 
         INPUT PARAMETERS
             Signal  -   array[0..N-1] - real function to be transformed,
@@ -3293,7 +3293,7 @@ public partial class alglib
             M       -   problem size
 
         OUTPUT PARAMETERS
-            R       -   cross-correlation, array[0..N+M-2]:
+            R       -   Cross-correlation, array[0..N+M-2]:
                         * positive lags are stored in R[0..N-1],
                           R[i] = sum(pattern[j]*signal[i+j]
                         * negative lags are stored in R[N..N+M-2],
@@ -3346,7 +3346,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        1-dimensional circular real cross-correlation.
+        1-dimensional circular real Cross-correlation.
 
         For given Pattern/Signal returns corr(Pattern,Signal) (circular).
         Algorithm has linearithmic complexity for any M/N.
@@ -3354,7 +3354,7 @@ public partial class alglib
         IMPORTANT:
             for  historical reasons subroutine accepts its parameters in  reversed
             order:   CorrR1DCircular(Signal, Pattern) = Pattern x Signal    (using
-            traditional definition of cross-correlation, denoting cross-correlation
+            traditional definition of Cross-correlation, denoting Cross-correlation
             as "x").
 
         INPUT PARAMETERS

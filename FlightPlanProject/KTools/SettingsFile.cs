@@ -1,82 +1,78 @@
 
-using UnityEngine;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using BepInEx.Logging;
-
-using System.Threading;
+using Newtonsoft.Json;
+using System.Globalization;
+using UnityEngine;
 
 namespace FlightPlan.KTools;
 
 public class SettingsFile
 {
-    protected string file_path = "";
-    Dictionary<string, string> data = new Dictionary<string, string>();
+    protected string FilePath = "";
+    Dictionary<string, string> Data = new();
 
     public SettingsFile(string file_path)
     {
-        this.file_path = file_path;
+        this.FilePath = file_path;
         Load();
     }
 
-    public ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("K2D2.SettingsFile");
+    public ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("K2D2.SettingsFile");
 
     protected void Load()
     {
 
-        var previous_culture = Thread.CurrentThread.CurrentCulture;
+        CultureInfo _previousCulture = Thread.CurrentThread.CurrentCulture;
         Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         try
         {
-            this.data = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(file_path));
+            this.Data = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(FilePath));
         }
         catch (System.Exception)
         {
-            logger.LogWarning($"error loading {file_path}");
+            Logger.LogWarning($"Error loading {FilePath}");
         }
 
-        Thread.CurrentThread.CurrentCulture = previous_culture;
+        Thread.CurrentThread.CurrentCulture = _previousCulture;
     }
 
     protected void Save()
     {
-        var previous_culture = Thread.CurrentThread.CurrentCulture;
+        CultureInfo _previousCulture = Thread.CurrentThread.CurrentCulture;
         Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         try
         {
-            File.WriteAllText(file_path, JsonConvert.SerializeObject(data));
+            File.WriteAllText(FilePath, JsonConvert.SerializeObject(Data));
         }
         catch (System.Exception)
         {
-            logger.LogError($"error saving {this.file_path}");
+            Logger.LogError($"Error saving {this.FilePath}");
         }
 
-        Thread.CurrentThread.CurrentCulture = previous_culture;
+        Thread.CurrentThread.CurrentCulture = _previousCulture;
     }
 
     public string GetString(string name, string defaultValue)
     {
-        if (data.ContainsKey(name))
-            return data[name];
+        if (Data.ContainsKey(name))
+            return Data[name];
 
         return defaultValue;
     }
 
     public void SetString(string name, string value)
     {
-        if (data.ContainsKey(name))
+        if (Data.ContainsKey(name))
         {
-            if (data[name] != value)
+            if (Data[name] != value)
             {
-                data[name] = value;
+                Data[name] = value;
                 Save();
             }
         }
         else
         {
-            data[name] = value;
+            Data[name] = value;
             Save();
         }
     }
@@ -88,8 +84,8 @@ public class SettingsFile
     /// </summary>
     public bool GetBool(string name, bool defaultValue)
     {
-        if (data.ContainsKey(name))
-            return data[name] == "1";
+        if (Data.ContainsKey(name))
+            return Data[name] == "1";
         else
             SetBool(name, defaultValue);
 
@@ -109,20 +105,19 @@ public class SettingsFile
 
     /// <summary>
     /// Get the parameter using integer value
-    /// if not found or on parsing error, it is replaced and saved at once
+    /// if not found or on parsing Error, it is replaced and saved at once
     /// </summary>
     public int GetInt(string name, int defaultValue)
     {
-        if (data.ContainsKey(name))
+        if (Data.ContainsKey(name))
         {
-            int value = 0;
-            if (int.TryParse(data[name], out value))
+            if (int.TryParse(Data[name], out int value))
             {
                 return value;
             }
         }
 
-        // invalid or no value found in data
+        // invalid or no value found in Data
         SetInt(name, defaultValue);
         return defaultValue;
     }
@@ -138,10 +133,10 @@ public class SettingsFile
 
     public TEnum GetEnum<TEnum>(string name, TEnum defaultValue) where TEnum : struct
     {
-        if (data.ContainsKey(name))
+        if (Data.ContainsKey(name))
         {
-            TEnum value = defaultValue;
-            if (Enum.TryParse<TEnum>(data[name], out value))
+            TEnum value;
+            if (Enum.TryParse<TEnum>(Data[name], out value))
             {
                 return value;
             }
@@ -158,20 +153,19 @@ public class SettingsFile
 
     /// <summary>
     /// Get the parameter using float value
-    /// if not found or on parsing error, it is replaced and saved at once
+    /// if not found or on parsing Error, it is replaced and saved at once
     /// </summary>
     public float GetFloat(string name, float defaultValue)
     {
-        if (data.ContainsKey(name))
+        if (Data.ContainsKey(name))
         {
-            float value = 0;
-            if (float.TryParse(data[name], out value))
+            if (float.TryParse(Data[name], out float value))
             {
                 return value;
             }
         }
 
-        // invalid or no value found in data
+        // invalid or no value found in Data
         SetFloat(name, defaultValue);
         return defaultValue;
     }
@@ -187,20 +181,19 @@ public class SettingsFile
 
     /// <summary>
     /// Get the parameter using double value
-    /// if not found or on parsing error, it is replaced and saved at once
+    /// if not found or on parsing Error, it is replaced and saved at once
     /// </summary>
     public double GetDouble(string name, double defaultValue)
     {
-        if (data.ContainsKey(name))
+        if (Data.ContainsKey(name))
         {
-            double value = 0;
-            if (double.TryParse(data[name], out value))
+            if (double.TryParse(Data[name], out double value))
             {
                 return value;
             }
         }
 
-        // invalid or no value found in data
+        // invalid or no value found in Data
         SetDouble(name, defaultValue);
         return defaultValue;
     }
@@ -216,20 +209,20 @@ public class SettingsFile
 
     /// <summary>
     /// Get the parameter using Vector3 value
-    ///  if not found or on parsing error, it is replaced and saved at once
+    ///  if not found or on parsing Error, it is replaced and saved at once
     /// </summary>
     public Vector3 GetVector3(string name, Vector3 defaultValue)
     {
-        if (!data.ContainsKey(name))
+        if (!Data.ContainsKey(name))
         {
             SetParamVector3(name, defaultValue);
             return defaultValue;
         }
 
-        string txt = (string)data[name];
-        string[] ar = txt.Split(';');
+        string _txt = Data[name];
+        string[] _ar = _txt.Split(';');
 
-        if (ar.Length < 3)
+        if (_ar.Length < 3)
         {
             SetParamVector3(name, defaultValue);
             return defaultValue;
@@ -238,9 +231,9 @@ public class SettingsFile
         Vector3 result = Vector3.zero;
         try
         {
-            result.x = float.Parse(ar[0]);
-            result.y = float.Parse(ar[1]);
-            result.z = float.Parse(ar[2]);
+            result.x = float.Parse(_ar[0]);
+            result.y = float.Parse(_ar[1]);
+            result.z = float.Parse(_ar[2]);
         }
         catch
         {
@@ -257,26 +250,26 @@ public class SettingsFile
     /// </summary>
     public void SetParamVector3(string name, Vector3 value)
     {
-        string text = value.x + ";" + value.y + ";" + value.z;
-        SetString(name, text);
+        string _text = value.x + ";" + value.y + ";" + value.z;
+        SetString(name, _text);
     }
 
     /// <summary>
     /// Get the parameter using Vector3d value
-    ///  if not found or on parsing error, it is replaced and saved at once
+    ///  if not found or on parsing Error, it is replaced and saved at once
     /// </summary>
     public Vector3 GetVector3d(string name, Vector3d defaultValue)
     {
-        if (!data.ContainsKey(name))
+        if (!Data.ContainsKey(name))
         {
             SetParamVector3d(name, defaultValue);
             return defaultValue;
         }
 
-        string txt = data[name];
-        string[] ar = txt.Split(';');
+        string _txt = Data[name];
+        string[] _ar = _txt.Split(';');
 
-        if (ar.Length < 3)
+        if (_ar.Length < 3)
         {
             SetParamVector3d(name, defaultValue);
             return defaultValue;
@@ -285,9 +278,9 @@ public class SettingsFile
         Vector3d result = Vector3d.zero;
         try
         {
-            result.x = double.Parse(ar[0]);
-            result.y = double.Parse(ar[1]);
-            result.z = double.Parse(ar[2]);
+            result.x = double.Parse(_ar[0]);
+            result.y = double.Parse(_ar[1]);
+            result.z = double.Parse(_ar[2]);
         }
         catch
         {
@@ -300,8 +293,8 @@ public class SettingsFile
 
     public void SetParamVector3d(string name, Vector3d value)
     {
-        string text = value.x + ";" + value.y + ";" + value.z;
-        SetString(name, text);
+        string _text = value.x + ";" + value.y + ";" + value.z;
+        SetString(name, _text);
     }
 }
 

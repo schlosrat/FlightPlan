@@ -1,12 +1,10 @@
-using UnityEngine;
-using System.Collections;
-using System;
 using System.Globalization;
+using UnityEngine;
 
 namespace FlightPlan.KTools.UI;
 
 /// <summary>
-/// A set of simple tools for colors that is missing in the main unity API
+/// A set of simple tools for _colors that is missing in the main unity API
 /// </summary>
 public class ColorTools
 {
@@ -15,42 +13,42 @@ public class ColorTools
     /// </summary>
     public static void ToHSV(Color col, out float h, out float s, out float v)
     {
-        float min, max, delta;
+        float _min, _max, _delta;
 
-        float r = col.r;
-        float g = col.g;
-        float b = col.b;
+        float _r = col.r;
+        float _g = col.g;
+        float _b = col.b;
 
-        min = Mathf.Min(r, Mathf.Min(g, b));
-        max = Mathf.Max(r, Mathf.Max(g, b));
-        v = max;                // v
+        _min = Mathf.Min(_r, Mathf.Min(_g, _b));
+        _max = Mathf.Max(_r, Mathf.Max(_g, _b));
+        v = _max;                // _v
 
-        delta = max - min;
+        _delta = _max - _min;
 
 
-        if (delta != 0)
+        if (_delta != 0)
         {
-            s = delta / max;        // s
+            s = _delta / _max;        // _s
         }
         else
         {
-            // r = g = b = 0		// s = 0, v is undefined
+            // _r = _g = _b = 0		// _s = 0, _v is undefined
             s = 0;
             h = 0;
             return;
         }
 
-        if (r == max)
+        if (_r == _max)
         {
-            h = (g - b) / delta;        // between yellow & magenta
+            h = (_g - _b) / _delta;        // between yellow & magenta
         }
-        else if (g == max)
+        else if (_g == _max)
         {
-            h = 2 + (b - r) / delta;    // between cyan & yellow
+            h = 2 + (_b - _r) / _delta;    // between cyan & yellow
         }
         else
         {
-            h = 4 + (r - g) / delta;    // between magenta & cyan
+            h = 4 + (_r - _g) / _delta;    // between magenta & cyan
         }
 
         h *= 60f / 360;             // 0-1
@@ -58,7 +56,6 @@ public class ColorTools
         if (h < 0)
             h += 1;
     }
-
 
     /// <summary>
     /// Convert a color from HSV values. any value is vetween 0 and one
@@ -68,28 +65,28 @@ public class ColorTools
         hue *= 360;
         //Debug.Log("hue : " + hue);
 
-        int hi = ((int)(Mathf.Floor(hue / 60f))) % 6;
-        //Debug.Log("hi : " + hi);
-        float f = hue / 60f - Mathf.Floor(hue / 60f);
-        //Debug.Log("f : " + f);
+        int _hi = ((int)(Mathf.Floor(hue / 60f))) % 6;
+        //Debug.Log("_hi : " + _hi);
+        float _f = hue / 60f - Mathf.Floor(hue / 60f);
+        //Debug.Log("_f : " + _f);
 
-        float v = value;
-        float p = value * (1 - saturation);
-        float q = value * (1 - f * saturation);
-        float t = value * (1 - (1 - f) * saturation);
+        float _v = value;
+        float _p = value * (1 - saturation);
+        float _q = value * (1 - _f * saturation);
+        float _t = value * (1 - (1 - _f) * saturation);
 
-        if (hi == 0)
-            return new Color(v, t, p, alpha);
-        else if (hi == 1)
-            return new Color(q, v, p, alpha);
-        else if (hi == 2)
-            return new Color(p, v, t, alpha);
-        else if (hi == 3)
-            return new Color(p, q, v, alpha);
-        else if (hi == 4)
-            return new Color(t, p, v, alpha);
+        if (_hi == 0)
+            return new Color(_v, _t, _p, alpha);
+        else if (_hi == 1)
+            return new Color(_q, _v, _p, alpha);
+        else if (_hi == 2)
+            return new Color(_p, _v, _t, alpha);
+        else if (_hi == 3)
+            return new Color(_p, _q, _v, alpha);
+        else if (_hi == 4)
+            return new Color(_t, _p, _v, alpha);
         else
-            return new Color(v, p, q, alpha);
+            return new Color(_v, _p, _q, alpha);
     }
 
     /// <summary>
@@ -100,7 +97,7 @@ public class ColorTools
     /// Or a html rgb color ex FF0000 is red
     /// </param>
     /// <returns>the parsed Color</returns>
-    static public Color parseColor(string color)
+    static public Color ParseColor(string color)
     {
         if (color == "") return Color.white;
         color = color.ToLower();
@@ -143,69 +140,68 @@ public class ColorTools
         }
     }
 
-    static public string formatColorHtml(Color col)
+    static public string FormatColorHtml(Color col)
     {
-        int r = (int)(col.r * 255);
-        int g = (int)(col.g * 255);
-        int b = (int)(col.b * 255);
-        return string.Format("{0:X2}{1:X2}{2:X2}", r, g, b);
+        int _r = (int)(col.r * 255);
+        int _g = (int)(col.g * 255);
+        int _b = (int)(col.b * 255);
+        return string.Format("{0:X2}{1:X2}{2:X2}", _r, _g, _b);
     }
 
-    // just a list of really differnts colors  that can be used for unitary test
+    // just a list of really differnts _colors  that can be used for unitary test
     // any color is far enough from the next one to be fully visible 
-    static public Color[] getRandomColorArray(int Nb, float saturation = 1)
+    static public Color[] GetRandomColorArray(int Nb, float saturation = 1)
     {
 
-        float delta = 1f / Nb;
-        Color[] colors = new Color[Nb];
+        float _delta = 1f / Nb;
+        Color[] _colors = new Color[Nb];
 
-        float h = UnityEngine.Random.Range(0f, 1);
+        float _h = UnityEngine.Random.Range(0f, 1);
 
         for (int i = 0; i < Nb; i++)
         {
-            colors[i] = FromHSV(h, saturation, 1, 1);
-            h += delta;
+            _colors[i] = FromHSV(_h, saturation, 1, 1);
+            _h += _delta;
         }
 
-        return colors;
+        return _colors;
     }
 
-    // just a list of really differnts colors  that can be used for unitary test
+    // just a list of really differnts _colors  that can be used for unitary test
     // any color is far enough from the next one to be fully visible 
-    static public Color[] getRainbowColorArray(int Nb)
+    static public Color[] GetRainbowColorArray(int Nb)
     {
-        float delta = 1f / Nb;
-        Color[] colors = new Color[Nb];
+        float _delta = 1f / Nb;
+        Color[] _colors = new Color[Nb];
 
-        float h = 0;
+        float _h = 0;
 
         for (int i = 0; i < Nb; i++)
         {
-            colors[i] = FromHSV(h, 1, 1, 1);
-            h += delta;
+            _colors[i] = FromHSV(_h, 1, 1, 1);
+            _h += _delta;
         }
 
-        return colors;
+        return _colors;
     }
 
-
-    static public Color randomColor()
+    static public Color RandomColor()
     {
-        float h = UnityEngine.Random.Range(0f, 1);
-        //  float v = UnityEngine.Random.Range(0.5f, 1);
-        return FromHSV(h, 1, 1, 1);
+        float _h = UnityEngine.Random.Range(0f, 1);
+        //  float _v = UnityEngine.Random.Range(0.5f, 1);
+        return FromHSV(_h, 1, 1, 1);
 
     }
 
-    static public Color changeColorHSV(Color source, float deltaH, float deltaS, float deltaV)
+    static public Color ChangeColorHSV(Color source, float deltaH, float deltaS, float deltaV)
     {
-        float h, s, v;
-        ToHSV(source, out h, out s, out v);
+        float _h, _s, _v;
+        ToHSV(source, out _h, out _s, out _v);
 
-        h += deltaH;
-        s += deltaS;
-        v += deltaV;
+        _h += deltaH;
+        _s += deltaS;
+        _v += deltaV;
 
-        return ColorTools.FromHSV(h, s, v, source.a);
+        return ColorTools.FromHSV(_h, _s, _v, source.a);
     }
 }

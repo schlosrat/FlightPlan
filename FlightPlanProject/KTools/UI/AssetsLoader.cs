@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using SpaceWarp.API.Assets;
 
@@ -6,14 +5,14 @@ namespace FlightPlan.KTools.UI;
 
 public class AssetsLoader
 {
-    public static Texture2D loadIcon(string path)
+    public static Texture2D LoadIcon(string path)
     {
-        var imageTexture = AssetManager.GetAsset<Texture2D>($"flight_plan/images/{path}.png");
+        Texture2D _imageTexture = AssetManager.GetAsset<Texture2D>($"flight_plan/images/{path}.png");
 
         //   Check if the texture is null
-        if (imageTexture == null)
+        if (_imageTexture == null)
         {
-            // Print an error message to the Console
+            // Print an Error message to the Console
             Debug.LogError("Failed to load image texture from path: " + path);
 
             // Print the full path of the resource
@@ -23,6 +22,6 @@ public class AssetsLoader
             Debug.Log("Expected resource type: Texture2D");
         }
 
-        return imageTexture;
+        return _imageTexture;
     }
 }

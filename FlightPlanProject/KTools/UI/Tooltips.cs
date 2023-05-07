@@ -5,58 +5,57 @@ namespace FlightPlan.KTools.UI;
 public class ToolTipsManager
 {
 
-    public static void setToolTip(string tooltip)
+    public static void SetToolTip(string tooltip)
     {
         if (Event.current.type == EventType.Repaint)
         {
-            if (last_tool_tip != tooltip)
+            if (LastToolTip != tooltip)
             {
                 //Debug.Log("changed");
 
                 if (!string.IsNullOrEmpty(tooltip))
                 {
-                    show = true;
-                    show_time = Time.time + delay;
-                    draw_tool_tip = tooltip;
+                    Show = true;
+                    ShowTime = Time.time + DELAY;
+                    DrawToolTip = tooltip;
                 }
                 else
                 {
-                    show = false;
+                    Show = false;
                 }
             }
 
-            last_tool_tip = tooltip;
+            LastToolTip = tooltip;
         }
     }
 
-    static float show_time;
-    const float delay = 0.5f;
-    static bool show = false;
+    static float ShowTime;
+    const float DELAY = 0.5f;
+    static bool Show = false;
 
-    static Vector2 offset = new Vector2(20, 10);
+    static Vector2 Offset = new Vector2(20, 10);
 
-    static string last_tool_tip;
-    static string draw_tool_tip;
+    static string LastToolTip;
+    static string DrawToolTip;
     public static void DrawToolTips()
     {
-        if (!show)
+        if (!Show)
             return;
 
-        if (Time.time > show_time)
+        if (Time.time > ShowTime)
         {
-            float minWidth, maxWidth;
-            GUI.skin.button.CalcMinMaxWidth(new GUIContent(draw_tool_tip), out minWidth, out maxWidth);
-            var tooltip_pos = new Rect(Input.mousePosition.x + offset.x, Screen.height - Input.mousePosition.y + offset.y, maxWidth, 10);
-            WindowTool.check_window_pos(ref tooltip_pos);
+            GUI.skin.button.CalcMinMaxWidth(new GUIContent(DrawToolTip), out float _minWidth, out float _maxWidth);
+            Rect _tooltipPos = new Rect(Input.mousePosition.x + Offset.x, Screen.height - Input.mousePosition.y + Offset.y, _maxWidth, 10);
+            WindowTool.CheckWindowPos(ref _tooltipPos);
 
-            GUILayout.Window(3, tooltip_pos, WindowFunction, "", GUI.skin.button);
+            GUILayout.Window(3, _tooltipPos, WindowFunction, "", GUI.skin.button);
         }
     }
 
     static void WindowFunction(int windowID)
     {
-        //Debug.Log(draw_tool_tip);
-        GUILayout.Label(draw_tool_tip);
+        //Debug.Log(DrawToolTip);
+        GUILayout.Label(DrawToolTip);
     }
 }
 

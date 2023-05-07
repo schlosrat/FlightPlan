@@ -154,7 +154,7 @@ namespace MuMech
             return result;
         }
 
-        // was: body.position ->  body.Position.localPosition
+        // was: body.Position ->  body.Position.localPosition
         // was: ret.LAN -> longitudeOfAscendingNode
         // was: Planetarium.up ->  body.Orbit.ReferenceFrame.up.vector
         // was: Planetarium.right -> body.Orbit.ReferenceFrame.right.vector
@@ -162,9 +162,9 @@ namespace MuMech
         // KSP2 version requires these to be type Position and Velocity.
         // pos = o.SwappedAbsolutePositionAtUT(UT);
         // vel = o.SwappedOrbitalVelocityAtUT(UT) + dV;
-        // The MJ version of OrbitFromStateVectors peroforms a SwapYZ on (pos - body position), and a SwapYZ on vel before passing them into
+        // The MJ version of OrbitFromStateVectors peroforms a SwapYZ on (pos - body Position), and a SwapYZ on vel before passing them into
         // the KSP1 version of UpdateFromStateVectors.
-        // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
+        // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.Position), OrbitExtensions.SwapYZ(vel), body, UT);
         public static PatchedConicsOrbit OrbitFromStateVectors(Vector3d pos, Vector3d vel, ICoordinateSystem coordinateSystem, CelestialBodyComponent body, double UT)
         {
             PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
@@ -172,11 +172,11 @@ namespace MuMech
             Position position = new(body.SimulationObject.transform.celestialFrame, (pos - body.Position.localPosition).SwapYAndZ); // OrbitExtensions.SwapYZ(pos - body.Position.localPosition)
             Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, vel.SwapYAndZ); // OrbitExtensions.SwapYZ(vel)
 
-            // Position position = new(body.SimulationObject.transform.celestialFrame, pos);
+            // Position Position = new(body.SimulationObject.transform.celestialFrame, pos);
             // Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, vel);
 
-            // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.position), OrbitExtensions.SwapYZ(vel), body, UT);
-            // orbit.UpdateFromStateVectors(new Position(o.referenceBody.SimulationObject.transform.celestialFrame, position), new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.referenceBody, UT);
+            // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.Position), OrbitExtensions.SwapYZ(vel), body, UT);
+            // Orbit.UpdateFromStateVectors(new Position(o.ReferenceBody.SimulationObject.transform.celestialFrame, Position), new Velocity(o.ReferenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.ReferenceBody, UT);
 
             ret.UpdateFromStateVectors(position, velocity, body, UT);
             if (double.IsNaN(ret.argumentOfPeriapsis))
@@ -465,7 +465,7 @@ namespace MuMech
 
 
     //A simple wrapper around a Dictionary, with the only change being that
-    //accessing the value of a nonexistent key returns a default value instead of an error.
+    //accessing the value of a nonexistent key returns a default value instead of an Error.
     class DefaultableDictionary<TKey, TValue> : KeyableDictionary<TKey, TValue>
     {
         private readonly TValue defaultValue;

@@ -33,11 +33,11 @@ public partial class alglib
         M   -   number of rows
         N   -   number of columns
         A   -   source matrix, MxN submatrix is copied and transposed
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         B   -   destination matrix, must be large enough to store result
-        IB  -   submatrix offset (row index)
-        JB  -   submatrix offset (column index)
+        IB  -   submatrix Offset (row index)
+        JB  -   submatrix Offset (column index)
     *************************************************************************/
     public static void cmatrixtranspose(int m, int n, complex[,] a, int ia, int ja, ref complex[,] b, int ib, int jb)
     {
@@ -58,11 +58,11 @@ public partial class alglib
         M   -   number of rows
         N   -   number of columns
         A   -   source matrix, MxN submatrix is copied and transposed
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         B   -   destination matrix, must be large enough to store result
-        IB  -   submatrix offset (row index)
-        JB  -   submatrix offset (column index)
+        IB  -   submatrix Offset (row index)
+        JB  -   submatrix Offset (column index)
     *************************************************************************/
     public static void rmatrixtranspose(int m, int n, double[,] a, int ia, int ja, ref double[,] b, int ib, int jb)
     {
@@ -105,11 +105,11 @@ public partial class alglib
         M   -   number of rows
         N   -   number of columns
         A   -   source matrix, MxN submatrix is copied and transposed
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         B   -   destination matrix, must be large enough to store result
-        IB  -   submatrix offset (row index)
-        JB  -   submatrix offset (column index)
+        IB  -   submatrix Offset (row index)
+        JB  -   submatrix Offset (column index)
     *************************************************************************/
     public static void cmatrixcopy(int m, int n, complex[,] a, int ia, int ja, ref complex[,] b, int ib, int jb)
     {
@@ -129,9 +129,9 @@ public partial class alglib
     Input parameters:
         N   -   subvector size
         A   -   source vector, N elements are copied
-        IA  -   source offset (first element index)
+        IA  -   source Offset (first element index)
         B   -   destination vector, must be large enough to store result
-        IB  -   destination offset (first element index)
+        IB  -   destination Offset (first element index)
     *************************************************************************/
     public static void rvectorcopy(int n, double[] a, int ia, ref double[] b, int ib)
     {
@@ -152,11 +152,11 @@ public partial class alglib
         M   -   number of rows
         N   -   number of columns
         A   -   source matrix, MxN submatrix is copied and transposed
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         B   -   destination matrix, must be large enough to store result
-        IB  -   submatrix offset (row index)
-        JB  -   submatrix offset (column index)
+        IB  -   submatrix Offset (row index)
+        JB  -   submatrix Offset (column index)
     *************************************************************************/
     public static void rmatrixcopy(int m, int n, double[,] a, int ia, int ja, ref double[,] b, int ib, int jb)
     {
@@ -182,12 +182,12 @@ public partial class alglib
         N   -   number of columns
         Alpha-  coefficient
         A   -   source matrix, MxN submatrix is copied and transposed
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         Beta-   coefficient
         B   -   destination matrix, must be large enough to store result
-        IB  -   submatrix offset (row index)
-        JB  -   submatrix offset (column index)
+        IB  -   submatrix Offset (row index)
+        JB  -   submatrix Offset (column index)
     *************************************************************************/
     public static void rmatrixgencopy(int m, int n, double alpha, double[,] a, int ia, int ja, double beta, ref double[,] b, int ib, int jb)
     {
@@ -212,13 +212,13 @@ public partial class alglib
         M   -   number of rows
         N   -   number of columns
         A   -   target matrix, MxN submatrix is updated
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         Alpha-  coefficient
         U   -   vector #1
-        IU  -   subvector offset
+        IU  -   subvector Offset
         V   -   vector #2
-        IV  -   subvector offset
+        IV  -   subvector Offset
 
 
       -- ALGLIB routine --
@@ -245,12 +245,12 @@ public partial class alglib
         M   -   number of rows
         N   -   number of columns
         A   -   target matrix, MxN submatrix is updated
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         U   -   vector #1
-        IU  -   subvector offset
+        IU  -   subvector Offset
         V   -   vector #2
-        IV  -   subvector offset
+        IV  -   subvector Offset
     *************************************************************************/
     public static void cmatrixrank1(int m, int n, ref complex[,] a, int ia, int ja, ref complex[] u, int iu, ref complex[] v, int iv)
     {
@@ -274,12 +274,12 @@ public partial class alglib
         M   -   number of rows
         N   -   number of columns
         A   -   target matrix, MxN submatrix is updated
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         U   -   vector #1
-        IU  -   subvector offset
+        IU  -   subvector Offset
         V   -   vector #2
-        IV  -   subvector offset
+        IV  -   subvector Offset
     *************************************************************************/
     public static void rmatrixrank1(int m, int n, ref double[,] a, int ia, int ja, ref double[] u, int iu, ref double[] v, int iv)
     {
@@ -317,15 +317,15 @@ public partial class alglib
         N   -   number of columns of op(A)
                 N>=0
         A   -   target matrix
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         OpA -   operation type:
                 * OpA=0     =>  op(A) = A
                 * OpA=1     =>  op(A) = A^T
                 * OpA=2     =>  op(A) = A^H
         X   -   input vector
-        IX  -   subvector offset
-        IY  -   subvector offset
+        IX  -   subvector Offset
+        IY  -   subvector Offset
         Y   -   preallocated matrix, must be large enough to store result
 
     OUTPUT PARAMETERS:
@@ -362,14 +362,14 @@ public partial class alglib
         M   -   number of rows of op(A)
         N   -   number of columns of op(A)
         A   -   target matrix
-        IA  -   submatrix offset (row index)
-        JA  -   submatrix offset (column index)
+        IA  -   submatrix Offset (row index)
+        JA  -   submatrix Offset (column index)
         OpA -   operation type:
                 * OpA=0     =>  op(A) = A
                 * OpA=1     =>  op(A) = A^T
         X   -   input vector
-        IX  -   subvector offset
-        IY  -   subvector offset
+        IX  -   subvector Offset
+        IY  -   subvector Offset
         Y   -   preallocated matrix, must be large enough to store result
 
     OUTPUT PARAMETERS:
@@ -441,15 +441,15 @@ public partial class alglib
     INPUT PARAMETERS
         N   -   matrix size, N>=0
         A       -   matrix, actial matrix is stored in A[IA:IA+N-1,JA:JA+N-1]
-        IA      -   submatrix offset
-        JA      -   submatrix offset
+        IA      -   submatrix Offset
+        JA      -   submatrix Offset
         IsUpper -   whether matrix is upper triangular
         IsUnit  -   whether matrix is unitriangular
         OpType  -   transformation type:
                     * 0 - no transformation
                     * 1 - transposition
         X       -   right part, actual vector is stored in X[IX:IX+N-1]
-        IX      -   offset
+        IX      -   Offset
 
     OUTPUT PARAMETERS
         X       -   solution replaces elements X[IX:IX+N-1]
@@ -483,8 +483,8 @@ public partial class alglib
         N   -   matrix size, N>=0
         M   -   matrix size, N>=0
         A       -   matrix, actial matrix is stored in A[I1:I1+N-1,J1:J1+N-1]
-        I1      -   submatrix offset
-        J1      -   submatrix offset
+        I1      -   submatrix Offset
+        J1      -   submatrix Offset
         IsUpper -   whether matrix is upper triangular
         IsUnit  -   whether matrix is unitriangular
         OpType  -   transformation type:
@@ -492,8 +492,8 @@ public partial class alglib
                     * 1 - transposition
                     * 2 - conjugate transposition
         X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-        I2  -   submatrix offset
-        J2  -   submatrix offset
+        I2  -   submatrix Offset
+        J2  -   submatrix Offset
 
       ! FREE EDITION OF ALGLIB:
       !
@@ -546,8 +546,8 @@ public partial class alglib
         N   -   matrix size, N>=0
         M   -   matrix size, N>=0
         A       -   matrix, actial matrix is stored in A[I1:I1+M-1,J1:J1+M-1]
-        I1      -   submatrix offset
-        J1      -   submatrix offset
+        I1      -   submatrix Offset
+        J1      -   submatrix Offset
         IsUpper -   whether matrix is upper triangular
         IsUnit  -   whether matrix is unitriangular
         OpType  -   transformation type:
@@ -555,8 +555,8 @@ public partial class alglib
                     * 1 - transposition
                     * 2 - conjugate transposition
         X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-        I2  -   submatrix offset
-        J2  -   submatrix offset
+        I2  -   submatrix Offset
+        J2  -   submatrix Offset
 
       ! FREE EDITION OF ALGLIB:
       !
@@ -609,16 +609,16 @@ public partial class alglib
         N   -   matrix size, N>=0
         M   -   matrix size, N>=0
         A       -   matrix, actial matrix is stored in A[I1:I1+N-1,J1:J1+N-1]
-        I1      -   submatrix offset
-        J1      -   submatrix offset
+        I1      -   submatrix Offset
+        J1      -   submatrix Offset
         IsUpper -   whether matrix is upper triangular
         IsUnit  -   whether matrix is unitriangular
         OpType  -   transformation type:
                     * 0 - no transformation
                     * 1 - transposition
         X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-        I2  -   submatrix offset
-        J2  -   submatrix offset
+        I2  -   submatrix Offset
+        J2  -   submatrix Offset
 
       ! FREE EDITION OF ALGLIB:
       !
@@ -671,16 +671,16 @@ public partial class alglib
         N   -   matrix size, N>=0
         M   -   matrix size, N>=0
         A       -   matrix, actial matrix is stored in A[I1:I1+M-1,J1:J1+M-1]
-        I1      -   submatrix offset
-        J1      -   submatrix offset
+        I1      -   submatrix Offset
+        J1      -   submatrix Offset
         IsUpper -   whether matrix is upper triangular
         IsUnit  -   whether matrix is unitriangular
         OpType  -   transformation type:
                     * 0 - no transformation
                     * 1 - transposition
         X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-        I2  -   submatrix offset
-        J2  -   submatrix offset
+        I2  -   submatrix Offset
+        J2  -   submatrix Offset
 
       ! FREE EDITION OF ALGLIB:
       !
@@ -739,15 +739,15 @@ public partial class alglib
         K       -   matrix size, K>=0
         Alpha   -   coefficient
         A       -   matrix
-        IA      -   submatrix offset (row index)
-        JA      -   submatrix offset (column index)
+        IA      -   submatrix Offset (row index)
+        JA      -   submatrix Offset (column index)
         OpTypeA -   multiplication type:
                     * 0 - A*A^H is calculated
                     * 2 - A^H*A is calculated
         Beta    -   coefficient
         C       -   preallocated input/output matrix
-        IC      -   submatrix offset (row index)
-        JC      -   submatrix offset (column index)
+        IC      -   submatrix Offset (row index)
+        JC      -   submatrix Offset (column index)
         IsUpper -   whether upper or lower triangle of C is updated;
                     this function updates only one half of C, leaving
                     other half unchanged (not referenced at all).
@@ -809,15 +809,15 @@ public partial class alglib
         K       -   matrix size, K>=0
         Alpha   -   coefficient
         A       -   matrix
-        IA      -   submatrix offset (row index)
-        JA      -   submatrix offset (column index)
+        IA      -   submatrix Offset (row index)
+        JA      -   submatrix Offset (column index)
         OpTypeA -   multiplication type:
                     * 0 - A*A^T is calculated
                     * 2 - A^T*A is calculated
         Beta    -   coefficient
         C       -   preallocated input/output matrix
-        IC      -   submatrix offset (row index)
-        JC      -   submatrix offset (column index)
+        IC      -   submatrix Offset (row index)
+        JC      -   submatrix Offset (column index)
         IsUpper -   whether C is upper triangular or lower triangular
 
       ! FREE EDITION OF ALGLIB:
@@ -878,7 +878,7 @@ public partial class alglib
 
     This function does NOT preallocate output matrix C, it MUST be preallocated
     by caller prior to calling this function. In case C does not have  enough
-    space to store result, exception will be generated.
+    SPACE to store result, exception will be generated.
 
     INPUT PARAMETERS
         M       -   matrix size, M>0
@@ -886,23 +886,23 @@ public partial class alglib
         K       -   matrix size, K>0
         Alpha   -   coefficient
         A       -   matrix
-        IA      -   submatrix offset
-        JA      -   submatrix offset
+        IA      -   submatrix Offset
+        JA      -   submatrix Offset
         OpTypeA -   transformation type:
                     * 0 - no transformation
                     * 1 - transposition
                     * 2 - conjugate transposition
         B       -   matrix
-        IB      -   submatrix offset
-        JB      -   submatrix offset
+        IB      -   submatrix Offset
+        JB      -   submatrix Offset
         OpTypeB -   transformation type:
                     * 0 - no transformation
                     * 1 - transposition
                     * 2 - conjugate transposition
         Beta    -   coefficient
         C       -   matrix (PREALLOCATED, large enough to store result)
-        IC      -   submatrix offset
-        JC      -   submatrix offset
+        IC      -   submatrix Offset
+        JC      -   submatrix Offset
 
       ! FREE EDITION OF ALGLIB:
       !
@@ -962,7 +962,7 @@ public partial class alglib
 
     This function does NOT preallocate output matrix C, it MUST be preallocated
     by caller prior to calling this function. In case C does not have  enough
-    space to store result, exception will be generated.
+    SPACE to store result, exception will be generated.
 
     INPUT PARAMETERS
         M       -   matrix size, M>0
@@ -970,21 +970,21 @@ public partial class alglib
         K       -   matrix size, K>0
         Alpha   -   coefficient
         A       -   matrix
-        IA      -   submatrix offset
-        JA      -   submatrix offset
+        IA      -   submatrix Offset
+        JA      -   submatrix Offset
         OpTypeA -   transformation type:
                     * 0 - no transformation
                     * 1 - transposition
         B       -   matrix
-        IB      -   submatrix offset
-        JB      -   submatrix offset
+        IB      -   submatrix Offset
+        JB      -   submatrix Offset
         OpTypeB -   transformation type:
                     * 0 - no transformation
                     * 1 - transposition
         Beta    -   coefficient
         C       -   PREALLOCATED output matrix, large enough to store result
-        IC      -   submatrix offset
-        JC      -   submatrix offset
+        IC      -   submatrix Offset
+        JC      -   submatrix Offset
 
       ! FREE EDITION OF ALGLIB:
       !
@@ -2854,15 +2854,15 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function serializes data structure to string.
+    This function serializes Data structure to string.
     
     Important properties of s_out:
     * it contains alphanumeric characters, dots, underscores, minus signs
     * these symbols are grouped into words, which are separated by spaces
       and Windows-style (CR+LF) newlines
     * although  serializer  uses  spaces and CR+LF as separators, you can 
-      replace any separator character by arbitrary combination of spaces,
-      tabs, Windows or Unix newlines. It allows flexible reformatting  of
+      replace any Separator character by arbitrary combination of spaces,
+      Tabs, Windows or Unix newlines. It allows flexible reformatting  of
       the  string  in  case you want to include it into text or XML file. 
       But you should not insert separators into the middle of the "words"
       nor you should change case of letters.
@@ -2886,7 +2886,7 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function unserializes data structure from string.
+    This function unserializes Data structure from string.
     *************************************************************************/
     public static void sparseunserialize(string s_in, out sparsematrix obj)
     {
@@ -2899,7 +2899,7 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function serializes data structure to stream.
+    This function serializes Data structure to stream.
     
     Data stream generated by this function is same as  string  representation
     generated  by  string  version  of  serializer - alphanumeric characters,
@@ -2921,7 +2921,7 @@ public partial class alglib
 
 
     /*************************************************************************
-    This function unserializes data structure from stream.
+    This function unserializes Data structure from stream.
     *************************************************************************/
     public static void sparseunserialize(System.IO.Stream stream_in, out sparsematrix obj)
     {
@@ -2955,7 +2955,7 @@ public partial class alglib
                         even zero).
                         It is important to understand that although hash-table
                         may grow automatically, it is better to  provide  good
-                        estimate of data size.
+                        estimate of Data size.
 
     OUTPUT PARAMETERS
         S           -   sparse M*N matrix in Hash-Table representation.
@@ -3038,7 +3038,7 @@ public partial class alglib
                         even zero).
                         It is important to understand that although hash-table
                         may grow automatically, it is better to  provide  good
-                        estimate of data size.
+                        estimate of Data size.
         S           -   SparseMatrix structure which MAY contain some  already
                         allocated storage.
 
@@ -3527,7 +3527,7 @@ public partial class alglib
         J           -   column index of the element to modify, 0<=J<N
 
     RESULT
-        whether S[I,J] is present in the data structure or not
+        whether S[I,J] is present in the Data structure or not
 
       -- ALGLIB PROJECT --
          Copyright 14.10.2020 by Bochkanov Sergey
@@ -3663,10 +3663,10 @@ public partial class alglib
                         * OpS=0     =>  op(S) = S
                         * OpS=1     =>  op(S) = S^T
         X           -   input vector, must have at least Cols(op(S))+IX elements
-        IX          -   subvector offset
+        IX          -   subvector Offset
         Beta        -   destination coefficient
         Y           -   preallocated output array, must have at least Rows(op(S))+IY elements
-        IY          -   subvector offset
+        IY          -   subvector Offset
 
     OUTPUT PARAMETERS
         Y           -   elements [IY...IY+Rows(op(S))-1] are replaced by result,
@@ -4108,7 +4108,7 @@ public partial class alglib
                           are used, and upper triangle is ignored.
         P           -   array[N] which stores permutation table;  P[I]=J means
                         that I-th row/column of matrix  A  is  moved  to  J-th
-                        position. For performance reasons we do NOT check that
+                        Position. For performance reasons we do NOT check that
                         P[] is  a   correct   permutation  (that there  is  no
                         repetitions, just that all its elements  are  in [0,N)
                         range.
@@ -4155,7 +4155,7 @@ public partial class alglib
                           are used, and upper triangle is ignored.
         P           -   array[N] which stores permutation table;  P[I]=J means
                         that I-th row/column of matrix  A  is  moved  to  J-th
-                        position. For performance reasons we do NOT check that
+                        Position. For performance reasons we do NOT check that
                         P[] is  a   correct   permutation  (that there  is  no
                         repetitions, just that all its elements  are  in [0,N)
                         range.
@@ -4210,7 +4210,7 @@ public partial class alglib
     /*************************************************************************
     This  function  is  used  to enumerate all elements of the sparse matrix.
     Before  first  call  user  initializes  T0 and T1 counters by zero. These
-    counters are used to remember current position in a  matrix;  after  each
+    counters are used to remember current Position in a  matrix;  after  each
     call they are updated by the function.
 
     Subsequent calls to this function return non-zero elements of the  sparse
@@ -4322,7 +4322,7 @@ public partial class alglib
           elemets are zero.
 
     NOTE: If you have O(non-zeros-per-row) time and memory  requirements,  use
-          SparseGetCompressedRow() function. It  returns  data  in  compressed
+          SparseGetCompressedRow() function. It  returns  Data  in  compressed
           format.
 
     NOTE: when  incorrect  I  (outside  of  [0,M-1]) or  matrix (non  CRS/SKS)
@@ -4374,10 +4374,10 @@ public partial class alglib
 
     NOTE: this function may allocate additional, unnecessary place for  ColIdx
           and Vals arrays. It is dictated by  performance  reasons  -  on  SKS
-          matrices it is faster  to  allocate  space  at  the  beginning  with
-          some "extra"-space, than performing two passes over matrix  -  first
-          time to calculate exact space required for data, second  time  -  to
-          store data itself.
+          matrices it is faster  to  allocate  SPACE  at  the  beginning  with
+          some "extra"-SPACE, than performing two passes over matrix  -  first
+          time to calculate exact SPACE required for Data, second  time  -  to
+          store Data itself.
 
       -- ALGLIB PROJECT --
          Copyright 10.12.2014 by Bochkanov Sergey
@@ -5023,7 +5023,7 @@ public partial class alglib
     /*************************************************************************
     The function returns number of strictly upper triangular non-zero elements
     in  the  matrix.  It  counts  SYMBOLICALLY non-zero elements, i.e. entries
-    in the sparse matrix data structure. If some element  has  zero  numerical
+    in the sparse matrix Data structure. If some element  has  zero  numerical
     value, it is still counted.
 
     This function has different cost for different types of matrices:
@@ -5051,7 +5051,7 @@ public partial class alglib
     /*************************************************************************
     The function returns number of strictly lower triangular non-zero elements
     in  the  matrix.  It  counts  SYMBOLICALLY non-zero elements, i.e. entries
-    in the sparse matrix data structure. If some element  has  zero  numerical
+    in the sparse matrix Data structure. If some element  has  zero  numerical
     value, it is still counted.
 
     This function has different cost for different types of matrices:
@@ -5236,14 +5236,14 @@ public partial class alglib
     
     /*************************************************************************
     This function sets stopping critera for the solver:
-    * error in eigenvector/value allowed by solver
+    * Error in eigenvector/value allowed by solver
     * maximum number of iterations to perform
 
     INPUT PARAMETERS:
         State       -   solver structure
         Eps         -   eps>=0,  with non-zero value used to tell solver  that
                         it can  stop  after  all  eigenvalues  converged  with
-                        error  roughly  proportional  to  eps*MAX(LAMBDA_MAX),
+                        Error  roughly  proportional  to  eps*MAX(LAMBDA_MAX),
                         where LAMBDA_MAX is a maximum eigenvalue.
                         Zero  value  means  that  no  check  for  precision is
                         performed.
@@ -5261,7 +5261,7 @@ public partial class alglib
 
     NOTE: passing non-zero eps results in  some performance  penalty,  roughly
           equal to 2N*(2K)^2 FLOPs per iteration. These additional computations
-          are required in order to estimate current error in  eigenvalues  via
+          are required in order to estimate current Error in  eigenvalues  via
           Rayleigh-Ritz process.
           Most of this additional time is  spent  in  construction  of  ~2Kx2K
           symmetric  subproblem  whose  eigenvalues  are  checked  with  exact
@@ -5436,7 +5436,7 @@ public partial class alglib
     sent by solver to user code: matrix X (array[N,RequestSize) which have  to
     be multiplied by out-of-core matrix A in a product A*X.
 
-    This function returns just request data; in order to get size of  the data
+    This function returns just request Data; in order to get size of  the Data
     prior to processing requestm, use eigsubspaceoocgetrequestinfo().
 
     It should be used in conjunction with other out-of-core-related  functions
@@ -5454,7 +5454,7 @@ public partial class alglib
         State           -   solver running in out-of-core mode
         X               -   possibly  preallocated   storage;  reallocated  if
                             needed, left unchanged, if large enough  to  store
-                            request data.
+                            request Data.
 
     OUTPUT PARAMETERS:
         X               -   array[N,RequestSize] or larger, leading  rectangle
@@ -6912,7 +6912,7 @@ public partial class alglib
         N       -   size of matrix A (can be smaller than actual size of A)
         IsUpper -   if IsUpper=True, then factorization is performed on  upper
                     triangle. Another triangle is ignored (it may contant some
-                    data, but it is not changed).
+                    Data, but it is not changed).
 
 
     OUTPUT PARAMETERS:
@@ -7131,7 +7131,7 @@ public partial class alglib
         Analysis    -   contains:
                         * symbolic analysis of the matrix structure which will
                           be used later to guide numerical factorization.
-                        * specific numeric values loaded into internal  memory
+                        * specific numeric values Loaded into internal  memory
                           waiting for the factorization to be performed
 
     This function fails if and only if the matrix A is symbolically degenerate
@@ -7275,7 +7275,7 @@ public partial class alglib
         Analysis    -   contains:
                         * symbolic analysis of the matrix structure which will
                           be used later to guide numerical factorization.
-                        * specific numeric values loaded into internal  memory
+                        * specific numeric values Loaded into internal  memory
                           waiting for the factorization to be performed
 
       -- ALGLIB routine --
@@ -7341,7 +7341,7 @@ public partial class alglib
     is set to True, all singular values will have high relative accuracy close
     to machine precision. If the parameter is set to False, only  the  biggest
     singular value will have relative accuracy  close  to  machine  precision.
-    The absolute error of other singular values is equal to the absolute error
+    The absolute Error of other singular values is equal to the absolute Error
     of the biggest singular value.
 
     Input parameters:
@@ -7392,7 +7392,7 @@ public partial class alglib
         By default, |TOL| falls within the range of 10*Epsilon and 100*Epsilon,
         where Epsilon is the machine precision. It is not  recommended  to  use
         TOL less than 10*Epsilon since this will  considerably  slow  down  the
-        algorithm and may not lead to error decreasing.
+        algorithm and may not lead to Error decreasing.
 
     History:
         * 31 March, 2007.
@@ -8762,7 +8762,7 @@ public partial class alglib
         isupper = false;
         matinv.spdmatrixinverse(ref a, n, isupper, ref info, rep.innerobj, null);
         if( !alglib.ap.forcesymmetric(a) )
-            throw new alglibexception("Internal error while forcing symmetricity of 'a' parameter");
+            throw new alglibexception("Internal Error while forcing symmetricity of 'a' parameter");
         return;
     }
             
@@ -8780,7 +8780,7 @@ public partial class alglib
         isupper = false;
         matinv.spdmatrixinverse(ref a, n, isupper, ref info, rep.innerobj, _params);
         if( !alglib.ap.forcesymmetric(a) )
-            throw new alglibexception("Internal error while forcing symmetricity of 'a' parameter");
+            throw new alglibexception("Internal Error while forcing symmetricity of 'a' parameter");
         return;
     }
     
@@ -8969,7 +8969,7 @@ public partial class alglib
         isupper = false;
         matinv.hpdmatrixinverse(ref a, n, isupper, ref info, rep.innerobj, null);
         if( !alglib.ap.forcehermitian(a) )
-            throw new alglibexception("Internal error while forcing Hermitian properties of 'a' parameter");
+            throw new alglibexception("Internal Error while forcing Hermitian properties of 'a' parameter");
         return;
     }
             
@@ -8987,7 +8987,7 @@ public partial class alglib
         isupper = false;
         matinv.hpdmatrixinverse(ref a, n, isupper, ref info, rep.innerobj, _params);
         if( !alglib.ap.forcehermitian(a) )
-            throw new alglibexception("Internal error while forcing Hermitian properties of 'a' parameter");
+            throw new alglibexception("Internal Error while forcing Hermitian properties of 'a' parameter");
         return;
     }
     
@@ -9385,7 +9385,7 @@ public partial class alglib
     Note 1:
         The block structure of matrix T can be easily recognized: since all
         the elements below the blocks are zeros, the elements a[i+1,i] which
-        are equal to 0 show the block border.
+        are equal to 0 Show the block border.
 
     Note 2:
         The algorithm performance depends on the value of the internal parameter
@@ -9460,7 +9460,7 @@ public partial class alglib
 
     Result:
         True, if the problem was solved successfully.
-        False, if the error occurred during the Cholesky decomposition of matrix
+        False, if the Error occurred during the Cholesky decomposition of matrix
         B (the matrix isn't positive-definite) or during the work of the iterative
         algorithm for solving the symmetric eigenproblem.
 
@@ -9529,7 +9529,7 @@ public partial class alglib
 
     Result:
         True, if the problem was reduced successfully.
-        False, if the error occurred during the Cholesky decomposition of
+        False, if the Error occurred during the Cholesky decomposition of
             matrix B (the matrix is not positive-definite).
 
       -- ALGLIB --
@@ -10293,11 +10293,11 @@ public partial class alglib
             M   -   number of rows
             N   -   number of columns
             A   -   source matrix, MxN submatrix is copied and transposed
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             B   -   destination matrix, must be large enough to store result
-            IB  -   submatrix offset (row index)
-            JB  -   submatrix offset (column index)
+            IB  -   submatrix Offset (row index)
+            JB  -   submatrix Offset (column index)
         *************************************************************************/
         public static void cmatrixtranspose(int m,
             int n,
@@ -10359,11 +10359,11 @@ public partial class alglib
             M   -   number of rows
             N   -   number of columns
             A   -   source matrix, MxN submatrix is copied and transposed
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             B   -   destination matrix, must be large enough to store result
-            IB  -   submatrix offset (row index)
-            JB  -   submatrix offset (column index)
+            IB  -   submatrix Offset (row index)
+            JB  -   submatrix Offset (column index)
         *************************************************************************/
         public static void rmatrixtranspose(int m,
             int n,
@@ -10466,11 +10466,11 @@ public partial class alglib
             M   -   number of rows
             N   -   number of columns
             A   -   source matrix, MxN submatrix is copied and transposed
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             B   -   destination matrix, must be large enough to store result
-            IB  -   submatrix offset (row index)
-            JB  -   submatrix offset (column index)
+            IB  -   submatrix Offset (row index)
+            JB  -   submatrix Offset (column index)
         *************************************************************************/
         public static void cmatrixcopy(int m,
             int n,
@@ -10507,9 +10507,9 @@ public partial class alglib
         Input parameters:
             N   -   subvector size
             A   -   source vector, N elements are copied
-            IA  -   source offset (first element index)
+            IA  -   source Offset (first element index)
             B   -   destination vector, must be large enough to store result
-            IB  -   destination offset (first element index)
+            IB  -   destination Offset (first element index)
         *************************************************************************/
         public static void rvectorcopy(int n,
             double[] a,
@@ -10540,11 +10540,11 @@ public partial class alglib
             M   -   number of rows
             N   -   number of columns
             A   -   source matrix, MxN submatrix is copied and transposed
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             B   -   destination matrix, must be large enough to store result
-            IB  -   submatrix offset (row index)
-            JB  -   submatrix offset (column index)
+            IB  -   submatrix Offset (row index)
+            JB  -   submatrix Offset (column index)
         *************************************************************************/
         public static void rmatrixcopy(int m,
             int n,
@@ -10587,12 +10587,12 @@ public partial class alglib
             N   -   number of columns
             Alpha-  coefficient
             A   -   source matrix, MxN submatrix is copied and transposed
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             Beta-   coefficient
             B   -   destination matrix, must be large enough to store result
-            IB  -   submatrix offset (row index)
-            JB  -   submatrix offset (column index)
+            IB  -   submatrix Offset (row index)
+            JB  -   submatrix Offset (column index)
         *************************************************************************/
         public static void rmatrixgencopy(int m,
             int n,
@@ -10683,13 +10683,13 @@ public partial class alglib
             M   -   number of rows
             N   -   number of columns
             A   -   target matrix, MxN submatrix is updated
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             Alpha-  coefficient
             U   -   vector #1
-            IU  -   subvector offset
+            IU  -   subvector Offset
             V   -   vector #2
-            IV  -   subvector offset
+            IV  -   subvector Offset
 
 
           -- ALGLIB routine --
@@ -10766,12 +10766,12 @@ public partial class alglib
             M   -   number of rows
             N   -   number of columns
             A   -   target matrix, MxN submatrix is updated
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             U   -   vector #1
-            IU  -   subvector offset
+            IU  -   subvector Offset
             V   -   vector #2
-            IV  -   subvector offset
+            IV  -   subvector Offset
         *************************************************************************/
         public static void cmatrixrank1(int m,
             int n,
@@ -10844,12 +10844,12 @@ public partial class alglib
             M   -   number of rows
             N   -   number of columns
             A   -   target matrix, MxN submatrix is updated
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             U   -   vector #1
-            IU  -   subvector offset
+            IU  -   subvector Offset
             V   -   vector #2
-            IV  -   subvector offset
+            IV  -   subvector Offset
         *************************************************************************/
         public static void rmatrixrank1(int m,
             int n,
@@ -10983,15 +10983,15 @@ public partial class alglib
             N   -   number of columns of op(A)
                     N>=0
             A   -   target matrix
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             OpA -   operation type:
                     * OpA=0     =>  op(A) = A
                     * OpA=1     =>  op(A) = A^T
                     * OpA=2     =>  op(A) = A^H
             X   -   input vector
-            IX  -   subvector offset
-            IY  -   subvector offset
+            IX  -   subvector Offset
+            IY  -   subvector Offset
             Y   -   preallocated matrix, must be large enough to store result
 
         OUTPUT PARAMETERS:
@@ -11131,14 +11131,14 @@ public partial class alglib
             M   -   number of rows of op(A)
             N   -   number of columns of op(A)
             A   -   target matrix
-            IA  -   submatrix offset (row index)
-            JA  -   submatrix offset (column index)
+            IA  -   submatrix Offset (row index)
+            JA  -   submatrix Offset (column index)
             OpA -   operation type:
                     * OpA=0     =>  op(A) = A
                     * OpA=1     =>  op(A) = A^T
             X   -   input vector
-            IX  -   subvector offset
-            IY  -   subvector offset
+            IX  -   subvector Offset
+            IY  -   subvector Offset
             Y   -   preallocated matrix, must be large enough to store result
 
         OUTPUT PARAMETERS:
@@ -11439,15 +11439,15 @@ public partial class alglib
         INPUT PARAMETERS
             N   -   matrix size, N>=0
             A       -   matrix, actial matrix is stored in A[IA:IA+N-1,JA:JA+N-1]
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             IsUpper -   whether matrix is upper triangular
             IsUnit  -   whether matrix is unitriangular
             OpType  -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             X       -   right part, actual vector is stored in X[IX:IX+N-1]
-            IX      -   offset
+            IX      -   Offset
             
         OUTPUT PARAMETERS
             X       -   solution replaces elements X[IX:IX+N-1]
@@ -11591,8 +11591,8 @@ public partial class alglib
             N   -   matrix size, N>=0
             M   -   matrix size, N>=0
             A       -   matrix, actial matrix is stored in A[I1:I1+N-1,J1:J1+N-1]
-            I1      -   submatrix offset
-            J1      -   submatrix offset
+            I1      -   submatrix Offset
+            J1      -   submatrix Offset
             IsUpper -   whether matrix is upper triangular
             IsUnit  -   whether matrix is unitriangular
             OpType  -   transformation type:
@@ -11600,8 +11600,8 @@ public partial class alglib
                         * 1 - transposition
                         * 2 - conjugate transposition
             X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-            I2  -   submatrix offset
-            J2  -   submatrix offset
+            I2  -   submatrix Offset
+            J2  -   submatrix Offset
 
           ! FREE EDITION OF ALGLIB:
           ! 
@@ -11807,8 +11807,8 @@ public partial class alglib
             N   -   matrix size, N>=0
             M   -   matrix size, N>=0
             A       -   matrix, actial matrix is stored in A[I1:I1+M-1,J1:J1+M-1]
-            I1      -   submatrix offset
-            J1      -   submatrix offset
+            I1      -   submatrix Offset
+            J1      -   submatrix Offset
             IsUpper -   whether matrix is upper triangular
             IsUnit  -   whether matrix is unitriangular
             OpType  -   transformation type:
@@ -11816,8 +11816,8 @@ public partial class alglib
                         * 1 - transposition
                         * 2 - conjugate transposition
             X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-            I2  -   submatrix offset
-            J2  -   submatrix offset
+            I2  -   submatrix Offset
+            J2  -   submatrix Offset
 
           ! FREE EDITION OF ALGLIB:
           ! 
@@ -12013,16 +12013,16 @@ public partial class alglib
             N   -   matrix size, N>=0
             M   -   matrix size, N>=0
             A       -   matrix, actial matrix is stored in A[I1:I1+N-1,J1:J1+N-1]
-            I1      -   submatrix offset
-            J1      -   submatrix offset
+            I1      -   submatrix Offset
+            J1      -   submatrix Offset
             IsUpper -   whether matrix is upper triangular
             IsUnit  -   whether matrix is unitriangular
             OpType  -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-            I2  -   submatrix offset
-            J2  -   submatrix offset
+            I2  -   submatrix Offset
+            J2  -   submatrix Offset
 
           ! FREE EDITION OF ALGLIB:
           ! 
@@ -12228,16 +12228,16 @@ public partial class alglib
             N   -   matrix size, N>=0
             M   -   matrix size, N>=0
             A       -   matrix, actial matrix is stored in A[I1:I1+M-1,J1:J1+M-1]
-            I1      -   submatrix offset
-            J1      -   submatrix offset
+            I1      -   submatrix Offset
+            J1      -   submatrix Offset
             IsUpper -   whether matrix is upper triangular
             IsUnit  -   whether matrix is unitriangular
             OpType  -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             X   -   matrix, actial matrix is stored in X[I2:I2+M-1,J2:J2+N-1]
-            I2  -   submatrix offset
-            J2  -   submatrix offset
+            I2  -   submatrix Offset
+            J2  -   submatrix Offset
 
           ! FREE EDITION OF ALGLIB:
           ! 
@@ -12439,15 +12439,15 @@ public partial class alglib
             K       -   matrix size, K>=0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset (row index)
-            JA      -   submatrix offset (column index)
+            IA      -   submatrix Offset (row index)
+            JA      -   submatrix Offset (column index)
             OpTypeA -   multiplication type:
                         * 0 - A*A^H is calculated
                         * 2 - A^H*A is calculated
             Beta    -   coefficient
             C       -   preallocated input/output matrix
-            IC      -   submatrix offset (row index)
-            JC      -   submatrix offset (column index)
+            IC      -   submatrix Offset (row index)
+            JC      -   submatrix Offset (column index)
             IsUpper -   whether upper or lower triangle of C is updated;
                         this function updates only one half of C, leaving
                         other half unchanged (not referenced at all).
@@ -12629,15 +12629,15 @@ public partial class alglib
             K       -   matrix size, K>=0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset (row index)
-            JA      -   submatrix offset (column index)
+            IA      -   submatrix Offset (row index)
+            JA      -   submatrix Offset (column index)
             OpTypeA -   multiplication type:
                         * 0 - A*A^T is calculated
                         * 2 - A^T*A is calculated
             Beta    -   coefficient
             C       -   preallocated input/output matrix
-            IC      -   submatrix offset (row index)
-            JC      -   submatrix offset (column index)
+            IC      -   submatrix Offset (row index)
+            JC      -   submatrix Offset (column index)
             IsUpper -   whether C is upper triangular or lower triangular
 
           ! FREE EDITION OF ALGLIB:
@@ -12818,7 +12818,7 @@ public partial class alglib
 
         This function does NOT preallocate output matrix C, it MUST be preallocated
         by caller prior to calling this function. In case C does not have  enough
-        space to store result, exception will be generated.
+        SPACE to store result, exception will be generated.
 
         INPUT PARAMETERS
             M       -   matrix size, M>0
@@ -12826,23 +12826,23 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             OpTypeA -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
                         * 2 - conjugate transposition
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             OpTypeB -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
                         * 2 - conjugate transposition
             Beta    -   coefficient
             C       -   matrix (PREALLOCATED, large enough to store result)
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           ! FREE EDITION OF ALGLIB:
           ! 
@@ -12962,7 +12962,7 @@ public partial class alglib
 
         This function does NOT preallocate output matrix C, it MUST be preallocated
         by caller prior to calling this function. In case C does not have  enough
-        space to store result, exception will be generated.
+        SPACE to store result, exception will be generated.
 
         INPUT PARAMETERS
             M       -   matrix size, M>0
@@ -12970,21 +12970,21 @@ public partial class alglib
             K       -   matrix size, K>0
             Alpha   -   coefficient
             A       -   matrix
-            IA      -   submatrix offset
-            JA      -   submatrix offset
+            IA      -   submatrix Offset
+            JA      -   submatrix Offset
             OpTypeA -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             B       -   matrix
-            IB      -   submatrix offset
-            JB      -   submatrix offset
+            IB      -   submatrix Offset
+            JB      -   submatrix Offset
             OpTypeB -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             Beta    -   coefficient
             C       -   PREALLOCATED output matrix, large enough to store result
-            IC      -   submatrix offset
-            JC      -   submatrix offset
+            IC      -   submatrix Offset
+            JC      -   submatrix Offset
 
           ! FREE EDITION OF ALGLIB:
           ! 
@@ -20084,7 +20084,7 @@ public partial class alglib
                             even zero).
                             It is important to understand that although hash-table
                             may grow automatically, it is better to  provide  good
-                            estimate of data size.
+                            estimate of Data size.
 
         OUTPUT PARAMETERS
             S           -   sparse M*N matrix in Hash-Table representation.
@@ -20143,7 +20143,7 @@ public partial class alglib
                             even zero).
                             It is important to understand that although hash-table
                             may grow automatically, it is better to  provide  good
-                            estimate of data size.
+                            estimate of Data size.
             S           -   SparseMatrix structure which MAY contain some  already
                             allocated storage.
 
@@ -21096,7 +21096,7 @@ public partial class alglib
             J           -   column index of the element to modify, 0<=J<N
 
         RESULT
-            whether S[I,J] is present in the data structure or not
+            whether S[I,J] is present in the Data structure or not
 
           -- ALGLIB PROJECT --
              Copyright 14.10.2020 by Bochkanov Sergey
@@ -21552,10 +21552,10 @@ public partial class alglib
                             * OpS=0     =>  op(S) = S
                             * OpS=1     =>  op(S) = S^T
             X           -   input vector, must have at least Cols(op(S))+IX elements
-            IX          -   subvector offset
+            IX          -   subvector Offset
             Beta        -   destination coefficient
             Y           -   preallocated output array, must have at least Rows(op(S))+IY elements
-            IY          -   subvector offset
+            IY          -   subvector Offset
             
         OUTPUT PARAMETERS
             Y           -   elements [IY...IY+Rows(op(S))-1] are replaced by result,
@@ -23665,7 +23665,7 @@ public partial class alglib
                     alglib.ap.assert(math.isfinite(v0), "SparseTRSV: overflow or division by exact zero");
                     return;
                 }
-                alglib.ap.assert(false, "SparseTRSV: internal error");
+                alglib.ap.assert(false, "SparseTRSV: internal Error");
             }
             if( s.matrixtype==2 )
             {
@@ -23782,9 +23782,9 @@ public partial class alglib
                     alglib.ap.assert(math.isfinite(v0), "SparseTRSV: overflow or division by exact zero");
                     return;
                 }
-                alglib.ap.assert(false, "SparseTRSV: internal error");
+                alglib.ap.assert(false, "SparseTRSV: internal Error");
             }
-            alglib.ap.assert(false, "SparseTRSV: internal error");
+            alglib.ap.assert(false, "SparseTRSV: internal Error");
         }
 
 
@@ -23806,7 +23806,7 @@ public partial class alglib
                               are used, and upper triangle is ignored.
             P           -   array[N] which stores permutation table;  P[I]=J means
                             that I-th row/column of matrix  A  is  moved  to  J-th
-                            position. For performance reasons we do NOT check that
+                            Position. For performance reasons we do NOT check that
                             P[] is  a   correct   permutation  (that there  is  no
                             repetitions, just that all its elements  are  in [0,N)
                             range.
@@ -23851,7 +23851,7 @@ public partial class alglib
                               are used, and upper triangle is ignored.
             P           -   array[N] which stores permutation table;  P[I]=J means
                             that I-th row/column of matrix  A  is  moved  to  J-th
-                            position. For performance reasons we do NOT check that
+                            Position. For performance reasons we do NOT check that
                             P[] is  a   correct   permutation  (that there  is  no
                             repetitions, just that all its elements  are  in [0,N)
                             range.
@@ -24064,7 +24064,7 @@ public partial class alglib
             }
             
             //
-            // Initialization value for free space
+            // Initialization value for free SPACE
             //
             s.tablesize = (int)Math.Round(k1/desiredloadfactor*growfactor+additional);
             s.nfree = s.tablesize-k1;
@@ -24102,7 +24102,7 @@ public partial class alglib
             int lt = 0;
             int rt = 0;
 
-            alglib.ap.assert(s.matrixtype==1, "SparseInitDUIdx: internal error, incorrect matrix type");
+            alglib.ap.assert(s.matrixtype==1, "SparseInitDUIdx: internal Error, incorrect matrix type");
             apserv.ivectorsetlengthatleast(ref s.didx, s.m, _params);
             apserv.ivectorsetlengthatleast(ref s.uidx, s.m, _params);
             for(i=0; i<=s.m-1; i++)
@@ -24203,7 +24203,7 @@ public partial class alglib
         /*************************************************************************
         This  function  is  used  to enumerate all elements of the sparse matrix.
         Before  first  call  user  initializes  T0 and T1 counters by zero. These
-        counters are used to remember current position in a  matrix;  after  each
+        counters are used to remember current Position in a  matrix;  after  each
         call they are updated by the function.
 
         Subsequent calls to this function return non-zero elements of the  sparse
@@ -24324,7 +24324,7 @@ public partial class alglib
                 
                 //
                 // SKS matrix:
-                // * T0 stores current offset in Vals[] array
+                // * T0 stores current Offset in Vals[] array
                 // * T1 stores index of the diagonal block
                 //
                 alglib.ap.assert(s.m==s.n, "SparseEnumerate: non-square SKS matrices are not supported");
@@ -24531,7 +24531,7 @@ public partial class alglib
               elemets are zero.
               
         NOTE: If you have O(non-zeros-per-row) time and memory  requirements,  use
-              SparseGetCompressedRow() function. It  returns  data  in  compressed
+              SparseGetCompressedRow() function. It  returns  Data  in  compressed
               format.
 
         NOTE: when  incorrect  I  (outside  of  [0,M-1]) or  matrix (non  CRS/SKS)
@@ -24637,10 +24637,10 @@ public partial class alglib
               
         NOTE: this function may allocate additional, unnecessary place for  ColIdx
               and Vals arrays. It is dictated by  performance  reasons  -  on  SKS
-              matrices it is faster  to  allocate  space  at  the  beginning  with
-              some "extra"-space, than performing two passes over matrix  -  first
-              time to calculate exact space required for data, second  time  -  to
-              store data itself.
+              matrices it is faster  to  allocate  SPACE  at  the  beginning  with
+              some "extra"-SPACE, than performing two passes over matrix  -  first
+              time to calculate exact SPACE required for Data, second  time  -  to
+              store Data itself.
 
           -- ALGLIB PROJECT --
              Copyright 10.12.2014 by Bochkanov Sergey
@@ -24671,7 +24671,7 @@ public partial class alglib
             nzcnt = 0;
             
             //
-            // CRS matrix - just copy data
+            // CRS matrix - just copy Data
             //
             if( s.matrixtype==1 )
             {
@@ -26128,7 +26128,7 @@ public partial class alglib
         This non-accessible to user function performs  in-place  creation  of  CRS
         matrix. It is expected that:
         * S.M and S.N are initialized
-        * S.RIdx, S.Idx and S.Vals are loaded with values in CRS  format  used  by
+        * S.RIdx, S.Idx and S.Vals are Loaded with values in CRS  format  used  by
           ALGLIB, with elements of S.Idx/S.Vals  possibly  being  unsorted  within
           each row (this constructor function may post-sort matrix,  assuming that
           it is sorted by rows).
@@ -26386,7 +26386,7 @@ public partial class alglib
         /*************************************************************************
         The function returns number of strictly upper triangular non-zero elements
         in  the  matrix.  It  counts  SYMBOLICALLY non-zero elements, i.e. entries
-        in the sparse matrix data structure. If some element  has  zero  numerical
+        in the sparse matrix Data structure. If some element  has  zero  numerical
         value, it is still counted.
 
         This function has different cost for different types of matrices:
@@ -26456,7 +26456,7 @@ public partial class alglib
                 }
                 return result;
             }
-            alglib.ap.assert(false, "SparseGetUpperCount: internal error");
+            alglib.ap.assert(false, "SparseGetUpperCount: internal Error");
             return result;
         }
 
@@ -26464,7 +26464,7 @@ public partial class alglib
         /*************************************************************************
         The function returns number of strictly lower triangular non-zero elements
         in  the  matrix.  It  counts  SYMBOLICALLY non-zero elements, i.e. entries
-        in the sparse matrix data structure. If some element  has  zero  numerical
+        in the sparse matrix Data structure. If some element  has  zero  numerical
         value, it is still counted.
 
         This function has different cost for different types of matrices:
@@ -26534,7 +26534,7 @@ public partial class alglib
                 }
                 return result;
             }
-            alglib.ap.assert(false, "SparseGetUpperCount: internal error");
+            alglib.ap.assert(false, "SparseGetUpperCount: internal Error");
             return result;
         }
 
@@ -26851,7 +26851,7 @@ public partial class alglib
 
             
             //
-            // Allocate space
+            // Allocate SPACE
             //
             wr = new double[n];
             wi = new double[n];
@@ -26946,7 +26946,7 @@ public partial class alglib
         Note 1:
             The block structure of matrix T could be easily recognized: since  all
             the elements  below  the blocks are zeros, the elements a[i+1,i] which
-            are equal to 0 show the block border.
+            are equal to 0 Show the block border.
 
         Note 2:
             the algorithm  performance  depends  on  the  value  of  the  internal
@@ -27488,7 +27488,7 @@ public partial class alglib
                 
                 //
                 // Block below is never executed; it is necessary just to avoid
-                // "unreachable code" warning about automatically generated code.
+                // "unreachable code" Warning about automatically generated code.
                 //
                 // We just need a way to transfer control to the end of the function,
                 // even a fake way which is never actually traversed.
@@ -28543,14 +28543,14 @@ public partial class alglib
 
         /*************************************************************************
         This function sets stopping critera for the solver:
-        * error in eigenvector/value allowed by solver
+        * Error in eigenvector/value allowed by solver
         * maximum number of iterations to perform
 
         INPUT PARAMETERS:
             State       -   solver structure
             Eps         -   eps>=0,  with non-zero value used to tell solver  that
                             it can  stop  after  all  eigenvalues  converged  with
-                            error  roughly  proportional  to  eps*MAX(LAMBDA_MAX),
+                            Error  roughly  proportional  to  eps*MAX(LAMBDA_MAX),
                             where LAMBDA_MAX is a maximum eigenvalue.
                             Zero  value  means  that  no  check  for  precision is
                             performed.
@@ -28568,7 +28568,7 @@ public partial class alglib
               
         NOTE: passing non-zero eps results in  some performance  penalty,  roughly
               equal to 2N*(2K)^2 FLOPs per iteration. These additional computations
-              are required in order to estimate current error in  eigenvalues  via
+              are required in order to estimate current Error in  eigenvalues  via
               Rayleigh-Ritz process.
               Most of this additional time is  spent  in  construction  of  ~2Kx2K
               symmetric  subproblem  whose  eigenvalues  are  checked  with  exact
@@ -28748,7 +28748,7 @@ public partial class alglib
         sent by solver to user code: matrix X (array[N,RequestSize) which have  to
         be multiplied by out-of-core matrix A in a product A*X.
 
-        This function returns just request data; in order to get size of  the data
+        This function returns just request Data; in order to get size of  the Data
         prior to processing requestm, use eigsubspaceoocgetrequestinfo().
 
         It should be used in conjunction with other out-of-core-related  functions
@@ -28766,7 +28766,7 @@ public partial class alglib
             State           -   solver running in out-of-core mode
             X               -   possibly  preallocated   storage;  reallocated  if
                                 needed, left unchanged, if large enough  to  store
-                                request data.
+                                request Data.
             
         OUTPUT PARAMETERS:
             X               -   array[N,RequestSize] or larger, leading  rectangle
@@ -31226,7 +31226,7 @@ public partial class alglib
                 }
                 
                 //
-                // label 30:
+                // Label 30:
                 //
                 l = l1;
                 lsv = l;
@@ -32285,7 +32285,7 @@ public partial class alglib
             }
             
             //
-            // Initialize error flags
+            // Initialize Error flags
             //
             ncnvrg = false;
             toofew = false;
@@ -33749,7 +33749,7 @@ public partial class alglib
                     {
                         
                         //
-                        // Converged -- Swap with position KFNEW,
+                        // Converged -- Swap with Position KFNEW,
                         // then increment KFNEW
                         //
                         if( ji>kfnew )
@@ -36874,7 +36874,7 @@ public partial class alglib
             Buf         -   following fields of Buf are set:
                             * Buf.RowPermRawIdx[] - contains row permutation, with
                               RawIdx[I]=J meaning that J-th row  of  the  original
-                              input matrix was moved to Ith position of the output
+                              input matrix was moved to Ith Position of the output
                               factorization
             
         This function always succeeds  i.e. it ALWAYS returns valid factorization,
@@ -37854,7 +37854,7 @@ public partial class alglib
 
         V0I, V0R, V1I, V1R must be preallocated arrays[N].
 
-        Following data are returned:
+        Following Data are returned:
         * UU - diagonal element (pivoted out), can be zero
         * V0I, V0R, NZ0 - sparse column pivoted out to the left (after permutation
           is applied to its elements) and divided by UU.
@@ -38512,7 +38512,7 @@ public partial class alglib
         * NStored - number of elements currently in the set
         * Items - first NStored elements are UNSORTED items
         * LocationOf - array[N] that allows quick access by key. If item I is present
-          in the set, LocationOf[I]>=0 and stores position in Items[]  of  element
+          in the set, LocationOf[I]>=0 and stores Position in Items[]  of  element
           I, i.e. Items[LocationOf[I]]=I.
           If item I is not present, LocationOf[I]<0.
         *************************************************************************/
@@ -39571,7 +39571,7 @@ public partial class alglib
         Reallocates internal storage for set #SetIdx, increasing its  capacity  to
         NewAllocated exactly. This function may invalidate internal  pointers  for
         ALL   sets  in  the  kn-set  structure  because  it  may  perform  storage
-        compression in order to reclaim previously freed space.
+        compression in order to reclaim previously freed SPACE.
 
         INPUT PARAMETERS
             SA          -   kn-set structure
@@ -40824,7 +40824,7 @@ public partial class alglib
 
         /*************************************************************************
         This function selects K-th  pivot  with  minimum  approximate  degree  and
-        generates permutation that reorders variable to the K-th position  in  the
+        generates permutation that reorders variable to the K-th Position  in  the
         matrix.
 
         Due to supernodal structure of the matrix more than one pivot variable can
@@ -40946,7 +40946,7 @@ public partial class alglib
             Buf.setA    -   Lp is eliminated from setA
             Buf.setE    -   Ep is eliminated from setE, P is added
             approxD     -   updated
-            Buf.setQSuperCand-   contains candidates for quasidense status assignment
+            Buf.setQSuperCand-   contains candidates for quasidense Status assignment
 
           -- ALGLIB PROJECT --
              Copyright 05.10.2020 by Bochkanov Sergey.
@@ -41195,14 +41195,14 @@ public partial class alglib
 
 
         /*************************************************************************
-        Assign quasidense status to proposed supervars,  perform all the necessary
+        Assign quasidense Status to proposed supervars,  perform all the necessary
         cleanup (remove vertices, etc)
 
         INPUT PARAMETERS
             Buf         -   properly initialized buffer object
-            Cand        -   supervariables to be moved to quasidense status
+            Cand        -   supervariables to be moved to quasidense Status
             P           -   current pivot element (used for integrity checks)
-                            or -1, when this function is used for initial status
+                            or -1, when this function is used for initial Status
                             assignment.
             
         OUTPUT PARAMETERS
@@ -41503,7 +41503,7 @@ public partial class alglib
             Buf         -   buffer; may be completely uninitialized, or one remained
                             from previous calls (including ones with completely
                             different matrices). Previously allocated temporary
-                            space will be reused as much as possible.
+                            SPACE will be reused as much as possible.
 
         OUTPUT PARAMETERS:
             Analysis    -   symbolic analysis of the matrix structure  which  will
@@ -42110,12 +42110,12 @@ public partial class alglib
         /*************************************************************************
         Sparse Cholesky factorization of symmetric matrix stored  in  CRS  format,
         using precomputed analysis of the sparsity pattern stored  in the Analysis
-        object and specific numeric values that  are  presently  loaded  into  the
+        object and specific numeric values that  are  presently  Loaded  into  the
         Analysis.
 
         The factorization can be retrieved  with  SPSymmExtract().  Alternatively,
         one can perform some operations without offloading  the  matrix  (somewhat
-        faster due to itilization of  SIMD-friendly  supernodal  data structures),
+        faster due to itilization of  SIMD-friendly  supernodal  Data structures),
         most importantly - linear system solution with SPSymmSolve().
 
         Depending on settings specified during factorization, may produce  vanilla
@@ -42269,7 +42269,7 @@ public partial class alglib
         matrix A.
 
         Works faster than extracting the matrix and solving with SparseTRSV()  due
-        to SIMD-friendly supernodal data structures being used.
+        to SIMD-friendly supernodal Data structures being used.
 
         INPUT PARAMETERS:
             Analysis    -   prior factorization performed on some sparse matrix
@@ -42307,7 +42307,7 @@ public partial class alglib
             ablasf.rsetallocv(n, 0.0, ref analysis.tmpx, _params);
             
             //
-            // Handle left-hand side permutation, convert data to internal SIMD-friendly format
+            // Handle left-hand side permutation, convert Data to internal SIMD-friendly format
             //
             ablasf.rsetallocv(n*simdwidth, 0.0, ref analysis.simdbuf, _params);
             for(i=0; i<=n-1; i++)
@@ -42424,7 +42424,7 @@ public partial class alglib
             }
             
             //
-            // Handle right-hand side permutation, convert data to internal SIMD-friendly format
+            // Handle right-hand side permutation, convert Data to internal SIMD-friendly format
             //
             for(i=0; i<=n-1; i++)
             {
@@ -42444,7 +42444,7 @@ public partial class alglib
             Analysis    -   prior factorization performed on some sparse matrix
 
         OUTPUT PARAMETERS:
-            SumSq, ErrSq-   diagonal magnitude and absolute diagonal error
+            SumSq, ErrSq-   diagonal magnitude and absolute diagonal Error
 
           -- ALGLIB routine --
              08.09.2021
@@ -42880,7 +42880,7 @@ public partial class alglib
                 {
                     
                     //
-                    // Move column I to position SIdx, decrease unprocessed children count
+                    // Move column I to Position SIdx, decrease unprocessed children count
                     //
                     supernodalpermutation[i] = sidx;
                     invsupernodalpermutation[sidx] = i;
@@ -43776,7 +43776,7 @@ public partial class alglib
                 {
                     
                     //
-                    // We need to move element K to position I.
+                    // We need to move element K to Position I.
                     // J is where K actually stored
                     //
                     k = analysis.inveffectiveperm[i];
@@ -43830,7 +43830,7 @@ public partial class alglib
             tmpBottomT,
             tmpUpdateT,
             tmpUpdate-  temporary sparsematrix instances; previously allocated
-                        space will be reused.
+                        SPACE will be reused.
             
         OUTPUT PARAMETERS:
             ATail   -   sparsity pattern of the lower triangular temporary  matrix
@@ -44109,7 +44109,7 @@ public partial class alglib
             A           -   sparse lower triangular matrix in CRS format.
             P           -   array[N] which stores permutation table;  P[I]=J means
                             that I-th row/column of matrix  A  is  moved  to  J-th
-                            position. For performance reasons we do NOT check that
+                            Position. For performance reasons we do NOT check that
                             P[] is  a   correct   permutation  (that there  is  no
                             repetitions, just that all its elements  are  in [0,N)
                             range.
@@ -44457,7 +44457,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Update target supernode with data from one of its children. This operation
+        Update target supernode with Data from one of its children. This operation
         is a supernodal equivalent  of  the  column  update  in  the  left-looking
         Cholesky.
 
@@ -44885,11 +44885,11 @@ public partial class alglib
 
 
         /*************************************************************************
-        This function aligns position in array in order to  better  accommodate to
+        This function aligns Position in array in order to  better  accommodate to
         SIMD specifics.
 
-        NOTE: this function aligns position measured in double precision  numbers,
-              not in bits or bytes. If you want to have 256-bit aligned  position,
+        NOTE: this function aligns Position measured in double precision  numbers,
+              not in bits or bytes. If you want to have 256-bit aligned  Position,
               round Offs to nearest multiple of 4 that is not less than Offs.
 
           -- ALGLIB routine --
@@ -46787,7 +46787,7 @@ public partial class alglib
             N       -   size of matrix A (can be smaller than actual size of A)
             IsUpper -   if IsUpper=True, then factorization is performed on  upper
                         triangle. Another triangle is ignored (it may contant some
-                        data, but it is not changed).
+                        Data, but it is not changed).
             
 
         OUTPUT PARAMETERS:
@@ -46876,7 +46876,7 @@ public partial class alglib
             nadd = 1;
             while( nready<n )
             {
-                alglib.ap.assert(nadd==1, "SkylineCholesky: internal error");
+                alglib.ap.assert(nadd==1, "SkylineCholesky: internal Error");
                 
                 //
                 // Calculate A1:=(inv(L)*A')'
@@ -46919,8 +46919,8 @@ public partial class alglib
                         // * JNZA  - index of the first column where A become nonzero
                         // * JNZL  - index of the first column where L become nonzero
                         // * JNZ   - index of the first column where both A and L become nonzero
-                        // * OffsA - offset of A[JNZ] in A.Vals
-                        // * OffsL - offset of L[I,JNZ] in A.Vals
+                        // * OffsA - Offset of A[JNZ] in A.Vals
+                        // * OffsL - Offset of L[I,JNZ] in A.Vals
                         //
                         // Then, we solve SUM(A1[j]*L[I,j],j=JNZ..I-1) + A1[I]*L[I,I] = A[I],
                         // with A1[JNZ..I-1] already known, and A1[I] unknown.
@@ -47300,7 +47300,7 @@ public partial class alglib
             Analysis    -   contains:
                             * symbolic analysis of the matrix structure which will
                               be used later to guide numerical factorization.
-                            * specific numeric values loaded into internal  memory
+                            * specific numeric values Loaded into internal  memory
                               waiting for the factorization to be performed
 
         This function fails if and only if the matrix A is symbolically degenerate
@@ -47579,7 +47579,7 @@ public partial class alglib
             Analysis    -   contains:
                             * symbolic analysis of the matrix structure which will
                               be used later to guide numerical factorization.
-                            * specific numeric values loaded into internal  memory
+                            * specific numeric values Loaded into internal  memory
                               waiting for the factorization to be performed
 
           -- ALGLIB routine --
@@ -47890,7 +47890,7 @@ public partial class alglib
 
         INPUT PARAMETERS:
             A       -   matrix given by upper or lower triangle
-            Offs    -   offset of diagonal block to decompose
+            Offs    -   Offset of diagonal block to decompose
             N       -   diagonal block size
             IsUpper -   what half is given
             Tmp     -   temporary array; allocated by function, if its size is too
@@ -48473,7 +48473,7 @@ public partial class alglib
         is set to True, all singular values will have high relative accuracy close
         to machine precision. If the parameter is set to False, only  the  biggest
         singular value will have relative accuracy  close  to  machine  precision.
-        The absolute error of other singular values is equal to the absolute error
+        The absolute Error of other singular values is equal to the absolute Error
         of the biggest singular value.
 
         Input parameters:
@@ -48524,7 +48524,7 @@ public partial class alglib
             By default, |TOL| falls within the range of 10*Epsilon and 100*Epsilon,
             where Epsilon is the machine precision. It is not  recommended  to  use
             TOL less than 10*Epsilon since this will  considerably  slow  down  the
-            algorithm and may not lead to error decreasing.
+            algorithm and may not lead to Error decreasing.
             
         History:
             * 31 March, 2007.
@@ -53744,7 +53744,7 @@ public partial class alglib
             State   -   structure which is used by FBLSCGIteration() to store
                         algorithm state between subsequent calls.
 
-        NOTE: no error checking is done; caller must check all parameters, prevent
+        NOTE: no Error checking is done; caller must check all parameters, prevent
               overflows, and so on.
 
           -- ALGLIB --
@@ -54136,7 +54136,7 @@ public partial class alglib
             State   -   structure which is used by FBLSGMRESIteration() to store
                         algorithm state between subsequent calls.
 
-        NOTE: no error checking is done; caller must check all parameters, prevent
+        NOTE: no Error checking is done; caller must check all parameters, prevent
               overflows, and so on.
 
           -- ALGLIB --
@@ -56872,7 +56872,7 @@ public partial class alglib
             apserv.tiledsplit(n, tscur, ref n1, ref n2, _params);
             mn = apserv.imin2(n1, n2, _params);
             apserv.touchint(ref mn, _params);
-            alglib.ap.assert(n2>0, "LUInverseRec: internal error!");
+            alglib.ap.assert(n2>0, "LUInverseRec: internal Error!");
             
             //
             // X := inv(U1)*U12
@@ -57073,7 +57073,7 @@ public partial class alglib
             apserv.tiledsplit(n, tscur, ref n1, ref n2, _params);
             mn = apserv.imin2(n1, n2, _params);
             apserv.touchint(ref mn, _params);
-            alglib.ap.assert(n2>0, "LUInverseRec: internal error!");
+            alglib.ap.assert(n2>0, "LUInverseRec: internal Error!");
             
             //
             // X := inv(U1)*U12
@@ -57711,7 +57711,7 @@ public partial class alglib
         Note 1:
             The block structure of matrix T can be easily recognized: since all
             the elements below the blocks are zeros, the elements a[i+1,i] which
-            are equal to 0 show the block border.
+            are equal to 0 Show the block border.
 
         Note 2:
             The algorithm performance depends on the value of the internal parameter
@@ -57801,7 +57801,7 @@ public partial class alglib
 
         Result:
             True, if the problem was solved successfully.
-            False, if the error occurred during the Cholesky decomposition of matrix
+            False, if the Error occurred during the Cholesky decomposition of matrix
             B (the matrix isn't positive-definite) or during the work of the iterative
             algorithm for solving the symmetric eigenproblem.
 
@@ -57960,7 +57960,7 @@ public partial class alglib
 
         Result:
             True, if the problem was reduced successfully.
-            False, if the error occurred during the Cholesky decomposition of
+            False, if the Error occurred during the Cholesky decomposition of
                 matrix B (the matrix is not positive-definite).
 
           -- ALGLIB --

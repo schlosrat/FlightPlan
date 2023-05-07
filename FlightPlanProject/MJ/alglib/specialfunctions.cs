@@ -36,7 +36,7 @@ public partial class alglib
         0 < X < 171.6
         -170 < X < 0, X is not an integer.
 
-    Relative error:
+    Relative Error:
      arithmetic   domain     # trials      peak         rms
         IEEE    -170,-33      20000       2.3e-15     3.3e-16
         IEEE     -33,  33     20000       9.4e-16     2.2e-16
@@ -78,11 +78,11 @@ public partial class alglib
     arithmetic      domain        # trials     peak         rms
        IEEE    0, 3                 28000     5.4e-16     1.1e-16
        IEEE    2.718, 2.556e305     40000     3.5e-16     8.3e-17
-    The error criterion was relative when the function magnitude
+    The Error criterion was relative when the function magnitude
     was greater than one but absolute when it was less than one.
 
-    The following test used the relative error criterion, though
-    at certain points the relative error could be much higher than
+    The following test used the relative Error criterion, though
+    at certain points the relative Error could be much higher than
     indicated.
        IEEE    -200, -4             10000     4.8e-16     1.3e-16
 
@@ -126,7 +126,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0,1         30000       3.7e-16     1.0e-16
 
@@ -146,7 +146,7 @@ public partial class alglib
     }
     
     /*************************************************************************
-    Complementary error function
+    Complementary Error function
 
      1 - erf(x) =
 
@@ -165,7 +165,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0,26.6417   30000       5.7e-14     1.5e-14
 
@@ -246,7 +246,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE     -13,0        30000       3.4e-14     6.7e-15
 
@@ -266,7 +266,7 @@ public partial class alglib
     }
     
     /*************************************************************************
-    Inverse of the error function
+    Inverse of the Error function
 
     Cephes Math Library Release 2.8:  June, 2000
     Copyright 1984, 1987, 1988, 1992, 2000 by Stephen L. Moshier
@@ -315,7 +315,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain        # trials      peak         rms
        IEEE     0.125, 1        20000       7.2e-16     1.3e-16
        IEEE     3e-308, 0.135   50000       4.6e-16     9.8e-17
@@ -393,7 +393,7 @@ public partial class alglib
     This subroutine uses high-precision approximation scheme proposed  by
     Alan Genz in "Numerical  Computation  of  Rectangular  Bivariate  and
     Trivariate Normal and  t  probabilities",  which  computes  CDF  with
-    absolute error roughly equal to 1e-14.
+    absolute Error roughly equal to 1e-14.
 
     This function won't fail as long as Rho is in (-1,+1) range.
 
@@ -445,7 +445,7 @@ public partial class alglib
 
     Tested at uniformly distributed random points (a,b,x) with a and b
     in "domain" and x between 0 and 1.
-                                           Relative error
+                                           Relative Error
     arithmetic   domain     # trials      peak         rms
        IEEE      0,5         10000       6.9e-15     4.5e-16
        IEEE      0,85       250000       2.2e-13     1.7e-14
@@ -483,7 +483,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
                    x     a,b
     arithmetic   domain  domain  # trials    peak       rms
        IEEE      0,1    .5,10000   50000    5.8e-12   1.3e-13
@@ -548,7 +548,7 @@ public partial class alglib
     ACCURACY:
 
     Tested at random 1 <= k <= 25.  The "domain" refers to t.
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE     -100,-2      50000       5.9e-15     1.4e-15
        IEEE     -2,100      500000       2.7e-15     4.9e-17
@@ -577,7 +577,7 @@ public partial class alglib
     ACCURACY:
 
     Tested at random 1 <= k <= 100.  The "domain" refers to p:
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE    .001,.999     25000       5.7e-15     8.0e-16
        IEEE    10^-6,.001    25000       2.0e-12     2.9e-14
@@ -624,7 +624,7 @@ public partial class alglib
 
     Tested at random points (a,b,x).
 
-                   x     a,b                     Relative error:
+                   x     a,b                     Relative Error:
     arithmetic  domain  domain     # trials      peak         rms
        IEEE      0,1    0,100       100000      9.8e-15     1.7e-15
        IEEE      1,5    0,100       100000      6.5e-15     3.5e-16
@@ -672,7 +672,7 @@ public partial class alglib
     ACCURACY:
 
     Tested at random points (a,b,x) in the indicated intervals.
-                   x     a,b                     Relative error:
+                   x     a,b                     Relative Error:
     arithmetic  domain  domain     # trials      peak         rms
        IEEE      0,1    1,100       100000      3.7e-14     5.9e-16
        IEEE      1,5    1,100       100000      8.0e-15     1.6e-15
@@ -717,7 +717,7 @@ public partial class alglib
 
     Tested at random points (a,b,p).
 
-                 a,b                     Relative error:
+                 a,b                     Relative Error:
     arithmetic  domain     # trials      peak         rms
      For p between .001 and 1:
        IEEE     1,100       100000      8.3e-15     4.7e-16
@@ -767,7 +767,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0,30       200000       3.6e-14     2.9e-15
        IEEE      0,100      300000       9.9e-14     1.5e-14
@@ -812,7 +812,7 @@ public partial class alglib
     ACCURACY:
 
     Tested at random a, x.
-                   a         x                      Relative error:
+                   a         x                      Relative Error:
     arithmetic   domain   domain     # trials      peak         rms
        IEEE     0.5,100   0,100      200000       1.9e-14     1.7e-15
        IEEE     0.01,0.5  0,100      200000       1.4e-13     1.6e-15
@@ -859,7 +859,7 @@ public partial class alglib
 
     Tested at random a, p in the intervals indicated.
 
-                   a        p                      Relative error:
+                   a        p                      Relative Error:
     arithmetic   domain   domain     # trials      peak         rms
        IEEE     0.5,100   0,0.5       100000       1.0e-14     1.7e-15
        IEEE     0.01,0.5  0,0.5       100000       9.0e-14     3.4e-15
@@ -1033,7 +1033,7 @@ public partial class alglib
 
     Tested at random points (a,b,p), with p between 0 and 1.
 
-                  a,b                     Relative error:
+                  a,b                     Relative Error:
     arithmetic  domain     # trials      peak         rms
      For p between 0.001 and 1:
        IEEE     0,100       100000      4.3e-15     2.6e-16
@@ -1076,7 +1076,7 @@ public partial class alglib
 
     Tested at random points (a,b,p).
 
-                  a,b                     Relative error:
+                  a,b                     Relative Error:
     arithmetic  domain     # trials      peak         rms
      For p between 0.001 and 1:
        IEEE     0,100       100000      6.7e-15     8.2e-16
@@ -1114,7 +1114,7 @@ public partial class alglib
 
     Tested at random points (a,b,p).
 
-                  a,b                     Relative error:
+                  a,b                     Relative Error:
     arithmetic  domain     # trials      peak         rms
      For p between 0.001 and 1:
        IEEE     0,100       100000      2.3e-14     6.4e-16
@@ -1161,7 +1161,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE       0,100       50000      8.6e-16     1.3e-16
 
@@ -1204,7 +1204,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0, 30       10000       1.7e-15     3.6e-16
 
@@ -1253,14 +1253,14 @@ public partial class alglib
     Tested at random points with u between 0 and 10, m between
     0 and 1.
 
-               Absolute error (* = relative error):
+               Absolute Error (* = relative Error):
     arithmetic   function   # trials      peak         rms
        IEEE      phi         10000       9.2e-16*    1.4e-16*
        IEEE      sn          50000       4.1e-15     4.6e-16
        IEEE      cn          40000       3.6e-15     4.4e-16
        IEEE      dn          10000       1.3e-12     1.8e-14
 
-     Peak error observed in consistency check using addition
+     Peak Error observed in consistency check using addition
     theorem for sn(u+v) was 4e-16 (absolute).  Also tested by
     the above relation to the incomplete elliptic integral.
     Accuracy deteriorates when u is large.
@@ -1322,7 +1322,7 @@ public partial class alglib
 
     ACCURACY:
        Test interval = [0,50].
-    Absolute error, except relative when > 1:
+    Absolute Error, except relative when > 1:
     arithmetic   function   # trials      peak         rms
        IEEE        Si        30000       4.4e-16     7.3e-17
        IEEE        Ci        30000       6.9e-16     5.1e-17
@@ -1375,10 +1375,10 @@ public partial class alglib
     ACCURACY:
 
     Test interval 0 to 88.
-                         Relative error:
+                         Relative Error:
     arithmetic   function  # trials      peak         rms
        IEEE         Shi      30000       6.9e-16     1.6e-16
-           Absolute error, except relative when |Chi| > 1:
+           Absolute Error, except relative when |Chi| > 1:
        IEEE         Chi      30000       8.4e-16     1.4e-16
 
     Cephes Math Library Release 2.8:  June, 2000
@@ -1633,7 +1633,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE       0,30       30000       8.1e-14     1.1e-14
 
@@ -1690,7 +1690,7 @@ public partial class alglib
 
     ACCURACY:
 
-     Relative error.
+     Relative Error.
 
     Arithmetic  function   domain     # trials      peak         rms
       IEEE       S(x)      0, 10       10000       2.0e-15     3.2e-16
@@ -1747,7 +1747,7 @@ public partial class alglib
     where the B2k are Bernoulli numbers.
 
     ACCURACY:
-       Relative error (except absolute when |psi| < 1):
+       Relative Error (except absolute when |psi| < 1):
     arithmetic   domain     # trials      peak         rms
        IEEE      0,30        30000       1.3e-15     1.4e-16
        IEEE      -30,0       40000       1.5e-15     2.2e-16
@@ -1789,9 +1789,9 @@ public partial class alglib
 
     ACCURACY:
     Error criterion is absolute when function <= 1, relative
-    when function > 1, except * denotes relative error criterion.
-    For large negative x, the absolute error increases as x^1.5.
-    For large positive x, the relative error increases as x^1.5.
+    when function > 1, except * denotes relative Error criterion.
+    For large negative x, the absolute Error increases as x^1.5.
+    For large positive x, the relative Error increases as x^1.5.
 
     Arithmetic  domain   function  # trials      peak         rms
     IEEE        -10, 0     Ai        10000       1.6e-15     2.7e-16
@@ -1845,7 +1845,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0,10        10000       6.9e-16     1.0e-16
 
@@ -2038,7 +2038,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Absolute error:
+                         Absolute Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0, 30       60000       4.2e-16     1.1e-16
 
@@ -2070,7 +2070,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Absolute error:
+                         Absolute Error:
     arithmetic   domain      # trials      peak         rms
        IEEE      0, 30       30000       2.6e-16     1.1e-16
 
@@ -2106,7 +2106,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Absolute error:
+                         Absolute Error:
     arithmetic   range      # trials      peak         rms
        IEEE      0, 30        5000       4.4e-16     7.9e-17
 
@@ -2148,7 +2148,7 @@ public partial class alglib
 
     ACCURACY:
 
-     Absolute error, when y0(x) < 1; else relative error:
+     Absolute Error, when y0(x) < 1; else relative Error:
 
     arithmetic   domain     # trials      peak         rms
        IEEE      0, 30       30000       1.3e-15     1.6e-16
@@ -2182,7 +2182,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Absolute error:
+                         Absolute Error:
     arithmetic   domain      # trials      peak         rms
        IEEE      0, 30       30000       1.0e-15     1.3e-16
 
@@ -2215,7 +2215,7 @@ public partial class alglib
     directly.
 
     ACCURACY:
-                         Absolute error, except relative
+                         Absolute Error, except relative
                          when y > 1:
     arithmetic   domain     # trials      peak         rms
        IEEE      0, 30       30000       3.4e-15     4.3e-16
@@ -2249,7 +2249,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0,30        30000       5.8e-16     1.4e-16
 
@@ -2282,7 +2282,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0, 30       30000       1.9e-15     2.1e-16
 
@@ -2314,8 +2314,8 @@ public partial class alglib
     ACCURACY:
 
     Tested at 2000 random points between 0 and 8.  Peak absolute
-    error (relative when K0 > 1) was 1.46e-14; rms, 4.26e-15.
-                         Relative error:
+    Error (relative when K0 > 1) was 1.46e-14; rms, 4.26e-15.
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0, 30       30000       1.2e-15     1.6e-16
 
@@ -2346,7 +2346,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0, 30       30000       1.2e-15     1.6e-16
 
@@ -2377,7 +2377,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE      0,30        90000       1.8e-8      3.0e-10
 
@@ -2499,7 +2499,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE       0,1        30000       2.5e-16     6.8e-17
 
@@ -2547,7 +2547,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE       0,1        30000       2.5e-16     6.8e-17
 
@@ -2593,7 +2593,7 @@ public partial class alglib
 
     Tested at random points with m in [0, 1] and phi as indicated.
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE     -10,10       200000      7.4e-16     1.0e-16
 
@@ -2632,7 +2632,7 @@ public partial class alglib
 
     ACCURACY:
 
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE       0, 1       10000       2.1e-16     7.3e-17
 
@@ -2674,7 +2674,7 @@ public partial class alglib
 
     Tested at random arguments with phi in [-10, 10] and m in
     [0, 1].
-                         Relative error:
+                         Relative Error:
     arithmetic   domain     # trials      peak         rms
        IEEE     -10,10      150000       3.3e-15     1.4e-16
 
@@ -2708,7 +2708,7 @@ public partial class alglib
             0 < X < 171.6
             -170 < X < 0, X is not an integer.
 
-        Relative error:
+        Relative Error:
          arithmetic   domain     # trials      peak         rms
             IEEE    -170,-33      20000       2.3e-15     3.3e-16
             IEEE     -33,  33     20000       9.4e-16     2.2e-16
@@ -2831,11 +2831,11 @@ public partial class alglib
         arithmetic      domain        # trials     peak         rms
            IEEE    0, 3                 28000     5.4e-16     1.1e-16
            IEEE    2.718, 2.556e305     40000     3.5e-16     8.3e-17
-        The error criterion was relative when the function magnitude
+        The Error criterion was relative when the function magnitude
         was greater than one but absolute when it was less than one.
 
-        The following test used the relative error criterion, though
-        at certain points the relative error could be much higher than
+        The following test used the relative Error criterion, though
+        at certain points the relative Error could be much higher than
         indicated.
            IEEE    -200, -4             10000     4.8e-16     1.3e-16
 
@@ -3018,7 +3018,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0,1         30000       3.7e-16     1.0e-16
 
@@ -3067,7 +3067,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Complementary error function
+        Complementary Error function
 
          1 - erf(x) =
 
@@ -3086,7 +3086,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0,26.6417   30000       5.7e-14     1.5e-14
 
@@ -3197,7 +3197,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE     -13,0        30000       3.4e-14     6.7e-15
 
@@ -3215,7 +3215,7 @@ public partial class alglib
 
 
         /*************************************************************************
-        Inverse of the error function
+        Inverse of the Error function
 
         Cephes Math Library Release 2.8:  June, 2000
         Copyright 1984, 1987, 1988, 1992, 2000 by Stephen L. Moshier
@@ -3260,7 +3260,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain        # trials      peak         rms
            IEEE     0.125, 1        20000       7.2e-16     1.3e-16
            IEEE     3e-308, 0.135   50000       4.6e-16     9.8e-17
@@ -3451,7 +3451,7 @@ public partial class alglib
         This subroutine uses high-precision approximation scheme proposed  by
         Alan Genz in "Numerical  Computation  of  Rectangular  Bivariate  and
         Trivariate Normal and  t  probabilities",  which  computes  CDF  with
-        absolute error roughly equal to 1e-14.
+        absolute Error roughly equal to 1e-14.
 
         This function won't fail as long as Rho is in (-1,+1) range.
 
@@ -3668,7 +3668,7 @@ public partial class alglib
 
         Tested at uniformly distributed random points (a,b,x) with a and b
         in "domain" and x between 0 and 1.
-                                               Relative error
+                                               Relative Error
         arithmetic   domain     # trials      peak         rms
            IEEE      0,5         10000       6.9e-15     4.5e-16
            IEEE      0,85       250000       2.2e-13     1.7e-14
@@ -3704,8 +3704,8 @@ public partial class alglib
             maxgam = 171.624376956302725;
             minlog = Math.Log(math.minrealnumber);
             maxlog = Math.Log(math.maxrealnumber);
-            alglib.ap.assert((double)(a)>(double)(0) && (double)(b)>(double)(0), "Domain error in IncompleteBeta");
-            alglib.ap.assert((double)(x)>=(double)(0) && (double)(x)<=(double)(1), "Domain error in IncompleteBeta");
+            alglib.ap.assert((double)(a)>(double)(0) && (double)(b)>(double)(0), "Domain Error in IncompleteBeta");
+            alglib.ap.assert((double)(x)>=(double)(0) && (double)(x)<=(double)(1), "Domain Error in IncompleteBeta");
             if( (double)(x)==(double)(0) )
             {
                 result = 0;
@@ -3823,7 +3823,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
                        x     a,b
         arithmetic   domain  domain  # trials    peak       rms
            IEEE      0,1    .5,10000   50000    5.8e-12   1.3e-13
@@ -3873,7 +3873,7 @@ public partial class alglib
             int breakihalvecycle = 0;
 
             i = 0;
-            alglib.ap.assert((double)(y)>=(double)(0) && (double)(y)<=(double)(1), "Domain error in InvIncompleteBeta");
+            alglib.ap.assert((double)(y)>=(double)(0) && (double)(y)<=(double)(1), "Domain Error in InvIncompleteBeta");
             
             //
             // special cases
@@ -4620,7 +4620,7 @@ public partial class alglib
         ACCURACY:
 
         Tested at random 1 <= k <= 25.  The "domain" refers to t.
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE     -100,-2      50000       5.9e-15     1.4e-15
            IEEE     -2,100      500000       2.7e-15     4.9e-17
@@ -4642,7 +4642,7 @@ public partial class alglib
             double xsqk = 0;
             int j = 0;
 
-            alglib.ap.assert(k>0, "Domain error in StudentTDistribution");
+            alglib.ap.assert(k>0, "Domain Error in StudentTDistribution");
             if( (double)(t)==(double)(0) )
             {
                 result = 0.5;
@@ -4715,7 +4715,7 @@ public partial class alglib
         ACCURACY:
 
         Tested at random 1 <= k <= 100.  The "domain" refers to p:
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE    .001,.999     25000       5.7e-15     8.0e-16
            IEEE    10^-6,.001    25000       2.0e-12     2.9e-14
@@ -4733,7 +4733,7 @@ public partial class alglib
             double z = 0;
             int rflg = 0;
 
-            alglib.ap.assert((k>0 && (double)(p)>(double)(0)) && (double)(p)<(double)(1), "Domain error in InvStudentTDistribution");
+            alglib.ap.assert((k>0 && (double)(p)>(double)(0)) && (double)(p)<(double)(1), "Domain Error in InvStudentTDistribution");
             rk = k;
             if( (double)(p)>(double)(0.25) && (double)(p)<(double)(0.75) )
             {
@@ -4795,7 +4795,7 @@ public partial class alglib
 
         Tested at random points (a,b,x).
 
-                       x     a,b                     Relative error:
+                       x     a,b                     Relative Error:
         arithmetic  domain  domain     # trials      peak         rms
            IEEE      0,1    0,100       100000      9.8e-15     1.7e-15
            IEEE      1,5    0,100       100000      6.5e-15     3.5e-16
@@ -4813,7 +4813,7 @@ public partial class alglib
             double result = 0;
             double w = 0;
 
-            alglib.ap.assert((a>=1 && b>=1) && (double)(x)>=(double)(0), "Domain error in FDistribution");
+            alglib.ap.assert((a>=1 && b>=1) && (double)(x)>=(double)(0), "Domain Error in FDistribution");
             w = a*x;
             w = w/(b+w);
             result = ibetaf.incompletebeta(0.5*a, 0.5*b, w, _params);
@@ -4847,7 +4847,7 @@ public partial class alglib
         ACCURACY:
 
         Tested at random points (a,b,x) in the indicated intervals.
-                       x     a,b                     Relative error:
+                       x     a,b                     Relative Error:
         arithmetic  domain  domain     # trials      peak         rms
            IEEE      0,1    1,100       100000      3.7e-14     5.9e-16
            IEEE      1,5    1,100       100000      8.0e-15     1.6e-15
@@ -4865,7 +4865,7 @@ public partial class alglib
             double result = 0;
             double w = 0;
 
-            alglib.ap.assert((a>=1 && b>=1) && (double)(x)>=(double)(0), "Domain error in FCDistribution");
+            alglib.ap.assert((a>=1 && b>=1) && (double)(x)>=(double)(0), "Domain Error in FCDistribution");
             w = b/(b+a*x);
             result = ibetaf.incompletebeta(0.5*b, 0.5*a, w, _params);
             return result;
@@ -4895,7 +4895,7 @@ public partial class alglib
 
         Tested at random points (a,b,p).
 
-                     a,b                     Relative error:
+                     a,b                     Relative Error:
         arithmetic  domain     # trials      peak         rms
          For p between .001 and 1:
            IEEE     1,100       100000      8.3e-15     4.7e-16
@@ -4915,7 +4915,7 @@ public partial class alglib
             double result = 0;
             double w = 0;
 
-            alglib.ap.assert(((a>=1 && b>=1) && (double)(y)>(double)(0)) && (double)(y)<=(double)(1), "Domain error in InvFDistribution");
+            alglib.ap.assert(((a>=1 && b>=1) && (double)(y)>(double)(0)) && (double)(y)<=(double)(1), "Domain Error in InvFDistribution");
             
             //
             // Compute probability for x = 0.5
@@ -4964,7 +4964,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0,30       200000       3.6e-14     2.9e-15
            IEEE      0,100      300000       9.9e-14     1.5e-14
@@ -5042,7 +5042,7 @@ public partial class alglib
         ACCURACY:
 
         Tested at random a, x.
-                       a         x                      Relative error:
+                       a         x                      Relative Error:
         arithmetic   domain   domain     # trials      peak         rms
            IEEE     0.5,100   0,100      200000       1.9e-14     1.7e-15
            IEEE     0.01,0.5  0,100      200000       1.4e-13     1.6e-15
@@ -5165,7 +5165,7 @@ public partial class alglib
 
         Tested at random a, p in the intervals indicated.
 
-                       a        p                      Relative error:
+                       a        p                      Relative Error:
         arithmetic   domain   domain     # trials      peak         rms
            IEEE     0.5,100   0,0.5       100000       1.0e-14     1.7e-15
            IEEE     0.01,0.5  0,0.5       100000       9.0e-14     3.4e-15
@@ -5378,7 +5378,7 @@ public partial class alglib
         {
             double result = 0;
 
-            alglib.ap.assert((double)(x)>=(double)(0) && (double)(v)>=(double)(1), "Domain error in ChiSquareDistribution");
+            alglib.ap.assert((double)(x)>=(double)(0) && (double)(v)>=(double)(1), "Domain Error in ChiSquareDistribution");
             result = igammaf.incompletegamma(v/2.0, x/2.0, _params);
             return result;
         }
@@ -5421,7 +5421,7 @@ public partial class alglib
         {
             double result = 0;
 
-            alglib.ap.assert((double)(x)>=(double)(0) && (double)(v)>=(double)(1), "Domain error in ChiSquareDistributionC");
+            alglib.ap.assert((double)(x)>=(double)(0) && (double)(v)>=(double)(1), "Domain Error in ChiSquareDistributionC");
             result = igammaf.incompletegammac(v/2.0, x/2.0, _params);
             return result;
         }
@@ -5453,7 +5453,7 @@ public partial class alglib
         {
             double result = 0;
 
-            alglib.ap.assert(((double)(y)>=(double)(0) && (double)(y)<=(double)(1)) && (double)(v)>=(double)(1), "Domain error in InvChiSquareDistribution");
+            alglib.ap.assert(((double)(y)>=(double)(0) && (double)(y)<=(double)(1)) && (double)(v)>=(double)(1), "Domain Error in InvChiSquareDistribution");
             result = 2*igammaf.invincompletegammac(0.5*v, y, _params);
             return result;
         }
@@ -5485,7 +5485,7 @@ public partial class alglib
 
         Tested at random points (a,b,p), with p between 0 and 1.
 
-                      a,b                     Relative error:
+                      a,b                     Relative Error:
         arithmetic  domain     # trials      peak         rms
          For p between 0.001 and 1:
            IEEE     0,100       100000      4.3e-15     2.6e-16
@@ -5502,8 +5502,8 @@ public partial class alglib
             double dk = 0;
             double dn = 0;
 
-            alglib.ap.assert((double)(p)>=(double)(0) && (double)(p)<=(double)(1), "Domain error in BinomialDistribution");
-            alglib.ap.assert(k>=-1 && k<=n, "Domain error in BinomialDistribution");
+            alglib.ap.assert((double)(p)>=(double)(0) && (double)(p)<=(double)(1), "Domain Error in BinomialDistribution");
+            alglib.ap.assert(k>=-1 && k<=n, "Domain Error in BinomialDistribution");
             if( k==-1 )
             {
                 result = 0;
@@ -5552,7 +5552,7 @@ public partial class alglib
 
         Tested at random points (a,b,p).
 
-                      a,b                     Relative error:
+                      a,b                     Relative Error:
         arithmetic  domain     # trials      peak         rms
          For p between 0.001 and 1:
            IEEE     0,100       100000      6.7e-15     8.2e-16
@@ -5571,8 +5571,8 @@ public partial class alglib
             double dk = 0;
             double dn = 0;
 
-            alglib.ap.assert((double)(p)>=(double)(0) && (double)(p)<=(double)(1), "Domain error in BinomialDistributionC");
-            alglib.ap.assert(k>=-1 && k<=n, "Domain error in BinomialDistributionC");
+            alglib.ap.assert((double)(p)>=(double)(0) && (double)(p)<=(double)(1), "Domain Error in BinomialDistributionC");
+            alglib.ap.assert(k>=-1 && k<=n, "Domain Error in BinomialDistributionC");
             if( k==-1 )
             {
                 result = 1;
@@ -5621,7 +5621,7 @@ public partial class alglib
 
         Tested at random points (a,b,p).
 
-                      a,b                     Relative error:
+                      a,b                     Relative Error:
         arithmetic  domain     # trials      peak         rms
          For p between 0.001 and 1:
            IEEE     0,100       100000      2.3e-14     6.4e-16
@@ -5643,7 +5643,7 @@ public partial class alglib
             double dn = 0;
             double p = 0;
 
-            alglib.ap.assert(k>=0 && k<n, "Domain error in InvBinomialDistribution");
+            alglib.ap.assert(k>=0 && k<n, "Domain Error in InvBinomialDistribution");
             dn = n-k;
             if( k==0 )
             {
@@ -5695,7 +5695,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE       0,100       50000      8.6e-16     1.3e-16
 
@@ -5904,7 +5904,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0, 30       10000       1.7e-15     3.6e-16
 
@@ -6087,14 +6087,14 @@ public partial class alglib
         Tested at random points with u between 0 and 10, m between
         0 and 1.
 
-                   Absolute error (* = relative error):
+                   Absolute Error (* = relative Error):
         arithmetic   function   # trials      peak         rms
            IEEE      phi         10000       9.2e-16*    1.4e-16*
            IEEE      sn          50000       4.1e-15     4.6e-16
            IEEE      cn          40000       3.6e-15     4.4e-16
            IEEE      dn          10000       1.3e-12     1.8e-14
 
-         Peak error observed in consistency check using addition
+         Peak Error observed in consistency check using addition
         theorem for sn(u+v) was 4e-16 (absolute).  Also tested by
         the above relation to the incomplete elliptic integral.
         Accuracy deteriorates when u is large.
@@ -6124,7 +6124,7 @@ public partial class alglib
             dn = 0;
             ph = 0;
 
-            alglib.ap.assert((double)(m)>=(double)(0) && (double)(m)<=(double)(1), "Domain error in JacobianEllipticFunctions: m<0 or m>1");
+            alglib.ap.assert((double)(m)>=(double)(0) && (double)(m)<=(double)(1), "Domain Error in JacobianEllipticFunctions: m<0 or m>1");
             a = new double[8+1];
             c = new double[8+1];
             if( (double)(m)<(double)(1.0e-9) )
@@ -6223,7 +6223,7 @@ public partial class alglib
 
         ACCURACY:
            Test interval = [0,50].
-        Absolute error, except relative when > 1:
+        Absolute Error, except relative when > 1:
         arithmetic   function   # trials      peak         rms
            IEEE        Si        30000       4.4e-16     7.3e-17
            IEEE        Ci        30000       6.9e-16     5.1e-17
@@ -6433,10 +6433,10 @@ public partial class alglib
         ACCURACY:
 
         Test interval 0 to 88.
-                             Relative error:
+                             Relative Error:
         arithmetic   function  # trials      peak         rms
            IEEE         Shi      30000       6.9e-16     1.6e-16
-               Absolute error, except relative when |Chi| > 1:
+               Absolute Error, except relative when |Chi| > 1:
            IEEE         Chi      30000       8.4e-16     1.4e-16
 
         Cephes Math Library Release 2.8:  June, 2000
@@ -6905,7 +6905,7 @@ public partial class alglib
         {
             double result = 0;
 
-            alglib.ap.assert(k>=0 && (double)(m)>(double)(0), "Domain error in PoissonDistribution");
+            alglib.ap.assert(k>=0 && (double)(m)>(double)(0), "Domain Error in PoissonDistribution");
             result = igammaf.incompletegammac(k+1, m, _params);
             return result;
         }
@@ -6943,7 +6943,7 @@ public partial class alglib
         {
             double result = 0;
 
-            alglib.ap.assert(k>=0 && (double)(m)>(double)(0), "Domain error in PoissonDistributionC");
+            alglib.ap.assert(k>=0 && (double)(m)>(double)(0), "Domain Error in PoissonDistributionC");
             result = igammaf.incompletegamma(k+1, m, _params);
             return result;
         }
@@ -6974,7 +6974,7 @@ public partial class alglib
         {
             double result = 0;
 
-            alglib.ap.assert((k>=0 && (double)(y)>=(double)(0)) && (double)(y)<(double)(1), "Domain error in InvPoissonDistribution");
+            alglib.ap.assert((k>=0 && (double)(y)>=(double)(0)) && (double)(y)<(double)(1), "Domain Error in InvPoissonDistribution");
             result = igammaf.invincompletegammac(k+1, y, _params);
             return result;
         }
@@ -6998,7 +6998,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE       0,30       30000       8.1e-14     1.1e-14
 
@@ -7083,7 +7083,7 @@ public partial class alglib
 
         ACCURACY:
 
-         Relative error.
+         Relative Error.
 
         Arithmetic  function   domain     # trials      peak         rms
           IEEE       S(x)      0, 10       10000       2.0e-15     3.2e-16
@@ -7255,7 +7255,7 @@ public partial class alglib
         where the B2k are Bernoulli numbers.
 
         ACCURACY:
-           Relative error (except absolute when |psi| < 1):
+           Relative Error (except absolute when |psi| < 1):
         arithmetic   domain     # trials      peak         rms
            IEEE      0,30        30000       1.3e-15     1.4e-16
            IEEE      -30,0       40000       1.5e-15     2.2e-16
@@ -7375,9 +7375,9 @@ public partial class alglib
 
         ACCURACY:
         Error criterion is absolute when function <= 1, relative
-        when function > 1, except * denotes relative error criterion.
-        For large negative x, the absolute error increases as x^1.5.
-        For large positive x, the relative error increases as x^1.5.
+        when function > 1, except * denotes relative Error criterion.
+        For large negative x, the absolute Error increases as x^1.5.
+        For large positive x, the relative Error increases as x^1.5.
 
         Arithmetic  domain   function  # trials      peak         rms
         IEEE        -10, 0     Ai        10000       1.6e-15     2.7e-16
@@ -7718,7 +7718,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0,10        10000       6.9e-16     1.0e-16
 
@@ -8088,7 +8088,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Absolute error:
+                             Absolute Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0, 30       60000       4.2e-16     1.1e-16
 
@@ -8154,7 +8154,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Absolute error:
+                             Absolute Error:
         arithmetic   domain      # trials      peak         rms
            IEEE      0, 30       30000       2.6e-16     1.1e-16
 
@@ -8230,7 +8230,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Absolute error:
+                             Absolute Error:
         arithmetic   range      # trials      peak         rms
            IEEE      0, 30        5000       4.4e-16     7.9e-17
 
@@ -8363,7 +8363,7 @@ public partial class alglib
 
         ACCURACY:
 
-         Absolute error, when y0(x) < 1; else relative error:
+         Absolute Error, when y0(x) < 1; else relative Error:
 
         arithmetic   domain     # trials      peak         rms
            IEEE      0, 30       30000       1.3e-15     1.6e-16
@@ -8427,7 +8427,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Absolute error:
+                             Absolute Error:
         arithmetic   domain      # trials      peak         rms
            IEEE      0, 30       30000       1.0e-15     1.3e-16
 
@@ -8491,7 +8491,7 @@ public partial class alglib
         directly.
 
         ACCURACY:
-                             Absolute error, except relative
+                             Absolute Error, except relative
                              when y > 1:
         arithmetic   domain     # trials      peak         rms
            IEEE      0, 30       30000       3.4e-15     4.3e-16
@@ -8556,7 +8556,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0,30        30000       5.8e-16     1.4e-16
 
@@ -8661,7 +8661,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0, 30       30000       1.9e-15     2.1e-16
 
@@ -8768,8 +8768,8 @@ public partial class alglib
         ACCURACY:
 
         Tested at 2000 random points between 0 and 8.  Peak absolute
-        error (relative when K0 > 1) was 1.46e-14; rms, 4.26e-15.
-                             Relative error:
+        Error (relative when K0 > 1) was 1.46e-14; rms, 4.26e-15.
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0, 30       30000       1.2e-15     1.6e-16
 
@@ -8787,7 +8787,7 @@ public partial class alglib
             double b1 = 0;
             double b2 = 0;
 
-            alglib.ap.assert((double)(x)>(double)(0), "Domain error in BesselK0: x<=0");
+            alglib.ap.assert((double)(x)>(double)(0), "Domain Error in BesselK0: x<=0");
             if( (double)(x)<=(double)(2) )
             {
                 y = x*x-2.0;
@@ -8852,7 +8852,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0, 30       30000       1.2e-15     1.6e-16
 
@@ -8871,7 +8871,7 @@ public partial class alglib
             double b2 = 0;
 
             z = 0.5*x;
-            alglib.ap.assert((double)(z)>(double)(0), "Domain error in K1");
+            alglib.ap.assert((double)(z)>(double)(0), "Domain Error in K1");
             if( (double)(x)<=(double)(2) )
             {
                 y = x*x-2.0;
@@ -8936,7 +8936,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE      0,30        90000       1.8e-8      3.0e-10
 
@@ -8981,7 +8981,7 @@ public partial class alglib
                 n = nn;
             }
             alglib.ap.assert(n<=31, "Overflow in BesselKN");
-            alglib.ap.assert((double)(x)>(double)(0), "Domain error in BesselKN");
+            alglib.ap.assert((double)(x)>(double)(0), "Domain Error in BesselKN");
             if( (double)(x)<=(double)(9.55) )
             {
                 ans = 0.0;
@@ -9393,7 +9393,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE       0,1        30000       2.5e-16     6.8e-17
 
@@ -9439,7 +9439,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE       0,1        30000       2.5e-16     6.8e-17
 
@@ -9514,7 +9514,7 @@ public partial class alglib
 
         Tested at random points with m in [0, 1] and phi as indicated.
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE     -10,10       200000      7.4e-16     1.0e-16
 
@@ -9641,7 +9641,7 @@ public partial class alglib
 
         ACCURACY:
 
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE       0, 1       10000       2.1e-16     7.3e-17
 
@@ -9655,7 +9655,7 @@ public partial class alglib
             double p = 0;
             double q = 0;
 
-            alglib.ap.assert((double)(m)>=(double)(0) && (double)(m)<=(double)(1), "Domain error in EllipticIntegralE: m<0 or m>1");
+            alglib.ap.assert((double)(m)>=(double)(0) && (double)(m)<=(double)(1), "Domain Error in EllipticIntegralE: m<0 or m>1");
             m = 1-m;
             if( (double)(m)==(double)(0) )
             {
@@ -9711,7 +9711,7 @@ public partial class alglib
 
         Tested at random arguments with phi in [-10, 10] and m in
         [0, 1].
-                             Relative error:
+                             Relative Error:
         arithmetic   domain     # trials      peak         rms
            IEEE     -10,10      150000       3.3e-15     1.4e-16
 

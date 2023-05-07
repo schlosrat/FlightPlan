@@ -12,15 +12,15 @@ public static class GeneralTools
     public static double Current_UT => Game.UniverseModel.UniversalTime;
 
     /// <summary>
-    /// Converts a string to a double, if the string contains a number. Else returns -1
+    /// Converts a string to a double, if the string contains a _number. Else returns -1
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>
     public static double GetNumberString(string str)
     {
-        string number = Regex.Replace(str, "[^0-9.]", "");
+        string _number = Regex.Replace(str, "[^0-9.]", "");
 
-        return number.Length > 0 ? double.Parse(number) : -1;
+        return _number.Length > 0 ? double.Parse(_number) : -1;
     }
 
     public static int ClampInt(int value, int min, int max)
@@ -28,32 +28,32 @@ public static class GeneralTools
         return (value < min) ? min : (value > max) ? max : value;
     }
 
-    public static Vector3d correctEuler(Vector3d euler)
+    public static Vector3d CorrectEuler(Vector3d euler)
     {
-        Vector3d result = euler;
-        if (result.x > 180)
+        Vector3d _result = euler;
+        if (_result.x > 180)
         {
-            result.x -= 360;
+            _result.x -= 360;
         }
-        if (result.y > 180)
+        if (_result.y > 180)
         {
-            result.y -= 360;
+            _result.y -= 360;
         }
-        if (result.z > 180)
+        if (_result.z > 180)
         {
-            result.z -= 360;
+            _result.z -= 360;
         }
 
-        return result;
+        return _result;
     }
 
-    public static double remainingStartTime(ManeuverNodeData node)
+    public static double RemainingStartTime(ManeuverNodeData node)
     {
-        var dt = node.Time - GeneralTools.Game.UniverseModel.UniversalTime;
-        return dt;
+        double _dt = node.Time - GeneralTools.Game.UniverseModel.UniversalTime;
+        return _dt;
     }
 
-    public static Guid createGuid()
+    public static Guid CreateGuid()
     {
         return Guid.NewGuid();
     }

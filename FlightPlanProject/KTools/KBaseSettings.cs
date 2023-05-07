@@ -5,39 +5,33 @@ namespace FlightPlan.KTools;
 
 public class KBaseSettings
 {
-    public static SettingsFile sfile = null;
-    public static string s_settings_path;
+    public static SettingsFile SFile = null;
+    public static string SettingsPath;
 
-    public static void Init(string settings_path)
+    public static void Init(string settingsPath)
     {
-        sfile = new SettingsFile(settings_path);
+        SFile = new SettingsFile(settingsPath);
     }
 
     // each setting is defined by an accessor pointing on s_settings_file
     // the convertion to type is made here
     // this way we can have any kind of settings without hard work
 
-    public static int window_x_pos
+    public static int WindowXPos
     {
-        get => sfile.GetInt("window_x_pos", 70);
-        set { sfile.SetInt("window_x_pos", value); }
+        get => SFile.GetInt("WindowXPos", 70);
+        set { SFile.SetInt("WindowXPos", value); }
     }
 
-    public static int window_y_pos
+    public static int WindowYPos
     {
-        get => sfile.GetInt("window_y_pos", 50);
-        set { sfile.SetInt("window_y_pos", value); }
+        get => SFile.GetInt("WindowYPos", 50);
+        set { SFile.SetInt("WindowYPos", value); }
     }
 
-    public static int main_tab_index
+    public static int MainTabIndex
     {
-        get { return sfile.GetInt("main_tab_index", 0); }
-        set { sfile.SetInt("main_tab_index", value); }
+        get { return SFile.GetInt("MainTabIndex", 0); }
+        set { SFile.SetInt("MainTabIndex", value); }
     }
-
 }
-
-
-
-
-
