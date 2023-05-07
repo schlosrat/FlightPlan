@@ -304,6 +304,14 @@ internal class BurnTimeOption
                 options.Add(TimeRef.COMPUTED); //"At Optimal Time"
                 maneuver_type_desc = "Performing planetary transfer";
                 break;
+            case ManeuverType.fixAp:
+                options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
+                maneuver_type_desc = "Setting new Ap";
+                break;
+            case ManeuverType.fixPe:
+                options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
+                maneuver_type_desc = "Setting new Pe";
+                break;
             default:
                 break;
         }
