@@ -17,6 +17,8 @@ public class FPStyles
         if (!KBaseStyle.Init())
             return false;
 
+        KBaseStyle.skin.window.fixedWidth = 300; // Must fit with max_width given to DrawTabs (TabsUI.cs)
+
         // Load specific icon and style here
         k2d2_big_icon = AssetsLoader.loadIcon("k2d2_big_icon");
         mnc_icon = AssetsLoader.loadIcon("mnc_icon_white_100");
@@ -48,7 +50,10 @@ public class FPStyles
     }
 
 
-    static int spacingAfterHeader = 5;
+    public static int spacingAfterHeader = 5;
+    public static int spacingAfterSection = 5;
+    public static int spacingAfterEntry = -12;
+
 
     public static void DrawSectionHeader(string sectionName, string value = "", float labelWidth = -1, GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
