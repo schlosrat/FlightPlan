@@ -51,7 +51,8 @@ public class FPStyles
 
     public static int SpacingAfterHeader = 5;
     public static int SpacingAfterSection = 5;
-    public static int SpacingAfterEntry = 0;
+    public static int SpacingAfterEntry = 2;
+    public static int SpacingAfterTallEntry = -3;
 
     public static void DrawSectionHeader(string sectionName, string value = "", float labelWidth = -1, GUIStyle valueStyle = null) // was (string sectionName, ref bool isPopout, string value = "")
     {
