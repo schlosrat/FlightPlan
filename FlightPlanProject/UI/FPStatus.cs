@@ -1,10 +1,9 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
-
+using FlightPlan.KTools.UI;
 using KSP.Game;
 using MuMech;
 using UnityEngine;
-using FlightPlan.KTools.UI;
 
 namespace FlightPlan;
 
@@ -17,7 +16,6 @@ public class FPStatus
         OK,
         WARNING,
         ERROR
-
     }
 
     static public Status status = Status.VIRGIN; // Everyone starts out this way...
@@ -28,7 +26,6 @@ public class FPStatus
     static ConfigEntry<string> initialStatusText;
     static ConfigEntry<double> statusPersistence;
     static ConfigEntry<double> statusFadeTime;
-
 
     static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FPStatus");
 
