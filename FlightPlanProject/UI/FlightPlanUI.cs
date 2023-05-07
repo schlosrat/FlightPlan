@@ -156,8 +156,11 @@ public class FlightPlanUI
     {
         Color normal;
 
+        if (!UI_Fields.InputFields.Contains(entryName))
+            UI_Fields.InputFields.Add(entryName);
+
         GUILayout.BeginHorizontal();
-        UI_Tools.Label(entryName, KBaseStyle.NameLabelStyle); // 
+        UI_Tools.Label(entryName, KBaseStyle.Label); // was: NameLabelStyle
         GUILayout.FlexibleSpace();
         normal = GUI.color;
         bool parsed = double.TryParse(textEntry, out _);
@@ -166,31 +169,33 @@ public class FlightPlanUI
         textEntry = GUILayout.TextField(textEntry, KBaseStyle.TextInputStyle);
         GUI.color = normal;
         GUILayout.Space(5);
-        UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle); // was 
+        UI_Tools.Label(unit); // was: , KBaseStyle.UnitLabelStyle
         GUILayout.EndHorizontal();
         GUILayout.Space(FPStyles.SpacingAfterEntry);
     }
 
     public double DrawEntryTextField(string entryName, double value, string unit = "", GUIStyle thisStyle = null)
     {
+        if (!UI_Fields.InputFields.Contains(entryName))
+            UI_Fields.InputFields.Add(entryName);
+
         GUILayout.BeginHorizontal();
-        if (thisStyle == null)
-            UI_Tools.Label(entryName);
+        if (thisStyle != null)
+            UI_Tools.Label(entryName, KBaseStyle.Label); // NameLabelStyle
         else
-            UI_Tools.Label(entryName, KBaseStyle.NameLabelStyle);
+            UI_Tools.Label(entryName);
+        // UI_Tools.Label(entryName, thisStyle ?? KBaseStyle.NameLabelStyle);
         GUILayout.FlexibleSpace();
         GUI.SetNextControlName(entryName);
-        if (thisStyle == null)
-            value = UI_Fields.DoubleField(entryName, value, KBaseStyle.TextInputStyle);
-        else
-            value = UI_Fields.DoubleField(entryName, value, thisStyle);
+        value = UI_Fields.DoubleField(entryName, value, thisStyle ?? KBaseStyle.TextInputStyle);
         GUILayout.Space(3);
-        if (thisStyle == null)
+        if (thisStyle != null)
             UI_Tools.Label(unit); // , KBaseStyle.UnitLabelStyle
         else
-            UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle);
+            UI_Tools.Label(entryName);
+        // UI_Tools.Label(unit, thisStyle ?? KBaseStyle.UnitLabelStyle);
         GUILayout.EndHorizontal();
-        GUILayout.Space(-FPStyles.SpacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterTallEntry);
         return value;
     }
 
@@ -219,7 +224,7 @@ public class FlightPlanUI
         value = UI_Fields.DoubleField(runString, value);
 
         GUILayout.Space(3);
-        UI_Tools.Label(unit);
+        UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle);
         GUILayout.EndHorizontal();
 
         GUILayout.Space(FPStyles.SpacingAfterEntry);
@@ -233,13 +238,13 @@ public class FlightPlanUI
         DrawToggleButton(runString, type, widthOverride);
         GUILayout.Space(10);
 
-        UI_Tools.Label(label);
+        UI_Tools.Label(label, KBaseStyle.NameLabelStyle);
 
         GUILayout.Space(3);
-        UI_Tools.Label(unit);
+        UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle);
         GUILayout.EndHorizontal();
 
-        GUILayout.Space(FPStyles.SpacingAfterEntry);
+        GUILayout.Space(FPStyles.SpacingAfterTallEntry);
     }
 
 
