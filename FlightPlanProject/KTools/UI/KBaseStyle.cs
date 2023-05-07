@@ -36,7 +36,8 @@ public class KBaseStyle
     }
 
     public static GUIStyle error, warning, label, mid_text, console_text, phase_ok, phase_warning, phase_error;
-    public static GUIStyle icons_label, title, slider_text;
+    public static GUIStyle icons_label, title, slider_text, textInputStyle, nameLabelStyle, valueLabelStyle, unitLabelStyle;
+    public static string unitColorHex;
 
     static void BuildLabels()
     {
@@ -87,6 +88,36 @@ public class KBaseStyle
         title = new GUIStyle();
         title.normal.textColor = ColorTools.parseColor("#C0C1E2");
         // title.fontSize = 19;
+
+        textInputStyle = new GUIStyle(GUI.skin.GetStyle("textField")) // was (_spaceWarpUISkin.textField)
+        {
+            alignment = TextAnchor.LowerCenter,
+            padding = new RectOffset(10, 10, 0, 0),
+            contentOffset = new Vector2(0, 2),
+            fixedHeight = 18,
+            fixedWidth = 100, //(float)(windowWidth / 4),
+            clipping = TextClipping.Overflow,
+            margin = new RectOffset(0, 0, 10, 0)
+        };
+
+        nameLabelStyle = new GUIStyle(GUI.skin.GetStyle("Label")); // was (_spaceWarpUISkin.label);
+        nameLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
+
+        valueLabelStyle = new GUIStyle(GUI.skin.GetStyle("Label")) // was (_spaceWarpUISkin.label)
+        {
+            alignment = TextAnchor.MiddleRight
+        };
+        valueLabelStyle.normal.textColor = new Color(.6f, .7f, 1, 1);
+
+        unitLabelStyle = new GUIStyle(valueLabelStyle)
+        {
+            fixedWidth = 24,
+            alignment = TextAnchor.MiddleLeft
+        };
+        unitLabelStyle.normal.textColor = new Color(.7f, .75f, .75f, 1);
+
+        unitColorHex = ColorUtility.ToHtmlStringRGBA(unitLabelStyle.normal.textColor);
+
     }
 
     public static GUIStyle separator;
@@ -207,7 +238,7 @@ public class KBaseStyle
     }
 
 
-    public static GUIStyle bigicon_button, icon_button, small_button, big_button, button;
+    public static GUIStyle bigicon_button, icon_button, small_button, big_button, button, ctrl_button;
 
     static void BuildButtons()
     {
@@ -243,6 +274,7 @@ public class KBaseStyle
         small_button.padding = new RectOffset(2, 2, 2, 2);
         small_button.overflow = new RectOffset(0, 0, 0, 0);
         small_button.alignment = TextAnchor.MiddleCenter;
+        // small_button.fixedHeight = 16;
 
         big_button = new GUIStyle(GUI.skin.GetStyle("Button"));
         big_button.normal.background = AssetsLoader.loadIcon("BigButton_Normal");
@@ -260,9 +292,6 @@ public class KBaseStyle
         // big_button.fontSize = 20;
         big_button.alignment = TextAnchor.MiddleCenter;
 
-
-
-
         // Small Button
         icon_button = new GUIStyle(small_button);
         icon_button.padding = new RectOffset(4, 4, 4, 4);
@@ -271,6 +300,24 @@ public class KBaseStyle
         bigicon_button.fixedWidth = 50;
         bigicon_button.fixedHeight = 50;
         bigicon_button.fontStyle = FontStyle.Bold;
+
+        ctrl_button = new GUIStyle(small_button) // GUI.skin.GetStyle("Button")) // was: _spaceWarpUISkin.button)
+        {
+            //alignment = TextAnchor.MiddleCenter,
+            //padding = new RectOffset(0, 0, 0, 3),
+            //contentOffset = new Vector2(0, 2),
+            fixedHeight = 16
+            //fixedWidth = 16,
+            //fontSize = 16,
+            //clipping = TextClipping.Overflow,
+            //margin = new RectOffset(0, 0, 10, 0)
+        };
+        ctrl_button.normal.background = AssetsLoader.loadIcon("Small_Button");
+        setAllFromNormal(ctrl_button);
+        ctrl_button.hover.background = AssetsLoader.loadIcon("Small_Button_hover");
+        ctrl_button.active.background = AssetsLoader.loadIcon("Small_Button_active");
+        ctrl_button.onNormal = ctrl_button.active;
+        setFromOn(ctrl_button);
 
     }
 
@@ -331,7 +378,7 @@ public class KBaseStyle
         foldout_open.active.background = AssetsLoader.loadIcon("Chapter_On_Active");
     }
 
-    public static GUIStyle toggle;
+    public static GUIStyle toggle, toggle_error;
     static void BuildToggle()
     {
         // Toggle Button
@@ -350,6 +397,9 @@ public class KBaseStyle
         toggle.border = new RectOffset(45, 5, 5, 5);
         toggle.padding = new RectOffset(34, 16, 0, 0);
         toggle.overflow = new RectOffset(0, 0, 0, 2);
+
+        toggle_error = new GUIStyle(toggle);
+        toggle_error.normal.textColor = Color.red;
     }
 
    
