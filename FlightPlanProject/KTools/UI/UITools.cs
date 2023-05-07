@@ -191,6 +191,11 @@ public class UI_Tools
         return GUILayout.Button(txt, KBaseStyle.small_button);
     }
 
+    public static bool CtrlButton(string txt)
+    {
+        return GUILayout.Button(txt, KBaseStyle.ctrl_button);
+    }
+
     public static bool BigIconButton(string txt)
     {
         return GUILayout.Button(txt, KBaseStyle.bigicon_button);
