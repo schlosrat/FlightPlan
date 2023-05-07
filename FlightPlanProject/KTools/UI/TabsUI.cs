@@ -149,13 +149,18 @@ public class TabsUI
         }
         
         _result = GeneralTools.ClampInt(_result, 0, _filteredPages.Count - 1);
-        if (_result != _currentIndex)
+        IPageContent _page = _filteredPages[_result];
+
+        if (_page != CurrentPage)
         {
             CurrentPage.UIVisible = false;
-            KBaseSettings.MainTabIndex = _result;
-            CurrentPage = _filteredPages[_result];
+            //KBaseSettings.MainTabIndex = _result;
+            //CurrentPage = _filteredPages[_result];
+            CurrentPage = _page;
             CurrentPage.UIVisible = true;
         }
+
+        KBaseSettings.MainTabIndex = _result;
 
         CurrentPage.OnGUI();
     }
