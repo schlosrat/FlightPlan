@@ -39,19 +39,22 @@ public class FPStatus
     public static void Ok(string txt)
     {
         set(Status.OK, txt);
-        Logger.LogInfo(txt);
+        if (txt.Length > 0)
+            Logger.LogInfo(txt);
     }
 
     public static void Warning(string txt)
     {
         set(Status.WARNING, txt);
-        Logger.LogWarning(txt);
+        if (txt.Length > 0)
+            Logger.LogWarning(txt);
     }
 
     public static void Error(string txt)
     {
         set(Status.ERROR, txt);
-        Logger.LogError(txt);
+        if (txt.Length > 0)
+            Logger.LogError(txt);
     }
 
     static void set(Status status, string txt)
