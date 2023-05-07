@@ -117,7 +117,7 @@ public class FlightPlanUI
             UI_Tools.Label(unit);
         }
         GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
+        GUILayout.Space(FPStyles.spacingAfterEntry);
     }
 
     public void DrawEntryButton(string entryName, ref bool button, string buttonStr, string value, string unit = "")
@@ -130,7 +130,7 @@ public class FlightPlanUI
         GUILayout.Space(5);
         UI_Tools.Label(unit);
         GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
+        GUILayout.Space(FPStyles.spacingAfterEntry);
     }
 
     public void DrawEntry2Button(string entryName, ref bool button1, string button1Str, ref bool button2, string button2Str, string value, string unit = "")
@@ -144,7 +144,7 @@ public class FlightPlanUI
         GUILayout.Space(5);
         UI_Tools.Console(unit);
         GUILayout.EndHorizontal();
-        GUILayout.Space(spacingAfterEntry);
+        GUILayout.Space(FPStyles.spacingAfterEntry);
     }
 
     public void DrawEntryTextField(string entryName, ref string textEntry, string unit = "")
