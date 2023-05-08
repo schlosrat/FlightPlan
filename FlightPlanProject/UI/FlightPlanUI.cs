@@ -277,7 +277,8 @@ public class FlightPlanUI
         if (!InitDone)
         {
             Tabs.Pages.Add(new OwnshipManeuversPage());
-            Tabs.Pages.Add(new TargetPage());
+            Tabs.Pages.Add(new TargetPageShip2Ship());
+            Tabs.Pages.Add(new TargetPageShip2Celestial());
             Tabs.Pages.Add(new InterplanetaryPage());
             Tabs.Pages.Add(new MoonPage());
             Tabs.Pages.Add(new ResonantOrbitPage());
@@ -388,62 +389,71 @@ public class FlightPlanUI
         double _requestedBurnTime = BurnTimeOption.RequestedBurnTime;
 
         bool _pass = false;
+        bool _launchMNC = false;
         switch (ManeuverType)
         {
-        case ManeuverType.circularize: // Working
-            _pass = Plugin.Circularize(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.newPe: // Working
-            _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
-            break;
-        case ManeuverType.newAp:// Working
-            _pass = Plugin.SetNewAp(_requestedBurnTime, TargetApR, -0.5);
-            break;
-        case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
-            _pass = Plugin.Ellipticize(_requestedBurnTime, TargetApR, TargetPeR, -0.5);
-            break;
-        case ManeuverType.newInc:// Working
-            _pass = Plugin.SetInclination(_requestedBurnTime, FPSettings.TargetInc_deg, -0.5);
-            break;
-        case ManeuverType.newLAN: // Untested
-            _pass = Plugin.SetNewLAN(_requestedBurnTime, FPSettings.TargetLAN_deg, -0.5);
-            break;
-        case ManeuverType.newNodeLon: // Untested
-            _pass = Plugin.SetNodeLongitude(_requestedBurnTime, FPSettings.TargetNodeLong_deg, -0.5);
-            break;
-        case ManeuverType.newSMA: // Untested
-            _pass = Plugin.SetNewSMA(_requestedBurnTime, TargetSMA, -0.5);
-            break;
-        case ManeuverType.matchPlane: // Working
-            _pass = Plugin.MatchPlanes(TimeRef, -0.5);
-            break;
-        case ManeuverType.hohmannXfer: // Works if we start in a good enough Orbit (reasonably circular, close to target's orbital plane)
-            _pass = Plugin.HohmannTransfer(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.interceptTgt: // Experimental
-            _pass = Plugin.InterceptTgt(_requestedBurnTime, FPSettings.InterceptTime, -0.5);
-            break;
-        case ManeuverType.courseCorrection: // Experimental Works at least some times...
-            _pass = Plugin.CourseCorrection(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
-            _pass = Plugin.MoonReturn(_requestedBurnTime, TargetMRPeR, -0.5);
-            break;
-        case ManeuverType.matchVelocity: // Experimental
-            _pass = Plugin.MatchVelocity(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-            _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.fixAp: // Working
-            _pass = Plugin.SetNewAp(_requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
-            break;
-        case ManeuverType.fixPe: // Working
-            _pass = Plugin.SetNewPe(_requestedBurnTime, ResonantOrbitPage.Pe2, - 0.5);
-            break;
+            case ManeuverType.circularize: // Working
+                _pass = Plugin.Circularize(_requestedBurnTime, -0.5);
+                break;
+            case ManeuverType.newPe: // Working
+                _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
+                break;
+            case ManeuverType.newAp:// Working
+                _pass = Plugin.SetNewAp(_requestedBurnTime, TargetApR, -0.5);
+                break;
+            case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
+                _pass = Plugin.Ellipticize(_requestedBurnTime, TargetApR, TargetPeR, -0.5);
+                break;
+            case ManeuverType.newInc:// Working
+                _pass = Plugin.SetInclination(_requestedBurnTime, FPSettings.TargetInc_deg, -0.5);
+                break;
+            case ManeuverType.newLAN: // Untested
+                _pass = Plugin.SetNewLAN(_requestedBurnTime, FPSettings.TargetLAN_deg, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.newNodeLon: // Untested
+                _pass = Plugin.SetNodeLongitude(_requestedBurnTime, FPSettings.TargetNodeLong_deg, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.newSMA: // Untested
+                _pass = Plugin.SetNewSMA(_requestedBurnTime, TargetSMA, -0.5);
+                break;
+            case ManeuverType.matchPlane: // Working
+                _pass = Plugin.MatchPlanes(TimeRef, -0.5);
+                break;
+            case ManeuverType.hohmannXfer: // Works if we start in a good enough Orbit (reasonably circular, close to target's orbital plane)
+                _pass = Plugin.HohmannTransfer(_requestedBurnTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.interceptTgt: // Experimental
+                _pass = Plugin.InterceptTgt(_requestedBurnTime, FPSettings.InterceptTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.courseCorrection: // Experimental Works at least some times...
+                _pass = Plugin.CourseCorrection(_requestedBurnTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
+                _pass = Plugin.MoonReturn(_requestedBurnTime, TargetMRPeR, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.matchVelocity: // Experimental
+                _pass = Plugin.MatchVelocity(_requestedBurnTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
+                _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.fixAp: // Working
+                _pass = Plugin.SetNewAp(_requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
+                break;
+            case ManeuverType.fixPe: // Working
+                _pass = Plugin.SetNewPe(_requestedBurnTime, ResonantOrbitPage.Pe2, - 0.5);
+                break;
         }
 
-        if (_pass && Plugin._autoLaunchMNC.Value)
+        if (_pass && Plugin._autoLaunchMNC.Value && _launchMNC)
             FPOtherModsInterface.instance.CallMNC();
     }
 }
