@@ -159,17 +159,25 @@ public class InterplanetaryPage : BasePageContent
     public override bool IsActive
     {
         get => _plugin._currentTarget != null // If the ActiveVessel is orbiting a planet and the current target is not the body the active vessel is orbiting
-            && _plugin._experimental.Value // No maneuvers relative to a star
-            && !referenceBody.IsStar && _plugin._currentTarget.IsCelestialBody
-            && referenceBody.Orbit.referenceBody.IsStar && (_plugin._currentTarget.Name != referenceBody.Name)
-            && _plugin._currentTarget.Orbit != null
+            && !referenceBody.IsStar // We're not orbiting a star
+            && _plugin._currentTarget.IsCelestialBody // the current target is a celestial object
+            && referenceBody.Orbit.referenceBody.IsStar && (_plugin._currentTarget.Name != referenceBody.Name) // we're at a planet and not targeting that same planet
+            && _plugin._currentTarget.Orbit != null // current target is not a star
             && _plugin._currentTarget.Orbit.referenceBody.IsStar; // exclude targets that are a moon
     }
     public override void OnGUI()
     {
         FPStyles.DrawSectionHeader("Orbital Transfer Maneuvers");
         BurnTimeOption.Instance.OptionSelectionGUI();
-        _mainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
+        if (_plugin._experimental.Value) // No maneuvers relative to a star
+        {
+            _mainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
+        }
+        else
+        {
+            // Let the user know they need to switch on Experimental Features to get this functionality
+            GUILayout.Label("No non-experimental capabilities available. Turn on <b>Experimental Features</b> in the Flight Plan <b>Condifuration Menu</b> (Press Alt-M, click Open Configuration Manager) to access maneuvers from this tab.", KBaseStyle.Warning);
+        }
     }
 }
 
