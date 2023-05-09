@@ -103,7 +103,7 @@ public class TargetPageShip2Ship : BasePageContent
         BurnTimeOption.Instance.OptionSelectionGUI();
 
         _mainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
-        // _mainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
+        _mainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
         _mainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
 
         if (_plugin._experimental.Value)
