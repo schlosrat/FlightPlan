@@ -43,33 +43,63 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 ### Easy Celestial Target Selection
 ![Flight Plan Celestial Target Selection Menu](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUI-9.png)
 * Menu for easy selection of *Celestial Targets*. Planets and their moons are graphically organized with moons indented below the planet they orbit. This capability augments the game's built-in target selection for easier selection of distant celestial bodies.
+
 ### Burn Time Option Selection
 ![Flight Plan Burn Time Option Menu](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUI-10.png)
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
-### Ownship Maneuvers
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png)
+
+### Ownship Maneuvers:
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png) **Always Available**
 * **Circularize**
 * **New Pe** (user specified value - km)
 * **New Ap** (user specified value - km)
 * **New Pe & Ap** (uses inputs for **New Pe** and **New Ap** above changing both in one maneuver)
 * **New Inclination** (user specified value - degrees)
 * **New SMA** (user specified value - km)
-### Target Relative Maneuvers (only available if a target is selected)
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png)
+### Target Relative Maneuvers: (only available if a target is selected)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
 
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png) **Available If Selected Target is Celestial Body**
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
-### Orbital Transfer Maneuvers
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png)
-* **Moon Return** (Only available when in orbit about a moon. User specified target Pe (km) for arrival back at the parent planet)
+### Orbital Transfer Maneuvers:
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Available If Active Vessel is Orbiting a Moon**
+* **Moon Return** (User specified target Pe (km) for arrival back at the parent planet)
 
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png)
-* **Planetary Transfer** (Only available when in orbit about a planet with another planet as the selected target)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
+* Display of Planetary Transfer Parameters:
+* *Phase Angle* to target (the current angle between the radius vectors for the origin and destination planets)
+* *Transfer Window Pahse Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go)
+* *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination)
+* *Synodic Period* (the time between transfer windows)
+* *Time to Next Window*
+* *Aproximate Eject DeltaV* (based on Hohman transfer orbit, but neglecting the Delta-V needed to escape from the origin)
+### Resonant Orbit Maneuvers
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/ROM_50.png) **Always Available**
+* Display of Resonant Orbit Configuration Parameters
+* *Payloads* (Number of payloads to deployments. Click + / - buttons to change. May be 2 to *)
+* *Deploy Orbits* (Number of resonant orbit cycles between deployments. Click + / - buttons to change. May be 1 to *)
+* *Target Altitude* for payload deployment (user configurable - km)
+* Current Orbit *Apoapsis* (click "⦾" button to set as Target Altitude)
+* Current Orbit *Periapsis* (click "⦾" button to set as Target Altitude)
+* *Synchronous Orbit Altitude* (click "⦾" button to set as Target Altitude)
+* *Semi Syncronous Orbit Altitude* (click "⦾" button to set as Target Altitude)
+* *SOI Altitude* (FYI - cant go above this)
+* *Min LOS Orbit Altitude* (click "⦾" button to set as Target Altitude - Going below this will prevent Line of Sight between deployed paylaods)
+* **Occlusion** (accounts for atmospheric/planetary occlusion in Min LOS Altitude: On or Off)
+* **Dive** (Configures to deploy at Apoapsis (ON) or Periapsis (OFF))
+* *Period* (FYI - Deployment orbital period)
+* *Apoapsis* (FYI - Deployment orbital apoapsis)
+* *Periapsis* (FYI - Deployment orbital periapsis)
+* *Eccentricity* (FYI - Deployment orbital eccentricity)
+* *Injection Delta-V* (FYI - Delta-V needed to circularize the payload's orbit at the point of deployment - typically lower for Diving deployments)
+* **Fix Pe** (Raise or Lower Pe to reach the configured deployment orbit)
+* **Fix Ap** (Raise or Lower Ap to reach the configured deployment orbit)
+
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
 * Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
