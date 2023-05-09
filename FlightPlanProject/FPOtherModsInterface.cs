@@ -66,7 +66,7 @@ public class FPOtherModsInterface
         Logger.LogInfo($"_mncLoaded = {_mncLoaded}");
 
         Logger.LogInfo($"K2D2_Plugin.ModGuid = {K2D2_Plugin.ModGuid}");
-        if (Chainloader.PluginInfos.TryGetValue(ManeuverNodeControllerMod.ModGuid, out _k2d2Info))
+        if (Chainloader.PluginInfos.TryGetValue(K2D2_Plugin.ModGuid, out _k2d2Info))
         {
             _k2d2Info = Chainloader.PluginInfos[K2D2_Plugin.ModGuid];
 
