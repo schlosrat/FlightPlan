@@ -73,11 +73,11 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
 * Display of Planetary Transfer Parameters:
 * *Phase Angle* to target (the current angle between the radius vectors for the origin and destination planets)
-* *Transfer Window Pahse Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go)
+* *Transfer Window Phase Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go)
 * *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination)
 * *Synodic Period* (the time between transfer windows)
 * *Time to Next Window*
-* *Aproximate Eject DeltaV* (based on Hohman transfer orbit, but neglecting the Delta-V needed to escape from the origin)
+* *Approximate Eject DeltaV* (based on Hohman transfer orbit, but neglecting the Delta-V needed to escape from the origin)
 ### Resonant Orbit Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/ROM_50.png) **Always Available**
 * Display of Resonant Orbit Configuration Parameters
@@ -87,11 +87,11 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 * Current Orbit *Apoapsis* (click "⦾" button to set as Target Altitude)
 * Current Orbit *Periapsis* (click "⦾" button to set as Target Altitude)
 * *Synchronous Orbit Altitude* (click "⦾" button to set as Target Altitude)
-* *Semi Syncronous Orbit Altitude* (click "⦾" button to set as Target Altitude)
-* *SOI Altitude* (FYI - cant go above this)
+* *Semi Synchronous Orbit Altitude* (click "⦾" button to set as Target Altitude)
+* *SOI Altitude* (FYI - cant deploy above this)
 * *Min LOS Orbit Altitude* (click "⦾" button to set as Target Altitude - Going below this will prevent Line of Sight between deployed paylaods)
-* **Occlusion** (accounts for atmospheric/planetary occlusion in Min LOS Altitude: On or Off)
-* **Dive** (Configures to deploy at Apoapsis (ON) or Periapsis (OFF))
+* **Occlusion** (Toggle to account for atmospheric/planetary occlusion in Min LOS Altitude: On or Off)
+* **Dive** (Toggle to configures for deployment at Apoapsis (ON) or Periapsis (OFF))
 * *Period* (FYI - Deployment orbital period)
 * *Apoapsis* (FYI - Deployment orbital apoapsis)
 * *Periapsis* (FYI - Deployment orbital periapsis)
