@@ -306,8 +306,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         var orbit = _activeVessel.Orbit;
 
         burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.Orbit, _deltaV, burnUT);
-        Logger.LogDebug($"CreateManeuverNod: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
-        Logger.LogDebug($"CreateManeuverNod: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
         NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, burnOffsetFactor);
         // StartCoroutine(TestPerturbedOrbit(Orbit, burnUT, _deltaV));
 
@@ -761,13 +761,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"PlanetaryXfer: Transfer to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
-        double _burnUTout, _burnUT2;
+        double _burnUTout, _burnUTout2;
         bool _syncPhaseAngle = true;
 
         FPStatus.Warning($"Experimental Transfer to {_currentTarget.Name} Ready");
 
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _syncPhaseAngle, out _burnUTout);
-        Vector3d _deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, out _burnUT2);
+        // Vector3d _deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, out _burnUTout2);
         if (_deltaV != Vector3d.zero)
         {
             CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
