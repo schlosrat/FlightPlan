@@ -1,12 +1,12 @@
 # Flight Plan
-![Flight Plan Banner Image](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-banner-2.png)
+![Flight Plan Banner Image](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-banner-2.png)
 
 Plan your (Space) Flight! Fly your Plan! Handy tools to help you set up maneuver nodes that will get you where you want to be.
 Making spaceflight planning easier for Kerbal Space Program 2 one mission at a time.
 
-**NOTE:** This mod draws heavily on some core [MechJeb2](https://github.com/MuMech/MechJeb2) code that has been adapted to work in KSP2, and would not be possible without the kind and generous contributions of Sarbian and the MechJeb development team! It is not the intent to replicate all MechJeb2 features and functions in this mod, but merely to make some handy maneuver planning tools available for KSP2 players. While you may be able to create some useful nodes with this mod, you'll still need to execute them accurately! Also, understanding some basic mission planning will be very usful for those employing the tools in this toolbox.
+**NOTE:** This mod draws heavily on some core [MechJeb2](https://raw.githubusercontent.com/MuMech/MechJeb2) code that has been adapted to work in KSP2, and would not be possible without the kind and generous contributions of Sarbian and the MechJeb development team! It is not the intent to replicate all MechJeb2 features and functions in this mod, but merely to make some handy maneuver planning tools available for KSP2 players. While you may be able to create some useful nodes with this mod, you'll still need to execute them accurately! Also, understanding some basic mission planning will be very useful for those employing the tools in this toolbox.
 
-**Note:** Version 0.8.0 has received significant updates and improvements in the GUI from [cfloutier](https://github.com/cfloutier) who richly deserves the credit for those parts. His contributions have dramatically improved the quality of the user interface and make the mod not only more modern and visually pleasing, but also easier and more fun to use.
+**Note:** Version 0.8.0 has received significant updates and improvements in the GUI from [cfloutier](https://raw.githubusercontent.com/cfloutier) who richly deserves the credit for those parts. His contributions have dramatically improved the quality of the user interface and make the mod not only more modern and visually pleasing, but also easier and more fun to use.
 
 ## Compatibility
 * Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
@@ -25,40 +25,51 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 1. Install **Node Manager** 0.5.3 or later (see link above). From the NodeManager-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\node_manager`.
 1. Download and extract this mod into the game folder. From the FlightPlan-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\flight_plan`.
 1. *Optional*: Download and install **K2-D2**, your friendly KSP Astromech ready to perform precision node execution for you! (see link above). From the K2D2_vx.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\K2D2`.
-1. *Optional*: Download and install **Maneuver Node Controller** to assist you with finetuning your maneuver nodes! (see link above). From the ManeuverNodeController-x.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\maneuver_node_controller`.
+1. *Optional*: Download and install **Maneuver Node Controller** to assist you with fine tuning your maneuver nodes! (see link above). From the ManeuverNodeController-x.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\maneuver_node_controller`.
 
 ## How to Use Flight Plan
-Flight Plan employs a tabbed interface to help organize it's features, and the list of available tabs updates automatically as your situation changes. Some tabs will always be available (e.g., Ownship Maneuvers and Resonant Orbit Maneuvers), while others will be offered to you based on the orbit you're in and / or the nature of your currently selected target. Fpr example, if your v]current target is another vessel, and that vessel is in orbit about the same body your active vessel is, then there will be a Target Relative Maneuvers tab available to you, and it will have the sorts of maneuvers you might need that are configured relative tot he target (e.g., Match Planes with target, etc.).
+Flight Plan employs a tabbed interface to help organize it's features. The list of available tabs updates dynamically based on your current situation. Some tabs will always be available (e.g., **Ownship Maneuvers** and **Resonant Orbit Maneuvers**), while others will be offered to you based on the orbit you're in and the type/location of your currently selected target. For example, if your current target is another vessel, and that vessel is in orbit about the same body your active vessel is, then the **Target Relative Maneuvers** tab will be available to you and it will have the sorts of maneuvers that are configured relative to a target (e.g., **Match Planes** with target, etc.).
 
 The basic workflow you'll want to follow when using Flight Plan is this.
-1. Click on the tab that has the type of maneuver you want to perform.
-2. Click on the **Maneuver Type** toggle button you want. Once you've selected a maneuver type then the menue for Burn Time Options will automatically be configured for options that make senese given that maneuve type and your current situation. For example, if you're in a hyperbolic orbit, then there will not be an option to perform a maneuver at the Ap, etc.
-3. Optional: Click on the Burn Time Option to display the list of available options. This step is optional because selectiong the maneuver type prior to this automatically populates the list and sets the current selected option to the default (it there wasn't an option selected previously, or to the previously selected option if that's a viable choice for this maneuver type.
-4. Optional: Set the text input field(s) for the maenuver type selected
-5. Pressmthe Make Node button
-6. Optional: press the K2-D2 button to automatically execute the node!
+1. Select the **Tab** that has the type of maneuver you want to perform.
+2. Click the **Maneuver Type** toggle button you want. Once you've selected a maneuver type then the menu for Burn Time Options will automatically be configured for the options that make sense given that maneuver type and your current situation. For example, if you're in a hyperbolic orbit, then there will not be an option to perform a maneuver at the Ap, etc.
+3. *Optional:* Click the **Burn Time Option** to display a list of available options. This step is optional because selecting the maneuver type prior to this automatically populates the list *and* sets the current selected option to the default (if there wasn't an option selected previously), or to the previously selected option (if that's a viable choice for this maneuver type). IF the Burn Time Option displayed suits your needs, then there's nothing you need to do on this step.
+4. *Optional:* Set the **Input Field(s)** for the maneuver type selected. Some maneuver types have input fields to the right of their toggle button and some don't. These fields are ore-populated with a default value or the last value you've used. Also, some Burn Time Options have additional input fields that are displayed when needed, e.g., "after a fixed time" and "at an altitude".
+5. Press the **Make Node** button. Pressing this button will either cause the maneuver node you've configured to be created with an appropriate status message confirming this, or you'll get an error message in the Status field.
+6. *Optional:* Click the **Maneuver Node Controller** icon button to the right of the Make Node button if you'd like to fine tune your maneuver node. This button is only available if you also have Maneuver Node Controller installed.
+6. *Optional:* press the **K2-D2** icon button to automatically execute the node! This button is only available if you also have K2-D2 installed.
 
 ## Features
 ### Easy Celestial Target Selection
-![Flight Plan Celestial Target Selection Menu](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-9.png)
+![Flight Plan Celestial Target Selection Menu](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUI-9.png)
 * Menu for easy selection of *Celestial Targets*. Planets and their moons are graphically organized with moons indented below the planet they orbit. This capability augments the game's built-in target selection for easier selection of distant celestial bodies.
 ### Burn Time Option Selection
-![Flight Plan Burn Time Option Menu](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-10.png)
+![Flight Plan Burn Time Option Menu](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUI-10.png)
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 ### Ownship Maneuvers
-![Flight Plan Main GUI](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-1.png)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png)
 * **Circularize**
 * **New Pe** (user specified value - km)
 * **New Ap** (user specified value - km)
 * **New Pe & Ap** (uses inputs for **New Pe** and **New Ap** above changing both in one maneuver)
 * **New Inclination** (user specified value - degrees)
 * **New LAN** (user specified value - degrees)
-### Maneuvers Relative to the Selected Target (only available if a target is selected)
+### Target Relative Maneuvers (only available if a target is selected)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png)
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
-### Moon Specific Maneuvers (only available when in orbit about a moon)
-* **Moon Return** (user specified target Pe (km) for arrival back at the parent planet)
+
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png)
+* **Match Planes** with Target
+* **Hohmann Transfer** to Target
+* **Course Correction** (requires being on an intercept trajectory)
+### Orbital Transfer Maneuvers
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png)
+* **Moon Return** (Only available when in orbit about a moon. User specified target Pe (km) for arrival back at the parent planet)
+
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png)
+* **Planetary Transfer** (Only available when in orbit about a planet with another planet as the selected target)
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
 * Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
@@ -73,84 +84,84 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 ## UI Screens
 The Flight Plan GUI will always display all Ownship maneuvers available in the current orbital situation. These are maneuvers which don't require a target and so are relative to your current vessel's orbit alone. Each *Maneuver Type* may be customized by the making a selection from the Burn options menu (right below the Celestial Target Selection Menu). For example, selecting **Circularize** as the Maneuver Type will result in having Burn Time options for *at the next Ap*, *at the next Pe*, *at an altitude*, and *after a fixed time*. In the case of the latter two options these will cause an additional input field to be presented where you can specify the **Maneuver Altitude** or **Time From Now**.
 
-![Flight Plan GUI Examples](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUIs.png)
+![Flight Plan GUI Examples](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUIs.png)
 
 Similarly, selecting **Match Planes** will give Burn Time options for *at the cheapest AN/DN w/Target*, *at the nearest AN/DN w/Target*, *at the next AN w/Target*, and *at the next DN w/Target*. NOTE: in the Match Planes example above the Make Node button has been pressed and Flight Plan is showing a status indicating the node is ready. In this example, with K2-D2 installed, the K2-D2 Astromech Icon is displayed in the lower right indicating that K2-D2 is ready to help you fly the node.
 
 In addition to the basic UI screens above, the UI will automatically adjust to offer capabilities relevant to the current orbit and selected target. Some options such as **Interplanetary Transfer** (above far right example) are only available if the *Experimental Features* option has been selected in the Flight Plan configuration options menu.
 
 ## Configuration Parameters
-![Flight Plan Configuration Parameters](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Config_Menu.png)
+![Flight Plan Configuration Parameters](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Config_Menu.png)
 
-This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press **Alt + M** to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the ionterface shown above. There are tool tip strings which describe what each setting does.
+This mod includes a number of user configurable parameters which can be accessed through the *SpaceWarp* configuration screen. Press **Alt + M** to pull up the SpaceWarp Mod dialog, and select the **Open Configuration Manager** button at the bottom to display the list of installed mods with configurable settings. Clicking on the Flight Plan entry will display the interface shown above. There are tool tip strings which describe what each setting does.
 Using the configuration parameters you can change a variety of things such as how long a status message sticks around before it start to fade, and also how long it will take to fade.
 
-**NOTE:** The following settings are dynamically managed and may be usted by the user while the game is running. All others will require exiting and restart to take effect.
+**NOTE:** The following settings are dynamically managed and may be set by the user while the game is running. All others will require exiting and restart to take effect.
 * Experimental Features: Enable/Disable
 * Launch Maneuver Node Controller: Enable/Disable
 * Status Fade Time: Seconds
 * Status Hold Time: Seconds
 
 ## Planned Improvement / Experimental Functions
-![Flight Plan Future GUI](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-4.png)
+![Flight Plan Future GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUI-4.png)
 
-**Work In Progress** developmental features may be enabled by switching on the *Experimental Features* in the mod's configuration screen. You do not need to restart the game for this setting to take effect, and it will allow you to play with some broken toys if you like. As these featuers mature and become realiable enough to use they will be moved up into the main feature set avaialble without turning on the *Experimental Features* setting.
-### Maneuvers Relative to the Selected Target (only available if a target is selected)
+**Work In Progress** developmental features may be enabled by switching on the *Experimental Features* in the mod's configuration screen. You do not need to restart the game for this setting to take effect, and it will allow you to play with some broken toys if you like. As these features mature and become reliable enough to use they will be moved up into the main feature set available without turning on the *Experimental Features* setting.
+### Target Relative Maneuvers
 * **Intercept** Target
 * **Match Velocity**
-### Interplanetary Transfer Maneuvers (only available if a planet is the selected target)
+### Interplanetary Transfer Maneuver (only available if a planet is the selected target)
 * **Interplanetary Transfer**
 
 ## Example: Take a Trip to Minmus
 ### Step 1: Match Planes
 Here we're stating out in a nicely equatorial Low Kerbin Orbit. As we want to go to Minmus, the first step is to get into a new circular orbit that's co-planar with the target. We can see that the necessary plane change maneuver has been planned and is ready to execute.
-![Flight Plan: Match Planes with Minmus 1](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-1.png)
+![Flight Plan: Match Planes with Minmus 1](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-1.png)
 
 Here we can see that K2-D2 has been activated. The Flight Plan status has been updated to show that we're executing the planned maneuver, and K2-D2 is reporting its status indicating the vessel is turning to point in the right direction for the planned burn.
-![Flight Plan: Match Planes with Minmus 2](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-2.png)
+![Flight Plan: Match Planes with Minmus 2](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-2.png)
 
 Here we can see K2-D2's status indicates we're warping to the burn. The Flight Plan status is unchanged.
-![Flight Plan: Match Planes with Minmus 3](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-3.png)
+![Flight Plan: Match Planes with Minmus 3](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-3.png)
 
 Here we can see K2-D2's status indicates we're executing the burn. The Flight Plan status is unchanged.
-![Flight Plan: Match Planes with Minmus 4](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-4.png)
+![Flight Plan: Match Planes with Minmus 4](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-4.png)
 
-Here we can see the plane change burn is done, the old node has been deleted, and we're now in a coplanar orbit with the target: Minums.
-![Flight Plan: Match Planes with Minmus 5](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-5.png)
+Here we can see the plane change burn is done, the old node has been deleted, and we're now in a co-planar orbit with the target: Minmus.
+![Flight Plan: Match Planes with Minmus 5](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-5.png)
 
 ### Step 2: Hohmann Transfer
-Now that we're in a coplanar orbit with our target we're ready to plan a Hohmann Transfer. Note that Flight Plan generated Hohmann Transfer maneuvers are not always spot on but will get you close. For this reason Flight Plan will bring up the Maneuver Node Controller mod if it's installed any time it produces an Hohmann Transfer. You may need to make minor adjustments to the prograde burn component or the node time, but should find that it's easy to get the transfer orbit you need with only a few clicks and no need to manually tweak the node. This example produced a good initial orbit that only required a few m/s more prograde delta-v and a slightly earlier burn time to get the result shown below.
-![Flight Plan: Match Planes with Minmus 6](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-6.png)
+Now that we're in a co-planar orbit with our target we're ready to plan a Hohmann Transfer. Note that Flight Plan generated Hohmann Transfer maneuvers are not always spot on but will get you close. For this reason Flight Plan will bring up the Maneuver Node Controller mod if it's installed any time it produces an Hohmann Transfer. You may need to make minor adjustments to the prograde burn component or the node time, but should find that it's easy to get the transfer orbit you need with only a few clicks and no need to manually tweak the node. This example produced a good initial orbit that only required a few m/s more prograde delta-v and a slightly earlier burn time to get the result shown below.
+![Flight Plan: Match Planes with Minmus 6](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-6.png)
 
 Here we can see K2-D2 has been commanded to execute the node and we're warping to the starting point for the burn.
-![Flight Plan: Match Planes with Minmus 7](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-7.png)
+![Flight Plan: Match Planes with Minmus 7](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-7.png)
 
 Here we can see K2-D2 executing the transfer burn.
-![Flight Plan: Match Planes with Minmus 8](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-8.png)
+![Flight Plan: Match Planes with Minmus 8](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-8.png)
 
 ### Step 3: Course Correction
 Sometimes in the game, as in life, things don't go quite as planned. What if you overshot the planned burn slightly as shown below? This can easily happen when executing a burn manually, and may also happen in some isolated cases when executing an automated burn. 
-![Flight Plan: Match Planes with Minmus 8a](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-8a%20-%20overshoot.png)
+![Flight Plan: Match Planes with Minmus 8a](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-8a%20-%20overshoot.png)
 
-Here we can see a Course Correction burn has been planned. Like the Hohmann Transfer option, this option will also bring up the Maneuver Node Controller mod so you can finetune things to make sure you've got the exact node you want. In this case very small prograde adjustments were made to get a good Pe at the Minmus flyby encounter.
-![Flight Plan: Match Planes with Minmus 9](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-9.png)
+Here we can see a Course Correction burn has been planned. Like the Hohmann Transfer option, this option will also bring up the Maneuver Node Controller mod so you can fine tune things to make sure you've got the exact node you want. In this case very small prograde adjustments were made to get a good Pe at the Minmus flyby encounter.
+![Flight Plan: Match Planes with Minmus 9](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-9.png)
 
 Here we can see K2-D2 performing a flawless Course Correction burn to get us back on track and headed for the encounter we want.
-![Flight Plan: Match Planes with Minmus 10](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-10.png)
+![Flight Plan: Match Planes with Minmus 10](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-10.png)
 
 ### Step 4: Arrival at Minmus
 Here we can see that we've arrived inside the Minmus SOI and are on track for a nearly equatorial flyby with a nice low Pe in a prograde orbit. What if we'd like to have an inclined orbit when we get to Minmus? Easy! Use Flight Plan to set up a a New Inclination at a burn time 30 seconds from now (this offset ensures we'll have sufficient time to point in the direction we need before the start of the burn).
-![Flight Plan: Match Planes with Minmus 11](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-11.png)
+![Flight Plan: Match Planes with Minmus 11](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-11.png)
 
 ### Step 5: Capture!
 Here we can see we're in a 60 degree inclined flyby orbit and we've got a Circularization burn planned for the periapsis of the Minmus encounter.
-![Flight Plan: Match Planes with Minmus 12](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-12.png)
+![Flight Plan: Match Planes with Minmus 12](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-12.png)
 
 Here we are approaching Pe in our Minmus Flyby with a Circularization burn planned to put us into a 60 degree inclined low circular orbit about Minmus. Perfect for picking a landing spot almost anywhere we may want to go. In this view you can also see the Maneuver Node Controller's GUI showing that our planned maneuver will place us in the orbit we want.
-![Flight Plan: Match Planes with Minmus 13](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-Action-13.png)
+![Flight Plan: Match Planes with Minmus 13](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-13.png)
 
 ## Older Examples
-The follwing images show more details illustrating Flight Plans fetures and capabilities. Althoguh the GUI has since been updated, these images still show relevant performance characteristics for the nodes you can generate.
+The following images show more details illustrating Flight Plans features and capabilities. Although the GUI has since been updated, these images still show relevant performance characteristics for the nodes you can generate.
 ### Burn Timing Detail (burn brackets effective point: Ap)
 ![Flight Plan: Circularize at Next Ap Burn Detail](https://i.imgur.com/pDkXeBM.png)
 
@@ -172,19 +183,19 @@ The follwing images show more details illustrating Flight Plans fetures and capa
 ### Match Planes with Minmus at DN (from 20 deg inclined orbit)
 ![Flight Plan: Match Planes with Target at DN Example](https://i.imgur.com/G4D3tiF.png)
 
-### Hohmann Transfer to Minmus (from coplanar orbit)
+### Hohmann Transfer to Minmus (from co-planar orbit)
 ![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/tIH5hkD.png)
 
-### Hohmann Transfer to Mun (from coplanar orbit)
+### Hohmann Transfer to Mun (from co-planar orbit)
 ![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/ymKTLyT.png)
 
 ### Set Inclination on Munar Flyby
-![Flight Plan: Set Incination to 87 in Hyperbolic Orbit](https://i.imgur.com/nBFNtm5.png)
+![Flight Plan: Set Inclination to 87 in Hyperbolic Orbit](https://i.imgur.com/nBFNtm5.png)
 
 ### Circularize at Pe for Munar Fly By
 ![Flight Plan: Circularize at Next Pe Example - Munar Flyby](https://i.imgur.com/gFuZRau.png)
 
-### Hohmann Transfer to Mun (from non-coplanar orbit: Inclined 20 degrees from target plane)
+### Hohmann Transfer to Mun (from non-co-planar orbit: Inclined 20 degrees from target plane)
 ![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/iliH2bY.png)
 
 # Flight Plan as a Library
@@ -194,38 +205,38 @@ This mod is primarily meant as a direct aid to the player but can also be used a
 
 ## Orbital Maneuver Node Capabilities
 
-**NOTE 1:** All of the orbital maneuver node creation methods in Flight Plan take a (double) burnUT, and an optional (double) burnOffsetFactor parameter. This factor is uesd with the node's burn duration (as estimated by the game) to allow you to offset the start time of the node. By default in KSP2 nodes begin at the time you've created them for unlike in KSP1 where they would bracket the requested start time. This optional parameter allows you to plan maneuver nodes that will start earlier so that the applied Delta-v occurs centered on the intended time.
+**NOTE 1:** All of the orbital maneuver node creation methods in Flight Plan take a (double) burnUT, and an optional (double) burnOffsetFactor parameter. This factor is used with the node's burn duration (as estimated by the game) to allow you to offset the start time of the node. By default in KSP2 nodes begin at the time you've created them for unlike in KSP1 where they would bracket the requested start time. This optional parameter allows you to plan maneuver nodes that will start earlier so that the applied Delta-v occurs centered on the intended time.
 
-**NOTE 2:** All of the orbital maneuver node creation methods in Flight Plan return a boolean value which is true if the node creation was successful and false otherwise.
+**NOTE 2:** All of the orbital maneuver node creation methods in Flight Plan return a Boolean value which is true if the node creation was successful and false otherwise.
 
 * **Circularize(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time for the active vessel to circularize the vessel's orbit at that point. This method can be used to plan a circularization burn at the next Apoapsis, Periapsis, or any other time that suits your needs during the orbit.
-* **SetNewPe(burnUT, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Periapsis (measured from center of body, not altitude above serface).
-* **SetNewAp(burnUT, newApR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis (measured from center of body, not altitude above serface).
-* **Ellipticize(burnUT, newApR, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis and Periapsis (both measured from center of body, not altitude above serface).
+* **SetNewPe(burnUT, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Periapsis (measured from center of body, not altitude above surface).
+* **SetNewAp(burnUT, newApR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis (measured from center of body, not altitude above surface).
+* **Ellipticize(burnUT, newApR, newPeR, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's Apoapsis and Periapsis (both measured from center of body, not altitude above surface).
 * **SetInclination(burnUT, newIncDeg, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbital inclination (in degrees).
 * **SetLAN(burnUT, newLANDeg, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's longitude of ascending node (in degrees).
 * **MatchPlanes(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to set the vessel's orbit inclination to match that of the currently selected target.
 * **HohmannTransfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* for a Hohmann Transfer to the currently selected target at the next available window. *NOTE*: The supplied burnUT parameter presently has no effect.
 * **InterceptTgt(burnUT, deltaUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to intercept the currently selected target at the a time of deltaUT from now.
-* **CourseCorrection(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* to finetune the trajectory to intercept the currently selected target. This method may be useful after executing a Hohman Transfer or Moon Return maneuver node. Calling it prior to node execution is suboptimal and not advised. *NOTE*: The supplied burnUT parameter presently has no effect.
+* **CourseCorrection(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* to fine tune the trajectory to intercept the currently selected target. This method may be useful after executing a Hohmann Transfer or Moon Return maneuver node. Calling it prior to node execution is sub-optimal and not advised. *NOTE*: The supplied burnUT parameter presently has no effect.
 * **MoonReturn(burnUT, targetPe, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* for a Hohmann Transfer to return the active vessel from a moon to the planet the moon is orbiting in a transfer orbit that give the targetPe when arriving at the parent planet. *NOTE*: The supplied burnUT parameter presently has no effect.
 * **MatchVelocity(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the specified time to match velocity with the currently selected target.
 * **PlanetaryXfer(burnUT, burnOffsetFactor)**: Calling this method will create a maneuver node at the *optimal time* for a Hohmann Transfer to the currently selected target planet during the next available transfer window. *NOTE*: The supplied burnUT parameter presently has no effect.
 
-## Orbital Time Prognistication Capabilities (KSP2's plus those available from Flight Plan)
-These methods can be accessed either directly (in the case of KSP2 native parameters) or by calling Flight Plan to get them. They are useful to determine the burnUT you may wish to use in a call to one of Flight Plans's maneuver node creation methods above.
+## Orbital Time Prognostication Capabilities (KSP2's plus those available from Flight Plan)
+These methods can be accessed either directly (in the case of KSP2 native parameters) or by calling Flight Plan to get them. They are useful to determine the burnUT you may wish to use in a call to one of Flight Plan's maneuver node creation methods above.
 
 * Time_to_Ap - Basic KSP2 parameter available from the active vessel's Orbit object.
 * Time_to_Pe - Basic KSP2 parameter available from the active vessel's Orbit object.
-* Radius(UT) - Basic KSP2 parameter available from the active vessel's Orbit object. Use in conjunction with AN/DN time predictors to get the *cheapest* node (hgihest node).
-* **NextApoapsisTime(UT)**: Returns the time of the next Ap occuring *after* UT. Useful for finding an Ap further in the future
-* **NextPeriapsisTime(UT)**: Returns the time of the next Pe occuring *after* UT. Useful for finding a Pe further in the future
+* Radius(UT) - Basic KSP2 parameter available from the active vessel's Orbit object. Use in conjunction with AN/DN time predictors to get the *cheapest* node (highest node).
+* **NextApoapsisTime(UT)**: Returns the time of the next Ap occurring *after* UT. Useful for finding an Ap further in the future
+* **NextPeriapsisTime(UT)**: Returns the time of the next Pe occurring *after* UT. Useful for finding a Pe further in the future
 * **NextClosestApproachTime(currentTarget.Orbit as PatchedConicsOrbit, UT)**: Returns the time of the next closest approach *after* UT between the active vessel and the target specified.
-* TimeOfAscendingNodeEquatorial(UT): Returns the time of the next *Equatorial* AN *after* UT for the active vessel. This is the point where the active vessel's orbit moves North through the plane of the ecliptic for the parent body the vessel is in orbit about.
-* TimeOfDescendingNodeEquatorial(UT): Returns the time of the next *Equatorial* DN *after* UT for the active vessel. This is the point where the active vessel's orbit moves South through the plane of the ecliptic for the parent body the vessel is in orbit about.
-* TimeOfAscendingNode(currentTarget.Orbit, UT): Returns the time of the next *target relative* AN *after* UT for the active vessel. This is the point where the active vessel's orbit moves North through the plane of the target's orbit for targets in orbit about the same parent body the vessel is orbiting.
-* TimeOfDescendingNode(currentTarget.Orbit, UT): Returns the time of the next *target relative* DN *after* UT for the active vessel. This is the point where the active vessel's orbit moves South through the plane of the target's orbit for targets in orbit about the same parent body the vessel is orbiting.
-* NextTimeOfRadius(UT, Radius): This is the next time *after* UT at which the active vessel will have the radius specified. Returns -1 in the event that the specified radius is not possible given the current orbit.
+* **TimeOfAscendingNodeEquatorial(UT):** Returns the time of the next *Equatorial* AN *after* UT for the active vessel. This is the point where the active vessel's orbit moves North through the plane of the ecliptic for the parent body the vessel is in orbit about.
+* **TimeOfDescendingNodeEquatorial(UT):** Returns the time of the next *Equatorial* DN *after* UT for the active vessel. This is the point where the active vessel's orbit moves South through the plane of the ecliptic for the parent body the vessel is in orbit about.
+* **TimeOfAscendingNode(currentTarget.Orbit, UT):** Returns the time of the next *target relative* AN *after* UT for the active vessel. This is the point where the active vessel's orbit moves North through the plane of the target's orbit for targets in orbit about the same parent body the vessel is orbiting.
+* **TimeOfDescendingNode(currentTarget.Orbit, UT):** Returns the time of the next *target relative* DN *after* UT for the active vessel. This is the point where the active vessel's orbit moves South through the plane of the target's orbit for targets in orbit about the same parent body the vessel is orbiting.
+* **NextTimeOfRadius(UT, Radius):** This is the next time *after* UT at which the active vessel will have the radius specified. Returns -1 in the event that the specified radius is not possible given the current orbit.
 
 To use this mod from your mod you will need to do one of the following:
 
@@ -324,7 +335,7 @@ See Step 3 above as there is no difference.
 ## Soft Dependency
 This is the way to go if optional capabilities in your mod will rely on functions in this Flight Plan, and you don't want your mod to have a hard dependency on Flight Plan.
 
-* The **advantage** to this way is that your mod's users don't need to have Flight Plan installed if they prefer not to have it, and you can distribute your mod without needing a hard dependency on Flight Plan - meaning you mod can launch and run yor mod without Flight Plan or its dependency Node Manager, although there may be some capabilities that aren't available to your users if they choose to pass on installing Flight Plan and Node Manager.
+* The **advantage** to this way is that your mod's users don't need to have Flight Plan installed if they prefer not to have it, and you can distribute your mod without needing a hard dependency on Flight Plan - meaning you mod can launch and run your mod without Flight Plan or its dependency Node Manager, although there may be some capabilities that aren't available to your users if they choose to pass on installing Flight Plan and Node Manager.
 * The **disadvantage** to this way is you'll need to do a bit more coding in your mod to be able to call Flight Plan's methods from your mod.
 
 ### Step 1: configure Assemblies
