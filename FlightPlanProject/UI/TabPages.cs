@@ -1,7 +1,8 @@
 ﻿using FlightPlan.KTools.UI;
 using FPUtilities;
-using KSP.Messages.PropertyWatchers;
+using KSP.Sim;
 using KSP.Sim.impl;
+using MuMech;
 using SpaceWarp.API.Assets;
 using UnityEngine;
 
@@ -165,10 +166,26 @@ public class InterplanetaryPage : BasePageContent
             && _plugin._currentTarget.Orbit != null // current target is not a star
             && _plugin._currentTarget.Orbit.referenceBody.IsStar; // exclude targets that are a moon
     }
+
     public override void OnGUI()
     {
         FPStyles.DrawSectionHeader("Orbital Transfer Maneuvers");
         BurnTimeOption.Instance.OptionSelectionGUI();
+        double _transferTime;
+
+        double synodicPeriod = referenceBody.Orbit.SynodicPeriod(_plugin._currentTarget.Orbit as PatchedConicsOrbit);
+        double phase = Phase();
+        double transfer = Transfer(out _transferTime);
+        double nextWindow = synodicPeriod * (transfer - phase) / 360;
+        if (nextWindow < 0) nextWindow += synodicPeriod;
+        // Display Transfer Info
+        _mainUI.DrawEntry($"Phase Angle to {_plugin._currentTarget.Name}", phase.ToString(), "°");
+        _mainUI.DrawEntry("Transfer Window Phase Angle", transfer.ToString(), "°");
+        _mainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime), " ");
+        _mainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
+        _mainUI.DrawEntry("Time to Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
+        _mainUI.DrawEntry("Aproximate Eject DeltaV", DeltaV().ToString(), "m/s");
+
         if (_plugin._experimental.Value) // No maneuvers relative to a star
         {
             _mainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
@@ -178,6 +195,80 @@ public class InterplanetaryPage : BasePageContent
             // Let the user know they need to switch on Experimental Features to get this functionality
             GUILayout.Label("No non-experimental capabilities available. Turn on <b>Experimental Features</b> in the Flight Plan <b>Configuration Menu</b> (Press Alt-M, click Open Configuration Manager) to access maneuvers from this tab.", KBaseStyle.Warning);
         }
+    }
+
+    double Phase()
+    {
+        // GameInstance game = GameManager.Instance.Game;
+        // _plugin._activeVessel
+        // SimulationObjectModel target = _plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+        CelestialBodyComponent cur = _plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().Orbit.referenceBody;
+
+        // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
+        while (cur.Orbit.referenceBody.Name != _plugin._currentTarget.Orbit.referenceBody.Name)
+        {
+            cur = cur.Orbit.referenceBody;
+        }
+
+        CelestialBodyComponent star = _plugin._currentTarget.CelestialBody.GetRelevantStar();
+        Vector3d to = star.coordinateSystem.ToLocalPosition(_plugin._currentTarget.Position); // radius vector of destination planet
+        Vector3d from = star.coordinateSystem.ToLocalPosition(cur.Position); // radius vector of origin planet
+
+        double phase = Vector3d.SignedAngle(to, from, Vector3d.up);
+        return Math.Round(phase, 1);
+    }
+
+    double Transfer(out double time)
+    {
+        // GameInstance game = GameManager.Instance.Game;
+        // SimulationObjectModel target = _plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+        CelestialBodyComponent cur = _plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().Orbit.referenceBody;
+
+        double ellipseA, transfer;
+
+        // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
+        while (cur.Orbit.referenceBody.Name != _plugin._currentTarget.Orbit.referenceBody.Name)
+        {
+            cur = cur.Orbit.referenceBody;
+        }
+
+        IKeplerOrbit targetOrbit = _plugin._currentTarget.Orbit;
+        IKeplerOrbit currentOrbit = cur.Orbit;
+
+        ellipseA = (targetOrbit.semiMajorAxis + currentOrbit.semiMajorAxis) / 2;
+        time = Mathf.PI * Mathf.Sqrt((float)((ellipseA) * (ellipseA) * (ellipseA)) / ((float)targetOrbit.referenceBody.gravParameter));
+
+        transfer = 180 - ((time / targetOrbit.period) * 360);
+        while (transfer < -180) { transfer += 360; }
+        return Math.Round(transfer, 1);
+    }
+
+    double DeltaV()
+    {
+        // GameInstance game = GameManager.Instance.Game;
+        // SimulationObjectModel target = _plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+        CelestialBodyComponent cur = _plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().Orbit.referenceBody;
+
+        // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
+        while (cur.Orbit.referenceBody.Name != _plugin._currentTarget.Orbit.referenceBody.Name)
+        {
+            cur = cur.Orbit.referenceBody;
+        }
+
+        IKeplerOrbit targetOrbit = _plugin._currentTarget.Orbit;
+        IKeplerOrbit currentOrbit = cur.Orbit;
+
+        double sunEject;
+        double ellipseA = (targetOrbit.semiMajorAxis + currentOrbit.semiMajorAxis) / 2;
+        CelestialBodyComponent star = targetOrbit.referenceBody;
+
+        sunEject = Mathf.Sqrt((float)(star.gravParameter) / (float)currentOrbit.semiMajorAxis) * (Mathf.Sqrt((float)targetOrbit.semiMajorAxis / (float)ellipseA) - 1);
+
+        VesselComponent ship = _plugin._activeVessel; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel(true);
+        double eject = Mathf.Sqrt((2 * (float)(cur.gravParameter) * ((1 / (float)ship.Orbit.radius) - (float)(1 / cur.sphereOfInfluence))) + (float)(sunEject * sunEject));
+        eject -= ship.Orbit.orbitalSpeed;
+
+        return Math.Round(eject, 1);
     }
 }
 
