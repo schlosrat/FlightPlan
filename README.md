@@ -141,7 +141,7 @@ Using the configuration parameters you can change a variety of things such as ho
 * **New LAN** (user specified value - degrees)
 ### Target Relative Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
-* **Intercept** Target
+* **Intercept** Target (user specified intercept time - seconds)
 * **Match Velocity**
 ### Orbital Transfer Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
