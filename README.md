@@ -27,12 +27,23 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 1. *Optional*: Download and install **K2-D2**, your friendly KSP Astromech ready to perform precision node execution for you! (see link above). From the K2D2_vx.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\K2D2`.
 1. *Optional*: Download and install **Maneuver Node Controller** to assist you with finetuning your maneuver nodes! (see link above). From the ManeuverNodeController-x.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\maneuver_node_controller`.
 
+## How to Use Flight Plan
+Flight Plan employs a tabbed interface to help organize it's features, and the list of available tabs updates automatically as your situation changes. Some tabs will always be available (e.g., Ownship Maneuvers and Resonant Orbit Maneuvers), while others will be offered to you based on the orbit you're in and / or the nature of your currently selected target. Fpr example, if your v]current target is another vessel, and that vessel is in orbit about the same body your active vessel is, then there will be a Target Relative Maneuvers tab available to you, and it will have the sorts of maneuvers you might need that are configured relative tot he target (e.g., Match Planes with target, etc.).
+
+The basic workflow you'll want to follow when using Flight Plan is this.
+1. Click on the tab that has the type of maneuver you want to perform.
+2. Click on the **Maneuver Type** toggle button you want. Once you've selected a maneuver type then the menue for Burn Time Options will automatically be configured for options that make senese given that maneuve type and your current situation. For example, if you're in a hyperbolic orbit, then there will not be an option to perform a maneuver at the Ap, etc.
+3. Optional: Click on the Burn Time Option to display the list of available options. This step is optional because selectiong the maneuver type prior to this automatically populates the list and sets the current selected option to the default (it there wasn't an option selected previously, or to the previously selected option if that's a viable choice for this maneuver type.
+4. Optional: Set the text input field(s) for the maenuver type selected
+5. Pressmthe Make Node button
+6. Optional: press the K2-D2 button to automatically execute the node!
+
 ## Features
 ### Easy Celestial Target Selection
-![Flight Plan Celestial Target Selection Menu](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-8.png)
+![Flight Plan Celestial Target Selection Menu](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-9.png)
 * Menu for easy selection of *Celestial Targets*. Planets and their moons are graphically organized with moons indented below the planet they orbit. This capability augments the game's built-in target selection for easier selection of distant celestial bodies.
 ### Burn Time Option Selection
-![Flight Plan Burn Time Option Menu](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-9.png)
+![Flight Plan Burn Time Option Menu](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-10.png)
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 ### Ownship Maneuvers
 ![Flight Plan Main GUI](https://github.com/schlosrat/FlightPlan/blob/master/Images/FP-GUI-1.png)
