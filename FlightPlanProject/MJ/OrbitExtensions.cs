@@ -10,7 +10,7 @@ using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using FlightPlan;
-//using UnityEngine;
+using UnityEngine;
 //using static VehiclePhysics.TelemetryTemplateBase;
 //using static MuMech.KSPOrbitModule;
 
@@ -687,6 +687,30 @@ namespace MuMech
             return angle;
         }
 
+        public static double Transfer(this PatchedConicsOrbit currentOrbit, PatchedConicsOrbit targetOrbit, out double time)
+        {
+            // GameInstance game = GameManager.Instance.Game;
+            // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+            CelestialBodyComponent cur = currentOrbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
+
+            double ellipseA, transfer;
+
+            // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
+            //while (cur.Orbit.referenceBody.Name != Plugin._currentTarget.Orbit.referenceBody.Name)
+            //{
+            //    cur = cur.Orbit.referenceBody;
+            //}
+
+            // IKeplerOrbit targetOrbit = Plugin._currentTarget.Orbit;
+            // IKeplerOrbit currentOrbit = cur.Orbit;
+
+            ellipseA = (targetOrbit.semiMajorAxis + currentOrbit.semiMajorAxis) / 2;
+            time = Mathf.PI * Mathf.Sqrt((float)((ellipseA) * (ellipseA) * (ellipseA)) / ((float)targetOrbit.referenceBody.gravParameter));
+
+            transfer = 180 - ((time / targetOrbit.period) * 360);
+            while (transfer < -180) { transfer += 360; }
+            return Math.Round(transfer, 1);
+        }
         //Computes the angle between two orbital planes. This will be a number between 0 and 180
         //Note that in the convention used two objects orbiting in the same plane but in
         //opposite directions have a relative inclination of 180 degrees.
