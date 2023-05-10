@@ -40,6 +40,7 @@ public class UI_Fields
     public static double DoubleField(string entryName, double value, GUIStyle thisStyle = null, bool parseAsTime = false)
     {
         string _textValue;
+        string timeFormat = "HH:mm:ss";
         if (TempDict.ContainsKey(entryName))
             // always use temp value
             _textValue = TempDict[entryName];
@@ -47,7 +48,7 @@ public class UI_Fields
         {
             if (parseAsTime)
             {
-                _textValue = value.ToString("hh:mm:ss");
+                _textValue = value.ToString(timeFormat);
             }
             else
                 _textValue = value.ToString();
@@ -61,8 +62,16 @@ public class UI_Fields
         double num;
         if (parseAsTime)
         {
-            _parsed = TimeSpan.TryParse(_textValue, out TimeSpan ts);
-            num = ts.TotalSeconds;
+            if (_textValue == timeFormat || _textValue.Length < 1)
+            {
+                _parsed = true;
+                num = 0;
+            }
+            else
+            {
+                _parsed = TimeSpan.TryParse(_textValue, out TimeSpan ts);
+                num = ts.TotalSeconds;
+            }
         }
         else
             _parsed = double.TryParse(_textValue, out num);
