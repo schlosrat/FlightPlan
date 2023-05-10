@@ -12,15 +12,15 @@ public class BasePageContent : IPageContent
 {
     public BasePageContent()
     {
-        this._mainUI = FlightPlanUI.Instance;
-        this._plugin = FlightPlanPlugin.Instance;
+        this.MainUI = FlightPlanUI.Instance;
+        this.Plugin = FlightPlanPlugin.Instance;
     }
-    protected FlightPlanUI _mainUI;
-    protected FlightPlanPlugin _plugin;
+    protected FlightPlanUI MainUI;
+    protected FlightPlanPlugin Plugin;
 
 
-    protected PatchedConicsOrbit orbit => _mainUI.Orbit;
-    protected CelestialBodyComponent referenceBody => _mainUI.ReferenceBody;
+    protected PatchedConicsOrbit Orbit => MainUI.Orbit;
+    protected CelestialBodyComponent ReferenceBody => MainUI.ReferenceBody;
 
     public virtual string Name => throw new NotImplementedException();
 
@@ -54,30 +54,30 @@ public class OwnshipManeuversPage : BasePageContent
     {
         FPStyles.DrawSectionHeader("Ownship Maneuvers");
         BurnTimeOption.Instance.OptionSelectionGUI();
-        _mainUI.DrawToggleButton("Circularize", ManeuverType.circularize);
+        MainUI.DrawToggleButton("Circularize", ManeuverType.circularize);
         // GUILayout.EndHorizontal();
 
-        FPSettings.PeAltitude_km = _mainUI.DrawToggleButtonWithTextField("New Pe", ManeuverType.newPe, FPSettings.PeAltitude_km, "km");
-        _mainUI.TargetPeR = FPSettings.PeAltitude_km * 1000 + referenceBody.radius;
+        FPSettings.PeAltitude_km = MainUI.DrawToggleButtonWithTextField("New Pe", ManeuverType.newPe, FPSettings.PeAltitude_km, "km");
+        MainUI.TargetPeR = FPSettings.PeAltitude_km * 1000 + ReferenceBody.radius;
 
-        if (_mainUI.Orbit.eccentricity < 1)
+        if (MainUI.Orbit.eccentricity < 1)
         {
-            FPSettings.ApAltitude_km = _mainUI.DrawToggleButtonWithTextField("New Ap", ManeuverType.newAp, FPSettings.ApAltitude_km, "km");
-            _mainUI.TargetApR = FPSettings.ApAltitude_km * 1000 + referenceBody.radius;
-            _mainUI.DrawToggleButton("New Pe & Ap", ManeuverType.newPeAp);
+            FPSettings.ApAltitude_km = MainUI.DrawToggleButtonWithTextField("New Ap", ManeuverType.newAp, FPSettings.ApAltitude_km, "km");
+            MainUI.TargetApR = FPSettings.ApAltitude_km * 1000 + ReferenceBody.radius;
+            MainUI.DrawToggleButton("New Pe & Ap", ManeuverType.newPeAp);
         }
 
-        FPSettings.TargetInc_deg = _mainUI.DrawToggleButtonWithTextField("New Inclination", ManeuverType.newInc, FPSettings.TargetInc_deg, "°");
+        FPSettings.TargetInc_deg = MainUI.DrawToggleButtonWithTextField("New Inclination", ManeuverType.newInc, FPSettings.TargetInc_deg, "°");
 
-        if (_plugin._experimental.Value)
+        if (Plugin._experimental.Value)
         {
-            FPSettings.TargetLAN_deg = _mainUI.DrawToggleButtonWithTextField("New LAN", ManeuverType.newLAN, FPSettings.TargetLAN_deg, "°");
+            FPSettings.TargetLAN_deg = MainUI.DrawToggleButtonWithTextField("New LAN", ManeuverType.newLAN, FPSettings.TargetLAN_deg, "°");
 
             // FPSettings.TargetNodeLong_deg = DrawToggleButtonWithTextField("New Node Longitude", ref newNodeLon, FPSettings.TargetNodeLong_deg, "°");
         }
 
-        FPSettings.TargetSMA_km = _mainUI.DrawToggleButtonWithTextField("New SMA", ManeuverType.newSMA, FPSettings.TargetSMA_km, "km");
-        _mainUI.TargetSMA = FPSettings.TargetSMA_km * 1000 + referenceBody.radius;
+        FPSettings.TargetSMA_km = MainUI.DrawToggleButtonWithTextField("New SMA", ManeuverType.newSMA, FPSettings.TargetSMA_km, "km");
+        MainUI.TargetSMA = FPSettings.TargetSMA_km * 1000 + ReferenceBody.radius;
     }
 }
 
@@ -91,9 +91,18 @@ public class TargetPageShip2Ship : BasePageContent
 
     public override bool IsActive
     {
-        get => _plugin._currentTarget != null  // If there is a target
-            && _plugin._currentTarget.IsVessel // And the target is a vessel
-            && _plugin._currentTarget.Orbit.referenceBody.Name == referenceBody.Name; // If the ActiveVessel and the target are both orbiting the same body
+        //get => Plugin._currentTarget != null  // If there is a target
+        //    && (Plugin._currentTarget.IsVessel || Plugin._currentTarget.IsPart) // And the target is a vessel or a part of a vessel (docking port?)
+        //    && Plugin._currentTarget?.orbit.referenceBody.Name == referenceBody.Name; // If the ActiveVessel and the target are both orbiting the same body
+        get
+        {
+            if (Plugin._currentTarget == null) return false;
+            if (!Plugin._currentTarget.IsVessel && !Plugin._currentTarget.IsPart) return false;
+            string referenceBodyName = Plugin._currentTarget.IsPart
+                ? Plugin._currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit.referenceBody.Name
+                : Plugin._currentTarget.Orbit.referenceBody.Name;
+            return referenceBodyName == ReferenceBody.Name;
+        }
     }
 
     public override void OnGUI()
@@ -102,14 +111,14 @@ public class TargetPageShip2Ship : BasePageContent
 
         BurnTimeOption.Instance.OptionSelectionGUI();
 
-        _mainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
-        _mainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
-        _mainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
+        MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
+        MainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
+        MainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
 
-        if (_plugin._experimental.Value)
+        if (Plugin._experimental.Value)
         {
-            FPSettings.InterceptTime = _mainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s");
-            _mainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
+            FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s");
+            MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
         }
     }
 }
@@ -125,10 +134,13 @@ public class TargetPageShip2Celestial : BasePageContent
 
     public override bool IsActive
     {
-        get => _plugin._currentTarget != null  // If there is a target
-            && _plugin._currentTarget.Orbit != null // And the target is not a star
-            && _plugin._currentTarget.IsCelestialBody // And the target is a Celestial
-            && _plugin._currentTarget.Orbit.referenceBody.Name == referenceBody.Name; // If the ActiveVessel and the _currentTarget are both orbiting the same body
+        get
+        {
+            if (Plugin._currentTarget == null) return false;  // If there is no target, then no tab
+            if (!Plugin._currentTarget.IsCelestialBody) return false; // If the target is not a Celestial, then no tab
+            if (Plugin._currentTarget.Orbit == null) return false; // And the target is a star, then no tab
+            return Plugin._currentTarget.Orbit.referenceBody.Name == ReferenceBody.Name; // If the ActiveVessel and the _currentTarget are both orbiting the same body
+        }
     }
 
     public override void OnGUI()
@@ -137,14 +149,14 @@ public class TargetPageShip2Celestial : BasePageContent
 
         BurnTimeOption.Instance.OptionSelectionGUI();
 
-        _mainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
-        _mainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
-        _mainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
+        MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
+        MainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
+        MainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
 
-        if (_plugin._experimental.Value)
+        if (Plugin._experimental.Value)
         {
-            FPSettings.InterceptTime = _mainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s");
-            _mainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
+            FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s");
+            MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
         }
     }
 }
@@ -159,36 +171,39 @@ public class InterplanetaryPage : BasePageContent
 
     public override bool IsActive
     {
-        get => _plugin._currentTarget != null // If the ActiveVessel is orbiting a planet and the current target is not the body the active vessel is orbiting
-            && !referenceBody.IsStar // We're not orbiting a star
-            && _plugin._currentTarget.IsCelestialBody // the current target is a celestial object
-            && referenceBody.Orbit.referenceBody.IsStar && (_plugin._currentTarget.Name != referenceBody.Name) // we're at a planet and not targeting that same planet
-            && _plugin._currentTarget.Orbit != null // current target is not a star
-            && _plugin._currentTarget.Orbit.referenceBody.IsStar; // exclude targets that are a moon
+        get
+        {
+            if (Plugin._currentTarget == null) return false; // If there is no target then no tab
+            if (ReferenceBody.IsStar) return false; // If we're orbiting a star then no tab
+            if (!Plugin._currentTarget.IsCelestialBody) return false; // the current target is not a celestial object then no tab
+            if (!ReferenceBody.Orbit.referenceBody.IsStar) return false; // If we're not at a planet then no tab
+            if (Plugin._currentTarget.Orbit == null) return false; // if current target is a star then no tab
+            if (!Plugin._currentTarget.Orbit.referenceBody.IsStar) return false; // If our target is not a planet then no tab
+            return Plugin._currentTarget.Name != ReferenceBody.Name;// if we're targeting the same planet we're orbiting then no tab
+        }
     }
 
     public override void OnGUI()
     {
         FPStyles.DrawSectionHeader("Orbital Transfer Maneuvers");
         BurnTimeOption.Instance.OptionSelectionGUI();
-        double _transferTime;
 
-        double synodicPeriod = referenceBody.Orbit.SynodicPeriod(_plugin._currentTarget.Orbit as PatchedConicsOrbit);
+        double synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(Plugin._currentTarget.Orbit as PatchedConicsOrbit);
         double phase = Phase();
-        double transfer = Transfer(out _transferTime);
+        double transfer = Transfer(out double _transferTime);
         double nextWindow = synodicPeriod * (transfer - phase) / 360;
         if (nextWindow < 0) nextWindow += synodicPeriod;
         // Display Transfer Info
-        _mainUI.DrawEntry($"Phase Angle to {_plugin._currentTarget.Name}", phase.ToString(), "°");
-        _mainUI.DrawEntry("Transfer Window Phase Angle", transfer.ToString(), "°");
-        _mainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime), " ");
-        _mainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
-        _mainUI.DrawEntry("Time to Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
-        _mainUI.DrawEntry("Aproximate Eject DeltaV", DeltaV().ToString(), "m/s");
+        MainUI.DrawEntry($"Phase Angle to {Plugin._currentTarget.Name}", phase.ToString(), "°");
+        MainUI.DrawEntry("Transfer Window Phase Angle", transfer.ToString(), "°");
+        MainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime), " ");
+        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
+        MainUI.DrawEntry("Time to Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
+        MainUI.DrawEntry("Aproximate Eject DeltaV", DeltaV().ToString(), "m/s");
 
-        if (_plugin._experimental.Value) // No maneuvers relative to a star
+        if (Plugin._experimental.Value) // No maneuvers relative to a star
         {
-            _mainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
+            MainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
         }
         else
         {
@@ -200,18 +215,18 @@ public class InterplanetaryPage : BasePageContent
     double Phase()
     {
         // GameInstance game = GameManager.Instance.Game;
-        // _plugin._activeVessel
-        // SimulationObjectModel target = _plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
-        CelestialBodyComponent cur = _plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().Orbit.referenceBody;
+        // Plugin._activeVessel
+        // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+        CelestialBodyComponent cur = Plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
 
         // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
-        while (cur.Orbit.referenceBody.Name != _plugin._currentTarget.Orbit.referenceBody.Name)
+        while (cur.Orbit.referenceBody.Name != Plugin._currentTarget.Orbit.referenceBody.Name)
         {
             cur = cur.Orbit.referenceBody;
         }
 
-        CelestialBodyComponent star = _plugin._currentTarget.CelestialBody.GetRelevantStar();
-        Vector3d to = star.coordinateSystem.ToLocalPosition(_plugin._currentTarget.Position); // radius vector of destination planet
+        CelestialBodyComponent star = Plugin._currentTarget.CelestialBody.GetRelevantStar();
+        Vector3d to = star.coordinateSystem.ToLocalPosition(Plugin._currentTarget.Position); // radius vector of destination planet
         Vector3d from = star.coordinateSystem.ToLocalPosition(cur.Position); // radius vector of origin planet
 
         double phase = Vector3d.SignedAngle(to, from, Vector3d.up);
@@ -221,18 +236,18 @@ public class InterplanetaryPage : BasePageContent
     double Transfer(out double time)
     {
         // GameInstance game = GameManager.Instance.Game;
-        // SimulationObjectModel target = _plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
-        CelestialBodyComponent cur = _plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().Orbit.referenceBody;
+        // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+        CelestialBodyComponent cur = Plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
 
         double ellipseA, transfer;
 
         // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
-        while (cur.Orbit.referenceBody.Name != _plugin._currentTarget.Orbit.referenceBody.Name)
+        while (cur.Orbit.referenceBody.Name != Plugin._currentTarget.Orbit.referenceBody.Name)
         {
             cur = cur.Orbit.referenceBody;
         }
 
-        IKeplerOrbit targetOrbit = _plugin._currentTarget.Orbit;
+        IKeplerOrbit targetOrbit = Plugin._currentTarget.Orbit;
         IKeplerOrbit currentOrbit = cur.Orbit;
 
         ellipseA = (targetOrbit.semiMajorAxis + currentOrbit.semiMajorAxis) / 2;
@@ -246,16 +261,16 @@ public class InterplanetaryPage : BasePageContent
     double DeltaV()
     {
         // GameInstance game = GameManager.Instance.Game;
-        // SimulationObjectModel target = _plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
-        CelestialBodyComponent cur = _plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().Orbit.referenceBody;
+        // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+        CelestialBodyComponent cur = Plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
 
         // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
-        while (cur.Orbit.referenceBody.Name != _plugin._currentTarget.Orbit.referenceBody.Name)
+        while (cur.Orbit.referenceBody.Name != Plugin._currentTarget.Orbit.referenceBody.Name)
         {
             cur = cur.Orbit.referenceBody;
         }
 
-        IKeplerOrbit targetOrbit = _plugin._currentTarget.Orbit;
+        IKeplerOrbit targetOrbit = Plugin._currentTarget.Orbit;
         IKeplerOrbit currentOrbit = cur.Orbit;
 
         double sunEject;
@@ -264,7 +279,7 @@ public class InterplanetaryPage : BasePageContent
 
         sunEject = Mathf.Sqrt((float)(star.gravParameter) / (float)currentOrbit.semiMajorAxis) * (Mathf.Sqrt((float)targetOrbit.semiMajorAxis / (float)ellipseA) - 1);
 
-        VesselComponent ship = _plugin._activeVessel; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel(true);
+        VesselComponent ship = Plugin._activeVessel; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel(true);
         double eject = Mathf.Sqrt((2 * (float)(cur.gravParameter) * ((1 / (float)ship.Orbit.radius) - (float)(1 / cur.sphereOfInfluence))) + (float)(sunEject * sunEject));
         eject -= ship.Orbit.orbitalSpeed;
 
@@ -283,17 +298,20 @@ public class MoonPage : BasePageContent
 
     public override bool IsActive
     {
-        get => !referenceBody.IsStar // not orbiting a star
-                && !referenceBody.Orbit.referenceBody.IsStar && orbit.eccentricity < 1;
-        // If the activeVessle is at a moon (a celestial in Orbit around another celestial that's not also a star)
+        get
+        {
+            if (ReferenceBody.IsStar) return false; // if were orbiting a star, then no tab
+            if (ReferenceBody.Orbit.referenceBody.IsStar) return false; // If we're orbiting a planet, then no tab
+            return Orbit.eccentricity < 1;
+        }
     }
     public override void OnGUI()
     {
         FPStyles.DrawSectionHeader("Orbital Transfer Maneuvers");
 
-        var parentPlanet = referenceBody.Orbit.referenceBody;
-        FPSettings.MoonReturnAltitude_km = _mainUI.DrawToggleButtonWithTextField("Moon Return", ManeuverType.moonReturn, FPSettings.MoonReturnAltitude_km, "km");
-        _mainUI.TargetMRPeR = FPSettings.MoonReturnAltitude_km * 1000 + parentPlanet.radius;
+        var parentPlanet = ReferenceBody.Orbit.referenceBody;
+        FPSettings.MoonReturnAltitude_km = MainUI.DrawToggleButtonWithTextField("Moon Return", ManeuverType.moonReturn, FPSettings.MoonReturnAltitude_km, "km");
+        MainUI.TargetMRPeR = FPSettings.MoonReturnAltitude_km * 1000 + parentPlanet.radius;
     }
 }
 
@@ -306,15 +324,15 @@ public class ResonantOrbitPage : BasePageContent
     private double _synchronousAlt;
     private double _semiSynchronousAlt;
     private double _minLOSAlt;
-    private string _targetAltitude = "600";      // String planned altitide for deployed satellites (destiantion Orbit)
-    private double _target_alt_km = 600;         // Double planned altitide for deployed satellites (destiantion Orbit)
-    private double _satPeriod;                   // The period of the destination Orbit
-    private double _xferPeriod;                  // The period of the resonant deploy Orbit (_xferPeriod = _resonance*_satPeriod)
+    private string _targetAltitude = "600";      // String planned altitide for deployed satellites (destiantion orbit)
+    private double _target_alt_km = 600;         // Double planned altitide for deployed satellites (destiantion orbit)
+    private double _satPeriod;                   // The period of the destination orbit
+    private double _xferPeriod;                  // The period of the resonant deploy orbit (_xferPeriod = _resonance*_satPeriod)
     // private bool _dive_error = false;
 
     // Data other classes and methods will need (needed to handle fixAp and fixPe maneuvers)
-    public static double Ap2 { get; set; } // The resonant deploy Orbit apoapsis
-    public static double Pe2 { get; set;  } // The resonant deploy Orbit periapsis
+    public static double Ap2 { get; set; } // The resonant deploy orbit apoapsis
+    public static double Pe2 { get; set;  } // The resonant deploy orbit periapsis
 
     public override string Name => "Resonant Orbit";
 
@@ -330,25 +348,25 @@ public class ResonantOrbitPage : BasePageContent
         BurnTimeOption.Instance.OptionSelectionGUI();
 
         // Data only needed inside this method
-        double _synchronousPeriod = _plugin._activeVessel.mainBody.rotationPeriod;
-        double _semiSynchronousPeriod = _plugin._activeVessel.mainBody.rotationPeriod / 2;
+        double _synchronousPeriod = Plugin._activeVessel.mainBody.rotationPeriod;
+        double _semiSynchronousPeriod = Plugin._activeVessel.mainBody.rotationPeriod / 2;
         _synchronousAlt = SMACalc(_synchronousPeriod);
         _semiSynchronousAlt = SMACalc(_semiSynchronousPeriod);
         int _n, _m;
 
         // Determine if synchronous or semi-synchronous orbits are possible for this body
-        if (_synchronousAlt > _plugin._activeVessel.mainBody.sphereOfInfluence)
+        if (_synchronousAlt > Plugin._activeVessel.mainBody.sphereOfInfluence)
         {
             _synchronousAlt = -1;
         }
-        if (_semiSynchronousAlt > _plugin._activeVessel.mainBody.sphereOfInfluence)
+        if (_semiSynchronousAlt > Plugin._activeVessel.mainBody.sphereOfInfluence)
         {
             _semiSynchronousAlt = -1;
         }
 
         // Set the _resonance factors based on diving or not
         _m = FPSettings.NumSats * FPSettings.NumOrbits;
-        if (FPSettings.DiveOrbit) // If we're going to dive under the target Orbit for the deployment Orbit
+        if (FPSettings.DiveOrbit) // If we're going to dive under the target orbit for the deployment orbit
             _n = _m - 1;
         else // If not
             _n = _m + 1;
@@ -356,65 +374,65 @@ public class ResonantOrbitPage : BasePageContent
         string _resonanceStr = String.Format("{0}/{1}", _n, _m);
 
         // Compute the minimum LOS altitude
-        _minLOSAlt = MinLOSCalc(FPSettings.NumSats, _plugin._activeVessel.mainBody.radius, _plugin._activeVessel.mainBody.hasAtmosphere);
+        _minLOSAlt = MinLOSCalc(FPSettings.NumSats, Plugin._activeVessel.mainBody.radius, Plugin._activeVessel.mainBody.hasAtmosphere);
 
-        _mainUI.DrawEntry2Button("Payloads:", ref _nSatUp, "+", ref _nSatDown, "-", FPSettings.NumSats.ToString(), "", "/"); // was numSatellites
-        _mainUI.DrawEntry2Button("Deploy Orbits:", ref _nOrbUp, "+", ref _nOrbDown, "-", FPSettings.NumOrbits.ToString(), "", "/"); // was numOrbits
-        _mainUI.DrawEntry("Orbital Resonance", _resonanceStr, " ");
+        MainUI.DrawEntry2Button("Payloads:", ref _nSatUp, "+", ref _nSatDown, "-", FPSettings.NumSats.ToString(), "", "/"); // was numSatellites
+        MainUI.DrawEntry2Button("Deploy Orbits:", ref _nOrbUp, "+", ref _nOrbDown, "-", FPSettings.NumOrbits.ToString(), "", "/"); // was numOrbits
+        MainUI.DrawEntry("Orbital Resonance", _resonanceStr, " ");
 
-        _mainUI.DrawEntryTextField("Target Altitude", ref _targetAltitude, "km"); // Tried" FPSettings.tgt_altitude_km 
+        MainUI.DrawEntryTextField("Target Altitude", ref _targetAltitude, "km"); // Tried" FPSettings.tgt_altitude_km 
         bool pass = double.TryParse(_targetAltitude, out _target_alt_km);
 
-        _mainUI.DrawEntryButton("Apoapsis", ref _setTgtAp, "⦾", $"{FPUtility.MetersToDistanceString(_plugin._activeVessel.Orbit.ApoapsisArl / 1000)}", "km");
-        _mainUI.DrawEntryButton("Periapsis", ref _setTgtPe, "⦾", $"{FPUtility.MetersToDistanceString(_plugin._activeVessel.Orbit.PeriapsisArl / 1000)}", "km");
+        MainUI.DrawEntryButton("Apoapsis", ref _setTgtAp, "⦾", $"{FPUtility.MetersToDistanceString(Plugin._activeVessel.Orbit.ApoapsisArl / 1000)}", "km");
+        MainUI.DrawEntryButton("Periapsis", ref _setTgtPe, "⦾", $"{FPUtility.MetersToDistanceString(Plugin._activeVessel.Orbit.PeriapsisArl / 1000)}", "km");
 
-        _satPeriod = PeriodCalc(_target_alt_km * 1000 + _plugin._activeVessel.mainBody.radius);
+        _satPeriod = PeriodCalc(_target_alt_km * 1000 + Plugin._activeVessel.mainBody.radius);
 
         if (_synchronousAlt > 0)
         {
-            _mainUI.DrawEntryButton("Synchronous Alt", ref _setTgtSync, "⦾", $"{FPUtility.MetersToDistanceString(_synchronousAlt / 1000)}", "km");
-            _mainUI.DrawEntryButton("Semi Synchronous Alt", ref _setTgtSemiSync, "⦾", $"{FPUtility.MetersToDistanceString(_semiSynchronousAlt / 1000)}", "km");
+            MainUI.DrawEntryButton("Synchronous Alt", ref _setTgtSync, "⦾", $"{FPUtility.MetersToDistanceString(_synchronousAlt / 1000)}", "km");
+            MainUI.DrawEntryButton("Semi Synchronous Alt", ref _setTgtSemiSync, "⦾", $"{FPUtility.MetersToDistanceString(_semiSynchronousAlt / 1000)}", "km");
         }
         else if (_semiSynchronousAlt > 0)
         {
-            _mainUI.DrawEntry("Synchronous Alt", "Outside SOI", " ");
-            _mainUI.DrawEntryButton("Semi Synchronous Alt", ref _setTgtSemiSync, "⦾", $"{FPUtility.MetersToDistanceString(_semiSynchronousAlt / 1000)}", "km");
+            MainUI.DrawEntry("Synchronous Alt", "Outside SOI", " ");
+            MainUI.DrawEntryButton("Semi Synchronous Alt", ref _setTgtSemiSync, "⦾", $"{FPUtility.MetersToDistanceString(_semiSynchronousAlt / 1000)}", "km");
         }
         else
         {
-            _mainUI.DrawEntry("Synchronous Alt", "Outside SOI", " ");
-            _mainUI.DrawEntry("Semi Synchronous Alt", "Outside SOI", " ");
+            MainUI.DrawEntry("Synchronous Alt", "Outside SOI", " ");
+            MainUI.DrawEntry("Semi Synchronous Alt", "Outside SOI", " ");
         }
-        _mainUI.DrawEntry("SOI Alt", $"{FPUtility.MetersToDistanceString(_plugin._activeVessel.mainBody.sphereOfInfluence / 1000)}", "km");
+        MainUI.DrawEntry("SOI Alt", $"{FPUtility.MetersToDistanceString(Plugin._activeVessel.mainBody.sphereOfInfluence / 1000)}", "km");
         if (_minLOSAlt > 0)
         {
-            _mainUI.DrawEntryButton("Min LOS Orbit Alt", ref _setTgtMinLOS, "⦾", $"{FPUtility.MetersToDistanceString(_minLOSAlt / 1000)}", "km");
+            MainUI.DrawEntryButton("Min LOS Orbit Alt", ref _setTgtMinLOS, "⦾", $"{FPUtility.MetersToDistanceString(_minLOSAlt / 1000)}", "km");
         }
         else
         {
-            _mainUI.DrawEntry("Min LOS Orbit Alt", "Undefined", "km");
+            MainUI.DrawEntry("Min LOS Orbit Alt", "Undefined", "km");
         }
-        FPSettings.Occlusion = _mainUI.DrawSoloToggle("<b>Occlusion</b>", FPSettings.Occlusion);
+        FPSettings.Occlusion = MainUI.DrawSoloToggle("<b>Occlusion</b>", FPSettings.Occlusion);
         if (FPSettings.Occlusion)
         {
-            FPSettings.OccModAtm = _mainUI.DrawEntryTextField("Atm", FPSettings.OccModAtm, "  ", KBaseStyle.TextInputStyle);
+            FPSettings.OccModAtm = MainUI.DrawEntryTextField("Atm", FPSettings.OccModAtm, "  ", KBaseStyle.TextInputStyle);
             // GUILayout.Space(-FPStyles.SpacingAfterEntry);
-            FPSettings.OccModVac = _mainUI.DrawEntryTextField("Vac", FPSettings.OccModVac, "  ", KBaseStyle.TextInputStyle);
+            FPSettings.OccModVac = MainUI.DrawEntryTextField("Vac", FPSettings.OccModVac, "  ", KBaseStyle.TextInputStyle);
             // GUILayout.Space(-FPStyles.SpacingAfterEntry);
         }
 
         // period1 = PeriodCalc(_target_alt_km*1000 + ActiveVessel.mainBody.radius);
         _xferPeriod = _resonance * _satPeriod;
         double _SMA2 = SMACalc(_xferPeriod);
-        double _sSMA = _target_alt_km * 1000 + _plugin._activeVessel.mainBody.radius;
+        double _sSMA = _target_alt_km * 1000 + Plugin._activeVessel.mainBody.radius;
         double _divePe = 2.0 * _SMA2 - _sSMA;
-        if (_divePe < _plugin._activeVessel.mainBody.radius) // No diving in the shallow end of the pool!
+        if (_divePe < Plugin._activeVessel.mainBody.radius) // No diving in the shallow end of the pool!
         {
             FPSettings.DiveOrbit = false;
-            FPSettings.DiveOrbit = _mainUI.DrawSoloToggle("<b>Dive</b>", FPSettings.DiveOrbit, true);
+            FPSettings.DiveOrbit = MainUI.DrawSoloToggle("<b>Dive</b>", FPSettings.DiveOrbit, true);
         }
         else
-            FPSettings.DiveOrbit = _mainUI.DrawSoloToggle("<b>Dive</b>", FPSettings.DiveOrbit);
+            FPSettings.DiveOrbit = MainUI.DrawSoloToggle("<b>Dive</b>", FPSettings.DiveOrbit);
 
         if (FPSettings.DiveOrbit)
         {
@@ -428,15 +446,15 @@ public class ResonantOrbitPage : BasePageContent
         }
         double _ce = (Ap2 - Pe2) / (Ap2 + Pe2);
         
-        _mainUI.DrawEntry("Period", $"{FPUtility.SecondsToTimeString(_xferPeriod)}", "s");
-        _mainUI.DrawEntry("Apoapsis", $"{FPUtility.MetersToDistanceString((Ap2 - _plugin._activeVessel.mainBody.radius) / 1000)}", "km");
-        _mainUI.DrawEntry("Periapsis", $"{FPUtility.MetersToDistanceString((Pe2 - _plugin._activeVessel.mainBody.radius) / 1000)}", "km");
-        _mainUI.DrawEntry("Eccentricity", _ce.ToString("N3"), " ");
-        double dV = BurnCalc(_sSMA, _sSMA, 0, Ap2, _SMA2, _ce, _plugin._activeVessel.mainBody.gravParameter);
-        _mainUI.DrawEntry("Injection Δv", dV.ToString("N3"), "m/s");
+        MainUI.DrawEntry("Period", $"{FPUtility.SecondsToTimeString(_xferPeriod)}", "s");
+        MainUI.DrawEntry("Apoapsis", $"{FPUtility.MetersToDistanceString((Ap2 - Plugin._activeVessel.mainBody.radius) / 1000)}", "km");
+        MainUI.DrawEntry("Periapsis", $"{FPUtility.MetersToDistanceString((Pe2 - Plugin._activeVessel.mainBody.radius) / 1000)}", "km");
+        MainUI.DrawEntry("Eccentricity", _ce.ToString("N3"), " ");
+        double dV = BurnCalc(_sSMA, _sSMA, 0, Ap2, _SMA2, _ce, Plugin._activeVessel.mainBody.gravParameter);
+        MainUI.DrawEntry("Injection Δv", dV.ToString("N3"), "m/s");
 
-        double _errorPe = (Pe2 - _plugin._activeVessel.Orbit.Periapsis) / 1000;
-        double _errorAp = (Ap2 - _plugin._activeVessel.Orbit.Apoapsis) / 1000;
+        double _errorPe = (Pe2 - Plugin._activeVessel.Orbit.Periapsis) / 1000;
+        double _errorAp = (Ap2 - Plugin._activeVessel.Orbit.Apoapsis) / 1000;
         string _fixPeStr, _fixApStr;
 
         GUILayout.Space(-FPStyles.SpacingAfterSection);
@@ -444,26 +462,26 @@ public class ResonantOrbitPage : BasePageContent
         UI_Tools.Separator();
 
         if (_errorPe > 0)
-            _fixPeStr = $"Raise to {((Pe2 - _plugin._activeVessel.mainBody.radius) / 1000):N2} km";
+            _fixPeStr = $"Raise to {((Pe2 - Plugin._activeVessel.mainBody.radius) / 1000):N2} km";
         else
-            _fixPeStr = $"Lower to {((Pe2 - _plugin._activeVessel.mainBody.radius) / 1000):N2} km";
+            _fixPeStr = $"Lower to {((Pe2 - Plugin._activeVessel.mainBody.radius) / 1000):N2} km";
         if (_errorAp > 0)
-            _fixApStr = $"Raise to {((Ap2 - _plugin._activeVessel.mainBody.radius) / 1000):N2} km";
+            _fixApStr = $"Raise to {((Ap2 - Plugin._activeVessel.mainBody.radius) / 1000):N2} km";
         else
-            _fixApStr = $"Lower to {((Ap2 - _plugin._activeVessel.mainBody.radius) / 1000):N2} km";
-        if (_plugin._activeVessel.Orbit.Apoapsis < Pe2)
+            _fixApStr = $"Lower to {((Ap2 - Plugin._activeVessel.mainBody.radius) / 1000):N2} km";
+        if (Plugin._activeVessel.Orbit.Apoapsis < Pe2)
         {
-            _mainUI.DrawToggleButtonWithLabel("Fix Ap", ManeuverType.fixAp, _fixApStr, "", 55);
+            MainUI.DrawToggleButtonWithLabel("Fix Ap", ManeuverType.fixAp, _fixApStr, "", 55);
         }
-        else if (_plugin._activeVessel.Orbit.Periapsis > Ap2)
+        else if (Plugin._activeVessel.Orbit.Periapsis > Ap2)
         {
-            _mainUI.DrawToggleButtonWithLabel("Fix Pe", ManeuverType.fixPe, _fixPeStr, "", 55);
+            MainUI.DrawToggleButtonWithLabel("Fix Pe", ManeuverType.fixPe, _fixPeStr, "", 55);
         }
         else
         {
-            if (Pe2 > _plugin._activeVessel.mainBody.radius)
-                _mainUI.DrawToggleButtonWithLabel("Fix Pe", ManeuverType.fixPe, _fixPeStr, "", 55);
-            _mainUI.DrawToggleButtonWithLabel("Fix Ap", ManeuverType.fixAp, _fixApStr, "", 55);
+            if (Pe2 > Plugin._activeVessel.mainBody.radius)
+                MainUI.DrawToggleButtonWithLabel("Fix Pe", ManeuverType.fixPe, _fixPeStr, "", 55);
+            MainUI.DrawToggleButtonWithLabel("Fix Ap", ManeuverType.fixAp, _fixApStr, "", 55);
         }
 
         HandleButtons();
@@ -505,14 +523,14 @@ public class ResonantOrbitPage : BasePageContent
     public double SMACalc(double period) // General Purpose: Compute SMA given orbital period - RELOCATE TO ?
     {
         double _SMA;
-        _SMA = Math.Pow((period * Math.Sqrt(_plugin._activeVessel.mainBody.gravParameter) / (2.0 * Math.PI)), (2.0 / 3.0));
+        _SMA = Math.Pow((period * Math.Sqrt(Plugin._activeVessel.mainBody.gravParameter) / (2.0 * Math.PI)), (2.0 / 3.0));
         return _SMA;
     }
 
     public double PeriodCalc(double SMA) // General Purpose: Compute orbital period given SMA - RELOCATE TO ?
     {
         double _period;
-        _period = (2.0 * Math.PI * Math.Pow(SMA, 1.5)) / Math.Sqrt(_plugin._activeVessel.mainBody.gravParameter);
+        _period = (2.0 * Math.PI * Math.Pow(SMA, 1.5)) / Math.Sqrt(Plugin._activeVessel.mainBody.gravParameter);
         return _period;
     }
 
@@ -557,15 +575,15 @@ public class ResonantOrbitPage : BasePageContent
             }
             else if (_setTgtPe)
             {
-                // Logger.LogInfo($"HandleButtons: Setting tgt_altitude_km to Periapsis {ActiveVessel.Orbit.PeriapsisArl / 1000.0} km");
-                _target_alt_km = _plugin._activeVessel.Orbit.PeriapsisArl / 1000.0;
+                // Logger.LogInfo($"HandleButtons: Setting tgt_altitude_km to Periapsis {ActiveVessel.orbit.PeriapsisArl / 1000.0} km");
+                _target_alt_km = Plugin._activeVessel.Orbit.PeriapsisArl / 1000.0;
                 _targetAltitude = _target_alt_km.ToString("N3");
                 // Logger.LogInfo($"HandleButtons: tgt_altitude_km set to {_targetAltitude} km");
             }
             else if (_setTgtAp)
             {
-                // Logger.LogInfo($"HandleButtons: Setting tgt_altitude_km to Apoapsis {ActiveVessel.Orbit.ApoapsisArl / 1000.0} km");
-                _target_alt_km = _plugin._activeVessel.Orbit.ApoapsisArl / 1000.0;
+                // Logger.LogInfo($"HandleButtons: Setting tgt_altitude_km to Apoapsis {ActiveVessel.orbit.ApoapsisArl / 1000.0} km");
+                _target_alt_km = Plugin._activeVessel.Orbit.ApoapsisArl / 1000.0;
                 _targetAltitude = _target_alt_km.ToString("N3");
                 // Logger.LogInfo($"HandleButtons: tgt_altitude_km set to {_targetAltitude} km");
 
