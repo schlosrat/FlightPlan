@@ -328,7 +328,7 @@ public class FlightPlanUI
         }
         DrawGUIStatus(_UT);
 
-        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the Orbit
+        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the orbit
         if (TimeRef == TimeRef.ALTITUDE)
         {
             if (FPSettings.Altitude_km * 1000 < Orbit.Periapsis)
@@ -421,7 +421,7 @@ public class FlightPlanUI
             case ManeuverType.matchPlane: // Working
                 _pass = Plugin.MatchPlanes(TimeRef, -0.5);
                 break;
-            case ManeuverType.hohmannXfer: // Works if we start in a good enough Orbit (reasonably circular, close to target's orbital plane)
+            case ManeuverType.hohmannXfer: // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
                 _pass = Plugin.HohmannTransfer(_requestedBurnTime, -0.5);
                 _launchMNC = true;
                 break;
