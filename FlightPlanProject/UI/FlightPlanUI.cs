@@ -214,14 +214,14 @@ public class FlightPlanUI
         return value;
     }
 
-    public double DrawToggleButtonWithTextField(string runString, ManeuverType type, double value, string unit = "")
+    public double DrawToggleButtonWithTextField(string runString, ManeuverType type, double value, string unit = "", bool parseAsTime = false)
     {
         GUILayout.BeginHorizontal();
 
         DrawToggleButton(runString, type);
         GUILayout.Space(10);
 
-        value = UI_Fields.DoubleField(runString, value);
+        value = UI_Fields.DoubleField(runString, value, null, parseAsTime);
 
         GUILayout.Space(3);
         UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle);

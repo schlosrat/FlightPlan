@@ -117,7 +117,7 @@ public class TargetPageShip2Ship : BasePageContent
 
         if (Plugin._experimental.Value)
         {
-            FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s");
+            FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s", true);
             MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
         }
     }
