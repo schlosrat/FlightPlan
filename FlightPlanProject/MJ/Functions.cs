@@ -564,7 +564,7 @@ namespace MechJebLib.Maths
 
         /// <summary>
         ///     Returns the vector delta V required to be applied in the prograde (or retrograde) direction
-        ///     to change the Orbit Apoapsis to the desired value.
+        ///     to change the orbit Apoapsis to the desired value.
         /// </summary>
         /// <param name="mu">Gravitational parameter</param>
         /// <param name="r">Current radius</param>
@@ -652,7 +652,7 @@ namespace MechJebLib.Maths
 
                 if (ecc < 1)
                 {
-                    // elliptic Orbit
+                    // elliptic orbit
                     s    = ecc * Math.Sin(eanom);
                     c    = ecc * Math.Cos(eanom);
                     f    = eanom - s - xma;
@@ -662,7 +662,7 @@ namespace MechJebLib.Maths
                 }
                 else
                 {
-                    // hyperbolic Orbit
+                    // hyperbolic orbit
                     s    = ecc * Math.Sinh(eanom);
                     c    = ecc * Math.Cosh(eanom);
                     f    = s - eanom - xma;

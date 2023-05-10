@@ -67,7 +67,7 @@ namespace MuMech
             return Math.Sqrt(2 * body.gravParameter / radius);
         }
 
-        //Computes the deltaV of the burn needed to circularize an Orbit at a given UT.
+        //Computes the deltaV of the burn needed to circularize an orbit at a given UT.
         public static Vector3d DeltaVToCircularize(PatchedConicsOrbit o, double UT)
         {
             Vector3d desiredVelocity = CircularOrbitSpeed(o.referenceBody, o.Radius(UT)) * o.Horizontal(UT);
@@ -201,7 +201,7 @@ namespace MuMech
                             break; // safety precaution
                         }
                         // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
-                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //if (testOrbit.eccentricity >= 1) // If we've shot too high
                         //{
                         //    minDeltaV = lastMax *= (1 / riseFactor); // Reset min
@@ -212,7 +212,7 @@ namespace MuMech
                         //        break; // We're done (in a bad way...)
                         //    maxDeltaV *= riseFactor; // Apply the new riseFactor
                         //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
-                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //}
                     }
                     else
@@ -293,7 +293,7 @@ namespace MuMech
             double minDeltaV = 0;
             // 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
             // This logic does not work! Assuming a max of 10000 can get you into a situation where the Apoapsis
-            // goes negative due to hyperbolic Orbit. In such a case the user has asked for an Apoapsis that is
+            // goes negative due to hyperbolic orbit. In such a case the user has asked for an Apoapsis that is
             // not possible for this body. Perhaps we need a check to make sure newApR is within the SOI? In any
             // event, simply doubling the max each time can get to a spot where SMA is NaN and Apoapsis goes
             // negative (discontinuity). Setting the max too high results in finite check failure exceptions.
@@ -324,13 +324,13 @@ namespace MuMech
                             break; // safety precaution
                         }
                         // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
-                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //while (testOrbit.eccentricity >= 1 && maxDeltaV > minDeltaV) // If we've shot too high, back off
                         //{
                         //    backoff = true;
                         //    maxDeltaV *= 0.9; // Back off by 10%
                         //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
-                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //}
                         //if (backoff)
                         //    break; // We're done
@@ -694,7 +694,7 @@ namespace MuMech
 
         // Lambert Solver Driver function.
         //
-        // This uses Shepperd's method instead of using KSP's Orbit class.
+        // This uses Shepperd's method instead of using KSP's orbit class.
         //
         // The reference time is usually 'now' or the first time the burn can start.
         //
@@ -855,7 +855,7 @@ namespace MuMech
             double turningAngle = Math.Abs(Vector3d.Angle(ejectionOrbitInitialVelocity, ejectionOrbitFinalVelocity));
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: turningAngle: {turningAngle}");
 
-            //rotate the exit direction by 90 + the turning angle to get a vector pointing to the spot in our Orbit
+            //rotate the exit direction by 90 + the turning angle to get a vector pointing to the spot in our orbit
             //where we should do the ejection burn. Then convert this to a true anomaly and compute the time closest
             //to planetUT at which we will pass through that true anomaly.
             Vector3d ejectionPointDirection = Quaternion.AngleAxis(-(float)(90 + turningAngle), o.SwappedOrbitNormal()) * inPlaneSoiExitDirection;
@@ -1054,7 +1054,7 @@ namespace MuMech
                 maxDT = target.EndUT - UT;
                 // longest possible transfer time would leave now and arrive at the target patch end
                 maxTT = Math.Min(maxTT, target.EndUT - UT);
-                // constraint on DT + TT <= maxDTplusT to arrive before the target Orbit ends
+                // constraint on DT + TT <= maxDTplusT to arrive before the target orbit ends
                 maxDTplusT = Math.Min(maxDTplusT, target.EndUT - UT);
             }
 
@@ -1329,7 +1329,7 @@ namespace MuMech
             return target.SwappedOrbitalVelocityAtUT(UT) - o.SwappedOrbitalVelocityAtUT(UT);
         }
 
-        // Compute the delta-V of the burn at the givent time required to enter an orbit with a period of (resonanceDivider-1)/resonanceDivider of the starting Orbit period
+        // Compute the delta-V of the burn at the givent time required to enter an orbit with a period of (resonanceDivider-1)/resonanceDivider of the starting orbit period
         public static Vector3d DeltaVToResonantOrbit(PatchedConicsOrbit o, double UT, double f)
         {
             double a = o.Apoapsis;
@@ -1492,7 +1492,7 @@ namespace MuMech
         }
 
         //
-        // Global OrbitPool for re-using Orbit objects
+        // Global OrbitPool for re-using orbit objects
         //
 
         // public static readonly Pool<PatchedConicsOrbit> OrbitPool = new Pool<PatchedConicsOrbit>(createOrbit, resetOrbit);
@@ -1516,24 +1516,24 @@ namespace MuMech
         //
         //public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT, out PatchedConicsOrbit intercept)
         //{
-        //    PatchedConicsOrbit Orbit = OrbitPool.Borrow();
-        //    Orbit.UpdateFromStateVectors(initial.SwappedRelativePositionAtUT(burnUT), initial.SwappedOrbitalVelocityAtUT(burnUT) + dV.xzy, initial.ReferenceBody, burnUT);
-        //    Orbit.StartUT = burnUT;
-        //    Orbit.EndUT = Orbit.eccentricity >= 1.0 ? Orbit.period : burnUT + Orbit.period;
+        //    PatchedConicsOrbit orbit = OrbitPool.Borrow();
+        //    orbit.UpdateFromStateVectors(initial.SwappedRelativePositionAtUT(burnUT), initial.SwappedOrbitalVelocityAtUT(burnUT) + dV.xzy, initial.ReferenceBody, burnUT);
+        //    orbit.StartUT = burnUT;
+        //    orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
         //    PatchedConicsOrbit next_orbit = OrbitPool.Borrow();
 
-        //    bool ok = PatchedConics.CalculatePatch(Orbit, next_orbit, burnUT, solverParameters, null);
-        //    while (ok && (Orbit.ReferenceBody != target) && (Orbit.EndUT < arrivalUT))
+        //    bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null);
+        //    while (ok && (orbit.ReferenceBody != target) && (orbit.EndUT < arrivalUT))
         //    {
-        //        OrbitPool.Release(Orbit);
-        //        Orbit = next_orbit;
+        //        OrbitPool.Release(orbit);
+        //        orbit = next_orbit;
         //        next_orbit = OrbitPool.Borrow();
 
-        //        ok = PatchedConics.CalculatePatch(Orbit, next_orbit, Orbit.StartUT, solverParameters, null);
+        //        ok = PatchedConics.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, null);
         //    }
-        //    intercept = Orbit;
-        //    intercept.UpdateFromOrbitAtUT(Orbit, arrivalUT, Orbit.ReferenceBody);
-        //    OrbitPool.Release(Orbit);
+        //    intercept = orbit;
+        //    intercept.UpdateFromOrbitAtUT(orbit, arrivalUT, orbit.ReferenceBody);
+        //    OrbitPool.Release(orbit);
         //    OrbitPool.Release(next_orbit);
         //}
 

@@ -156,8 +156,8 @@ namespace MuMech
 
         // was: body.Position ->  body.Position.localPosition
         // was: ret.LAN -> longitudeOfAscendingNode
-        // was: Planetarium.up ->  body.Orbit.ReferenceFrame.up.vector
-        // was: Planetarium.right -> body.Orbit.ReferenceFrame.right.vector
+        // was: Planetarium.up ->  body.orbit.ReferenceFrame.up.vector
+        // was: Planetarium.right -> body.orbit.ReferenceFrame.right.vector
         // OrbitFromStateVectors calls the KSP2 method UpdateFromStateVectors. The KSP1 version took pos and vel as Vector3d, but the
         // KSP2 version requires these to be type Position and Velocity.
         // pos = o.SwappedAbsolutePositionAtUT(UT);
@@ -176,7 +176,7 @@ namespace MuMech
             // Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, vel);
 
             // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.Position), OrbitExtensions.SwapYZ(vel), body, UT);
-            // Orbit.UpdateFromStateVectors(new Position(o.ReferenceBody.SimulationObject.transform.celestialFrame, Position), new Velocity(o.ReferenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.ReferenceBody, UT);
+            // orbit.UpdateFromStateVectors(new Position(o.ReferenceBody.SimulationObject.transform.celestialFrame, Position), new Velocity(o.ReferenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.ReferenceBody, UT);
 
             ret.UpdateFromStateVectors(position, velocity, body, UT);
             if (double.IsNaN(ret.argumentOfPeriapsis))

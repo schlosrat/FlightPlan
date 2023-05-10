@@ -26,8 +26,8 @@ namespace MuMech
         }
 
         //
-        // These "Swapped" functions translate preexisting Orbit class functions into world
-        // space. For some reason, Orbit class functions seem to use a coordinate system
+        // These "Swapped" functions translate preexisting orbit class functions into world
+        // space. For some reason, orbit class functions seem to use a coordinate system
         // in which the Y and Z coordinates are swapped.
         //
         public static Vector3d SwappedOrbitalVelocityAtUT(this PatchedConicsOrbit o, double UT) // KS2: OrbitalVelocity
@@ -193,10 +193,10 @@ namespace MuMech
             // If CreateOrbit were embedded here:
             //Vector3d pos = o.SwappedRelativePositionAtUT(UT); // o.ReferenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativePositionAtUTZup(UT).SwapYAndZ)
             //Vector3d vel = o.SwappedOrbitalVelocityAtUT(UT) + dV; // o.ReferenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetOrbitalVelocityAtUTZup(UT).SwapYAndZ);
-            //PatchedConicsOrbit Orbit = new PatchedConicsOrbit(o.ReferenceBody.universeModel);
-            //Orbit.UpdateFromStateVectors(new Position(o.ReferenceBody.SimulationObject.transform.celestialFrame, pos), new Velocity(o.ReferenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel), o.ReferenceBody, UT);
+            //PatchedConicsOrbit orbit = new PatchedConicsOrbit(o.ReferenceBody.universeModel);
+            //orbit.UpdateFromStateVectors(new Position(o.ReferenceBody.SimulationObject.transform.celestialFrame, pos), new Velocity(o.ReferenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel), o.ReferenceBody, UT);
 
-            //return Orbit;
+            //return orbit;
 
             // MJ version is one line:
             // return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.ReferenceBody, UT);
@@ -215,7 +215,7 @@ namespace MuMech
         {
             PatchedConicsOrbit orbit = new(o.referenceBody.universeModel);
 
-            // Actual KS2 returns: Orbit.UpdateFromStateVectors(new Position(body.SimulationObject.transform.celestialFrame, Position), new Velocity(body.SimulationObject.transform.celestialFrame.motionFrame, velocity), body, ut);
+            // Actual KS2 returns: orbit.UpdateFromStateVectors(new Position(body.SimulationObject.transform.celestialFrame, Position), new Velocity(body.SimulationObject.transform.celestialFrame.motionFrame, velocity), body, ut);
             orbit.UpdateFromStateVectors(new Position(o.referenceBody.SimulationObject.transform.celestialFrame, position), new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.referenceBody, UT);
 
             return orbit;
@@ -396,7 +396,7 @@ namespace MuMech
         //Gives the true anomaly (in a's orbit) at which a crosses its ascending node
         //with b's orbit.
         //The returned value is always between 0 and 2 * PI.
-        public static double AscendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)  // was Orbit as type for b
+        public static double AscendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)  // was orbit as type for b
         {
             Vector3d vectorToAN = Vector3d.Cross(a.SwappedOrbitNormal(), b.SwappedOrbitNormal());
             return a.TrueAnomalyFromVector(vectorToAN);
@@ -405,7 +405,7 @@ namespace MuMech
         //Gives the true anomaly (in a's orbit) at which a crosses its descending node
         //with b's orbit.
         //The returned value is always between 0 and 2 * PI.
-        public static double DescendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b) // was Orbit as type for b
+        public static double DescendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b) // was orbit as type for b
         {
             return MuUtils.ClampDegrees360(a.AscendingNodeTrueAnomaly(b) + 180.0);
         }
@@ -750,7 +750,7 @@ namespace MuMech
             return "PeriapsisArl:" + o.PeriapsisArl + " ApoapsisArl:" + o.ApoapsisArl + " SMA:" + o.semiMajorAxis + " ECC:" + o.eccentricity + " INC:" + o.inclination + " LAN:" + o.longitudeOfAscendingNode + " ArgP:" + o.argumentOfPeriapsis + " TA:" + o.TrueAnomaly;
         }
 
-        // used to be SuicideBurnCountdown(Orbit Orbit, VesselState vesselState, Vessel vessel)
+        // used to be SuicideBurnCountdown(Orbit orbit, VesselState vesselState, Vessel vessel)
         public static double SuicideBurnCountdown(PatchedConicsOrbit Orbit, VesselComponent vessel)
         {
             if (vessel.mainBody == null) return 0;
