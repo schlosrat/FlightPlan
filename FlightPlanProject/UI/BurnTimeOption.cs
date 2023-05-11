@@ -101,9 +101,9 @@ internal class BurnTimeOption
     public void SetBurnTime()
     {
         // Set the requested burn time based on the selected timing _option
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        FlightPlanPlugin _plugin = FlightPlanPlugin.Instance;
-        PatchedConicsOrbit orbit = _plugin._activeVessel.Orbit;
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        FlightPlanPlugin Plugin = FlightPlanPlugin.Instance;
+        PatchedConicsOrbit Orbit = Plugin._activeVessel.Orbit;
 
         switch (FlightPlanUI.TimeRef)
         {
@@ -115,42 +115,51 @@ internal class BurnTimeOption
 
                 break;
             case TimeRef.APOAPSIS:
-                RequestedBurnTime = orbit.NextApoapsisTime(_UT);
+                RequestedBurnTime = Orbit.NextApoapsisTime(UT);
                 break;
 
             case TimeRef.PERIAPSIS:
-                RequestedBurnTime = orbit.NextPeriapsisTime(_UT);
+                RequestedBurnTime = Orbit.NextPeriapsisTime(UT);
                 break;
             case TimeRef.CLOSEST_APPROACH:
-                RequestedBurnTime = orbit.NextClosestApproachTime(_plugin._currentTarget.Orbit as PatchedConicsOrbit, _UT + 2); // +2 so that closestApproachTime is definitely > _UT
+                if (Plugin._currentTarget != null)
+                    RequestedBurnTime = Orbit.NextClosestApproachTime(Plugin._currentTarget.Orbit as PatchedConicsOrbit, UT + 2); // +2 so that closestApproachTime is definitely > _UT
+                else
+                    FlightPlanUI.TimeRef = TimeRef.None;
                 break;
             case TimeRef.EQ_ASCENDING:
-                RequestedBurnTime = orbit.TimeOfAscendingNodeEquatorial(_UT);
+                RequestedBurnTime = Orbit.TimeOfAscendingNodeEquatorial(UT);
                 break;
             case TimeRef.EQ_DESCENDING:
-                RequestedBurnTime = orbit.TimeOfDescendingNodeEquatorial(_UT);
+                RequestedBurnTime = Orbit.TimeOfDescendingNodeEquatorial(UT);
                 break;
             case TimeRef.REL_ASCENDING:
-                RequestedBurnTime = orbit.TimeOfAscendingNode(_plugin._currentTarget.Orbit, _UT); // like built in TimeOfAN(_currentTarget.Orbit, _UT), but with check to prevent time in the past
+                if (Plugin._currentTarget != null)
+                    RequestedBurnTime = Orbit.TimeOfAscendingNode(Plugin._currentTarget.Orbit, UT); // like built in TimeOfAN(_currentTarget.Orbit, _UT), but with check to prevent time in the past
+                else
+                    FlightPlanUI.TimeRef = TimeRef.None;
                 break;
             case TimeRef.REL_DESCENDING:
-                RequestedBurnTime = orbit.TimeOfDescendingNode(_plugin._currentTarget.Orbit, _UT); // like built in TimeOfDN(_currentTarget.Orbit, _UT), but with check to prevent time in the past
+                if (Plugin._currentTarget != null)
+                    RequestedBurnTime = Orbit.TimeOfDescendingNode(Plugin._currentTarget.Orbit, UT); // like built in TimeOfDN(_currentTarget.Orbit, _UT), but with check to prevent time in the past
+                else
+                    FlightPlanUI.TimeRef = TimeRef.None;
                 break;
             case TimeRef.X_FROM_NOW:
-                RequestedBurnTime = _UT + FPSettings.TimeOffset;
+                RequestedBurnTime = UT + FPSettings.TimeOffset;
                 break;
             case TimeRef.ALTITUDE:
-                RequestedBurnTime = orbit.NextTimeOfRadius(_UT, FPSettings.Altitude_km * 1000);
+                RequestedBurnTime = Orbit.NextTimeOfRadius(UT, FPSettings.Altitude_km * 1000);
                 break;
             case TimeRef.EQ_NEAREST_AD:
-                RequestedBurnTime = Math.Min(orbit.TimeOfAscendingNodeEquatorial(_UT), orbit.TimeOfDescendingNodeEquatorial(_UT));
+                RequestedBurnTime = Math.Min(Orbit.TimeOfAscendingNodeEquatorial(UT), Orbit.TimeOfDescendingNodeEquatorial(UT));
                 break;
             case TimeRef.EQ_HIGHEST_AD:
                 {
-                    double _timeAN = orbit.TimeOfAscendingNodeEquatorial(_UT);
-                    double _timeDN = orbit.TimeOfDescendingNodeEquatorial(_UT);
-                    double _ascendingNodeRadius = orbit.Radius(_timeAN);
-                    double _descendingNodeRadius = orbit.Radius(_timeDN);
+                    double _timeAN = Orbit.TimeOfAscendingNodeEquatorial(UT);
+                    double _timeDN = Orbit.TimeOfDescendingNodeEquatorial(UT);
+                    double _ascendingNodeRadius = Orbit.Radius(_timeAN);
+                    double _descendingNodeRadius = Orbit.Radius(_timeDN);
                     if (_ascendingNodeRadius > _descendingNodeRadius)
                         RequestedBurnTime = _timeAN;
                     else
@@ -158,18 +167,26 @@ internal class BurnTimeOption
                 }
                 break;
             case TimeRef.REL_NEAREST_AD:
-                RequestedBurnTime = Math.Min(orbit.TimeOfAscendingNode(_plugin._currentTarget.Orbit, _UT), orbit.TimeOfDescendingNode(_plugin._currentTarget.Orbit, _UT));
+                if (Plugin._currentTarget != null)
+                    RequestedBurnTime = Math.Min(Orbit.TimeOfAscendingNode(Plugin._currentTarget.Orbit, UT), Orbit.TimeOfDescendingNode(Plugin._currentTarget.Orbit, UT));
+                else
+                    FlightPlanUI.TimeRef = TimeRef.None;
                 break;
             case TimeRef.REL_HIGHEST_AD:
                 {
-                    double timeAN = orbit.TimeOfAscendingNode(_plugin._currentTarget.Orbit, _UT);
-                    double timeDN = orbit.TimeOfDescendingNode(_plugin._currentTarget.Orbit, _UT);
-                    double _ascendingNodeRadius = orbit.Radius(timeAN);
-                    double _descendingNodeRadius = orbit.Radius(timeDN);
-                    if (_ascendingNodeRadius > _descendingNodeRadius)
-                        RequestedBurnTime = timeAN;
+                    if (Plugin._currentTarget.Orbit != null)
+                    {
+                        double _timeAN = Orbit.TimeOfAscendingNode(Plugin._currentTarget.Orbit, UT);
+                        double _timeDN = Orbit.TimeOfDescendingNode(Plugin._currentTarget.Orbit, UT);
+                        double _ascendingNodeRadius = Orbit.Radius(_timeAN);
+                        double _descendingNodeRadius = Orbit.Radius(_timeDN);
+                        if (_ascendingNodeRadius > _descendingNodeRadius)
+                            RequestedBurnTime = _timeAN;
+                        else
+                            RequestedBurnTime = _timeDN;
+                    }
                     else
-                        RequestedBurnTime = timeDN;
+                        FlightPlanUI.TimeRef = TimeRef.None;
                 }
                 break;
             default:
@@ -185,45 +202,44 @@ internal class BurnTimeOption
     {
         Options.Clear();
         
-        VesselComponent _activeVessel = FlightPlanPlugin.Instance._activeVessel;
+        VesselComponent ActiveVessel = FlightPlanPlugin.Instance._activeVessel;
 
-        string _maneuverTypeDesc = "";
-
+        string ManeuverTypeDesc = "";
 
         switch (type)
         {
             case ManeuverType.None:
-                _maneuverTypeDesc = "None";
+                ManeuverTypeDesc = "None";
                 break;
             case ManeuverType.circularize:
-                if (_activeVessel.Orbit.eccentricity < 1)
+                if (ActiveVessel.Orbit.eccentricity < 1)
                     Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
                 Options.Add(TimeRef.ALTITUDE); //"At An Altittude"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
 
-                _maneuverTypeDesc = "Circularizing";
+                ManeuverTypeDesc = "Circularizing";
                 break;
             case ManeuverType.newPe:
-                if (_activeVessel.Orbit.eccentricity < 1)
+                if (ActiveVessel.Orbit.eccentricity < 1)
                     Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
                 Options.Add(TimeRef.ALTITUDE); //"At An Altittude"
 
-                _maneuverTypeDesc = "Setting new Pe";
+                ManeuverTypeDesc = "Setting new Pe";
                 break;
             case ManeuverType.newAp:
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
-                if (_activeVessel.Orbit.eccentricity < 1)
+                if (ActiveVessel.Orbit.eccentricity < 1)
                     Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
                 Options.Add(TimeRef.ALTITUDE); //"At An Altittude"
 
-                _maneuverTypeDesc = "Setting new Ap";
+                ManeuverTypeDesc = "Setting new Ap";
                 break;
             case ManeuverType.newPeAp:
-                if (_activeVessel.Orbit.eccentricity < 1)
+                if (ActiveVessel.Orbit.eccentricity < 1)
                     Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
@@ -231,7 +247,7 @@ internal class BurnTimeOption
                 Options.Add(TimeRef.EQ_ASCENDING); //"At Equatorial AN"
                 Options.Add(TimeRef.EQ_DESCENDING); //"At Equatorial DN"
 
-                _maneuverTypeDesc = "Elipticizing";
+                ManeuverTypeDesc = "Elipticizing";
                 break;
             case ManeuverType.newInc:
                 Options.Add(TimeRef.EQ_HIGHEST_AD); //"At Cheapest eq AN/DN"
@@ -240,31 +256,31 @@ internal class BurnTimeOption
                 Options.Add(TimeRef.EQ_DESCENDING); //"At Equatorial DN"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
 
-                _maneuverTypeDesc = "Setting new inclination";
+                ManeuverTypeDesc = "Setting new inclination";
                 break;
             case ManeuverType.newLAN:
-                if (_activeVessel.Orbit.eccentricity < 1)
+                if (ActiveVessel.Orbit.eccentricity < 1)
                     Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
 
-                _maneuverTypeDesc = "Setting new LAN";
+                ManeuverTypeDesc = "Setting new LAN";
                 break;
             case ManeuverType.newNodeLon:
-                if (_activeVessel.Orbit.eccentricity < 1)
+                if (ActiveVessel.Orbit.eccentricity < 1)
                     Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
 
-                _maneuverTypeDesc = "Shifting Node LongitudeN";
+                ManeuverTypeDesc = "Shifting Node LongitudeN";
                 break;
             case ManeuverType.newSMA:
-                if (_activeVessel.Orbit.eccentricity < 1)
+                if (ActiveVessel.Orbit.eccentricity < 1)
                     Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
 
-                _maneuverTypeDesc = "Setting new SMA";
+                ManeuverTypeDesc = "Setting new SMA";
                 break;
             case ManeuverType.matchPlane:
                 Options.Add(TimeRef.REL_HIGHEST_AD); //"At Cheapest AN/DN With Target"
@@ -272,48 +288,48 @@ internal class BurnTimeOption
                 Options.Add(TimeRef.REL_ASCENDING); //"At Next AN With Target"
                 Options.Add(TimeRef.REL_DESCENDING); //"At Next DN With Target"
 
-                _maneuverTypeDesc = "Matching planes";
+                ManeuverTypeDesc = "Matching planes";
                 break;
             case ManeuverType.hohmannXfer:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
-                _maneuverTypeDesc = "Performing Homann transfer";
+                ManeuverTypeDesc = "Performing Homann transfer";
                 break;
             case ManeuverType.courseCorrection:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
-                _maneuverTypeDesc = "Performaing course correction";
+                ManeuverTypeDesc = "Performaing course correction";
                 break;
             case ManeuverType.interceptTgt:
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
 
-                _maneuverTypeDesc = "Intercepting";
+                ManeuverTypeDesc = "Intercepting";
                 break;
             case ManeuverType.matchVelocity:
                 Options.Add(TimeRef.CLOSEST_APPROACH); //"At Closest Approach"
                 Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
 
-                _maneuverTypeDesc = "Matching velocity";
+                ManeuverTypeDesc = "Matching velocity";
                 break;
             case ManeuverType.moonReturn:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
-                _maneuverTypeDesc = "Performaing moon return";
+                ManeuverTypeDesc = "Performaing moon return";
                 break;
             case ManeuverType.planetaryXfer:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
-                _maneuverTypeDesc = "Performing planetary transfer";
+                ManeuverTypeDesc = "Performing planetary transfer";
                 break;
             case ManeuverType.fixAp:
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
 
-                _maneuverTypeDesc = "Setting new Ap";
+                ManeuverTypeDesc = "Setting new Ap";
                 break;
             case ManeuverType.fixPe:
                 Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
 
-                _maneuverTypeDesc = "Setting new Pe";
+                ManeuverTypeDesc = "Setting new Pe";
                 break;
             default:
                 break;
@@ -325,7 +341,7 @@ internal class BurnTimeOption
         if (!Options.Contains(FlightPlanUI.TimeRef))
             FlightPlanUI.TimeRef = Options[0];
 
-        return _maneuverTypeDesc;
+        return ManeuverTypeDesc;
     }
 
 
