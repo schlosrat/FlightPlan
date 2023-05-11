@@ -739,7 +739,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Logger.LogDebug($"MatchVelocity: Match Velocity with {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
 
-        FPStatus.Warning($"Experimental Velocity Match with {_currentTarget.Name} Ready");
+        FPStatus.Ok($"Ready to Match Velocity with {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
 
         // double closestApproachTime = orbit.NextClosestApproachTime(_currentTarget.orbit as PatchedConicsOrbit, _UT + 2); //+2 so that closestApproachTime is definitely > _UT
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit);

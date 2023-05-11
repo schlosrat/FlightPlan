@@ -445,7 +445,6 @@ public class FlightPlanUI
                 break;
             case ManeuverType.matchVelocity: // Experimental
                 _pass = Plugin.MatchVelocity(_requestedBurnTime, -0.5);
-                _launchMNC = true;
                 break;
             case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
                 _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
