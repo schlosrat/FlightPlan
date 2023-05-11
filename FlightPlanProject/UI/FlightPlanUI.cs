@@ -322,7 +322,7 @@ public class FlightPlanUI
 
         // Draw the GUI Status at the end of this tab
         double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        if (Plugin._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN)
+        if (Plugin._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN && FPStatus.status != FPStatus.Status.ERROR)
         {
             FPStatus.Ok("");
         }
@@ -396,10 +396,16 @@ public class FlightPlanUI
                 _pass = Plugin.Circularize(_requestedBurnTime, -0.5);
                 break;
             case ManeuverType.newPe: // Working
-                _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
+                if (TargetPeR < Orbit.Apoapsis)
+                    _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
+                else
+                    FPStatus.Error($"Unable to set Pe above current Ap");
                 break;
             case ManeuverType.newAp:// Working
-                _pass = Plugin.SetNewAp(_requestedBurnTime, TargetApR, -0.5);
+                if (TargetApR > Orbit.Periapsis)
+                    _pass = Plugin.SetNewAp(_requestedBurnTime, TargetApR, -0.5);
+                else
+                    FPStatus.Error($"Unable to set Ap below current Pe");
                 break;
             case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
                 _pass = Plugin.Ellipticize(_requestedBurnTime, TargetApR, TargetPeR, -0.5);
