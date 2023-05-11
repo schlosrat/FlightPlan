@@ -125,17 +125,17 @@ public class TargetPageShip2Ship : BasePageContent
         else
             targetOrbit = Plugin._currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit;
 
-        double synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
+        double synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
         double timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
         double closestApproach = (Orbit.SwappedAbsolutePositionAtUT(timeToClosestApproach) - targetOrbit.SwappedAbsolutePositionAtUT(timeToClosestApproach)).magnitude;
-        double relativeInc = Orbit.inclination - Plugin._currentTarget.Orbit.inclination;
+        double relativeInc = Orbit.inclination - targetOrbit.inclination;
         int maxPhasingOrbits = 5;
         double closestApproachLimit1 = 3000;
         double closestApproachLimit2 = 100;
         double phase = Orbit.PhaseAngle(targetOrbit, UT);
-        double transfer = Plugin._activeVessel.Orbit.Transfer(targetOrbit, out _);
+        double transfer = Orbit.Transfer(targetOrbit, out _);
         double nextWindow = synodicPeriod * (transfer - phase) / 360;
-        if (nextWindow < 0) nextWindow += synodicPeriod;
+        while (nextWindow < 0) nextWindow += synodicPeriod;
         MainUI.DrawEntry("Target Orbit:", $"{targetOrbit.PeriapsisArl / 1000:N0} km x {targetOrbit.ApoapsisArl / 1000:N0} km");
         MainUI.DrawEntry("Current Orbit:", $"{Orbit.PeriapsisArl / 1000:N0} km x {Orbit.ApoapsisArl / 1000:N0} km");
         MainUI.DrawEntry("Relative Inclination:", $"{relativeInc:N2} deg");
@@ -148,10 +148,10 @@ public class TargetPageShip2Ship : BasePageContent
         FPSettings.ApAltitude_km = MainUI.DrawToggleButtonWithTextField("New Ap", ManeuverType.newAp, FPSettings.ApAltitude_km, "km");
         MainUI.DrawToggleButton("Circularize", ManeuverType.circularize);
         MainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
+        MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
 
         if (Plugin._experimental.Value)
         {
-            MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
             FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s", true);
         }
         // MainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
