@@ -119,8 +119,6 @@ public class TargetPageShip2Ship : BasePageContent
 
         FPStyles.DrawSectionHeader("Target Relative Maneuvers");
 
-        BurnTimeOption.Instance.OptionSelectionGUI();
-
         if (Plugin._currentTarget.IsVessel)
         {
             // DockingPortSelectionGUI();
@@ -134,6 +132,8 @@ public class TargetPageShip2Ship : BasePageContent
         }
         if (targetDistance < closestApproachLimit1)
             TargetSelection.SelectDockingPort = UI_Tools.SmallToggleButton(TargetSelection.SelectDockingPort, "Select Docking Port", "Select Docking Port");
+
+        BurnTimeOption.Instance.OptionSelectionGUI();
 
         double synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
         double timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
