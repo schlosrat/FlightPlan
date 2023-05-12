@@ -112,26 +112,33 @@ public class TargetPageShip2Ship : BasePageContent
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit;
         string recommendedManeuver;
+        const int maxPhasingOrbits = 5;
+        const double closestApproachLimit1 = 3000;
+        const double closestApproachLimit2 = 100;
+        double targetDistance;
 
         FPStyles.DrawSectionHeader("Target Relative Maneuvers");
 
         BurnTimeOption.Instance.OptionSelectionGUI();
 
-        if (!Plugin._currentTarget.IsPart)
+        if (Plugin._currentTarget.IsVessel)
         {
-            DockingPortSelectionGUI();
+            // DockingPortSelectionGUI();
             targetOrbit = Plugin._currentTarget.Orbit as PatchedConicsOrbit;
+            targetDistance = (Orbit.SwappedAbsolutePositionAtUT(UT) - targetOrbit.SwappedAbsolutePositionAtUT(UT)).magnitude;
         }
         else
+        {
             targetOrbit = Plugin._currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit;
+            targetDistance = (Orbit.SwappedAbsolutePositionAtUT(UT) - targetOrbit.SwappedAbsolutePositionAtUT(UT)).magnitude;
+        }
+        if (targetDistance < closestApproachLimit1)
+            TargetSelection.SelectDockingPort = UI_Tools.SmallToggleButton(TargetSelection.SelectDockingPort, "Select Docking Port", "Select Docking Port");
 
         double synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
         double timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
         double closestApproach = (Orbit.SwappedAbsolutePositionAtUT(timeToClosestApproach) - targetOrbit.SwappedAbsolutePositionAtUT(timeToClosestApproach)).magnitude;
         double relativeInc = Orbit.inclination - targetOrbit.inclination;
-        int maxPhasingOrbits = 5;
-        double closestApproachLimit1 = 3000;
-        double closestApproachLimit2 = 100;
         double phase = Orbit.PhaseAngle(targetOrbit, UT);
         double transfer = Orbit.Transfer(targetOrbit, out _);
         double nextWindow = synodicPeriod * (transfer - phase) / 360;
@@ -142,7 +149,13 @@ public class TargetPageShip2Ship : BasePageContent
         MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
         MainUI.DrawEntry("Next Window:", FPUtility.SecondsToTimeString(nextWindow));
         MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach));
-        MainUI.DrawEntry("Separation at CA:", $"{closestApproach/1000:N1} km");
+        if (closestApproach > 1000)
+            MainUI.DrawEntry("Separation at CA:", $"{closestApproach/1000:N1} km");
+        else
+        {
+            MainUI.DrawEntry("Separation at CA:", $"{closestApproach:N1} m");
+            MainUI.DrawEntry("Relative Velocity:", $"{(Orbit.SwappedOrbitalVelocityAtUT(UT) - targetOrbit.SwappedOrbitalVelocityAtUT(UT)).magnitude:N1} m/s");
+        }
 
         MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
         FPSettings.ApAltitude_km = MainUI.DrawToggleButtonWithTextField("New Ap", ManeuverType.newAp, FPSettings.ApAltitude_km, "km");
@@ -156,17 +169,19 @@ public class TargetPageShip2Ship : BasePageContent
         }
         // MainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
 
-        recommendedManeuver = "Ready for docking";
-        if (relativeInc > 1)
-            recommendedManeuver = "Match planes for rendezvous";
+        recommendedManeuver = "None";
+        if (targetDistance < closestApproachLimit2)
+            recommendedManeuver = "Ready for docking";
+        else if (relativeInc > 1)
+            recommendedManeuver = "Next Action: Match planes for rendezvous";
         else if (nextWindow / Orbit.period > maxPhasingOrbits)
             recommendedManeuver = $"Next intercept window would be {nextWindow/Orbit.period:N1} orbits away, which is more than the maximum of {maxPhasingOrbits} phasing orbits. Increase phasing rate by establishing a new phasing orbit at {(targetOrbit.semiMajorAxis - ReferenceBody.radius)*2:N0} km.";
         else if (closestApproach > closestApproachLimit1)
-            recommendedManeuver = $"Perform Hohmann Transfer to target";
+            recommendedManeuver = $"Next Action: Perform Hohmann Transfer to target";
         else if (closestApproach > closestApproachLimit2)
-            recommendedManeuver = "Close distance to target";
+            recommendedManeuver = $"Next Action: Close distance to target. HINT: Point at target, burn GENTLY toward target, Match Velocity at closest approch. Rinse and repeat until distance < {closestApproachLimit2} m";
 
-        MainUI.DrawEntry("Next Action:", recommendedManeuver);
+        MainUI.DrawEntry(recommendedManeuver);
 
     }
     private void DockingPortSelectionGUI()

@@ -16,7 +16,7 @@ public class FlightPlanUI
     {
         _instance = this;
         this.Plugin = main_plugin;
-        BodySelection = new BodySelection(main_plugin);
+        BodySelection = new TargetSelection(main_plugin);
         BurnOptions = new BurnTimeOption();
     }
 
@@ -62,7 +62,7 @@ public class FlightPlanUI
 
     public ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanUI");
 
-    BodySelection BodySelection; // Name this something clearer to distinguish it from the type/class?
+    TargetSelection BodySelection; // Name this something clearer to distinguish it from the type/class?
     BurnTimeOption BurnOptions;
 
     // int spacingAfterEntry = 5;
@@ -94,30 +94,19 @@ public class FlightPlanUI
         return toggle;
     }
 
-    //public void DrawToggleButton(string txt, ManeuverType maneuveur_type)
-    //{
-    //    bool active = ManeuverType == maneuveur_type;
-
-    //    bool result = UI_Tools.SmallToggleButton(active, txt, txt);
-    //    if (result != active)
-    //    {
-    //        if (!active)
-    //            SetManeuverType(maneuveur_type);
-    //        else
-    //            SetManeuverType(ManeuverType.None);
-    //    }
-    //}
-
-    public void DrawEntry(string entryName, string value, string unit = "")
+    public void DrawEntry(string entryName, string value = "", string unit = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Label(entryName);
-        GUILayout.FlexibleSpace();
-        UI_Tools.Label(value);
-        if (unit.Length > 0)
+        if (value.Length > 0)
         {
-            GUILayout.Space(5);
-            UI_Tools.Label(unit);
+            GUILayout.FlexibleSpace();
+            UI_Tools.Label(value);
+            if (unit.Length > 0)
+            {
+                GUILayout.Space(5);
+                UI_Tools.Label(unit);
+            }
         }
         GUILayout.EndHorizontal();
         GUILayout.Space(FPStyles.SpacingAfterEntry);
@@ -307,7 +296,7 @@ public class FlightPlanUI
         //CurrentNode = (ActiveNodes.Count() > 0) ? ActiveNodes[0] : null;
         FPUtility.RefreshActiveVesselAndCurrentManeuver();
         
-        BodySelection.BodySelectionGUI();
+        BodySelection.TargetSelectionGUI();
         Tabs.OnGUI();
 
         // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
