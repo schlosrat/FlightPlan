@@ -144,8 +144,8 @@ namespace MuMech
                     }
                     else
                     {
-                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception1"));//"Warning: Orbit is hyperbolic, so apoapsis doesn't exist."
-                        throw new Exception("Warning: Orbit is hyperbolic, so apoapsis doesn't exist.");//"Warning: Orbit is hyperbolic, so apoapsis doesn't exist."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception1"));//"Warning: orbit is hyperbolic, so apoapsis doesn't exist."
+                        throw new Exception("Warning: Orbit is hyperbolic, so apoapsis doesn't exist.");//"Warning: orbit is hyperbolic, so apoapsis doesn't exist."
                     }
                     break;
 
@@ -172,8 +172,8 @@ namespace MuMech
                     }
                     else
                     {
-                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception3"));//"Warning: can't circularize at this altitude, since current Orbit does not reach it."
-                        throw new Exception("Warning: can't circularize at this altitude, since current Orbit does not reach it.");//"Warning: can't circularize at this altitude, since current Orbit does not reach it."
+                        // throw new OperationException(Localizer.Format("#MechJeb_Maneu_Exception3"));//"Warning: can't circularize at this altitude, since current orbit does not reach it."
+                        throw new Exception("Warning: can't circularize at this altitude, since current orbit does not reach it.");//"Warning: can't circularize at this altitude, since current orbit does not reach it."
                     }
                     break;
 

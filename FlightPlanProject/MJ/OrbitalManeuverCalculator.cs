@@ -14,6 +14,7 @@ using FlightPlan;
 using MechJebLib.Maths;
 using MechJebLib.Primitives;
 using UnityEngine;
+using FPUtilities;
 // using Smooth.Pools;
 
 namespace MuMech
@@ -52,21 +53,21 @@ namespace MuMech
             return longitude; // * UtilMath.Rad2Deg;
         }
         
-        //Computes the speed of a circular Orbit of a given radius for a given body.
+        //Computes the speed of a circular orbit of a given radius for a given body.
         public static double CircularOrbitSpeed(CelestialBodyComponent body, double radius)
         {
             //v = sqrt(GM/r)
             return Math.Sqrt(body.gravParameter / radius);
         }
 
-        //Computes the speed of a circular Orbit of a given radius for a given body.
+        //Computes the speed of a circular orbit of a given radius for a given body.
         public static double EscapeVelocity(CelestialBodyComponent body, double radius)
         {
             //v = sqrt(2GM/r)
             return Math.Sqrt(2 * body.gravParameter / radius);
         }
 
-        //Computes the deltaV of the burn needed to circularize an Orbit at a given UT.
+        //Computes the deltaV of the burn needed to circularize an orbit at a given UT.
         public static Vector3d DeltaVToCircularize(PatchedConicsOrbit o, double UT)
         {
             Vector3d desiredVelocity = CircularOrbitSpeed(o.referenceBody, o.Radius(UT)) * o.Horizontal(UT);
@@ -88,11 +89,11 @@ namespace MuMech
             newApR = Math.Max(newApR, radius + 1);
 
             double GM = o.referenceBody.gravParameter;
-            double E = -GM / (newPeR + newApR); // total energy per unit mass of new Orbit
-            double L = Math.Sqrt(Math.Abs((Math.Pow(E * (newApR - newPeR), 2) - GM * GM) / (2 * E))); // angular momentum per unit mass of new Orbit
-            double kineticE = E + GM / radius; // kinetic energy (per unit mass) of new Orbit at UT
-            double newHorizontalV = L / radius;   // horizontal velocity of new Orbit at UT
-            double newUpV = Math.Sqrt(Math.Abs(2 * kineticE - newHorizontalV * newHorizontalV)); //vertical velocity of new Orbit at UT
+            double E = -GM / (newPeR + newApR); // total energy per unit mass of new orbit
+            double L = Math.Sqrt(Math.Abs((Math.Pow(E * (newApR - newPeR), 2) - GM * GM) / (2 * E))); // angular momentum per unit mass of new orbit
+            double kineticE = E + GM / radius; // kinetic energy (per unit mass) of new orbit at UT
+            double newHorizontalV = L / radius;   // horizontal velocity of new orbit at UT
+            double newUpV = Math.Sqrt(Math.Abs(2 * kineticE - newHorizontalV * newHorizontalV)); //vertical velocity of new orbit at UT
 
             //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: radius {radius} m");
             //FlightPlanPlugin.Logger.LogDebug($"DeltaVToEllipticize: newPeR {newPeR} m");
@@ -133,7 +134,7 @@ namespace MuMech
         }
 
         //Computes the delta-V of the burn required to attain a given periapsis, starting from
-        //a given Orbit and burning at a given UT. Throws an ArgumentException if given an impossible periapsis.
+        //a given orbit and burning at a given UT. Throws an ArgumentException if given an impossible periapsis.
         //The computed burn is always horizontal, though this may not be strictly optimal.
         public static Vector3d DeltaVToChangePeriapsis(PatchedConicsOrbit o, double UT, double newPeR)
         {
@@ -200,7 +201,7 @@ namespace MuMech
                             break; // safety precaution
                         }
                         // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
-                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //if (testOrbit.eccentricity >= 1) // If we've shot too high
                         //{
                         //    minDeltaV = lastMax *= (1 / riseFactor); // Reset min
@@ -211,7 +212,7 @@ namespace MuMech
                         //        break; // We're done (in a bad way...)
                         //    maxDeltaV *= riseFactor; // Apply the new riseFactor
                         //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
-                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //}
                     }
                     else
@@ -274,7 +275,7 @@ namespace MuMech
 
         //Computes the delta-V of the burn at a given UT required to change an orbits apoapsis to a given value.
         //The computed burn is always prograde or retrograde, though this may not be strictly optimal.
-        //Note that you can pass in a negative apoapsis if the desired final Orbit is hyperbolic
+        //Note that you can pass in a negative apoapsis if the desired final orbit is hyperbolic
         public static Vector3d DeltaVToChangeApoapsis(PatchedConicsOrbit o, double UT, double newApR)
         {
             double radius = o.Radius(UT);
@@ -292,7 +293,7 @@ namespace MuMech
             double minDeltaV = 0;
             // 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
             // This logic does not work! Assuming a max of 10000 can get you into a situation where the Apoapsis
-            // goes negative due to hyperbolic Orbit. In such a case the user has asked for an Apoapsis that is
+            // goes negative due to hyperbolic orbit. In such a case the user has asked for an Apoapsis that is
             // not possible for this body. Perhaps we need a check to make sure newApR is within the SOI? In any
             // event, simply doubling the max each time can get to a spot where SMA is NaN and Apoapsis goes
             // negative (discontinuity). Setting the max too high results in finite check failure exceptions.
@@ -323,13 +324,13 @@ namespace MuMech
                             break; // safety precaution
                         }
                         // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
-                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //while (testOrbit.eccentricity >= 1 && maxDeltaV > minDeltaV) // If we've shot too high, back off
                         //{
                         //    backoff = true;
                         //    maxDeltaV *= 0.9; // Back off by 10%
                         //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
-                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test Orbit
+                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
                         //}
                         //if (backoff)
                         //    break; // We're done
@@ -383,14 +384,14 @@ namespace MuMech
             return deltaV;
         }
 
-        //Computes the heading of the ground track of an Orbit with a given inclination at a given latitude.
+        //Computes the heading of the ground track of an orbit with a given inclination at a given latitude.
         //Both inputs are in degrees.
         //Convention: At equator, inclination    0 => heading 90 (east)
         //                        inclination   90 => heading 0  (north)
         //                        inclination  -90 => heading 180 (south)
         //                        inclination ±180 => heading 270 (west)
         //Returned heading is in degrees and in the range 0 to 360.
-        //If the given latitude is too large, so that an Orbit with a given inclination never attains the
+        //If the given latitude is too large, so that an orbit with a given inclination never attains the
         //given latitude, then this function returns either 90 (if -90 < inclination < 90) or 270.
         public static double HeadingForInclination(double inclinationDegrees, double latitudeDegrees)
         {
@@ -419,7 +420,7 @@ namespace MuMech
         //                        inclination  -90 => heading 180 (south)
         //                        inclination ±180 => heading 270 (west)
         //Returned heading is in degrees and in the range 0 to 360.
-        //If the given latitude is too large, so that an Orbit with a given inclination never attains the
+        //If the given latitude is too large, so that an orbit with a given inclination never attains the
         //given latitude, then this function returns either 90 (if -90 < inclination < 90) or 270.
         public static double HeadingForLaunchInclination(VesselComponent vessel, VesselState vesselState, double inclinationDegrees)
         {
@@ -461,7 +462,7 @@ namespace MuMech
                 deltaHorizontalVelocity = deltaHorizontalVelocityOne;
             } else {
                 // now in order to get great circle tracks correct we pick the side which gives the lowest delta-V, which will get
-                // ground tracks that Cross the maximum (or minimum) latitude of a great circle correct.
+                // ground tracks that cross the maximum (or minimum) latitude of a great circle correct.
                 if ( deltaHorizontalVelocityOne.magnitude < deltaHorizontalVelocityTwo.magnitude ) {
                     desiredHorizontalVelocity = desiredHorizontalVelocityOne;
                     deltaHorizontalVelocity = deltaHorizontalVelocityOne;
@@ -482,7 +483,7 @@ namespace MuMech
             return MuUtils.ClampDegrees360(UtilMath.Rad2Deg * Math.Atan2(Vector3d.Dot(deltaHorizontalVelocity, east), Vector3d.Dot(deltaHorizontalVelocity, north)));
         }
 
-        //Computes the delta-V of the burn required to change an Orbit's inclination to a given value
+        //Computes the delta-V of the burn required to change an orbit's inclination to a given value
         //at a given UT. If the latitude at that time is too high, so that the desired inclination
         //cannot be attained, the burn returned will achieve as low an inclination as possible (namely, inclination = latitude).
         //The input inclination is in degrees.
@@ -515,7 +516,7 @@ namespace MuMech
             return deltaV;
         }
 
-        //Computes the delta-V and time of a burn to match planes with the target Orbit. The output burnUT
+        //Computes the delta-V and time of a burn to match planes with the target orbit. The output burnUT
         //will be equal to the time of the first ascending node with respect to the target after the given UT.
         //Throws an ArgumentException if o is hyperbolic and doesn't have an ascending node relative to the target.
         public static Vector3d DeltaVAndTimeToMatchPlanesAscending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
@@ -532,7 +533,7 @@ namespace MuMech
             return deltaV;
         }
 
-        //Computes the delta-V and time of a burn to match planes with the target Orbit. The output burnUT
+        //Computes the delta-V and time of a burn to match planes with the target orbit. The output burnUT
         //will be equal to the time of the first descending node with respect to the target after the given UT.
         //Throws an ArgumentException if o is hyperbolic and doesn't have a descending node relative to the target.
         public static Vector3d DeltaVAndTimeToMatchPlanesDescending(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
@@ -550,10 +551,10 @@ namespace MuMech
         }
 
         //Computes the dV of a Hohmann transfer burn at time UT that will put the apoapsis or periapsis
-        //of the transfer Orbit on top of the target Orbit.
+        //of the transfer orbit on top of the target orbit.
         //The output value apsisPhaseAngle is the phase angle between the transferring vessel and the
-        //target object as the transferring vessel crosses the target Orbit at the apoapsis or periapsis
-        //of the transfer Orbit.
+        //target object as the transferring vessel crosses the target orbit at the apoapsis or periapsis
+        //of the transfer orbit.
         //Actually, it's not exactly the phase angle. It's a sort of mean anomaly phase angle. The
         //difference is not important for how this function is used by DeltaVAndTimeForHohmannTransfer.
         private static Vector3d DeltaVAndApsisPhaseAngleOfHohmannTransfer(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double apsisPhaseAngle)
@@ -589,14 +590,14 @@ namespace MuMech
         }
 
         //Computes the time and dV of a Hohmann transfer injection burn such that at apoapsis the transfer
-        //Orbit passes as close as possible to the target.
+        //orbit passes as close as possible to the target.
         //The output burnUT will be the first transfer window found after the given UT.
         //Assumes o and target are in approximately the same plane, and orbiting in the same direction.
-        //Also assumes that o is a perfectly circular Orbit (though result should be OK for small eccentricity).
+        //Also assumes that o is a perfectly circular orbit (though result should be OK for small eccentricity).
         public static Vector3d DeltaVAndTimeForHohmannTransfer(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
         {
             //We do a binary search for the burn time that zeros out the phase angle between the
-            //transferring vessel and the target at the apsis of the transfer Orbit.
+            //transferring vessel and the target at the apsis of the transfer orbit.
             double synodicPeriod = o.SynodicPeriod(target);
             FlightPlanPlugin.Logger.LogDebug($"synodicPeriod: {synodicPeriod}");
 
@@ -622,7 +623,7 @@ namespace MuMech
                 {
                     minTime = t - dt;
                     maxTime = t;
-                    FlightPlanPlugin.Logger.LogDebug($"Found transfer window between {minTime - UT} and {maxTime - UT} from now (test {i})");
+                    FlightPlanPlugin.Logger.LogDebug($"Found transfer window between {minTime - UT} and {FPUtility.SecondsToTimeString(maxTime - UT)} from now (test {i})");
                     break;
                 }
 
@@ -638,7 +639,7 @@ namespace MuMech
 
                 if (i == numDivisions)
                 {
-                    throw new ArgumentException("DeltaVAndTimeForHohmannTransfer: couldn't find the transfer window!!");
+                    throw new ArgumentException("OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer: couldn't find the transfer window!!");
                 }
             }
 
@@ -653,7 +654,7 @@ namespace MuMech
             catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVAndTimeForHohmannTransfer: Brents method threw an argument exception Error (supressed): {e.Message}"); }
 
             Vector3d burnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, burnUT, out _);
-            FlightPlanPlugin.Logger.LogDebug($"Optimal Time for Transfer: {burnUT - UT} from now");
+            FlightPlanPlugin.Logger.LogDebug($"Optimal Time for Transfer: {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
 
             return burnDV;
         }
@@ -664,7 +665,7 @@ namespace MuMech
             return  DeltaVToInterceptAtTime(o, UT, target, DT, out finalVelocity, offsetDistance, shortway);
         }
 
-        // Computes the delta-V of a burn at a given time that will put an object with a given Orbit on a
+        // Computes the delta-V of a burn at a given time that will put an object with a given orbit on a
         // course to intercept a target at a specific interceptUT.
         //
         // offsetDistance: this is used by the Rendezvous Autopilot and is only going to be valid over very short distances
@@ -693,15 +694,15 @@ namespace MuMech
 
         // Lambert Solver Driver function.
         //
-        // This uses Shepperd's method instead of using KSP's Orbit class.
+        // This uses Shepperd's method instead of using KSP's orbit class.
         //
         // The reference time is usually 'now' or the first time the burn can start.
         //
         // GM       - grav parameter of the celestial
-        // pos      - Position of the source Orbit at a reference time
-        // vel      - velocity of the source Orbit at a reference time
-        // tpos     - Position of the target Orbit at a reference time
-        // tvel     - velocity of the target Orbit at a reference time
+        // pos      - position of the source orbit at a reference time
+        // vel      - velocity of the source orbit at a reference time
+        // tpos     - position of the target orbit at a reference time
+        // tvel     - velocity of the target orbit at a reference time
         // DT       - time of the burn in seconds after the reference time
         // TT       - transfer time of the burn in seconds after the burn time
         // secondDV - the second burn dV
@@ -709,10 +710,10 @@ namespace MuMech
         //
         private static Vector3d DeltaVToInterceptAtTime(double GM, Vector3d pos, Vector3d vel, Vector3d tpos, Vector3d tvel, double dt, double tt, out Vector3d secondDV, bool posigrade = true)
         {
-            // advance the source Orbit to ref + DT
+            // advance the source orbit to ref + DT
             Shepperd.Solve(GM, dt, pos.ToV3(), vel.ToV3(), out V3 pos1, out V3 vel1);
 
-            // advance the target Orbit to ref + DT + TT
+            // advance the target orbit to ref + DT + TT
             Shepperd.Solve(GM, dt + tt, tpos.ToV3(), tvel.ToV3(), out V3 pos2, out V3 vel2);
 
             Gooding.Solve(GM, pos1, vel1, pos2, posigrade ? tt : -tt, 0, out V3 transferVi, out V3 transferVf);
@@ -747,7 +748,7 @@ namespace MuMech
             return dV;
         }
 
-        // This is the entry point for the course-correction to a target Orbit which is a celestial
+        // This is the entry point for the course-correction to a target orbit which is a celestial
         public static Vector3d DeltaVAndTimeForCheapestCourseCorrection(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target, CelestialBodyComponent targetBody, double finalPeR, out double burnUT)
         {
             Vector3d collisionDV = DeltaVAndTimeForCheapestCourseCorrection(o, UT, target, out burnUT);
@@ -772,7 +773,7 @@ namespace MuMech
             return deltaV;
         }
 
-        // This is the entry point for the course-correction to a target Orbit which is not a celestial
+        // This is the entry point for the course-correction to a target orbit which is not a celestial
         public static Vector3d DeltaVAndTimeForCheapestCourseCorrection(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target, double caDistance, out double burnUT)
         {
             Vector3d collisionDV = DeltaVAndTimeForCheapestCourseCorrection(o, UT, target, out burnUT);
@@ -789,15 +790,16 @@ namespace MuMech
         }
 
         //Computes the time and delta-V of an ejection burn to a Hohmann transfer from one planet to another.
-        //It's assumed that the initial Orbit around the first planet is circular, and that this Orbit
-        //is in the same plane as the Orbit of the first planet around the sun. It's also assumed that
+        //It's assumed that the initial orbit around the first planet is circular, and that this orbit
+        //is in the same plane as the orbit of the first planet around the sun. It's also assumed that
         //the target planet has a fairly low relative inclination with respect to the first planet. If the
         //inclination change is nonzero you should also do a mid-course correction burn, as computed by
         //DeltaVForCourseCorrection (a function that has been removed due to being unused).
         public static Vector3d DeltaVAndTimeForInterplanetaryTransferEjection(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target, bool syncPhaseAngle, out double burnUT)
         {
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: Target {target.referenceBody.Name}");
             PatchedConicsOrbit planetOrbit = o.referenceBody.Orbit;
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: From {o.referenceBody.Name}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: To {FlightPlanPlugin.Instance._currentTarget.Name}");
 
             //Compute the time and dV for a Hohmann transfer where we pretend that we are the planet we are orbiting.
             //This gives us the "ideal" deltaV and UT of the ejection burn, if we didn't have to worry about waiting for the right
@@ -817,21 +819,22 @@ namespace MuMech
                 if (target.semiMajorAxis < planetOrbit.semiMajorAxis) idealDeltaV = DeltaVToChangePeriapsis(planetOrbit, idealBurnUT, target.semiMajorAxis);
                 else idealDeltaV = DeltaVToChangeApoapsis(planetOrbit, idealBurnUT, target.semiMajorAxis);
             }
-            FlightPlanPlugin.Logger.LogDebug($"idealDeltaV: [{idealDeltaV.x}, {idealDeltaV.y}, {idealDeltaV.z}] = {idealDeltaV.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: idealDeltaV: [{idealDeltaV.x}, {idealDeltaV.y}, {idealDeltaV.z}] = {idealDeltaV.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: idealBurnUT: {idealBurnUT} = {FPUtility.SecondsToTimeString(idealBurnUT - UT)} from now");
 
-            //Compute the actual transfer Orbit this ideal burn would lead to.
+            //Compute the actual transfer orbit this ideal burn would lead to.
             PatchedConicsOrbit transferOrbit = planetOrbit.PerturbedOrbit(idealBurnUT, idealDeltaV);
 
-            //Now figure out how to approximately eject from our current Orbit into the Hohmann Orbit we just computed.
+            //Now figure out how to approximately eject from our current orbit into the Hohmann orbit we just computed.
 
-            //Assume we want to exit the SOI with the same velocity as the ideal transfer Orbit at idealUT -- i.e., immediately
-            //after the "ideal" burn we used to compute the transfer Orbit. This isn't quite right.
+            //Assume we want to exit the SOI with the same velocity as the ideal transfer orbit at idealUT -- i.e., immediately
+            //after the "ideal" burn we used to compute the transfer orbit. This isn't quite right.
             //We intend to eject from our planet at idealUT and only several hours later will we exit the SOI. Meanwhile
-            //the transfer Orbit will have acquired a slightly different velocity, which we should correct for. Maybe
+            //the transfer orbit will have acquired a slightly different velocity, which we should correct for. Maybe
             //just add in (1/2)(sun gravity)*(time to exit soi)^2 ? But how to compute time to exit soi? Or maybe once we
-            //have the ejection Orbit we should just move the ejection burn back by the time to exit the soi?
+            //have the ejection orbit we should just move the ejection burn back by the time to exit the soi?
             Vector3d soiExitVelocity = idealDeltaV;
-            //project the desired exit direction into the current Orbit plane to get the feasible exit direction
+            //project the desired exit direction into the current orbit plane to get the feasible exit direction
             Vector3d inPlaneSoiExitDirection = Vector3d.Exclude(o.SwappedOrbitNormal(), soiExitVelocity).normalized;
 
             //compute the angle by which the trajectory turns between periapsis (where we do the ejection burn)
@@ -842,36 +845,34 @@ namespace MuMech
             double ejectionKineticEnergy = soiExitEnergy + o.referenceBody.gravParameter / ejectionRadius;
             double ejectionSpeed = Math.Sqrt(2 * ejectionKineticEnergy);
 
-            //construct a sample ejection Orbit
+            //construct a sample ejection orbit
             Vector3d ejectionOrbitInitialVelocity = ejectionSpeed * (Vector3d)o.referenceBody.transform.right.vector;
             Vector3d ejectionOrbitInitialPosition = o.referenceBody.Position.localPosition + ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
-            //Position Position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(ejectionOrbitInitialPosition - o.ReferenceBody.Position.localPosition));
-            //Velocity velocity = new(o.ReferenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(ejectionOrbitInitialVelocity));
             PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(ejectionOrbitInitialPosition, ejectionOrbitInitialVelocity, o.coordinateSystem, o.referenceBody, 0);
-
-            ///Position Position = new(o.coordinateSystem, ejectionOrbitInitialPosition); // want Position in KSP2 coordinates
-            // Velocity velocity = new(o.ReferenceBody.celestialMotionFrame, ejectionOrbitInitialVelocity); // want velocity in KSP2 coordinates
-            // var pos = MathDP.AsPosition(o.coordinateSystem, ejectionOrbitInitialPosition);
-            // var vel = MathDP.AsVelocity(o.relativeToMotion, MathDP.AsVector(o.coordinateSystem, ejectionOrbitInitialVelocity));
-
             double ejectionOrbitDuration = sampleEjectionOrbit.NextTimeOfRadius(0, o.referenceBody.sphereOfInfluence);
             Vector3d ejectionOrbitFinalVelocity = sampleEjectionOrbit.SwappedOrbitalVelocityAtUT(ejectionOrbitDuration);
 
             double turningAngle = Math.Abs(Vector3d.Angle(ejectionOrbitInitialVelocity, ejectionOrbitFinalVelocity));
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: turningAngle: {turningAngle}");
 
-            //rotate the exit direction by 90 + the turning angle to get a vector pointing to the spot in our Orbit
+            //rotate the exit direction by 90 + the turning angle to get a vector pointing to the spot in our orbit
             //where we should do the ejection burn. Then convert this to a true anomaly and compute the time closest
             //to planetUT at which we will pass through that true anomaly.
             Vector3d ejectionPointDirection = Quaternion.AngleAxis(-(float)(90 + turningAngle), o.SwappedOrbitNormal()) * inPlaneSoiExitDirection;
             double ejectionTrueAnomaly = o.TrueAnomalyFromVector(ejectionPointDirection);
             burnUT = o.TimeOfTrueAnomaly(ejectionTrueAnomaly, idealBurnUT - o.period);
 
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: ejectionTrueAnomaly = {ejectionTrueAnomaly}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
+
             if ((idealBurnUT - burnUT > o.period / 2) || (burnUT < UT))
             {
                 burnUT += o.period;
             }
 
-            //rotate the exit direction by the turning angle to get a vector pointing to the spot in our Orbit
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
+
+            //rotate the exit direction by the turning angle to get a vector pointing to the spot in our orbit
             //where we should do the ejection burn
             Vector3d ejectionBurnDirection = Quaternion.AngleAxis(-(float)(turningAngle), o.SwappedOrbitNormal()) * inPlaneSoiExitDirection;
             Vector3d ejectionVelocity = ejectionSpeed * ejectionBurnDirection;
@@ -880,18 +881,18 @@ namespace MuMech
 
             var deltaV = ejectionVelocity - preEjectionVelocity;
 
-            FlightPlanPlugin.Logger.LogDebug($"ejectionVelocity:    [{ejectionVelocity.x}, {ejectionVelocity.y}, {ejectionVelocity.z}] = {ejectionVelocity.magnitude} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"preEjectionVelocity: [{preEjectionVelocity.x}, {preEjectionVelocity.y}, {preEjectionVelocity.z}] = {preEjectionVelocity.magnitude} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"deltaV:              [{deltaV.x}, {deltaV.y}, {deltaV.z}] = {deltaV.magnitude} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"burnUT:              {burnUT - UT} s from now");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: ejectionVelocity:    [{ejectionVelocity.x}, {ejectionVelocity.y}, {ejectionVelocity.z}] = {ejectionVelocity.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: preEjectionVelocity: [{preEjectionVelocity.x}, {preEjectionVelocity.y}, {preEjectionVelocity.z}] = {preEjectionVelocity.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: deltaV:              [{deltaV.x}, {deltaV.y}, {deltaV.z}] = {deltaV.magnitude} m/s");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: burnUT:              {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
 
             return deltaV;
         }
 
         public struct LambertProblem
         {
-            public Vector3d pos, vel;    // Position + velocity of source Orbit at reference time
-            public Vector3d tpos, tvel;  // Position + velocity of target Orbit at reference time
+            public Vector3d pos, vel;    // position + velocity of source orbit at reference time
+            public Vector3d tpos, tvel;  // position + velocity of target orbit at reference time
             public double GM;
             public bool shortway;
             public bool intercept_only;  // omit the second burn from the cost
@@ -959,7 +960,7 @@ namespace MuMech
                 alglib.minlmsetlc(state, C, CT);
             alglib.minlmsetcond(state, eps, maxIter);
 
-            LambertProblem prob = new LambertProblem // Check this vs. old code!
+            LambertProblem prob = new LambertProblem
             {
                 pos = pos,
                 vel = vel,
@@ -1004,7 +1005,6 @@ namespace MuMech
         // FIXME: there's some very confusing nomenclature between DeltaVAndTimeForBiImpulsiveTransfer and this
         //        the minUT/maxUT values here are zero-centered on this methods UT.  the minUT/maxUT parameters to
         //        the other method are proper UT times and not zero centered at all.
-        // NEEDS: CalculateNextOrbit() from OrbitExtensions.cs - which needs PatchedConics.CalculatePatch (see that code for assumptions!)
         public static Vector3d DeltaVAndTimeForBiImpulsiveAnnealed(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double bestUT, double minDT = 0.0, double maxDT = Double.PositiveInfinity, bool intercept_only = false, bool fixed_ut = false)
         {
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForBiImpulsiveAnnealed: origin = " + o.MuString());
@@ -1041,7 +1041,7 @@ namespace MuMech
             if (maxDT == Double.PositiveInfinity)
                 maxDT = 1.5 * o.SynodicPeriod(target);
 
-            // figure the max transfer time of a Hohmann Orbit using the SMAs of the two orbits instead of the radius (as a guess), multiplied by 2
+            // figure the max transfer time of a Hohmann orbit using the SMAs of the two orbits instead of the radius (as a guess), multiplied by 2
             double a = ( Math.Abs(o.semiMajorAxis) + Math.Abs(target.semiMajorAxis) ) / 2;
             double maxTT = Math.PI * Math.Sqrt( a * a * a / o.referenceBody.gravParameter );   // FIXME: allow tweaking
 
@@ -1050,17 +1050,17 @@ namespace MuMech
 
             if (target.PatchEndTransition != PatchTransitionType.Final && target.PatchEndTransition != PatchTransitionType.Initial)
             {
-                // reset the guess to search for start times out to the end of the target Orbit
+                // reset the guess to search for start times out to the end of the target orbit
                 maxDT = target.EndUT - UT;
                 // longest possible transfer time would leave now and arrive at the target patch end
                 maxTT = Math.Min(maxTT, target.EndUT - UT);
-                // constraint on DT + TT <= maxDTplusT to arrive before the target Orbit ends
+                // constraint on DT + TT <= maxDTplusT to arrive before the target orbit ends
                 maxDTplusT = Math.Min(maxDTplusT, target.EndUT - UT);
             }
 
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForBiImpulsiveAnnealed: o.patchEndTransition = " + o.PatchEndTransition);
 
-            // if our Orbit ends, search for start times all the way to the end, but don't violate maxDTplusT if its set
+            // if our orbit ends, search for start times all the way to the end, but don't violate maxDTplusT if its set
             if (o.PatchEndTransition != PatchTransitionType.Final && o.PatchEndTransition != PatchTransitionType.Initial)
             {
                 maxDT = Math.Min(o.EndUT - UT, maxDTplusT);
@@ -1196,8 +1196,8 @@ namespace MuMech
         }
 
         //Computes the time and delta-V of an ejection burn to a Hohmann transfer from one planet to another.
-        //It's assumed that the initial Orbit around the first planet is circular, and that this Orbit
-        //is in the same plane as the Orbit of the first planet around the sun. It's also assumed that
+        //It's assumed that the initial orbit around the first planet is circular, and that this orbit
+        //is in the same plane as the orbit of the first planet around the sun. It's also assumed that
         //the target planet has a fairly low relative inclination with respect to the first planet. If the
         //inclination change is nonzero you should also do a mid-course correction burn, as computed by
         //DeltaVForCourseCorrection (a function that has been removed due to being unused).
@@ -1216,19 +1216,20 @@ namespace MuMech
             double vesselOrbitVelocity = OrbitalManeuverCalculator.CircularOrbitSpeed(o.referenceBody, o.semiMajorAxis);
             idealDeltaV = DeltaVAndTimeForHohmannLambertTransfer(planetOrbit, target, UT, out idealBurnUT, vesselOrbitVelocity);
 
-            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: idealBurnUT = " + idealBurnUT + ", idealDeltaV = " + idealDeltaV);
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: idealBurnUT = {idealBurnUT} = {FPUtility.SecondsToTimeString(idealBurnUT - UT)} from now.");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: idealDeltaV = {idealDeltaV} m/s");
 
-            //Compute the actual transfer Orbit this ideal burn would lead to.
+            //Compute the actual transfer orbit this ideal burn would lead to.
             PatchedConicsOrbit transferOrbit = planetOrbit.PerturbedOrbit(idealBurnUT, idealDeltaV);
 
-            //Now figure out how to approximately eject from our current Orbit into the Hohmann Orbit we just computed.
+            //Now figure out how to approximately eject from our current orbit into the Hohmann orbit we just computed.
 
-            //Assume we want to exit the SOI with the same velocity as the ideal transfer Orbit at idealUT -- i.e., immediately
-            //after the "ideal" burn we used to compute the transfer Orbit. This isn't quite right.
+            //Assume we want to exit the SOI with the same velocity as the ideal transfer orbit at idealUT -- i.e., immediately
+            //after the "ideal" burn we used to compute the transfer orbit. This isn't quite right.
             //We intend to eject from our planet at idealUT and only several hours later will we exit the SOI. Meanwhile
-            //the transfer Orbit will have acquired a slightly different velocity, which we should correct for. Maybe
+            //the transfer orbit will have acquired a slightly different velocity, which we should correct for. Maybe
             //just add in (1/2)(sun gravity)*(time to exit soi)^2 ? But how to compute time to exit soi? Or maybe once we
-            //have the ejection Orbit we should just move the ejection burn back by the time to exit the soi?
+            //have the ejection orbit we should just move the ejection burn back by the time to exit the soi?
             Vector3d soiExitVelocity = idealDeltaV;
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: soiExitVelocity = " + (Vector3)soiExitVelocity);
 
@@ -1243,21 +1244,17 @@ namespace MuMech
             double ejectionSpeed = Math.Sqrt(2 * ejectionKineticEnergy);
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionSpeed = " + ejectionSpeed);
 
-            //construct a sample ejection Orbit
+            //construct a sample ejection orbit
             Vector3d ejectionOrbitInitialVelocity = ejectionSpeed * (Vector3d)o.referenceBody.transform.right.vector;
             Vector3d ejectionOrbitInitialPosition = o.referenceBody.Position.localPosition + ejectionRadius * (Vector3d)o.referenceBody.transform.up.vector;
-            // Position Position = new(o.coordinateSystem, OrbitExtensions.SwapYZ(ejectionOrbitInitialPosition - o.ReferenceBody.Position.localPosition));
-            // Velocity velocity = new(o.ReferenceBody.celestialMotionFrame, OrbitExtensions.SwapYZ(ejectionOrbitInitialVelocity));
-            // Position Position = new(o.coordinateSystem, ejectionOrbitInitialPosition); // want Position in KSP2 coordinates
-            // Velocity velocity = new(o.ReferenceBody.celestialMotionFrame, ejectionOrbitInitialVelocity); // want velocity in KSP2 coordinates
-            PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(ejectionOrbitInitialPosition, ejectionOrbitInitialVelocity, o.coordinateSystem, o.referenceBody, 0);
+            PatchedConicsOrbit sampleEjectionOrbit = MuUtils.OrbitFromStateVectors(ejectionOrbitInitialPosition, ejectionOrbitInitialVelocity, o.coordinateSystem, o.referenceBody, UT); // was 0 in place of UT
             double ejectionOrbitDuration = sampleEjectionOrbit.NextTimeOfRadius(0, o.referenceBody.sphereOfInfluence);
             Vector3d ejectionOrbitFinalVelocity = sampleEjectionOrbit.SwappedOrbitalVelocityAtUT(ejectionOrbitDuration);
 
             double turningAngle = Vector3d.Angle(ejectionOrbitInitialVelocity, ejectionOrbitFinalVelocity);
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: turningAngle = " + turningAngle);
 
-            //sine of the angle between the vessel Orbit and the desired SOI exit velocity
+            //sine of the angle between the vessel orbit and the desired SOI exit velocity
             double outOfPlaneAngle = (UtilMath.Deg2Rad) * (90 - Vector3d.Angle(soiExitVelocity, o.SwappedOrbitNormal()));
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: outOfPlaneAngle (rad) = " + outOfPlaneAngle);
 
@@ -1267,26 +1264,30 @@ namespace MuMech
             Vector3d exitNormal = Vector3d.Cross(-soiExitVelocity, o.SwappedOrbitNormal()).normalized;
             Vector3d normal2 = Vector3d.Cross(exitNormal, -soiExitVelocity).normalized;
 
-            //unit vector pointing to the spot on our Orbit where we will burn.
+            //unit vector pointing to the spot on our orbit where we will burn.
             //fails if outOfPlaneAngle > coneAngle.
             Vector3d ejectionPointDirection = Math.Cos(coneAngle) * (-soiExitVelocity.normalized)
                 + Math.Cos(coneAngle) * Math.Tan(outOfPlaneAngle) * normal2
                 - Math.Sqrt(Math.Pow(Math.Sin(coneAngle), 2) - Math.Pow(Math.Cos(coneAngle) * Math.Tan(outOfPlaneAngle), 2)) * exitNormal;
 
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: soiExitVelocity = " + (Vector3)soiExitVelocity);
-            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: vessel Orbit normal = " + (Vector3)(1000 * o.SwappedOrbitNormal()));
+            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: vessel orbit normal = " + (Vector3)(1000 * o.SwappedOrbitNormal()));
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: exitNormal = " + (Vector3)(1000 * exitNormal));
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: normal2 = " + (Vector3)(1000 * normal2));
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionPointDirection = " + ejectionPointDirection);
 
-
             double ejectionTrueAnomaly = o.TrueAnomalyFromVector(ejectionPointDirection);
             burnUT = o.TimeOfTrueAnomaly(ejectionTrueAnomaly, idealBurnUT - o.period);
+
+            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomaly = " + ejectionTrueAnomaly);
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
 
             if ((idealBurnUT - burnUT > o.period / 2) || (burnUT < UT))
             {
                 burnUT += o.period;
             }
+
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
 
             Vector3d ejectionOrbitNormal = Vector3d.Cross(ejectionPointDirection, soiExitVelocity).normalized;
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionOrbitNormal = " + ejectionOrbitNormal);
@@ -1304,7 +1305,7 @@ namespace MuMech
             CelestialBodyComponent moon = o.referenceBody;
             CelestialBodyComponent primary = moon.referenceBody;
 
-            //construct an Orbit at the target radius around the primary, in the same plane as the moon. This is a fake target
+            //construct an orbit at the target radius around the primary, in the same plane as the moon. This is a fake target
             // The inputs look like what would be in a KeplerOrbitState, but using that doesn't work?
             PatchedConicsOrbit primaryOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel)
             {
@@ -1322,13 +1323,13 @@ namespace MuMech
         }
 
         //Computes the delta-V of the burn at a given time required to zero out the difference in orbital velocities
-        //between a given Orbit and a target.
+        //between a given orbit and a target.
         public static Vector3d DeltaVToMatchVelocities(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target)
         {
             return target.SwappedOrbitalVelocityAtUT(UT) - o.SwappedOrbitalVelocityAtUT(UT);
         }
 
-        // Compute the delta-V of the burn at the givent time required to enter an Orbit with a period of (resonanceDivider-1)/resonanceDivider of the starting Orbit period
+        // Compute the delta-V of the burn at the givent time required to enter an orbit with a period of (resonanceDivider-1)/resonanceDivider of the starting orbit period
         public static Vector3d DeltaVToResonantOrbit(PatchedConicsOrbit o, double UT, double f)
         {
             double a = o.Apoapsis;
@@ -1399,7 +1400,7 @@ namespace MuMech
                 if (o.TimeOfDescendingNodeEquatorial(UT) < o.TimeOfAscendingNodeEquatorial(UT))
                 {
                     // DN is closer than AN
-                    // Burning for the AN would entail flipping the Orbit around, and would be very expensive
+                    // Burning for the AN would entail flipping the orbit around, and would be very expensive
                     // therefore, burn for the corresponding Longitude of the Descending Node
                     target_longitude = MuUtils.ClampDegrees360(newLAN + 180.0);
                 }
@@ -1469,8 +1470,8 @@ namespace MuMech
             double LongitudeOffset = NodeLongitude - newNodeLong; // Amount we need to shift the Ap's longitude
 
             // Calculate a semi-major axis that gives us an orbital period that will rotate the body to place
-            // the burn location directly over the newNodeLong longitude, over the course of one full Orbit.
-            // N tracks the number of full body rotations desired in a vessal Orbit.
+            // the burn location directly over the newNodeLong longitude, over the course of one full orbit.
+            // N tracks the number of full body rotations desired in a vessal orbit.
             // If N=0, we calculate the SMA required to let the body rotate less than a full local day.
             // If the resulting SMA would drop us under the 5x time warp limit, we deem it to be too low, and try again with N+1.
             // In other words, we allow the body to rotate more than 1 day, but less then 2 days.
@@ -1491,7 +1492,7 @@ namespace MuMech
         }
 
         //
-        // Global OrbitPool for re-using Orbit objects
+        // Global OrbitPool for re-using orbit objects
         //
 
         // public static readonly Pool<PatchedConicsOrbit> OrbitPool = new Pool<PatchedConicsOrbit>(createOrbit, resetOrbit);
@@ -1500,50 +1501,50 @@ namespace MuMech
 
         // private static readonly PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
 
-        // Runs the PatchedConicSolver to do initial value "shooting" given an initial Orbit, a maneuver dV and UT to execute, to a target Celestial's SOI
+        // Runs the PatchedConicSolver to do initial value "shooting" given an initial orbit, a maneuver dV and UT to execute, to a target Celestial's SOI
         //
-        // initial   : initial parkig Orbit
+        // initial   : initial parkig orbit
         // target    : the Body whose SOI we are shooting towards
-        // dV        : the dV of the manuever off of the parking Orbit
-        // burnUT    : the time of the maneuver off of the parking Orbit
+        // dV        : the dV of the manuever off of the parking orbit
+        // burnUT    : the time of the maneuver off of the parking orbit
         // arrivalUT : this is really more of an upper clamp on the simulation so that if we miss and never hit the body SOI it stops
-        // intercept : this is the final computed intercept Orbit, it should be in the SOI of the target body, but if it never hits it then the
-        //             e.g. heliocentric Orbit is returned instead, so the caller needs to check.
+        // intercept : this is the final computed intercept orbit, it should be in the SOI of the target body, but if it never hits it then the
+        //             e.g. heliocentric orbit is returned instead, so the caller needs to check.
         //
         // FIXME: NREs when there's no next patch
         // FIXME: duplicates code with OrbitExtensions.CalculateNextOrbit()
         //
         //public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT, out PatchedConicsOrbit intercept)
         //{
-        //    PatchedConicsOrbit Orbit = OrbitPool.Borrow();
-        //    Orbit.UpdateFromStateVectors(initial.SwappedRelativePositionAtUT(burnUT), initial.SwappedOrbitalVelocityAtUT(burnUT) + dV.xzy, initial.ReferenceBody, burnUT);
-        //    Orbit.StartUT = burnUT;
-        //    Orbit.EndUT = Orbit.eccentricity >= 1.0 ? Orbit.period : burnUT + Orbit.period;
+        //    PatchedConicsOrbit orbit = OrbitPool.Borrow();
+        //    orbit.UpdateFromStateVectors(initial.SwappedRelativePositionAtUT(burnUT), initial.SwappedOrbitalVelocityAtUT(burnUT) + dV.xzy, initial.ReferenceBody, burnUT);
+        //    orbit.StartUT = burnUT;
+        //    orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
         //    PatchedConicsOrbit next_orbit = OrbitPool.Borrow();
 
-        //    bool ok = PatchedConics.CalculatePatch(Orbit, next_orbit, burnUT, solverParameters, null);
-        //    while (ok && (Orbit.ReferenceBody != target) && (Orbit.EndUT < arrivalUT))
+        //    bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null);
+        //    while (ok && (orbit.ReferenceBody != target) && (orbit.EndUT < arrivalUT))
         //    {
-        //        OrbitPool.Release(Orbit);
-        //        Orbit = next_orbit;
+        //        OrbitPool.Release(orbit);
+        //        orbit = next_orbit;
         //        next_orbit = OrbitPool.Borrow();
 
-        //        ok = PatchedConics.CalculatePatch(Orbit, next_orbit, Orbit.StartUT, solverParameters, null);
+        //        ok = PatchedConics.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, null);
         //    }
-        //    intercept = Orbit;
-        //    intercept.UpdateFromOrbitAtUT(Orbit, arrivalUT, Orbit.ReferenceBody);
-        //    OrbitPool.Release(Orbit);
+        //    intercept = orbit;
+        //    intercept.UpdateFromOrbitAtUT(orbit, arrivalUT, orbit.ReferenceBody);
+        //    OrbitPool.Release(orbit);
         //    OrbitPool.Release(next_orbit);
         //}
 
-        // Takes an e.g. heliocentric Orbit and a target planet celestial and finds the time of the SOI intercept.
+        // Takes an e.g. heliocentric orbit and a target planet celestial and finds the time of the SOI intercept.
         //
         //
         //
         public static void SOI_intercept(PatchedConicsOrbit transfer, CelestialBodyComponent target, double UT1, double UT2, out double UT)
         {
             if ( transfer.referenceBody != target.Orbit.referenceBody )
-                throw new ArgumentException("[MechJeb] SOI_intercept: transfer Orbit must be in the same SOI as the target celestial");
+                throw new ArgumentException("[MechJeb] SOI_intercept: transfer orbit must be in the same SOI as the target celestial");
             Func<double, object, double> f = delegate(double UT, object ign) { return ( transfer.GetRelativePositionAtUT(UT) - target.Orbit.GetRelativePositionAtUT(UT) ).magnitude - target.sphereOfInfluence;  };
             UT = 0;
             try { UT = BrentRoot.Solve(f, UT1, UT2, null); }

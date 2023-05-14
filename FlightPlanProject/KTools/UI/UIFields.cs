@@ -37,20 +37,44 @@ public class UI_Fields
         GameInputState = !InputFields.Contains(GUI.GetNameOfFocusedControl());
     }
 
-    public static double DoubleField(string entryName, double value, GUIStyle thisStyle = null)
+    public static double DoubleField(string entryName, double value, GUIStyle thisStyle = null, bool parseAsTime = false)
     {
         string _textValue;
+        string timeFormat = "HH:mm:ss";
         if (TempDict.ContainsKey(entryName))
             // always use temp value
             _textValue = TempDict[entryName];
         else
-            _textValue = value.ToString();
-
+        {
+            if (parseAsTime)
+            {
+                _textValue = value.ToString(timeFormat);
+            }
+            else
+                _textValue = value.ToString();
+        }
+        
         if (!InputFields.Contains(entryName))
             InputFields.Add(entryName);
 
         Color _normal = GUI.color;
-        bool _parsed = double.TryParse(_textValue, out double num);
+        bool _parsed;
+        double num;
+        if (parseAsTime)
+        {
+            if (_textValue == timeFormat || _textValue.Length < 1)
+            {
+                _parsed = true;
+                num = 0;
+            }
+            else
+            {
+                _parsed = TimeSpan.TryParse(_textValue, out TimeSpan ts);
+                num = ts.TotalSeconds;
+            }
+        }
+        else
+            _parsed = double.TryParse(_textValue, out num);
         if (!_parsed) GUI.color = Color.red;
 
         GUI.SetNextControlName(entryName);

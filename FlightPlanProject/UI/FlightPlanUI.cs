@@ -16,7 +16,7 @@ public class FlightPlanUI
     {
         _instance = this;
         this.Plugin = main_plugin;
-        BodySelection = new BodySelection(main_plugin);
+        BodySelection = new TargetSelection(main_plugin);
         BurnOptions = new BurnTimeOption();
     }
 
@@ -62,7 +62,7 @@ public class FlightPlanUI
 
     public ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanUI");
 
-    BodySelection BodySelection; // Name this something clearer to distinguish it from the type/class?
+    TargetSelection BodySelection; // Name this something clearer to distinguish it from the type/class?
     BurnTimeOption BurnOptions;
 
     // int spacingAfterEntry = 5;
@@ -94,30 +94,19 @@ public class FlightPlanUI
         return toggle;
     }
 
-    //public void DrawToggleButton(string txt, ManeuverType maneuveur_type)
-    //{
-    //    bool active = ManeuverType == maneuveur_type;
-
-    //    bool result = UI_Tools.SmallToggleButton(active, txt, txt);
-    //    if (result != active)
-    //    {
-    //        if (!active)
-    //            SetManeuverType(maneuveur_type);
-    //        else
-    //            SetManeuverType(ManeuverType.None);
-    //    }
-    //}
-
-    public void DrawEntry(string entryName, string value, string unit = "")
+    public void DrawEntry(string entryName, string value = "", string unit = "")
     {
         GUILayout.BeginHorizontal();
         UI_Tools.Label(entryName);
-        GUILayout.FlexibleSpace();
-        UI_Tools.Label(value);
-        if (unit.Length > 0)
+        if (value.Length > 0)
         {
-            GUILayout.Space(5);
-            UI_Tools.Label(unit);
+            GUILayout.FlexibleSpace();
+            UI_Tools.Label(value);
+            if (unit.Length > 0)
+            {
+                GUILayout.Space(5);
+                UI_Tools.Label(unit);
+            }
         }
         GUILayout.EndHorizontal();
         GUILayout.Space(FPStyles.SpacingAfterEntry);
@@ -214,14 +203,14 @@ public class FlightPlanUI
         return value;
     }
 
-    public double DrawToggleButtonWithTextField(string runString, ManeuverType type, double value, string unit = "")
+    public double DrawToggleButtonWithTextField(string runString, ManeuverType type, double value, string unit = "", bool parseAsTime = false)
     {
         GUILayout.BeginHorizontal();
 
         DrawToggleButton(runString, type);
         GUILayout.Space(10);
 
-        value = UI_Fields.DoubleField(runString, value);
+        value = UI_Fields.DoubleField(runString, value, null, parseAsTime);
 
         GUILayout.Space(3);
         UI_Tools.Label(unit, KBaseStyle.UnitLabelStyle);
@@ -277,7 +266,8 @@ public class FlightPlanUI
         if (!InitDone)
         {
             Tabs.Pages.Add(new OwnshipManeuversPage());
-            Tabs.Pages.Add(new TargetPage());
+            Tabs.Pages.Add(new TargetPageShip2Ship());
+            Tabs.Pages.Add(new TargetPageShip2Celestial());
             Tabs.Pages.Add(new InterplanetaryPage());
             Tabs.Pages.Add(new MoonPage());
             Tabs.Pages.Add(new ResonantOrbitPage());
@@ -306,7 +296,7 @@ public class FlightPlanUI
         //CurrentNode = (ActiveNodes.Count() > 0) ? ActiveNodes[0] : null;
         FPUtility.RefreshActiveVesselAndCurrentManeuver();
         
-        BodySelection.BodySelectionGUI();
+        BodySelection.TargetSelectionGUI();
         Tabs.OnGUI();
 
         // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
@@ -321,13 +311,13 @@ public class FlightPlanUI
 
         // Draw the GUI Status at the end of this tab
         double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        if (Plugin._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN)
+        if (Plugin._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN && FPStatus.status != FPStatus.Status.ERROR)
         {
             FPStatus.Ok("");
         }
         DrawGUIStatus(_UT);
 
-        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the Orbit
+        // If the selected option is to do an activity "at an altitude", then make sure the altitude is possible for the orbit
         if (TimeRef == TimeRef.ALTITUDE)
         {
             if (FPSettings.Altitude_km * 1000 < Orbit.Periapsis)
@@ -388,62 +378,79 @@ public class FlightPlanUI
         double _requestedBurnTime = BurnTimeOption.RequestedBurnTime;
 
         bool _pass = false;
+        bool _launchMNC = false;
         switch (ManeuverType)
         {
-        case ManeuverType.circularize: // Working
-            _pass = Plugin.Circularize(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.newPe: // Working
-            _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
-            break;
-        case ManeuverType.newAp:// Working
-            _pass = Plugin.SetNewAp(_requestedBurnTime, TargetApR, -0.5);
-            break;
-        case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
-            _pass = Plugin.Ellipticize(_requestedBurnTime, TargetApR, TargetPeR, -0.5);
-            break;
-        case ManeuverType.newInc:// Working
-            _pass = Plugin.SetInclination(_requestedBurnTime, FPSettings.TargetInc_deg, -0.5);
-            break;
-        case ManeuverType.newLAN: // Untested
-            _pass = Plugin.SetNewLAN(_requestedBurnTime, FPSettings.TargetLAN_deg, -0.5);
-            break;
-        case ManeuverType.newNodeLon: // Untested
-            _pass = Plugin.SetNodeLongitude(_requestedBurnTime, FPSettings.TargetNodeLong_deg, -0.5);
-            break;
-        case ManeuverType.newSMA: // Untested
-            _pass = Plugin.SetNewSMA(_requestedBurnTime, TargetSMA, -0.5);
-            break;
-        case ManeuverType.matchPlane: // Working
-            _pass = Plugin.MatchPlanes(TimeRef, -0.5);
-            break;
-        case ManeuverType.hohmannXfer: // Works if we start in a good enough Orbit (reasonably circular, close to target's orbital plane)
-            _pass = Plugin.HohmannTransfer(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.interceptTgt: // Experimental
-            _pass = Plugin.InterceptTgt(_requestedBurnTime, FPSettings.InterceptTime, -0.5);
-            break;
-        case ManeuverType.courseCorrection: // Experimental Works at least some times...
-            _pass = Plugin.CourseCorrection(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
-            _pass = Plugin.MoonReturn(_requestedBurnTime, TargetMRPeR, -0.5);
-            break;
-        case ManeuverType.matchVelocity: // Experimental
-            _pass = Plugin.MatchVelocity(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
-            _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
-            break;
-        case ManeuverType.fixAp: // Working
-            _pass = Plugin.SetNewAp(_requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
-            break;
-        case ManeuverType.fixPe: // Working
-            _pass = Plugin.SetNewPe(_requestedBurnTime, ResonantOrbitPage.Pe2, - 0.5);
-            break;
+            case ManeuverType.circularize: // Working
+                _pass = Plugin.Circularize(_requestedBurnTime, -0.5);
+                break;
+            case ManeuverType.newPe: // Working
+                if (TargetPeR < Orbit.Apoapsis || Orbit.eccentricity >= 1)
+                    _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
+                else
+                    FPStatus.Error($"Unable to set Pe above current Ap");
+                break;
+            case ManeuverType.newAp:// Working
+                if (TargetApR > Orbit.Periapsis)
+                    _pass = Plugin.SetNewAp(_requestedBurnTime, TargetApR, -0.5);
+                else
+                    FPStatus.Error($"Unable to set Ap below current Pe");
+                break;
+            case ManeuverType.newPeAp:// Working: Not perfect, but pretty good results nevertheless
+                _pass = Plugin.Ellipticize(_requestedBurnTime, TargetApR, TargetPeR, -0.5);
+                break;
+            case ManeuverType.newInc:// Working
+                _pass = Plugin.SetInclination(_requestedBurnTime, FPSettings.TargetInc_deg, -0.5);
+                break;
+            case ManeuverType.newLAN: // Untested
+                _pass = Plugin.SetNewLAN(_requestedBurnTime, FPSettings.TargetLAN_deg, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.newNodeLon: // Untested
+                _pass = Plugin.SetNodeLongitude(_requestedBurnTime, FPSettings.TargetNodeLong_deg, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.newSMA: // Untested
+                _pass = Plugin.SetNewSMA(_requestedBurnTime, TargetSMA, -0.5);
+                break;
+            case ManeuverType.matchPlane: // Working
+                _pass = Plugin.MatchPlanes(TimeRef, -0.5);
+                break;
+            case ManeuverType.hohmannXfer: // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
+                _pass = Plugin.HohmannTransfer(_requestedBurnTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.interceptTgt: // Experimental
+                _pass = Plugin.InterceptTgt(_requestedBurnTime, FPSettings.InterceptTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.courseCorrection: // Experimental Works at least some times...
+                if (Plugin._currentTarget.IsCelestialBody)
+                    _pass = Plugin.CourseCorrection(_requestedBurnTime, FPSettings.InterceptDistanceCelestial*1000, -0.5);
+                else
+                    _pass = Plugin.CourseCorrection(_requestedBurnTime, FPSettings.InterceptDistanceVessel, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
+                _pass = Plugin.MoonReturn(_requestedBurnTime, TargetMRPeR, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.matchVelocity: // Experimental
+                _pass = Plugin.MatchVelocity(_requestedBurnTime, -0.5);
+                break;
+            case ManeuverType.planetaryXfer: // Experimental - also not working at all. Places node at wrong time, often on the wrong side of mainbody (lowering when should be raising and vice versa)
+                _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
+                _launchMNC = true;
+                break;
+            case ManeuverType.fixAp: // Working
+                _pass = Plugin.SetNewAp(_requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
+                break;
+            case ManeuverType.fixPe: // Working
+                _pass = Plugin.SetNewPe(_requestedBurnTime, ResonantOrbitPage.Pe2, - 0.5);
+                break;
         }
 
-        if (_pass && Plugin._autoLaunchMNC.Value)
+        if (_pass && Plugin._autoLaunchMNC.Value && _launchMNC)
             FPOtherModsInterface.instance.CallMNC();
     }
 }

@@ -305,20 +305,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = _activeVessel.Orbit;
 
-        burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.Orbit, _deltaV, burnUT);
-        Logger.LogDebug($"CreateManeuverNod: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
-        Logger.LogDebug($"CreateManeuverNod: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
+        burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
         NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, burnOffsetFactor);
-        // StartCoroutine(TestPerturbedOrbit(Orbit, burnUT, _deltaV));
+        // StartCoroutine(TestPerturbedOrbit(orbit, burnUT, _deltaV));
 
         // Recalculate node based on the Offset time
         //var nodeTimeAdj = -CurrentNode.BurnDuration / 2;
         //var burnStartTime = CurrentNode.Time + nodeTimeAdj;
         //Logger.LogDebug($"BurnDuration: {CurrentNode.BurnDuration}, Adjusting start of burn by {nodeTimeAdj}s");
-        //_deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(Orbit, burnStartTime);
-        //burnParams = Orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, _deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.Orbit, _deltaV, burnUT);
-        ////var burnParamsT1 = Orbit.DeltaVToManeuverNodeCoordinates(_UT, _deltaV);
-        ////var burnParamsT2 = Orbit.DeltaVToManeuverNodeCoordinates(_UT, ActiveVessel, _deltaV);
+        //_deltaV = OrbitalManeuverCalculator.DeltaVToCircularize(orbit, burnStartTime);
+        //burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnStartTime, _deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
+        ////var burnParamsT1 = orbit.DeltaVToManeuverNodeCoordinates(_UT, _deltaV);
+        ////var burnParamsT2 = orbit.DeltaVToManeuverNodeCoordinates(_UT, ActiveVessel, _deltaV);
         ////Logger.LogDebug($"OG burnParams               [{burnParams.x}, {burnParams.y}, {burnParams.z}] m/s  = {burnParams.magnitude} m/s {burnUT - _UT} s from _UT");
         ////Logger.LogDebug($"Test: burnParamsT1          [{burnParamsT1.x}, {burnParamsT1.y}, {burnParamsT1.z}] m/s = {burnParamsT1.magnitude} m/s");
         ////Logger.LogDebug($"Test: burnParamsT2          [{burnParamsT2.x}, {burnParamsT2.y}, {burnParamsT2.z}] m/s = {burnParamsT2.magnitude} m/s");
@@ -361,9 +361,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Logger.LogDebug($"SetNewPe {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Pe");
-        //var TimeToAp = Orbit.TimeToAp;
+        //var TimeToAp = orbit.TimeToAp;
         //double burnUT, _e;
-        //_e = Orbit.eccentricity;
+        //_e = orbit.eccentricity;
         //if (_e < 1)
         //    burnUT = _UT + TimeToAp;
         //else
@@ -372,7 +372,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         FPStatus.Ok($"Ready to Change Pe {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: TargetPeR {newPe} m, currentPeR {_orbit.Periapsis} m, body.radius {_orbit.referenceBody.radius} m");
-        // Debug.Log($"Seeking Solution: TargetPeR {TargetPeR} m, currentPeR {Orbit.Periapsis} m, body.radius {Orbit.ReferenceBody.radius} m");
+        // Debug.Log($"Seeking Solution: TargetPeR {TargetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.ReferenceBody.radius} m");
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(_orbit, burnUT, newPe);
         if (_deltaV != Vector3d.zero)
         {
@@ -393,7 +393,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Logger.LogDebug($"SetNewAp {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
-        //var TimeToPe = Orbit.TimeToPe;
+        //var TimeToPe = orbit.TimeToPe;
         //var burnUT = _UT + TimeToPe;
 
         FPStatus.Ok($"Ready to Change Ap {BurnTimeOption.TimeRefDesc}");
@@ -474,7 +474,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
-        // var TimeToPe = Orbit.TimeToPe;
+        // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
         FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.TimeRefDesc}");
@@ -500,7 +500,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
-        // var TimeToPe = Orbit.TimeToPe;
+        // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
         FPStatus.Warning($"Experimental Node Longitude Change {BurnTimeOption.TimeRefDesc}");
@@ -526,7 +526,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Logger.LogDebug($"SetNewSMA {BurnTimeOption.TimeRefDesc}");
         // Debug.Log("Set New Ap");
-        // var TimeToPe = Orbit.TimeToPe;
+        // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
         FPStatus.Error($"Ready to Change SMA Change {BurnTimeOption.TimeRefDesc}");
@@ -613,7 +613,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             bool _dnExists = _orbit.DescendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
             double _anTime = _orbit.TimeOfAscendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
             double _dnTime = _orbit.TimeOfDescendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
-            // burnUT = timeSelector.ComputeManeuverTime(Orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit);
+            // burnUT = timeSelector.ComputeManeuverTime(orbit, _UT, _currentTarget.orbit as PatchedConicsOrbit);
             _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, intercept_only: _intercept_only, fixed_ut: false);
         }
 
@@ -663,7 +663,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool CourseCorrection(double burnUT, double burnOffsetFactor)
+    public bool CourseCorrection(double burnUT, double interceptDistance, double burnOffsetFactor)
     {
         double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
@@ -676,15 +676,21 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (_currentTarget.IsCelestialBody) // For a target that is a celestial
         {
-            Logger.LogDebug($"Seeking Solution for Celestial Target");
-            double _finalPeR = _currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _currentTarget.Orbit.referenceBody, _finalPeR, out _burnUTout);
+            if (interceptDistance < 0)
+                interceptDistance = _currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
+            else
+                interceptDistance += _currentTarget.CelestialBody.radius;
+            Logger.LogDebug($"Seeking Solution for Celestial Target with Pe {interceptDistance}");
+            // double _finalPeR = _currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _currentTarget.Orbit.referenceBody, interceptDistance, out _burnUTout);
         }
         else // For a tartget that is not a celestial
         {
-            Logger.LogDebug($"Seeking Solution for Non-Celestial Target");
-            double _caDistance = 100; // m (closest approach to non-celestial target)
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _caDistance, out _burnUTout);
+            if (interceptDistance < 0)
+                interceptDistance = 100; // m (PeR at celestial target)
+            Logger.LogDebug($"Seeking Solution for Non-Celestial Target with closest approach {interceptDistance}");
+            // double _caDistance = 100; // m (closest approach to non-celestial target)
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, interceptDistance, out _burnUTout);
         }
         if (_deltaV != Vector3d.zero)
         {
@@ -716,7 +722,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         else
         {
             double _burnUTout;
-            // double primaryRaidus = Orbit.ReferenceBody.Orbit.ReferenceBody.radius + 100000; // m
+            // double primaryRaidus = orbit.ReferenceBody.orbit.ReferenceBody.radius + 100000; // m
             Logger.LogDebug($"Moon Return Attempting to Solve...");
             Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(_orbit, _UT, targetMRPeR, out _burnUTout);
             if (_deltaV != Vector3d.zero)
@@ -739,9 +745,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         Logger.LogDebug($"MatchVelocity: Match Velocity with {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
 
-        FPStatus.Warning($"Experimental Velocity Match with {_currentTarget.Name} Ready");
+        FPStatus.Ok($"Ready to Match Velocity with {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
 
-        // double closestApproachTime = Orbit.NextClosestApproachTime(_currentTarget.Orbit as PatchedConicsOrbit, _UT + 2); //+2 so that closestApproachTime is definitely > _UT
+        // double closestApproachTime = orbit.NextClosestApproachTime(_currentTarget.orbit as PatchedConicsOrbit, _UT + 2); //+2 so that closestApproachTime is definitely > _UT
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit);
         if (_deltaV != Vector3d.zero)
         {
@@ -761,13 +767,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"PlanetaryXfer: Transfer to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
-        double _burnUTout, _burnUT2;
+        double _burnUTout, _burnUTout2;
         bool _syncPhaseAngle = true;
 
         FPStatus.Warning($"Experimental Transfer to {_currentTarget.Name} Ready");
 
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _syncPhaseAngle, out _burnUTout);
-        Vector3d _deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, out _burnUT2);
+        // Vector3d _deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(_orbit, _UT, _currentTarget.orbit as PatchedConicsOrbit, out _burnUTout2);
         if (_deltaV != Vector3d.zero)
         {
             CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
@@ -782,11 +788,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private IEnumerator TestPerturbedOrbit(PatchedConicsOrbit o, double burnUT, Vector3d dV)
     {
-        // This code compares the Orbit info returned from a PerturbedOrbit Orbit call with the
-        // info for the Orbit in the next patch. It should be called after creating a maneuver
+        // This code compares the orbit info returned from a PerturbedOrbit orbit call with the
+        // info for the orbit in the next patch. It should be called after creating a maneuver
         // node for the active vessel that applies the burn vector associated with the dV to
         // make sure that PerturbedOrbit is correctly predicting the effect of delta V on the
-        // current Orbit.
+        // current orbit.
 
         // NodeManagerPlugin.Instance.RefreshNodes();
         yield return (object)new WaitForFixedUpdate();
@@ -809,7 +815,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch != null) { nextOrbit = NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch; }
             else { nextOrbit = maneuverPlanSolver.ManeuverTrajectory[0] as PatchedConicsOrbit; }
 
-            // IPatchedOrbit Orbit = null;
+            // IPatchedOrbit orbit = null;
 
             Logger.LogDebug($"thisOrbit:{o}");
             Logger.LogDebug($"nextOrbit:{nextOrbit}");

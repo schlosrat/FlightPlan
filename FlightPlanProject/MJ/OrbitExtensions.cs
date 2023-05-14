@@ -10,7 +10,7 @@ using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using FlightPlan;
-//using UnityEngine;
+using UnityEngine;
 //using static VehiclePhysics.TelemetryTemplateBase;
 //using static MuMech.KSPOrbitModule;
 
@@ -18,6 +18,18 @@ namespace MuMech
 {
     public static class OrbitExtensions
     {
+        public static double RelativeDistance(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
+        {
+            return (b.SwappedRelativePositionAtUT(UT) - a.SwappedRelativePositionAtUT(UT)).magnitude;
+        }
+
+        public static double RelativeSpeed(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
+        {
+            Vector3d relVel = a.SwappedOrbitalVelocityAtUT(UT) - b.SwappedOrbitalVelocityAtUT(UT);
+            Vector3d relPos =  a.SwappedRelativePositionAtUT(UT) - b.SwappedRelativePositionAtUT(UT);
+            return Vector3d.Dot(relVel, relPos.normalized);
+        }
+
         //can probably be replaced with Vector3d.xzy?
         public static Vector3d SwapYZ(Vector3d v)
         {
@@ -26,8 +38,8 @@ namespace MuMech
         }
 
         //
-        // These "Swapped" functions translate preexisting Orbit class functions into world
-        // SPACE. For some reason, Orbit class functions seem to use a coordinate system
+        // These "Swapped" functions translate preexisting orbit class functions into world
+        // space. For some reason, orbit class functions seem to use a coordinate system
         // in which the Y and Z coordinates are swapped.
         //
         public static Vector3d SwappedOrbitalVelocityAtUT(this PatchedConicsOrbit o, double UT) // KS2: OrbitalVelocity
@@ -38,7 +50,7 @@ namespace MuMech
             return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetOrbitalVelocityAtUTZup(UT).SwapYAndZ);
         }
 
-        //Position relative to the primary
+        //position relative to the primary
         public static Vector3d SwappedRelativePositionAtUT(this PatchedConicsOrbit o, double UT) // KS2: RelativePosition
         {
             // Vector3d GetRelativePositionAtUT(double UT) => this.GetRelativePositionAtObTZup(this.GetObtAtUT(UT)).SwapYAndZ;
@@ -48,7 +60,7 @@ namespace MuMech
             return o.referenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativePositionAtUTZup(UT).SwapYAndZ);
         }
 
-        //Position in world SPACE
+        //position in world space
         public static Vector3d SwappedAbsolutePositionAtUT(this PatchedConicsOrbit o, double UT)
         {
             // was: o.ReferenceBody.Position -> o.ReferenceBody.Position.localPosition
@@ -87,7 +99,7 @@ namespace MuMech
         //}
 
         //normalized vector perpendicular to the orbital plane
-        //convention: as you look down along the Orbit normal, the satellite revolves counterclockwise
+        //convention: as you look down along the orbit normal, the satellite revolves counterclockwise
         public static Vector3d SwappedOrbitNormal(this PatchedConicsOrbit o) // KS2: OrbitNormal
         {
             // Vector3d GetRelativeOrbitNormal() => this.universeModel.Zup.WorldToLocal(this.orbitFrame.Z);
@@ -97,7 +109,7 @@ namespace MuMech
         }
 
         //normalized vector perpendicular to the orbital plane
-        //convention: as you look down along the Orbit normal, the satellite revolves counterclockwise
+        //convention: as you look down along the orbit normal, the satellite revolves counterclockwise
         public static Vector3d SwappedOrbitNormal(this IKeplerOrbit o) // KS2: OrbitNormal
         {
             // Vector3d GetRelativeOrbitNormal() => this.universeModel.Zup.WorldToLocal(this.orbitFrame.Z);
@@ -127,7 +139,7 @@ namespace MuMech
             return Vector3d.Exclude(o.Prograde(UT), o.Up(UT)).normalized;
         }
 
-        //another name for the Orbit normal; this form makes it look like the other directions
+        //another name for the orbit normal; this form makes it look like the other directions
         public static Vector3d NormalPlus(this PatchedConicsOrbit o, double UT)
         {
             // From KS2:
@@ -193,10 +205,10 @@ namespace MuMech
             // If CreateOrbit were embedded here:
             //Vector3d pos = o.SwappedRelativePositionAtUT(UT); // o.ReferenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetRelativePositionAtUTZup(UT).SwapYAndZ)
             //Vector3d vel = o.SwappedOrbitalVelocityAtUT(UT) + dV; // o.ReferenceBody.transform.celestialFrame.ToLocalPosition(o.ReferenceFrame, o.GetOrbitalVelocityAtUTZup(UT).SwapYAndZ);
-            //PatchedConicsOrbit Orbit = new PatchedConicsOrbit(o.ReferenceBody.universeModel);
-            //Orbit.UpdateFromStateVectors(new Position(o.ReferenceBody.SimulationObject.transform.celestialFrame, pos), new Velocity(o.ReferenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel), o.ReferenceBody, UT);
+            //PatchedConicsOrbit orbit = new PatchedConicsOrbit(o.ReferenceBody.universeModel);
+            //orbit.UpdateFromStateVectors(new Position(o.ReferenceBody.SimulationObject.transform.celestialFrame, pos), new Velocity(o.ReferenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel), o.ReferenceBody, UT);
 
-            //return Orbit;
+            //return orbit;
 
             // MJ version is one line:
             // return MuUtils.OrbitFromStateVectors(o.SwappedAbsolutePositionAtUT(UT), o.SwappedOrbitalVelocityAtUT(UT) + dV, o.ReferenceBody, UT);
@@ -215,20 +227,20 @@ namespace MuMech
         {
             PatchedConicsOrbit orbit = new(o.referenceBody.universeModel);
 
-            // Actual KS2 returns: Orbit.UpdateFromStateVectors(new Position(body.SimulationObject.transform.celestialFrame, Position), new Velocity(body.SimulationObject.transform.celestialFrame.motionFrame, velocity), body, ut);
+            // Actual KS2 returns: orbit.UpdateFromStateVectors(new Position(body.SimulationObject.transform.celestialFrame, Position), new Velocity(body.SimulationObject.transform.celestialFrame.motionFrame, velocity), body, ut);
             orbit.UpdateFromStateVectors(new Position(o.referenceBody.SimulationObject.transform.celestialFrame, position), new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, velocity), o.referenceBody, UT);
 
             return orbit;
         }
 
-        // returns a new Orbit that is identical to the current one (although the epoch will change)
-        // (i tried many different APIs in the Orbit class, but the GetOrbitalStateVectors/UpdateFromStateVectors route was the only one that worked)
+        // returns a new orbit that is identical to the current one (although the epoch will change)
+        // (i tried many different APIs in the orbit class, but the GetOrbitalStateVectors/UpdateFromStateVectors route was the only one that worked)
         public static PatchedConicsOrbit Clone(this PatchedConicsOrbit o, double UT = Double.NegativeInfinity)
         {
             Vector3d pos, vel;
 
             // hack up a dynamic default value to the current time
-            if (UT == Double.NegativeInfinity)
+            if ( UT == Double.NegativeInfinity )
                 UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
 
             PatchedConicsOrbit newOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
@@ -259,7 +271,7 @@ namespace MuMech
             return nextOrbit;
         }
 
-        // This does not allocate a new Orbit object and the caller should call new PatchedConicsOrbit if/when required
+        // This does not allocate a new orbit object and the caller should call new PatchedConicsOrbit if/when required
         public static void MutatedOrbit(this PatchedConicsOrbit o, double periodOffset = Double.NegativeInfinity)
         {
             double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -292,10 +304,13 @@ namespace MuMech
         //distance between two orbiting objects at a given time
         public static double Separation(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
         {
-            return (a.SwappedAbsolutePositionAtUT(UT) - b.SwappedAbsolutePositionAtUT(UT)).magnitude;
+            Vector3d aPos = a.SwappedAbsolutePositionAtUT(UT);
+            Vector3d bPos = b.SwappedAbsolutePositionAtUT(UT);
+            return (aPos - bPos).magnitude;
+            // return (a.SwappedAbsolutePositionAtUT(UT) - b.SwappedAbsolutePositionAtUT(UT)).magnitude;
         }
 
-        //Time during a's next Orbit at which object a comes nearest to object b.
+        //Time during a's next orbit at which object a comes nearest to object b.
         //If a is hyperbolic, the examined interval is the next 100 units of mean anomaly.
         //This is quite a large segment of the hyperbolic arc. However, for extremely high
         //hyperbolic eccentricity it may not find the actual closest approach.
@@ -338,7 +353,7 @@ namespace MuMech
             return a.Separation(b, a.NextClosestApproachTime(b, UT));
         }
 
-        //The mean anomaly of the Orbit.
+        //The mean anomaly of the orbit.
         //For elliptical orbits, the value return is always between 0 and 2pi
         //For hyperbolic orbits, the value can be any number.
         public static double MeanAnomalyAtUT(this PatchedConicsOrbit o, double UT)
@@ -393,19 +408,19 @@ namespace MuMech
             }
         }
 
-        //Gives the true anomaly (in a's Orbit) at which a crosses its ascending node
-        //with b's Orbit.
+        //Gives the true anomaly (in a's orbit) at which a crosses its ascending node
+        //with b's orbit.
         //The returned value is always between 0 and 2 * PI.
-        public static double AscendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)  // was Orbit as type for b
+        public static double AscendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b)  // was orbit as type for b
         {
             Vector3d vectorToAN = Vector3d.Cross(a.SwappedOrbitNormal(), b.SwappedOrbitNormal());
             return a.TrueAnomalyFromVector(vectorToAN);
         }
 
-        //Gives the true anomaly (in a's Orbit) at which a crosses its descending node
-        //with b's Orbit.
+        //Gives the true anomaly (in a's orbit) at which a crosses its descending node
+        //with b's orbit.
         //The returned value is always between 0 and 2 * PI.
-        public static double DescendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b) // was Orbit as type for b
+        public static double DescendingNodeTrueAnomaly(this PatchedConicsOrbit a, IKeplerOrbit b) // was orbit as type for b
         {
             return MuUtils.ClampDegrees360(a.AscendingNodeTrueAnomaly(b) + 180.0);
         }
@@ -521,11 +536,11 @@ namespace MuMech
             Vector3d vectorToPe = o.SwappedRelativePositionAtPeriapsis();
             double angleFromPe = Vector3d.Angle(vectorToPe, projected);
 
-            //If the vector points to the infalling part of the Orbit then we need to do 360 minus the
-            //angle from Pe to get the true anomaly. Test this by taking the the Cross product of the
-            //Orbit normal and vector to the periapsis. This gives a vector that points to center of the
-            //outgoing side of the Orbit. If vectorToAN is more than 90 degrees from this vector, it occurs
-            //during the infalling part of the Orbit.
+            //If the vector points to the infalling part of the orbit then we need to do 360 minus the
+            //angle from Pe to get the true anomaly. Test this by taking the the cross product of the
+            //orbit normal and vector to the periapsis. This gives a vector that points to center of the
+            //outgoing side of the orbit. If vectorToAN is more than 90 degrees from this vector, it occurs
+            //during the infalling part of the orbit.
             if (Math.Abs(Vector3d.Angle(projected, Vector3d.Cross(oNormal, vectorToPe))) < 90)
             {
                 return angleFromPe;
@@ -543,7 +558,7 @@ namespace MuMech
         //Converts a true anomaly into an eccentric anomaly.
         //For elliptical orbits this returns a value between 0 and 2pi
         //For hyperbolic orbits the returned value can be any number.
-        //NOTE: For a hyperbolic Orbit, if a true anomaly is requested that does not exist (a true anomaly
+        //NOTE: For a hyperbolic orbit, if a true anomaly is requested that does not exist (a true anomaly
         //past the true anomaly of the asymptote) then an ArgumentException is thrown
         public static double GetEccentricAnomalyAtTrueAnomaly(this PatchedConicsOrbit o, double trueAnomaly)
         {
@@ -573,8 +588,8 @@ namespace MuMech
 
         //Originally by Zool, revised by The_Duck
         //Converts an eccentric anomaly into a mean anomaly.
-        //For an elliptical Orbit, the returned value is between 0 and 2pi
-        //For a hyperbolic Orbit, the returned value is any number
+        //For an elliptical orbit, the returned value is between 0 and 2pi
+        //For a hyperbolic orbit, the returned value is any number
         public static double GetMeanAnomalyAtEccentricAnomaly(this PatchedConicsOrbit o, double E)
         {
             double e = o.eccentricity;
@@ -593,7 +608,7 @@ namespace MuMech
         //Converts a true anomaly into a mean anomaly (via the intermediate step of the eccentric anomaly)
         //For elliptical orbits, the output is between 0 and 2pi
         //For hyperbolic orbits, the output can be any number
-        //NOTE: For a hyperbolic Orbit, if a true anomaly is requested that does not exist (a true anomaly
+        //NOTE: For a hyperbolic orbit, if a true anomaly is requested that does not exist (a true anomaly
         //past the true anomaly of the asymptote) then an ArgumentException is thrown
         public static double GetMeanAnomalyAtTrueAnomaly(this PatchedConicsOrbit o, double trueAnomaly)
         {
@@ -602,20 +617,20 @@ namespace MuMech
 
         //TODO 1.1 changed trueAnomaly to rad but MJ ext stil uses deg. Should change for consistency
 
-        //NOTE: this function can throw an ArgumentException, if o is a hyperbolic Orbit with an eccentricity
+        //NOTE: this function can throw an ArgumentException, if o is a hyperbolic orbit with an eccentricity
         //large enough that it never attains the given true anomaly
         public static double TimeOfTrueAnomaly(this PatchedConicsOrbit o, double trueAnomaly, double UT)
         {
             //FlightPlanPlugin.Logger.LogDebug($"OrbitExtensions: trueAnomaly: {trueAnomaly}° = {trueAnomaly*UtilMath.Deg2Rad} radians");
-            return o.GetUTforTrueAnomaly(trueAnomaly*UtilMath.Deg2Rad, o.period);
-            //return o.UTAtMeanAnomaly(o.GetMeanAnomalyAtEccentricAnomaly(o.GetEccentricAnomalyAtTrueAnomaly(trueAnomaly)), UT);
+            // return o.GetUTforTrueAnomaly(trueAnomaly*UtilMath.Deg2Rad, o.period);
+            return o.UTAtMeanAnomaly(o.GetMeanAnomalyAtEccentricAnomaly(o.GetEccentricAnomalyAtTrueAnomaly(trueAnomaly)), UT);
         }
 
-        //Returns the next time at which a will Cross its ascending node with b.
+        //Returns the next time at which a will cross its ascending node with b.
         //For elliptical orbits this is a time between UT and UT + a.period.
         //For hyperbolic orbits this can be any time, including a time in the past if
         //the ascending node is in the past.
-        //NOTE: this function will throw an ArgumentException if a is a hyperbolic Orbit and the "ascending node"
+        //NOTE: this function will throw an ArgumentException if a is a hyperbolic Oobit and the "ascending node"
         //occurs at a true anomaly that a does not actually ever attain
         public static double TimeOfAscendingNode(this PatchedConicsOrbit a, IKeplerOrbit b, double UT)
         {
@@ -624,11 +639,11 @@ namespace MuMech
             return UTAN;
         }
 
-        //Returns the next time at which a will Cross its descending node with b.
+        //Returns the next time at which a will cross its descending node with b.
         //For elliptical orbits this is a time between UT and UT + a.period.
         //For hyperbolic orbits this can be any time, including a time in the past if
         //the descending node is in the past.
-        //NOTE: this function will throw an ArgumentException if a is a hyperbolic Orbit and the "descending node"
+        //NOTE: this function will throw an ArgumentException if a is a hyperbolic orbit and the "descending node"
         //occurs at a true anomaly that a does not actually ever attain
         public static double TimeOfDescendingNode(this PatchedConicsOrbit a, IKeplerOrbit b, double UT)
         {
@@ -637,24 +652,24 @@ namespace MuMech
             return UTDN;
         }
 
-        //Returns the next time at which the orbiting object will Cross the equator
+        //Returns the next time at which the orbiting object will cross the equator
         //moving northward, if o is east-moving, or southward, if o is west-moving.
         //For elliptical orbits this is a time between UT and UT + o.period.
         //For hyperbolic orbits this can by any time, including a time in the past if the
         //ascending node is in the past.
-        //NOTE: this function will throw an ArgumentException if o is a hyperbolic Orbit and the
+        //NOTE: this function will throw an ArgumentException if o is a hyperbolic orbit and the
         //"ascending node" occurs at a true anomaly that o does not actually ever attain.
         public static double TimeOfAscendingNodeEquatorial(this PatchedConicsOrbit o, double UT)
         {
             return o.TimeOfTrueAnomaly(o.AscendingNodeEquatorialTrueAnomaly(), UT);
         }
 
-        //Returns the next time at which the orbiting object will Cross the equator
+        //Returns the next time at which the orbiting object will cross the equator
         //moving southward, if o is east-moving, or northward, if o is west-moving.
         //For elliptical orbits this is a time between UT and UT + o.period.
         //For hyperbolic orbits this can by any time, including a time in the past if the
         //descending node is in the past.
-        //NOTE: this function will throw an ArgumentException if o is a hyperbolic Orbit and the
+        //NOTE: this function will throw an ArgumentException if o is a hyperbolic orbit and the
         //"descending node" occurs at a true anomaly that o does not actually ever attain.
         public static double TimeOfDescendingNodeEquatorial(this PatchedConicsOrbit o, double UT)
         {
@@ -687,6 +702,31 @@ namespace MuMech
             return angle;
         }
 
+        public static double Transfer(this PatchedConicsOrbit currentOrbit, PatchedConicsOrbit targetOrbit, out double time)
+        {
+            // GameInstance game = GameManager.Instance.Game;
+            // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
+            CelestialBodyComponent cur = currentOrbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
+
+            double ellipseA, transfer;
+
+            // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
+            //while (cur.Orbit.referenceBody.Name != Plugin._currentTarget.Orbit.referenceBody.Name)
+            //{
+            //    cur = cur.Orbit.referenceBody;
+            //}
+
+            // IKeplerOrbit targetOrbit = Plugin._currentTarget.Orbit;
+            // IKeplerOrbit currentOrbit = cur.Orbit;
+
+            ellipseA = (targetOrbit.semiMajorAxis + currentOrbit.semiMajorAxis) / 2;
+            time = Mathf.PI * Mathf.Sqrt((float)((ellipseA) * (ellipseA) * (ellipseA)) / ((float)targetOrbit.referenceBody.gravParameter));
+
+            transfer = 180 - ((time / targetOrbit.period) * 360);
+            while (transfer < -180) { transfer += 360; }
+            return Math.Round(transfer, 1);
+        }
+
         //Computes the angle between two orbital planes. This will be a number between 0 and 180
         //Note that in the convention used two objects orbiting in the same plane but in
         //opposite directions have a relative inclination of 180 degrees.
@@ -697,7 +737,7 @@ namespace MuMech
 
         //Finds the next time at which the orbiting object will achieve a given radius
         //from the center of the primary.
-        //If the given radius is impossible for this Orbit, an ArgumentException is thrown.
+        //If the given radius is impossible for this orbit, an ArgumentException is thrown.
         //For elliptical orbits this will be a time between UT and UT + period
         //For hyperbolic orbits this can be any time. If the given radius will be achieved
         //in the future then the next time at which that radius will be achieved will be returned.
@@ -729,27 +769,17 @@ namespace MuMech
             return burnVec.x * o.RadialPlus(UT) + burnVec.y * o.NormalPlus(UT) + burnVec.z * o.Prograde(UT);
         }
 
-        // Sadly, this does not work... Maybe with more work it could? It doesn't actually use UT, so to test it you need to get close to
-        // the burn point you want, then call both this one and the one above and compare those results to eachother and whatever kludge
-        // (flip prograde, flip radial, etc.) to see if this get's you to the answer the kludge provides without needing the kludge.
-        //public static Vector3d DeltaVToManeuverNodeCoordinates(this PatchedConicsOrbit o, double UT, VesselComponent vessel, Vector3d dV)
-        //{
-        //    var frame = vessel.transform.coordinateSystem;
-        //    Vector deltaV = new(o.coordinateSystem, dV);
-        //    Vector3d burnVec = frame.ToLocalVector(deltaV);
-        //    return burnVec;
-        //}
 
-        // Return the Orbit of the parent body orbiting the sun
-        //public static PatchedConicsOrbit TopParentOrbit(this PatchedConicsOrbit Orbit)
-        //{
-        //    PatchedConicsOrbit result = Orbit;
-        //    while (result.ReferenceBody != Planetarium.fetch.Sun)
-        //    {
-        //        result = result.ReferenceBody.Orbit; // was: result.ReferenceBody.Orbit
-        //    }
-        //    return result;
-        //}
+        // Return the orbit of the parent body orbiting the sun
+        public static PatchedConicsOrbit TopParentOrbit(this PatchedConicsOrbit Orbit)
+        {
+            PatchedConicsOrbit result = Orbit;
+            while (result.referenceBody != result.referenceBody.GetRelevantStar()) // was: (result.ReferenceBody != Planetarium.fetch.Sun)
+            {
+                result = result.referenceBody.Orbit;
+            }
+            return result;
+        }
 
         public static String MuString(this PatchedConicsOrbit o)
         {
@@ -760,35 +790,35 @@ namespace MuMech
             return "PeriapsisArl:" + o.PeriapsisArl + " ApoapsisArl:" + o.ApoapsisArl + " SMA:" + o.semiMajorAxis + " ECC:" + o.eccentricity + " INC:" + o.inclination + " LAN:" + o.longitudeOfAscendingNode + " ArgP:" + o.argumentOfPeriapsis + " TA:" + o.TrueAnomaly;
         }
 
-        // used to be SuicideBurnCountdown(Orbit Orbit, VesselState vesselState, Vessel vessel)
-        //public static double SuicideBurnCountdown(PatchedConicsOrbit Orbit, VesselComponent vessel)
-        //{
-        //    if (vessel.mainBody == null) return 0;
-        //    if (Orbit.PeriapsisArl > 0) return Double.PositiveInfinity;
+        // used to be SuicideBurnCountdown(Orbit orbit, VesselState vesselState, Vessel vessel)
+        public static double SuicideBurnCountdown(PatchedConicsOrbit Orbit, VesselComponent vessel)
+        {
+            if (vessel.mainBody == null) return 0;
+            if (Orbit.PeriapsisArl > 0) return Double.PositiveInfinity;
 
-        //    double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
-        //    double angleFromHorizontal = 90 - Vector3d.Angle(-vessel.SurfaceVelocity.vector, vessel.Orbit.Up(UT));
-        //    angleFromHorizontal = MuUtils.Clamp(angleFromHorizontal, 0, 90);
-        //    double sine = Math.Sin(angleFromHorizontal * UtilMath.Deg2Rad);
-        //    double g = vessel.graviticAcceleration.magnitude;
-        //    double T = vesselState.limitedMaxThrustAccel;
+            double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+            double angleFromHorizontal = 90 - Vector3d.Angle(-vessel.SurfaceVelocity.vector, vessel.Orbit.Up(UT));
+            angleFromHorizontal = MuUtils.Clamp(angleFromHorizontal, 0, 90);
+            double sine = Math.Sin(angleFromHorizontal * UtilMath.Deg2Rad);
+            double g = vessel.graviticAcceleration.magnitude;
+            double T = 0 ; // THIS IS WRONG! THIS JUST ALLOWS THE CODE TO COMPILE. FIX ME! was: vesselState.limitedMaxThrustAccel;
 
-        //    double effectiveDecel = 0.5 * (-2 * g * sine + Math.Sqrt((2 * g * sine) * (2 * g * sine) + 4 * (T * T - g * g)));
-        //    double decelTime = vessel.SrfSpeedMagnitude / effectiveDecel;
+            double effectiveDecel = 0.5 * (-2 * g * sine + Math.Sqrt((2 * g * sine) * (2 * g * sine) + 4 * (T * T - g * g)));
+            double decelTime = vessel.SrfSpeedMagnitude / effectiveDecel;
 
-        //    Vector3d estimatedLandingSite = vessel.CenterOfMass.localPosition + 0.5 * decelTime * vessel.SurfaceVelocity.vector;
-        //    Position Position = new(Orbit.coordinateSystem, estimatedLandingSite);
-        //    double terrainRadius = vessel.mainBody.radius + vessel.mainBody.GetAltitudeFromRadius(Position); // was: vessel.mainBody.TerrainAltitude(estimatedLandingSite)
-        //    double impactTime = 0;
-        //    try
-        //    {
-        //        impactTime = Orbit.NextTimeOfRadius(vesselState.time, terrainRadius);
-        //    }
-        //    catch (ArgumentException)
-        //    {
-        //        return 0;
-        //    }
-        //    return impactTime - decelTime / 2 - vesselState.time;
-        //}
+            Vector3d estimatedLandingSite = vessel.CenterOfMass.localPosition + 0.5 * decelTime * vessel.SurfaceVelocity.vector;
+            Position Position = new(Orbit.coordinateSystem, estimatedLandingSite);
+            double terrainRadius = vessel.mainBody.radius + vessel.mainBody.GetAltitudeFromRadius(Position); // was: vessel.mainBody.TerrainAltitude(estimatedLandingSite)
+            double impactTime = 0;
+            try
+            {
+                impactTime = Orbit.NextTimeOfRadius(UT, terrainRadius); // was: vesselState.time
+            }
+            catch (ArgumentException)
+            {
+                return 0;
+            }
+            return impactTime - decelTime / 2 - UT; // was: - vesselState.time;
+        }
     }
 }

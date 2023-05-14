@@ -17,7 +17,7 @@ public class FPStyles
         if (!KBaseStyle.Init())
             return false;
 
-        KBaseStyle.Skin.window.fixedWidth = 300; // Must fit with max_width given to DrawTabs (TabsUI.cs)
+        KBaseStyle.Skin.window.fixedWidth = 350; // Must fit with max_width given to DrawTabs (TabsUI.cs)
 
         // Load specific Icon and style here
         K2D2BigIcon = AssetsLoader.LoadIcon("k2d2_big_icon");

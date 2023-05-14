@@ -85,10 +85,17 @@ public static class FPUtility
             seconds = Math.Abs(seconds);
         }
 
-        int _days = (int)(_cap / 21600);
-        int _hours = (int)((_cap - (_days * 21600)) / 3600);
-        int _minutes = (int)((_cap - (_hours * 3600) - (_days * 21600)) / 60);
-        double _secs = (seconds - (_days * 21600) - (_hours * 3600) - (_minutes * 60));
+        int _secPerYear = 21600 * 426 + 32 * 60;
+        int _years = (int)(_cap / _secPerYear);
+        int _days = (int)((_cap - (_years * _secPerYear)) / 21600);
+        int _hours = (int)((_cap - (_days * 21600) - (_years * _secPerYear)) / 3600);
+        int _minutes = (int)((_cap - (_hours * 3600) - (_days * 21600) - (_years * _secPerYear)) / 60);
+        double _secs = (seconds - (_years * _secPerYear) - (_days * 21600) - (_hours * 3600) - (_minutes * 60));
+
+        if (_years > 0)
+        {
+            _result += $"{_years}{_spacing}y ";
+        }
 
         if (_days > 0)
         {
