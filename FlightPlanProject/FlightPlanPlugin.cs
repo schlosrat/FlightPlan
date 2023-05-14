@@ -477,7 +477,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
-        FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.TimeRefDesc}");
+        if (Math.Abs(_orbit.inclination) < 10)
+            FPStatus.Warning($"WARNING: Orbital plane has low inclination of {_orbit.inclination}° (recommend i > 10°). Maneuver many not be accurate.");
+        else
+            FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: newLANvalue {newLANvalue}°");
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(_orbit, burnUT, newLANvalue);
@@ -601,7 +604,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         FPStatus.Warning($"Ready to Transfer to {_currentTarget.Name} ?");
 
-        bool _simpleTransfer = true;
+        bool _simpleTransfer = false;
         bool _intercept_only = true;
         if (_simpleTransfer)
         {
@@ -614,7 +617,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             double _anTime = _orbit.TimeOfAscendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
             double _dnTime = _orbit.TimeOfDescendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
             // burnUT = timeSelector.ComputeManeuverTime(orbit, _UT, _currentTarget.orbit as PatchedConicsOrbit);
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, intercept_only: _intercept_only, fixed_ut: false);
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, intercept_only: _intercept_only);
         }
 
         if (_deltaV != Vector3d.zero)
