@@ -56,7 +56,7 @@ public partial class alglib
                                 hess[i,j] = d2f(p,q)/(d(p[i])*d(p[j]))
 
     Callbacks for progress reports:
-    * ndimensional_rep          reports current Position of optimization algo    
+    * ndimensional_rep          reports current position of optimization algo    
     
     Callbacks for ODE solvers:
     * ndimensional_ode_rp       calculates dy/dx for given y[] and x
@@ -204,7 +204,7 @@ public partial class alglib
     public static void AE_CRITICAL_ASSERT(bool x)
     {
         if( !x )
-            System.Environment.FailFast("ALGLIB: critical Error");
+            System.Environment.FailFast("ALGLIB: critical error");
     }
     
     /********************************************************************
@@ -404,10 +404,10 @@ public partial class alglib
     * you may define multiple trace tags by separating them with  commas,
       like "SLP,OPTGUARD,SLP.PROBING"
     * trace tags are case-insensitive
-    * spaces/Tabs are NOT allowed in the tags string
+    * spaces/tabs are NOT allowed in the tags string
 
-    Trace log is saved to file "filename", which is Opened in the  append
-    mode. If no file with such name  can  be  Opened,  tracing  won't  be
+    Trace log is saved to file "filename", which is opened in the  append
+    mode. If no file with such name  can  be  opened,  tracing  won't  be
     performed (but no exception will be generated).
     ********************************************************************/
     public static void trace_file(string tags, string filename)
@@ -931,14 +931,14 @@ public partial class alglib
      * CSV operations: reading CSV file to real matrix.
      * 
      * This function reads CSV  file  and  stores  its  contents  to  double
-     * precision 2D array. Format of the Data file must conform to RFC  4180
+     * precision 2D array. Format of the data file must conform to RFC  4180
      * specification, with additional notes:
      * - file size should be less than 2GB
      * - ASCI encoding, UTF-8 without BOM (in header names) are supported
-     * - any character (comma/tab/SPACE) may be used as field Separator,  as
+     * - any character (comma/tab/space) may be used as field separator,  as
      *   long as it is distinct from one used for decimal point
      * - multiple subsequent field separators (say, two  spaces) are treated
-     *   as MULTIPLE separators, not one big Separator
+     *   as MULTIPLE separators, not one big separator
      * - both comma and full stop may be used as decimal point. Parser  will
      *   automatically determine specific character being used.  Both  fixed
      *   and exponential number formats are  allowed.   Thousand  separators
@@ -949,7 +949,7 @@ public partial class alglib
      * 
      * INPUT PARAMETERS:
      *     filename        relative/absolute path
-     *     Separator       character used to separate fields.  May  be  ' ',
+     *     separator       character used to separate fields.  May  be  ' ',
      *                     ',', '\t'. Other separators are possible too.
      *     flags           several values combined with bitwise OR:
      *                     * alglib::CSV_SKIP_HEADERS -  if present, first row
@@ -1148,14 +1148,14 @@ public partial class alglib
         public void alloc_entry()
         {
             if( mode!=SMODE.ALLOC )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
             entries_needed++;
         }
 
         public void alloc_byte_array(byte[] a)
         {
             if( mode!=SMODE.ALLOC )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
             int n = ap.len(a);
             n = n/8 + (n%8>0 ? 1 : 0);
             entries_needed += 1+n;
@@ -1167,12 +1167,12 @@ public partial class alglib
             
             // check and change mode
             if( mode!=SMODE.ALLOC )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
             
             // if no entries needes (degenerate case)
             if( entries_needed==0 )
             {
-                bytes_asked = 4; /* a pair of chars for \r\n, one for SPACE, one for dot */ 
+                bytes_asked = 4; /* a pair of chars for \r\n, one for space, one for dot */ 
                 return bytes_asked;
             }
             
@@ -1186,8 +1186,8 @@ public partial class alglib
             }
             
             // calculate result size
-            result  = ((rows-1)*SER_ENTRIES_PER_ROW+lastrowsize)*SER_ENTRY_LENGTH;  /* Data size */
-            result +=  (rows-1)*(SER_ENTRIES_PER_ROW-1)+(lastrowsize-1);            /* SPACE symbols */
+            result  = ((rows-1)*SER_ENTRIES_PER_ROW+lastrowsize)*SER_ENTRY_LENGTH;  /* data size */
+            result +=  (rows-1)*(SER_ENTRIES_PER_ROW-1)+(lastrowsize-1);            /* space symbols */
             result += rows*2;                                                       /* newline symbols */
             result += 1;                                                            /* trailing dot */
             bytes_asked = result;
@@ -1199,12 +1199,12 @@ public partial class alglib
             int allocsize = get_alloc_size();
             
             // clear input/output buffers which may hold pointers to unneeded memory
-            // NOTE: it also helps us to avoid errors when Data are written to incorrect location
+            // NOTE: it also helps us to avoid errors when data are written to incorrect location
             clear_buffers();
             
             // check and change mode
             if( mode!=SMODE.ALLOC )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
             mode = SMODE.TO_STRING;
             
             // other preparations
@@ -1216,12 +1216,12 @@ public partial class alglib
         public void sstart_stream(System.IO.Stream o_stream)
         {   
             // clear input/output buffers which may hold pointers to unneeded memory
-            // NOTE: it also helps us to avoid errors when Data are written to incorrect location
+            // NOTE: it also helps us to avoid errors when data are written to incorrect location
             clear_buffers();
             
             // check and change mode
             if( mode!=SMODE.ALLOC )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
             mode = SMODE.TO_STREAM;
             io_stream = o_stream;
         }
@@ -1229,12 +1229,12 @@ public partial class alglib
         public void ustart_str(string s)
         {
             // clear input/output buffers which may hold pointers to unneeded memory
-            // NOTE: it also helps us to avoid errors when Data are written to incorrect location
+            // NOTE: it also helps us to avoid errors when data are written to incorrect location
             clear_buffers();
             
             // check and change mode
             if( mode!=SMODE.DEFAULT )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
             mode = SMODE.FROM_STRING;
             
             in_str = s.ToCharArray();
@@ -1244,12 +1244,12 @@ public partial class alglib
         public void ustart_stream(System.IO.Stream i_stream)
         {
             // clear input/output buffers which may hold pointers to unneeded memory
-            // NOTE: it also helps us to avoid errors when Data are written to incorrect location
+            // NOTE: it also helps us to avoid errors when data are written to incorrect location
             clear_buffers();
             
             // check and change mode
             if( mode!=SMODE.DEFAULT )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
             mode = SMODE.FROM_STREAM;
             io_stream = i_stream;
         }
@@ -1270,7 +1270,7 @@ public partial class alglib
                 cnt_out = 0;
             }
             else
-                throw new alglib.alglibexception("ALGLIB: internal Error during serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during serialization");
             
             // serialize
             if( val_idx==0 )
@@ -1282,7 +1282,7 @@ public partial class alglib
             else if( val_idx==3 )
                 ulong2str( v3, arr_out, ref cnt_out);
             else
-                throw new alglib.alglibexception("ALGLIB: internal Error during serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during serialization");
             entries_saved++;
             if( entries_saved%SER_ENTRIES_PER_ROW!=0 )
             {
@@ -1310,19 +1310,19 @@ public partial class alglib
                 return;
             }
             else
-                throw new alglib.alglibexception("ALGLIB: internal Error during serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during serialization");
         }
 
         private void unstream_entry_char()
         {
             if( mode!=SMODE.FROM_STREAM )
-                throw new alglib.alglibexception("ALGLIB: internal Error during unserialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during unserialization");
             int c;
             for(;;)
             {
                 c = io_stream.ReadByte();
                 if( c<0 )
-                    throw new alglib.alglibexception("ALGLIB: internal Error during unserialization");
+                    throw new alglib.alglibexception("ALGLIB: internal error during unserialization");
                 if( c!=' ' && c!='\t' && c!='\n' && c!='\r' )
                     break;
             }
@@ -1332,7 +1332,7 @@ public partial class alglib
                 c = io_stream.ReadByte();
                 entry_buf_char[k] = (char)c;
                 if( c<0 || c==' ' || c=='\t' || c=='\n' || c=='\r' )
-                    throw new alglib.alglibexception("ALGLIB: internal Error during unserialization");
+                    throw new alglib.alglibexception("ALGLIB: internal error during unserialization");
             }
             entry_buf_char[SER_ENTRY_LENGTH] = (char)0;
         }
@@ -1388,7 +1388,7 @@ public partial class alglib
                 int dummy = 0;
                 return str2bool(entry_buf_char, ref dummy);
             }
-            throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+            throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
         }
 
         public int unserialize_int()
@@ -1401,7 +1401,7 @@ public partial class alglib
                 int dummy = 0;
                 return str2int(entry_buf_char, ref dummy);
             }
-            throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+            throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
         }
 
         public double unserialize_double()
@@ -1414,7 +1414,7 @@ public partial class alglib
                 int dummy = 0;
                 return str2double(entry_buf_char, ref dummy);
             }
-            throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+            throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
         }
 
         public ulong unserialize_ulong()
@@ -1427,7 +1427,7 @@ public partial class alglib
                 int dummy = 0;
                 return str2ulong(entry_buf_char, ref dummy);
             }
-            throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+            throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
         }
 
         public byte[] unserialize_byte_array()
@@ -1485,17 +1485,17 @@ public partial class alglib
                         continue;
                     if( c=='.' )
                         break;
-                    throw new alglib.alglibexception("ALGLIB: internal Error during unserialization");
+                    throw new alglib.alglibexception("ALGLIB: internal error during unserialization");
                 }
                 return;
             }
-            throw new alglib.alglibexception("ALGLIB: internal Error during unserialization");
+            throw new alglib.alglibexception("ALGLIB: internal error during unserialization");
         }
 
         public string get_string()
         {
             if( mode!=SMODE.TO_STRING )
-                throw new alglib.alglibexception("ALGLIB: internal Error during (un)serialization");
+                throw new alglib.alglibexception("ALGLIB: internal error during (un)serialization");
              return new string(out_str, 0, bytes_written);
         }
 
@@ -1555,9 +1555,9 @@ public partial class alglib
         (24 bits again).
 
         src         array
-        src_offs    Offset of three-bytes chunk
+        src_offs    offset of three-bytes chunk
         dst         array for ints
-        dst_offs    Offset of four-ints chunk
+        dst_offs    offset of four-ints chunk
         ************************************************************************/
         private static void threebytes2foursixbits(byte[] src, int src_offs, int[] dst, int dst_offs)
         {
@@ -1572,9 +1572,9 @@ public partial class alglib
         (24 bits again).
 
         src         pointer to four ints
-        src_offs    Offset of the chunk
+        src_offs    offset of the chunk
         dst         pointer to three bytes
-        dst_offs    Offset of the chunk
+        dst_offs    offset of the chunk
         ************************************************************************/
         private static void foursixbits2threebytes(int[] src, int src_offs, byte[] dst, int dst_offs)
         {
@@ -1588,7 +1588,7 @@ public partial class alglib
 
         v           boolean value to be serialized
         buf         buffer, at least 11 characters wide
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
@@ -1605,15 +1605,15 @@ public partial class alglib
         /************************************************************************
         This function unserializes boolean value from buffer
 
-        buf         buffer which contains value; leading spaces/Tabs/newlines are 
-                    ignored, traling spaces/Tabs/newlines are treated as  end  of
+        buf         buffer which contains value; leading spaces/tabs/newlines are 
+                    ignored, traling spaces/tabs/newlines are treated as  end  of
                     the boolean value.
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
 
-        This function raises an Error in case unexpected symbol is found
+        This function raises an error in case unexpected symbol is found
         ************************************************************************/
         private static bool str2bool(char[] buf, ref int offs)
         {
@@ -1652,12 +1652,12 @@ public partial class alglib
 
         v           integer value to be serialized
         buf         buffer, at least 11 characters wide 
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
 
-        This function raises an Error in case unexpected symbol is found
+        This function raises an error in case unexpected symbol is found
         ************************************************************************/
         private static void int2str(int v, char[] buf, ref int offs)
         {
@@ -1698,15 +1698,15 @@ public partial class alglib
         /************************************************************************
         This function unserializes integer value from string
 
-        buf         buffer which contains value; leading spaces/Tabs/newlines are 
-                    ignored, traling spaces/Tabs/newlines are treated as  end  of
+        buf         buffer which contains value; leading spaces/tabs/newlines are 
+                    ignored, traling spaces/tabs/newlines are treated as  end  of
                     the integer value.
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
 
-        This function raises an Error in case unexpected symbol is found
+        This function raises an error in case unexpected symbol is found
         ************************************************************************/
         private static int str2int(char[] buf, ref int offs)
         {
@@ -1763,7 +1763,7 @@ public partial class alglib
 
         v           double value to be serialized
         buf         buffer, at least 11 characters wide 
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
@@ -1855,7 +1855,7 @@ public partial class alglib
 
         v           ulong value to be serialized
         buf         buffer, at least 11 characters wide 
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
@@ -1892,15 +1892,15 @@ public partial class alglib
         /************************************************************************
         This function unserializes double value from string
 
-        buf         buffer which contains value; leading spaces/Tabs/newlines are 
-                    ignored, traling spaces/Tabs/newlines are treated as  end  of
+        buf         buffer which contains value; leading spaces/tabs/newlines are 
+                    ignored, traling spaces/tabs/newlines are treated as  end  of
                     the double value.
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
 
-        This function raises an Error in case unexpected symbol is found
+        This function raises an error in case unexpected symbol is found
         ************************************************************************/
         private static double str2double(char[] buf, ref int offs)
         {
@@ -1977,15 +1977,15 @@ public partial class alglib
         /************************************************************************
         This function unserializes ulong value from string
 
-        buf         buffer which contains value; leading spaces/Tabs/newlines are 
-                    ignored, traling spaces/Tabs/newlines are treated as  end  of
+        buf         buffer which contains value; leading spaces/tabs/newlines are 
+                    ignored, traling spaces/tabs/newlines are treated as  end  of
                     the ulong value.
-        offs        Offset in the buffer
+        offs        offset in the buffer
         
         after return from this function, offs points to the char's past the value
         being read.
 
-        This function raises an Error in case unexpected symbol is found
+        This function raises an error in case unexpected symbol is found
         ************************************************************************/
         private static ulong str2ulong(char[] buf, ref int offs)
         {
@@ -2061,7 +2061,7 @@ public partial class alglib
         }
 
         /********************************************************************
-        Shared pool: Data structure used to provide thread-safe access to pool
+        Shared pool: data structure used to provide thread-safe access to pool
         of temporary variables.
         ********************************************************************/
         public class sharedpoolentry
@@ -3471,9 +3471,9 @@ public partial class alglib
             N       -   vector length
             Alpha   -   multiplier
             Y       -   source vector
-            OffsY   -   source Offset
+            OffsY   -   source offset
             X       -   destination vector
-            OffsX   -   destination Offset
+            OffsX   -   destination offset
 
         RESULT:
             X := X + alpha*Y
@@ -5169,9 +5169,9 @@ public partial class alglib
         INPUT PARAMETERS:
             N       -   vector length
             X       -   source array
-            OffsX   -   source Offset
+            OffsX   -   source offset
             Y       -   preallocated array[N]
-            OffsY   -   destination Offset
+            OffsY   -   destination offset
 
         OUTPUT PARAMETERS:
             Y       -   N elements starting from OffsY are replaced by X[OffsX:OffsX+N-1]
@@ -5214,9 +5214,9 @@ public partial class alglib
         INPUT PARAMETERS:
             N       -   vector length
             X       -   source array
-            OffsX   -   source Offset
+            OffsX   -   source offset
             Y       -   preallocated array[N]
-            OffsY   -   destination Offset
+            OffsY   -   destination offset
 
         OUTPUT PARAMETERS:
             Y       -   N elements starting from OffsY are replaced by X[OffsX:OffsX+N-1]
@@ -5527,16 +5527,16 @@ public partial class alglib
             N   -   number of columns of op(A)
             Alpha-  coefficient
             A   -   source matrix
-            IA  -   submatrix Offset (row index)
-            JA  -   submatrix Offset (column index)
+            IA  -   submatrix offset (row index)
+            JA  -   submatrix offset (column index)
             OpA -   operation type:
                     * OpA=0     =>  op(A) = A
                     * OpA=1     =>  op(A) = A^T
             X   -   input vector, has at least N+IX elements
-            IX  -   subvector Offset
+            IX  -   subvector offset
             Beta-   coefficient
             Y   -   preallocated output array, has at least M+IY elements
-            IY  -   subvector Offset
+            IY  -   subvector offset
 
         OUTPUT PARAMETERS:
             Y   -   vector which stores result
@@ -5716,15 +5716,15 @@ public partial class alglib
         INPUT PARAMETERS
             N   -   matrix size, N>=0
             A       -   matrix, actial matrix is stored in A[IA:IA+N-1,JA:JA+N-1]
-            IA      -   submatrix Offset
-            JA      -   submatrix Offset
+            IA      -   submatrix offset
+            JA      -   submatrix offset
             IsUpper -   whether matrix is upper triangular
             IsUnit  -   whether matrix is unitriangular
             OpType  -   transformation type:
                         * 0 - no transformation
                         * 1 - transposition
             X       -   right part, actual vector is stored in X[IX:IX+N-1]
-            IX      -   Offset
+            IX      -   offset
             
         OUTPUT PARAMETERS
             X       -   solution replaces elements X[IX:IX+N-1]
