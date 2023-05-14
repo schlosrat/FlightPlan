@@ -18,6 +18,18 @@ namespace MuMech
 {
     public static class OrbitExtensions
     {
+        public static double RelativeDistance(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
+        {
+            return (b.SwappedRelativePositionAtUT(UT) - a.SwappedRelativePositionAtUT(UT)).magnitude;
+        }
+
+        public static double RelativeSpeed(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
+        {
+            Vector3d relVel = a.SwappedOrbitalVelocityAtUT(UT) - b.SwappedOrbitalVelocityAtUT(UT);
+            Vector3d relPos =  a.SwappedRelativePositionAtUT(UT) - b.SwappedRelativePositionAtUT(UT);
+            return Vector3d.Dot(relVel, relPos.normalized);
+        }
+
         //can probably be replaced with Vector3d.xzy?
         public static Vector3d SwapYZ(Vector3d v)
         {
@@ -292,7 +304,10 @@ namespace MuMech
         //distance between two orbiting objects at a given time
         public static double Separation(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
         {
-            return (a.SwappedAbsolutePositionAtUT(UT) - b.SwappedAbsolutePositionAtUT(UT)).magnitude;
+            Vector3d aPos = a.SwappedAbsolutePositionAtUT(UT);
+            Vector3d bPos = b.SwappedAbsolutePositionAtUT(UT);
+            return (aPos - bPos).magnitude;
+            // return (a.SwappedAbsolutePositionAtUT(UT) - b.SwappedAbsolutePositionAtUT(UT)).magnitude;
         }
 
         //Time during a's next orbit at which object a comes nearest to object b.
@@ -711,6 +726,7 @@ namespace MuMech
             while (transfer < -180) { transfer += 360; }
             return Math.Round(transfer, 1);
         }
+
         //Computes the angle between two orbital planes. This will be a number between 0 and 180
         //Note that in the convention used two objects orbiting in the same plane but in
         //opposite directions have a relative inclination of 180 degrees.
@@ -785,7 +801,7 @@ namespace MuMech
             angleFromHorizontal = MuUtils.Clamp(angleFromHorizontal, 0, 90);
             double sine = Math.Sin(angleFromHorizontal * UtilMath.Deg2Rad);
             double g = vessel.graviticAcceleration.magnitude;
-            double T = 0 ; // was: vesselState.limitedMaxThrustAccel;
+            double T = 0 ; // THIS IS WRONG! THIS JUST ALLOWS THE CODE TO COMPILE. FIX ME! was: vesselState.limitedMaxThrustAccel;
 
             double effectiveDecel = 0.5 * (-2 * g * sine + Math.Sqrt((2 * g * sine) * (2 * g * sine) + 4 * (T * T - g * g)));
             double decelTime = vessel.SrfSpeedMagnitude / effectiveDecel;
