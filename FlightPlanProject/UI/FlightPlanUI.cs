@@ -385,7 +385,7 @@ public class FlightPlanUI
                 _pass = Plugin.Circularize(_requestedBurnTime, -0.5);
                 break;
             case ManeuverType.newPe: // Working
-                if (TargetPeR < Orbit.Apoapsis)
+                if (TargetPeR < Orbit.Apoapsis || Orbit.eccentricity >= 1)
                     _pass = Plugin.SetNewPe(_requestedBurnTime, TargetPeR, -0.5);
                 else
                     FPStatus.Error($"Unable to set Pe above current Ap");
@@ -425,7 +425,10 @@ public class FlightPlanUI
                 _launchMNC = true;
                 break;
             case ManeuverType.courseCorrection: // Experimental Works at least some times...
-                _pass = Plugin.CourseCorrection(_requestedBurnTime, -0.5);
+                if (Plugin._currentTarget.IsCelestialBody)
+                    _pass = Plugin.CourseCorrection(_requestedBurnTime, FPSettings.InterceptDistanceCelestial*1000, -0.5);
+                else
+                    _pass = Plugin.CourseCorrection(_requestedBurnTime, FPSettings.InterceptDistanceVessel, -0.5);
                 _launchMNC = true;
                 break;
             case ManeuverType.moonReturn: // Works - but may give poor Pe, including potentially lithobreaking
