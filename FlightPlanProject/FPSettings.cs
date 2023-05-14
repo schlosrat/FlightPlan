@@ -59,6 +59,18 @@ public class FPSettings
         set { KBaseSettings.SFile.SetDouble("InterceptTime", value); }
     }
 
+    public static double InterceptDistanceVessel
+    {
+        get => KBaseSettings.SFile.GetDouble("InterceptDistanceVessel", 100);
+        set { KBaseSettings.SFile.SetDouble("InterceptDistanceVessel", value); }
+    }
+
+    public static double InterceptDistanceCelestial
+    {
+        get => KBaseSettings.SFile.GetDouble("InterceptDistanceCelestial", 50);
+        set { KBaseSettings.SFile.SetDouble("InterceptDistanceCelestial", value); }
+    }
+
     public static double TimeOffset
     {
         get => KBaseSettings.SFile.GetDouble("TimeOffset", 30);
