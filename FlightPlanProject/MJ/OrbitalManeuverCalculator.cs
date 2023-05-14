@@ -987,7 +987,7 @@ namespace MuMech
 
             alglib.minlmoptimize(state, LambertCost, null, prob);
             alglib.minlmresultsbuf(state, ref x, rep);
-            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForBiImpulsiveTransfer: iter = " + rep.iterationscount);
+            // FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForBiImpulsiveTransfer: iter = " + rep.iterationscount);
             if (rep.terminationtype < 0)
             {
                 // FIXME: we should not accept this result
