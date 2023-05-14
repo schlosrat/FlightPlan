@@ -11,6 +11,7 @@ using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using UnityEngine;
+using System.Collections;
 
 namespace MuMech
 {
@@ -75,7 +76,8 @@ namespace MuMech
 
         public static string PrettyPrint(Quaternion quaternion, string format = "F3")
         {
-            return "[" + PadPositive(quaternion.x, format) + ", " + PadPositive(quaternion.y, format) + ", " + PadPositive(quaternion.z, format) + ", " + PadPositive(quaternion.w ,format) + "]";
+            return "[" + PadPositive(quaternion.x, format) + ", " + PadPositive(quaternion.y, format) + ", " + PadPositive(quaternion.z, format) +
+                   ", " + PadPositive(quaternion.w, format) + "]";
         }
 
         //For some reason, Math doesn't have the inverse hyperbolic trigonometric functions:
@@ -116,7 +118,7 @@ namespace MuMech
         {
             angle = angle % 360.0;
             if (angle < 0) return angle + 360.0;
-            else return angle;
+            return angle;
         }
 
         //keeps angles in the range -180 to 180
@@ -131,7 +133,7 @@ namespace MuMech
         {
             angle = angle % (2 * Math.PI);
             if (angle < 0) return angle + 2 * Math.PI;
-            else return angle;
+            return angle;
         }
 
         public static double ClampRadiansPi(double angle)
@@ -147,9 +149,10 @@ namespace MuMech
             return Math.Min((angle1 - angle2 + 360) % 360, (angle2 - angle1 + 360) % 360);
         }
 
-        public static double IntPow(double val, int exp) {
+        public static double IntPow(double val, int exp)
+        {
             double result = val;
-            for(int i=1;i<exp;++i)
+            for (int i = 1; i < exp; ++i)
                 result *= val;
             return result;
         }
@@ -185,14 +188,20 @@ namespace MuMech
                 Vector3d vectorToPe = ret.eccVec.SwapYAndZ; //  OrbitExtensions.SwapYZ(ret.eccVec);
                 double cosArgumentOfPeriapsis = Vector3d.Dot(vectorToAN, vectorToPe) / (vectorToAN.magnitude * vectorToPe.magnitude);
                 //Squad's UpdateFromStateVectors is missing these checks, which are needed due to finite precision arithmetic:
-                if(cosArgumentOfPeriapsis > 1) {
+                if (cosArgumentOfPeriapsis > 1)
+                {
                     ret.argumentOfPeriapsis = 0;
-                } else if(cosArgumentOfPeriapsis < -1) {
+                }
+                else if (cosArgumentOfPeriapsis < -1)
+                {
                     ret.argumentOfPeriapsis = 180;
-                } else {
+                }
+                else
+                {
                     ret.argumentOfPeriapsis = Math.Acos(cosArgumentOfPeriapsis);
                 }
             }
+
             return ret;
         }
 
@@ -221,10 +230,20 @@ namespace MuMech
             int dx = x2 - x1;
             int stepx, stepy;
 
-            if (dy < 0) { dy = -dy; stepy = -1; }
+            if (dy < 0)
+            {
+                dy    = -dy;
+                stepy = -1;
+            }
             else { stepy = 1; }
-            if (dx < 0) { dx = -dx; stepx = -1; }
+
+            if (dx < 0)
+            {
+                dx    = -dx;
+                stepx = -1;
+            }
             else { stepx = 1; }
+
             dy <<= 1;
             dx <<= 1;
 
@@ -238,10 +257,11 @@ namespace MuMech
                 {
                     if (fraction >= 0)
                     {
-                        y1 += stepy;
+                        y1       += stepy;
                         fraction -= dx;
                     }
-                    x1 += stepx;
+
+                    x1       += stepx;
                     fraction += dy;
                     tex.SetPixel(x1, y1, col);
                 }
@@ -253,10 +273,11 @@ namespace MuMech
                 {
                     if (fraction >= 0)
                     {
-                        x1 += stepx;
+                        x1       += stepx;
                         fraction -= dy;
                     }
-                    y1 += stepy;
+
+                    y1       += stepy;
                     fraction += dx;
                     tex.SetPixel(x1, y1, col);
                 }
@@ -291,8 +312,8 @@ namespace MuMech
     public class MovingAverage
     {
         private readonly double[] store;
-        private readonly int storeSize;
-        private int nextIndex = 0;
+        private readonly int      storeSize;
+        private          int      nextIndex;
 
         public double value
         {
@@ -303,19 +324,20 @@ namespace MuMech
                 {
                     tmp += store[i];
                 }
+
                 return tmp / storeSize;
             }
             set
             {
                 store[nextIndex] = value;
-                nextIndex = (nextIndex + 1) % storeSize;
+                nextIndex        = (nextIndex + 1) % storeSize;
             }
         }
 
         public MovingAverage(int size = 10, double startingValue = 0)
         {
             storeSize = size;
-            store = new double[size];
+            store     = new double[size];
             force(startingValue);
         }
 
@@ -346,8 +368,8 @@ namespace MuMech
     public class MovingAverage3d
     {
         private readonly Vector3d[] store;
-        private readonly int storeSize;
-        private int nextIndex = 0;
+        private readonly int        storeSize;
+        private          int        nextIndex;
 
         public Vector3d value
         {
@@ -358,19 +380,20 @@ namespace MuMech
                 {
                     tmp += store[i];
                 }
+
                 return tmp / storeSize;
             }
             set
             {
                 store[nextIndex] = value;
-                nextIndex = (nextIndex + 1) % storeSize;
+                nextIndex        = (nextIndex + 1) % storeSize;
             }
         }
 
-        public MovingAverage3d(int size = 10, Vector3d startingValue = default(Vector3d))
+        public MovingAverage3d(int size = 10, Vector3d startingValue = default)
         {
             storeSize = size;
-            store = new Vector3d[size];
+            store     = new Vector3d[size];
             force(startingValue);
         }
 
@@ -400,18 +423,16 @@ namespace MuMech
 
     //A simple wrapper around a Dictionary, with the only change being that
     //The keys are also stored in a list so they can be iterated without allocating an IEnumerator
-    class KeyableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+    internal class KeyableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
         protected Dictionary<TKey, TValue> d = new Dictionary<TKey, TValue>();
+
         // Also store the keys in a list so we can iterate them without allocating an IEnumerator
         protected List<TKey> k = new List<TKey>();
 
         public virtual TValue this[TKey key]
         {
-            get
-            {
-                return d[key];
-            }
+            get => d[key];
             set
             {
                 if (d.ContainsKey(key)) d[key] = value;
@@ -428,16 +449,18 @@ namespace MuMech
             k.Add(key);
             d.Add(key, value);
         }
-        public bool ContainsKey(TKey key) { return d.ContainsKey(key); }
-        public ICollection<TKey> Keys { get { return d.Keys; } }
-        public List<TKey> KeysList { get { return k; } }
+
+        public bool              ContainsKey(TKey key) { return d.ContainsKey(key); }
+        public ICollection<TKey> Keys                  => d.Keys;
+        public List<TKey>        KeysList              => k;
 
         public bool Remove(TKey key)
         {
             return d.Remove(key) && k.Remove(key);
         }
-        public bool TryGetValue(TKey key, out TValue value) { return d.TryGetValue(key, out value); }
-        public ICollection<TValue> Values { get { return d.Values; } }
+
+        public bool                TryGetValue(TKey key, out TValue value) { return d.TryGetValue(key, out value); }
+        public ICollection<TValue> Values                                  => d.Values;
 
         public void Add(KeyValuePair<TKey, TValue> item)
         {
@@ -450,23 +473,24 @@ namespace MuMech
             d.Clear();
             k.Clear();
         }
-        public bool Contains(KeyValuePair<TKey, TValue> item) { return ((IDictionary<TKey, TValue>)d).Contains(item); }
+
+        public bool Contains(KeyValuePair<TKey, TValue> item)                  { return ((IDictionary<TKey, TValue>)d).Contains(item); }
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) { ((IDictionary<TKey, TValue>)d).CopyTo(array, arrayIndex); }
-        public int Count { get { return d.Count; } }
-        public bool IsReadOnly { get { return ((IDictionary<TKey, TValue>)d).IsReadOnly; } }
+        public int  Count                                                      => d.Count;
+        public bool IsReadOnly                                                 => ((IDictionary<TKey, TValue>)d).IsReadOnly;
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             return ((IDictionary<TKey, TValue>)d).Remove(item) && k.Remove(item.Key);
         }
+
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() { return d.GetEnumerator(); }
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return ((System.Collections.IEnumerable)d).GetEnumerator(); }
+        IEnumerator IEnumerable.                       GetEnumerator() { return ((IEnumerable)d).GetEnumerator(); }
     }
 
-
     //A simple wrapper around a Dictionary, with the only change being that
-    //accessing the value of a nonexistent key returns a default value instead of an Error.
-    class DefaultableDictionary<TKey, TValue> : KeyableDictionary<TKey, TValue>
+    //accessing the value of a nonexistent key returns a default value instead of an error.
+    internal class DefaultableDictionary<TKey, TValue> : KeyableDictionary<TKey, TValue>
     {
         private readonly TValue defaultValue;
 
@@ -500,7 +524,7 @@ namespace MuMech
     //Represents a 2x2 matrix
     public class Matrix2x2
     {
-        readonly double a, b, c, d;
+        private readonly double a, b, c, d;
 
         //  [a    b]
         //  [      ]
