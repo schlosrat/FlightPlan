@@ -61,11 +61,11 @@ public static class FPUtility
 
     public static string SecondsToTimeString(double seconds, bool addSpacing = true, bool returnLastUnit = false)
     {
-        if (seconds == Double.PositiveInfinity)
+        if (seconds == double.PositiveInfinity)
         {
             return "∞";
         }
-        else if (seconds == Double.NegativeInfinity)
+        else if (seconds == double.NegativeInfinity)
         {
             return "-∞";
         }
