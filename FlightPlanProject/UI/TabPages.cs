@@ -6,7 +6,6 @@ using KSP.Sim.impl;
 using MuMech;
 using SpaceWarp.API.Assets;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace FlightPlan;
 
@@ -20,8 +19,8 @@ public class BasePageContent : IPageContent
     protected FlightPlanUI MainUI;
     protected FlightPlanPlugin Plugin;
 
-
     protected PatchedConicsOrbit Orbit => MainUI.Orbit;
+
     protected CelestialBodyComponent ReferenceBody => MainUI.ReferenceBody;
 
     public virtual string Name => throw new NotImplementedException();
@@ -115,21 +114,21 @@ public class TargetPageShip2Ship : BasePageContent
         const int maxPhasingOrbits = 5;
         const double closestApproachLimit1 = 3000;
         const double closestApproachLimit2 = 100;
-        double targetDistance;
+        const double maxDockingSpeed = 1;
+        const double maxApproachSpeed = 3;
 
         FPStyles.DrawSectionHeader("Target Relative Maneuvers");
 
         if (Plugin._currentTarget.IsVessel)
         {
-            // DockingPortSelectionGUI();
             targetOrbit = Plugin._currentTarget.Orbit as PatchedConicsOrbit;
-            targetDistance = (Orbit.SwappedAbsolutePositionAtUT(UT) - targetOrbit.SwappedAbsolutePositionAtUT(UT)).magnitude;
         }
         else
         {
             targetOrbit = Plugin._currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit;
-            targetDistance = (Orbit.SwappedAbsolutePositionAtUT(UT) - targetOrbit.SwappedAbsolutePositionAtUT(UT)).magnitude;
         }
+
+        double targetDistance = (Orbit.SwappedAbsolutePositionAtUT(UT) - targetOrbit.SwappedAbsolutePositionAtUT(UT)).magnitude;
         if (targetDistance < closestApproachLimit1)
             TargetSelection.SelectDockingPort = UI_Tools.SmallToggleButton(TargetSelection.SelectDockingPort, "Select Docking Port", "Select Docking Port");
 
@@ -137,24 +136,25 @@ public class TargetPageShip2Ship : BasePageContent
 
         double synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
         double timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
-        double closestApproach = (Orbit.SwappedAbsolutePositionAtUT(timeToClosestApproach) - targetOrbit.SwappedAbsolutePositionAtUT(timeToClosestApproach)).magnitude;
-        double relativeInc = Orbit.inclination - targetOrbit.inclination;
+        double closestApproach = Orbit.RelativeDistance(targetOrbit, timeToClosestApproach);
+        double relVelocityNow = Orbit.RelativeSpeed(targetOrbit, UT);
+        double relVelocityCA = Orbit.RelativeSpeed(targetOrbit, timeToClosestApproach);
+        double relativeInc = Orbit.RelativeInclination(targetOrbit);
         double phase = Orbit.PhaseAngle(targetOrbit, UT);
         double transfer = Orbit.Transfer(targetOrbit, out _);
-        double nextWindow = synodicPeriod * (transfer - phase) / 360;
-        while (nextWindow < 0) nextWindow += synodicPeriod;
+        double nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360;
         MainUI.DrawEntry("Target Orbit:", $"{targetOrbit.PeriapsisArl / 1000:N0} km x {targetOrbit.ApoapsisArl / 1000:N0} km");
         MainUI.DrawEntry("Current Orbit:", $"{Orbit.PeriapsisArl / 1000:N0} km x {Orbit.ApoapsisArl / 1000:N0} km");
-        MainUI.DrawEntry("Relative Inclination:", $"{relativeInc:N2} deg");
+        MainUI.DrawEntry("Relative Inclination:", $"{relativeInc:N2}°");
         MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
         MainUI.DrawEntry("Next Window:", FPUtility.SecondsToTimeString(nextWindow));
         MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach));
         if (closestApproach > 1000)
-            MainUI.DrawEntry("Separation at CA:", $"{closestApproach/1000:N1} km");
+            MainUI.DrawEntry("Separation at CA:", $"{closestApproach / 1000:N1} km");
         else
         {
             MainUI.DrawEntry("Separation at CA:", $"{closestApproach:N1} m");
-            MainUI.DrawEntry("Relative Velocity:", $"{(Orbit.SwappedOrbitalVelocityAtUT(UT) - targetOrbit.SwappedOrbitalVelocityAtUT(UT)).magnitude:N1} m/s");
+            MainUI.DrawEntry("Relative Velocity:", $"{relVelocityNow:N1} m/s");
         }
 
         MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
@@ -166,27 +166,44 @@ public class TargetPageShip2Ship : BasePageContent
         if (Plugin._experimental.Value)
         {
             FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s", true);
+            FPSettings.InterceptDistanceVessel = MainUI.DrawToggleButtonWithTextField("Course Correction", ManeuverType.courseCorrection, FPSettings.InterceptDistanceVessel, "m");
         }
-        // MainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
 
+        // Compose a recommened action based on the range to the target and relative velocity now and at closest approach
         recommendedManeuver = "None";
-        if (targetDistance < closestApproachLimit2)
-            recommendedManeuver = "Ready for docking";
-        else if (relativeInc > 1)
-            recommendedManeuver = "Next Action: Match planes for rendezvous";
-        else if (nextWindow / Orbit.period > maxPhasingOrbits)
+        if (targetDistance < closestApproachLimit2) // If we're very close
+        {
+            if (Math.Abs(relVelocityCA) < maxDockingSpeed) // We're stopped or nearly stopped relative to the target
+                recommendedManeuver = "Ready for docking";
+            else if (relVelocityCA > 0)
+                recommendedManeuver = "Moving away from target";
+            else
+                recommendedManeuver = "Moving toward target. Match Velocity at closest approach";
+        }
+        else if (targetDistance < closestApproachLimit1) // If we're close, but not very close
+        { 
+            if (Math.Abs(relVelocityCA) < maxDockingSpeed) // We're stopped or nearly stopped relative to the target
+                recommendedManeuver = $"Need to get closer. HINT: Point at target, burn GENTLY toward target, Match Velocity at closest approch. Rinse and repeat until distance < {closestApproachLimit2} m";
+            else if (relVelocityCA > 0)
+                recommendedManeuver = $"Moving away from target. Match Velocity after fixed time to stop and plan next maneuver";
+            else
+                recommendedManeuver = $"Moving toward target. Match Velocity at closest approach";
+        }
+        else if (relativeInc > 1) // We're not in a co-plannar orbit with the target
+            recommendedManeuver = "Need to Match planes for rendezvous";
+        else if (closestApproach < closestApproachLimit2) // We're on our way
+            recommendedManeuver = $"Need to Match Velocity at closest approch.";
+        else if (closestApproach < closestApproachLimit1) // We're on our way, but we're not going to arrive inside closestApproachLimit2
+            recommendedManeuver = $"Need to Match Velocity at closest approch, then close distance for docking.";
+        else if (closestApproach < 3*closestApproachLimit1) // We're on our way, but we're not even going to arrive within closestApproachLimit1
+            recommendedManeuver = $"Closest apporach will be {closestApproach/1000:N1} km. Recommend Course Correction for closer arrival.";
+        else if (nextWindow / Orbit.period > maxPhasingOrbits) // We're not yet on our way and not is a good orbit to start out from
             recommendedManeuver = $"Next intercept window would be {nextWindow/Orbit.period:N1} orbits away, which is more than the maximum of {maxPhasingOrbits} phasing orbits. Increase phasing rate by establishing a new phasing orbit at {(targetOrbit.semiMajorAxis - ReferenceBody.radius)*2:N0} km.";
-        else if (closestApproach > closestApproachLimit1)
-            recommendedManeuver = $"Next Action: Perform Hohmann Transfer to target";
-        else if (closestApproach > closestApproachLimit2)
-            recommendedManeuver = $"Next Action: Close distance to target. HINT: Point at target, burn GENTLY toward target, Match Velocity at closest approch. Rinse and repeat until distance < {closestApproachLimit2} m";
+        else // We're not yet on our way, but we are in a good orbit to start from
+            recommendedManeuver = $"Need to perform Hohmann Transfer to target";
 
         MainUI.DrawEntry(recommendedManeuver);
 
-    }
-    private void DockingPortSelectionGUI()
-    {
-        MainUI.DrawEntry("Docking Port Selection GUI", "Comming Soon!");
     }
 }
 
@@ -212,19 +229,54 @@ public class TargetPageShip2Celestial : BasePageContent
 
     public override void OnGUI()
     {
+        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        PatchedConicsOrbit targetOrbit;
+        double nextWindow;
+
         FPStyles.DrawSectionHeader("Target Relative Maneuvers");
 
         BurnTimeOption.Instance.OptionSelectionGUI();
 
+        targetOrbit = Plugin._currentTarget.Orbit as PatchedConicsOrbit;
+        double synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
+        double timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
+        double closestApproach = Orbit.RelativeDistance(targetOrbit, timeToClosestApproach);
+        // double relVelocityNow = Orbit.RelativeSpeed(targetOrbit, UT);
+        // double relVelocityCA = Orbit.RelativeSpeed(targetOrbit, timeToClosestApproach);
+        double relativeInc = Orbit.RelativeInclination(targetOrbit);
+        double phase = Orbit.PhaseAngle(targetOrbit, UT);
+        double transfer = Orbit.Transfer(targetOrbit, out double _transferTime);
+        nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360; // transfer - phase
+        MainUI.DrawEntry("Target Orbit:", $"{targetOrbit.PeriapsisArl / 1000:N0} km x {targetOrbit.ApoapsisArl / 1000:N0} km");
+        MainUI.DrawEntry("Current Orbit:", $"{Orbit.PeriapsisArl / 1000:N0} km x {Orbit.ApoapsisArl / 1000:N0} km");
+        MainUI.DrawEntry("Relative Inclination:", $"{relativeInc:N2}°");
+        MainUI.DrawEntry($"Phase Angle to {Plugin._currentTarget.Name}", $"{phase:N1}°");
+        MainUI.DrawEntry($"Transfer Window Phase Angle", $"{transfer:N1}°");
+        MainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime), " ");
+        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
+        MainUI.DrawEntry("Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
+
+        MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach));
+        //if (closestApproach > 1000)
+        //    MainUI.DrawEntry("Separation at CA:", $"{closestApproach / 1000:N1} km");
+        //else
+        //{
+        //    MainUI.DrawEntry("Separation at CA:", $"{closestApproach:N1} m");
+        //    MainUI.DrawEntry("Relative Velocity:", $"{relVelocityNow:N1} m/s");
+        //}
+
+
         MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
         MainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
-        MainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
+        FPSettings.InterceptDistanceCelestial = MainUI.DrawToggleButtonWithTextField("Course Correction", ManeuverType.courseCorrection, FPSettings.InterceptDistanceCelestial, "km");
+        // MainUI.DrawToggleButton("Course Correction", ManeuverType.courseCorrection);
 
         if (Plugin._experimental.Value)
         {
             FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s");
-            MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
         }
+
+        MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
     }
 }
 
@@ -258,16 +310,23 @@ public class InterplanetaryPage : BasePageContent
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit = Plugin._currentTarget.Orbit as PatchedConicsOrbit;
         double synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
+        double relativeInc = Orbit.RelativeInclination(targetOrbit);
         double phase = ReferenceBody.Orbit.PhaseAngle(targetOrbit, UT);
-        double transfer = Plugin._activeVessel.Orbit.referenceBody.Orbit.Transfer(targetOrbit, out double _transferTime);
-        double nextWindow = synodicPeriod * (transfer - phase) / 360;
-        if (nextWindow < 0) nextWindow += synodicPeriod;
+        // double phase2 = Phase();
+        double transfer = ReferenceBody.Orbit.Transfer(targetOrbit, out double _transferTime);
+        // double transfer2 = Transfer(out _);
+        double nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360; // transfer - phase
+        // double nextWindow2 = synodicPeriod * MuUtils.ClampDegrees360(phase2 - transfer) / 360; // transfer - phase
         // Display Transfer Info
-        MainUI.DrawEntry($"Phase Angle to {Plugin._currentTarget.Name}", phase.ToString(), "°");
-        MainUI.DrawEntry("Transfer Window Phase Angle", transfer.ToString(), "°");
+        MainUI.DrawEntry("Relative Inclination:", $"{relativeInc:N2}°");
+        MainUI.DrawEntry($"Phase Angle to {Plugin._currentTarget.Name}", $"{phase:N1}°");
+        // MainUI.DrawEntry($"Phase Angle to {Plugin._currentTarget.Name}", $"{phase2:N1}°");
+        MainUI.DrawEntry("Transfer Window Phase Angle", $"{transfer:N1}°");
+        // MainUI.DrawEntry("Transfer Window Phase Angle", $"{transfer2:N1}°");
         MainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime), " ");
         MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
-        MainUI.DrawEntry("Time to Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
+        MainUI.DrawEntry("Aproximate Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
+        // MainUI.DrawEntry("Next Window", FPUtility.SecondsToTimeString(nextWindow2), " ");
         MainUI.DrawEntry("Aproximate Eject DeltaV", DeltaV().ToString(), "m/s");
 
         if (Plugin._experimental.Value) // No maneuvers relative to a star
