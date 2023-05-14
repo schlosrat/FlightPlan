@@ -1,18 +1,17 @@
 
-using KSP.Sim.impl;
-using UnityEngine;
 using FlightPlan.KTools.UI;
 using KSP.Game;
 using KSP.Sim.DeltaV;
-using KSP.Iteration.UI.Binding;
+using KSP.Sim.impl;
+using UnityEngine;
 
 namespace FlightPlan;
 
 public class TargetSelection
 {
     FlightPlanPlugin Plugin;
-    private bool selecting = false, selectingVessel = false;
-    private Vector2 scrollPosition, scrollPositionVessels;
+    private bool selecting = false;
+    private Vector2 scrollPosition;
     private static List<VesselComponent> allVessels;
     private static List<PartComponent> allPorts;
     private static SimulationObjectModel thisVessel = null;
@@ -46,58 +45,78 @@ public class TargetSelection
     {
         if (SelectDockingPort)
         {
+            // If no target, bail out. We can't select a docing port unless there's either a vessel or port targeted.
             if (Plugin._currentTarget == null)
             {
                 selecting = false;
                 return;
             }
-            // IF we've not been here before
-            if (thisVessel == null)
-            {
-                thisVessel = Plugin._currentTarget;
+
+            // If we don't have a list we need one
+            if (allPorts == null || allPorts.Count < 1)
                 doNewList = true;
-            }
-            // Make a list of all docking ports on current vessel
+
+            // If the current target is a vessel
             if (Plugin._currentTarget.IsVessel)
             {
-                // If we've not made a list for this vessel or we need a new list
-                if (Plugin._currentTarget.GlobalId != thisVessel.GlobalId || doNewList)
+                // If we don't have a local copy of the vessel
+                if (thisVessel == null)
                 {
-                    doNewList = false;
                     thisVessel = Plugin._currentTarget;
-                    //allPorts = thisVessel.PartOwner.Parts.ToList().Where<PartComponentModule_DockingNode>;
-                    //allPorts = thisVessel.PartOwner.Parts.ToList().SelectMany<PartComponentModule_DockingNode>;
-                    //allPorts = thisVessel.PartOwner.Parts.ToList().Select<>;
+                    doNewList = true;
+                }
+
+                // If this is a different vessel, then update the local copy
+                if (thisVessel.GlobalId != Plugin._currentTarget.GlobalId)
+                {
+                    thisVessel = Plugin._currentTarget;
+                    doNewList = true;
+                }
+
+                // If we've not made a list for this vessel or we need a new list
+                if (doNewList)
+                {
                     allPorts = thisVessel.PartOwner.Parts.ToList();
                     allPorts.RemoveAll(part => !part.IsPartDockingPort(out _));
                 }
             }
             else if (Plugin._currentTarget.IsPart)// We've got a part selected
             {
-                // The current target is a part (probably a docking port, but not necessarily)
-                // Find the vessel this part is in, and make a list of all docking ports on that vessel
-               
-                if (thisVessel.GlobalId != Plugin._currentTarget.Part.PartOwner.SimulationObject.Vessel.GlobalId)
+                // If we don't have a local copy of the vessel
+                if (thisVessel == null)
                 {
-                    thisVessel = Plugin._currentTarget.Part.PartOwner.SimulationObject; //.Vessel as SimulationObjectModel;
+                    thisVessel = Plugin._currentTarget.Part.PartOwner.SimulationObject;
+                    doNewList = true;
+                }
+
+                // If this is a different vessel, then update the local copy
+                if (thisVessel.GlobalId != Plugin._currentTarget.Part.PartOwner.SimulationObject.GlobalId)
+                {
+                    thisVessel = Plugin._currentTarget;
+                    doNewList = true;
+                }
+
+                // If we've not made a list for this vessel or we need a new list
+                if (doNewList)
+                {
                     allPorts = thisVessel.PartOwner.Parts.ToList();
                     allPorts.RemoveAll(part => !part.IsPartDockingPort(out _));
                 }
             }
-            else if (allPorts == null)
-            {
-                // Rebuild the last list of ports
-                Plugin._activeVessel.SetTargetByID(thisVessel.GlobalId);
-                Plugin._currentTarget = Plugin._activeVessel.TargetObject;
-                allPorts = thisVessel.PartOwner.Parts.ToList();
-                allPorts.RemoveAll(part => !part.IsPartDockingPort(out _));
-            }
-            else if (allPorts.Count > 0)
-            {
-                // Jump back to the last list of ports
-                Plugin._activeVessel.SetTargetByID(thisVessel.GlobalId);
-                Plugin._currentTarget = Plugin._activeVessel.TargetObject;
-            }
+            //else if (allPorts == null)
+            //{
+            //    // Rebuild the last list of ports
+            //    // Plugin._activeVessel.SetTargetByID(thisVessel.GlobalId);
+            //    // Plugin._currentTarget = Plugin._activeVessel.TargetObject;
+            //    allPorts = thisVessel.PartOwner.Parts.ToList();
+            //    allPorts.RemoveAll(part => !part.IsPartDockingPort(out _));
+            //}
+            //else if (allPorts.Count > 0)
+            //{
+            //    // Jump back to the last list of ports
+            //    // Plugin._activeVessel.SetTargetByID(thisVessel.GlobalId);
+            //    // Plugin._currentTarget = Plugin._activeVessel.TargetObject;
+            //}
             else
             {
                 selecting = false;
