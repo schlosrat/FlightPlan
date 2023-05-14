@@ -663,7 +663,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    public bool CourseCorrection(double burnUT, double burnOffsetFactor)
+    public bool CourseCorrection(double burnUT, double interceptDistance, double burnOffsetFactor)
     {
         double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
@@ -676,15 +676,21 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (_currentTarget.IsCelestialBody) // For a target that is a celestial
         {
-            Logger.LogDebug($"Seeking Solution for Celestial Target");
-            double _finalPeR = _currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _currentTarget.Orbit.referenceBody, _finalPeR, out _burnUTout);
+            if (interceptDistance < 0)
+                interceptDistance = _currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
+            else
+                interceptDistance += _currentTarget.CelestialBody.radius;
+            Logger.LogDebug($"Seeking Solution for Celestial Target with Pe {interceptDistance}");
+            // double _finalPeR = _currentTarget.CelestialBody.radius + 50000; // m (PeR at celestial target)
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _currentTarget.Orbit.referenceBody, interceptDistance, out _burnUTout);
         }
         else // For a tartget that is not a celestial
         {
-            Logger.LogDebug($"Seeking Solution for Non-Celestial Target");
-            double _caDistance = 100; // m (closest approach to non-celestial target)
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, _caDistance, out _burnUTout);
+            if (interceptDistance < 0)
+                interceptDistance = 100; // m (PeR at celestial target)
+            Logger.LogDebug($"Seeking Solution for Non-Celestial Target with closest approach {interceptDistance}");
+            // double _caDistance = 100; // m (closest approach to non-celestial target)
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForCheapestCourseCorrection(_orbit, _UT, _currentTarget.Orbit as PatchedConicsOrbit, interceptDistance, out _burnUTout);
         }
         if (_deltaV != Vector3d.zero)
         {
