@@ -642,6 +642,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // var burnUT = _UT + 30;
         double _interceptUT = _UT + tgtUT;
         double _offsetDistance;
+        Vector3d _deltaV;
 
         FPStatus.Warning($"Experimental Intercept of {_currentTarget.Name} Ready");
 
@@ -650,7 +651,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             _offsetDistance = _currentTarget.Orbit.referenceBody.radius + 50000;
         else
             _offsetDistance = 100;
-        Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit, _interceptUT, _offsetDistance);
+        (_deltaV, _) = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit, _interceptUT, _offsetDistance);
         if (_deltaV != Vector3d.zero)
         {
             CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
@@ -708,6 +709,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     {
         double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
+        Vector3d _deltaV;
 
         Logger.LogDebug($"MoonReturn: Return from {_orbit.referenceBody.Name} {BurnTimeOption.TimeRefDesc}");
         var _e = _orbit.eccentricity;
@@ -724,7 +726,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             double _burnUTout;
             // double primaryRaidus = orbit.ReferenceBody.orbit.ReferenceBody.radius + 100000; // m
             Logger.LogDebug($"Moon Return Attempting to Solve...");
-            Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(_orbit, _UT, targetMRPeR, out _burnUTout);
+            (_deltaV, _burnUTout) = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(_orbit, _UT, targetMRPeR);
             if (_deltaV != Vector3d.zero)
             {
                 CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
