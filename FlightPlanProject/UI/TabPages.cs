@@ -128,7 +128,7 @@ public class TargetPageShip2Ship : BasePageContent
             targetOrbit = Plugin._currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit;
         }
 
-        double targetDistance = (Orbit.SwappedAbsolutePositionAtUT(UT) - targetOrbit.SwappedAbsolutePositionAtUT(UT)).magnitude;
+        double targetDistance = (Orbit.WorldPositionAtUT(UT) - targetOrbit.WorldPositionAtUT(UT)).magnitude;
         if (targetDistance < closestApproachLimit1)
             TargetSelection.SelectDockingPort = UI_Tools.SmallToggleButton(TargetSelection.SelectDockingPort, "Select Docking Port", "Select Docking Port");
 
