@@ -491,28 +491,30 @@ namespace MuMech
         //   - first, clamp newInclination to the range -180, 180
         //   - if newInclination > 0, do the cheaper burn to set that inclination
         //   - if newInclination < 0, do the more expensive burn to set that inclination
-        public static Vector3d DeltaVToChangeInclination(PatchedConicsOrbit o, double UT, double newInclination)
+        public static Vector3d DeltaVToChangeInclination(PatchedConicsOrbit o, double UT, double newInclinationDeg)
         {
-            double latitude = GetLatitude(o, UT); // was o.ReferenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
-            double desiredHeading = HeadingForInclination(newInclination, latitude);
+            double latitudeDeg = GetLatitude(o, UT); // was o.ReferenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
+            double desiredHeadingDeg = HeadingForInclination(newInclinationDeg, latitudeDeg);
             // var north = o.North(UT);
             // var east = o.East(UT);
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.SwappedOrbitalVelocityAtUT(UT));
-            Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: latitude {latitude}°, newInclination {newInclination}°");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHeading {desiredHeading}°");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.North(UT)               [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.East(UT)                [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
-            Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeading) * o.North(UT);
+            Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeadingDeg) * o.East(UT);
+            Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeadingDeg) * o.North(UT);
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: UT                {UT}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: latitudeDeg       {latitudeDeg}°, newInclinationDeg {newInclinationDeg}°");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHeadingDeg {desiredHeadingDeg}°");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.East(UT)                [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.North(UT)               [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
             if (Vector3d.Dot(actualHorizontalVelocity, northComponent) < 0) northComponent *= -1;
-            if (MuUtils.ClampDegrees180(newInclination) < 0) northComponent *= -1;
+            if (MuUtils.ClampDegrees180(newInclinationDeg) < 0) northComponent *= -1;
             Vector3d desiredHorizontalVelocity = eastComponent + northComponent;
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
             var deltaV = desiredHorizontalVelocity - actualHorizontalVelocity;
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
             return deltaV;
         }
 
