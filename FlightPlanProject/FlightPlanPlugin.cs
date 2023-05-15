@@ -478,7 +478,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // var burnUT = _UT + 30;
 
         if (Math.Abs(_orbit.inclination) < 10)
-            FPStatus.Warning($"WARNING: Orbital plane has low inclination of {_orbit.inclination}° (recommend i > 10°). Maneuver many not be accurate.");
+            FPStatus.Warning($"WARNING: Orbital plane has low inclination of {_orbit.inclination:N2}° (recommend i > 10°). Maneuver many not be accurate.");
         else
             FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.TimeRefDesc}");
 
@@ -532,7 +532,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
-        FPStatus.Error($"Ready to Change SMA Change {BurnTimeOption.TimeRefDesc}");
+        FPStatus.Ok($"Ready to Change SMA Change {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: newSMA {newSMA} m");
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVForSemiMajorAxis(_orbit, burnUT, newSMA);
