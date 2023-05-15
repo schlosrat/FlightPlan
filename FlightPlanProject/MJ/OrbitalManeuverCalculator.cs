@@ -525,6 +525,7 @@ namespace MuMech
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.WorldOrbitalVelocityAtUT(UT));
             Vector3d eastComponent  = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeadingDeg) * o.East(UT);
             Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeadingDeg) * o.North(UT);
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: UT                 {UT}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: latitudeDeg        {latitudeDeg}°, newInclination {newInclinationDeg}°");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHeadingDeg  {desiredHeadingDeg}°");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
