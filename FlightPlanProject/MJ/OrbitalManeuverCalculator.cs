@@ -6,20 +6,21 @@
  * This work is relaesed under the same license(s) inherited from the originating version.
  */
 
+using FlightPlan;
+using FPUtilities;
 using KSP.Game;
+using KSP.Sim;
 using KSP.Sim.impl;
 using KSP.Sim.State;
-using KSP.Sim;
-using FlightPlan;
-// using MechJebLib.Maths;
-using MechJebLib.Primitives;
-using MechJebLib.Maneuvers;
-using UnityEngine;
-using FPUtilities;
+using KSP.Utilities;
 using MechJebLib.Core;
 using MechJebLib.Core.TwoBody;
-using KSP.Rendering.Planets;
-using KSP.Utilities;
+using MechJebLib.Maneuvers;
+// using MechJebLib.Maths;
+using MechJebLib.Primitives;
+using System.Diagnostics;
+using UnityEngine;
+using Random = System.Random;
 // using Smooth.Pools;
 
 namespace MuMech
@@ -131,8 +132,7 @@ namespace MuMech
         }
 
         //Computes the delta-V of the burn required to attain a given periapsis, starting from
-        //a given orbit and burning at a given UT. Throws an ArgumentException if given an impossible periapsis.
-        //The computed burn is always horizontal, though this may not be strictly optimal.
+        //a given orbit and burning at a given UT.
         public static Vector3d DeltaVToChangePeriapsis(PatchedConicsOrbit o, double ut, double newPeR)
         {
             double radius = o.Radius(ut);
@@ -144,127 +144,127 @@ namespace MuMech
 
             V3 dv = ChangeOrbitalElement.DeltaV(o.referenceBody.gravParameter, r, v, newPeR, ChangeOrbitalElement.Type.PERIAPSIS);
 
-            //are we raising or lowering the periapsis?
-            bool raising = (newPeR > o.Periapsis);
-            // Why do we use o.Horizontal here and o.Prograde for DeltaVToChangeApoapsis?
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Horizontal(ut);
-            var burDir = o.DeltaVToManeuverNodeCoordinates(ut, burnDirection);  // test code - delete
+            ////are we raising or lowering the periapsis?
+            //bool raising = (newPeR > o.Periapsis);
+            //// Why do we use o.Horizontal here and o.Prograde for DeltaVToChangeApoapsis?
+            //Vector3d burnDirection = (raising ? 1 : -1) * o.Horizontal(ut);
+            //var burDir = o.DeltaVToManeuverNodeCoordinates(ut, burnDirection);  // test code - delete
 
-            double minDeltaV = 0;
-            double maxDeltaV;
-            if (raising)
-            {
-                maxDeltaV = 0.25;
+            //double minDeltaV = 0;
+            //double maxDeltaV;
+            //if (raising)
+            //{
+            //    maxDeltaV = 0.25;
 
-                // Old Way: This can sometimes give Finite Check failures from BrentRoot due to poorly set max
-                //put an upper bound on the required deltaV:
-                PatchedConicsOrbit testOrbit = o.PerturbedOrbit(ut, maxDeltaV * burnDirection);
-                while (testOrbit.Periapsis < newPeR)
-                {
-                    minDeltaV = maxDeltaV; //narrow the range
-                    maxDeltaV *= 2;
-                    try { testOrbit = o.PerturbedOrbit(ut, maxDeltaV * burnDirection); }
-                    catch (Exception e)
-                    {
-                        maxDeltaV = minDeltaV;
-                        minDeltaV *= 0.5;
-                        FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Unable to find good maxDeltaV {e}");
-                        break;
-                    }
-                    if (maxDeltaV > 100000) break; //a safety precaution
-                }
-                FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV = {maxDeltaV}");
+            //    // Old Way: This can sometimes give Finite Check failures from BrentRoot due to poorly set max
+            //    //put an upper bound on the required deltaV:
+            //    PatchedConicsOrbit testOrbit = o.PerturbedOrbit(ut, maxDeltaV * burnDirection);
+            //    while (testOrbit.Periapsis < newPeR)
+            //    {
+            //        minDeltaV = maxDeltaV; //narrow the range
+            //        maxDeltaV *= 2;
+            //        try { testOrbit = o.PerturbedOrbit(ut, maxDeltaV * burnDirection); }
+            //        catch (Exception e)
+            //        {
+            //            maxDeltaV = minDeltaV;
+            //            minDeltaV *= 0.5;
+            //            FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Unable to find good maxDeltaV {e}");
+            //            break;
+            //        }
+            //        if (maxDeltaV > 100000) break; //a safety precaution
+            //    }
+            //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV = {maxDeltaV}");
 
-                // THIS WAY IS WRONG! It makes no sense to limit delta v based on escape velocity when adjusting Pe.
-                // An escape velocity check makes sense when raising Ap, not when raising or lowering Pe
-                // New way: This prevents Finite Check failures from BrentRoot by finding a better max
-                // Max Delta-V based on escape velocity
-                // var maxDeltaVCap = EscapeVelocity(o.ReferenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude - MuUtils.DBL_EPSILON;
+            //    // THIS WAY IS WRONG! It makes no sense to limit delta v based on escape velocity when adjusting Pe.
+            //    // An escape velocity check makes sense when raising Ap, not when raising or lowering Pe
+            //    // New way: This prevents Finite Check failures from BrentRoot by finding a better max
+            //    // Max Delta-V based on escape velocity
+            //    // var maxDeltaVCap = EscapeVelocity(o.ReferenceBody, radius) - o.SwappedOrbitalVelocityAtUT(UT).magnitude - MuUtils.DBL_EPSILON;
 
-                /*
-                double lastMax = maxDeltaV;
-                double riseFactor = 2;
-                var testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
-                while (testOrbit.eccentricity < 1)
-                {
-                    // This will break if the newPeR > current Apoapsis. Once we've applied enough deltaV
-                    // To raise the periapsis above the apoapsis, the value we need to test becomes the
-                    // apoapsis.
-                    if (testOrbit.Periapsis < newPeR) // maxDeltaV is not high enough
-                    {
-                        lastMax = maxDeltaV;     // record the previous max in case we need to back off
-                        minDeltaV = maxDeltaV;   // narrow the range
-                        maxDeltaV *= riseFactor; // Boost the max by the riseFactor
-                        if (maxDeltaV > maxDeltaVCap)
-                        {
-                            maxDeltaV = maxDeltaVCap;
-                            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV Capped at {maxDeltaV} m/s");
-                            break; // safety precaution
-                        }
-                        // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
-                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
-                        //if (testOrbit.eccentricity >= 1) // If we've shot too high
-                        //{
-                        //    minDeltaV = lastMax *= (1 / riseFactor); // Reset min
-                        //    maxDeltaV = lastMax;                     // Reset the max
-                        //    if (riseFactor > 1.25)  // If there's still room to trim the riseFactor
-                        //        riseFactor -= 0.25; // Trim it
-                        //    else
-                        //        break; // We're done (in a bad way...)
-                        //    maxDeltaV *= riseFactor; // Apply the new riseFactor
-                        //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
-                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
-                        //}
-                    }
-                    else
-                        break; // We're done (in a good way)
-                }
-                if (testOrbit.eccentricity >= 1 || maxDeltaV < minDeltaV) // We got done in a bad way...
-                {
-                    FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Unable to find a maxDeltaV that gets to an Periapsis above {newPeR}");
-                } */
-            }
-            else
-            {
-                //when lowering periapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
-                // maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection)) - MuUtils.DBL_EPSILON;
-                maxDeltaV = 0.999 * Math.Abs(Vector3d.Dot(o.WorldOrbitalVelocityAtUT(ut), burnDirection));
-            }
+            //    /*
+            //    double lastMax = maxDeltaV;
+            //    double riseFactor = 2;
+            //    var testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
+            //    while (testOrbit.eccentricity < 1)
+            //    {
+            //        // This will break if the newPeR > current Apoapsis. Once we've applied enough deltaV
+            //        // To raise the periapsis above the apoapsis, the value we need to test becomes the
+            //        // apoapsis.
+            //        if (testOrbit.Periapsis < newPeR) // maxDeltaV is not high enough
+            //        {
+            //            lastMax = maxDeltaV;     // record the previous max in case we need to back off
+            //            minDeltaV = maxDeltaV;   // narrow the range
+            //            maxDeltaV *= riseFactor; // Boost the max by the riseFactor
+            //            if (maxDeltaV > maxDeltaVCap)
+            //            {
+            //                maxDeltaV = maxDeltaVCap;
+            //                FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV Capped at {maxDeltaV} m/s");
+            //                break; // safety precaution
+            //            }
+            //            // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
+            //            testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
+            //            //if (testOrbit.eccentricity >= 1) // If we've shot too high
+            //            //{
+            //            //    minDeltaV = lastMax *= (1 / riseFactor); // Reset min
+            //            //    maxDeltaV = lastMax;                     // Reset the max
+            //            //    if (riseFactor > 1.25)  // If there's still room to trim the riseFactor
+            //            //        riseFactor -= 0.25; // Trim it
+            //            //    else
+            //            //        break; // We're done (in a bad way...)
+            //            //    maxDeltaV *= riseFactor; // Apply the new riseFactor
+            //            //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV    {maxDeltaV} m/s");
+            //            //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
+            //            //}
+            //        }
+            //        else
+            //            break; // We're done (in a good way)
+            //    }
+            //    if (testOrbit.eccentricity >= 1 || maxDeltaV < minDeltaV) // We got done in a bad way...
+            //    {
+            //        FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Unable to find a maxDeltaV that gets to an Periapsis above {newPeR}");
+            //    } */
+            //}
+            //else
+            //{
+            //    //when lowering periapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
+            //    // maxDeltaV = Math.Abs(Vector3d.Dot(o.SwappedOrbitalVelocityAtUT(UT), burnDirection)) - MuUtils.DBL_EPSILON;
+            //    maxDeltaV = 0.999 * Math.Abs(Vector3d.Dot(o.WorldOrbitalVelocityAtUT(ut), burnDirection));
+            //}
 
-            /*
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: radius    {radius}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: newPeR    {newPeR}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: raising   {raising}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: deltaVDir [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: burnDir   [{burDir.x}, {burDir.y}, {burDir.z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: minDeltaV {minDeltaV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV {maxDeltaV} m/s");
+            ///*
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: radius    {radius}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: newPeR    {newPeR}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: raising   {raising}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: deltaVDir [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: burnDir   [{burDir.x}, {burDir.y}, {burDir.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: minDeltaV {minDeltaV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: maxDeltaV {maxDeltaV} m/s");
 
-            var initialTestOrbitMin = o.PerturbedOrbit(UT, minDeltaV * burnDirection);
-            var initialTestOrbitMax = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMin {initialTestOrbitMin}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Periapsis}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax {initialTestOrbitMax}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Periapsis}");
-            */
+            //var initialTestOrbitMin = o.PerturbedOrbit(UT, minDeltaV * burnDirection);
+            //var initialTestOrbitMax = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMin {initialTestOrbitMin}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Periapsis}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax {initialTestOrbitMax}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Periapsis}");
+            //*/
 
-            // minDeltaV = 0;
-            // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: minDeltaV* {minDeltaV} m/s");
+            //// minDeltaV = 0;
+            //// FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: minDeltaV* {minDeltaV} m/s");
 
-            Func<double, object, double> f = delegate (double testDeltaV, object ign)
-            {
-                return o.PerturbedOrbit(ut, testDeltaV * burnDirection).Periapsis - newPeR;
-            };
-            double dV = 0;
-            try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
-            catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVToChangePeriapsis: Brents method threw a timeout Error (supressed)"); }
-            catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+            //Func<double, object, double> f = delegate (double testDeltaV, object ign)
+            //{
+            //    return o.PerturbedOrbit(ut, testDeltaV * burnDirection).Periapsis - newPeR;
+            //};
+            //double dV = 0;
+            //try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
+            //catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVToChangePeriapsis: Brents method threw a timeout Error (supressed)"); }
+            //catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVToChangePeriapsis: Brents method threw an argument exception Error (supressed): {e.Message}"); }
 
-            var deltaV = dV * burnDirection;
+            //var deltaV = dV * burnDirection;
 
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangePeriapsis: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
 
-            // return deltaV;
+            //return deltaV;
             return dv.V3ToWorld();
 
         }
@@ -279,112 +279,130 @@ namespace MuMech
         //Computes the delta-V of the burn at a given UT required to change an orbits apoapsis to a given value.
         //The computed burn is always prograde or retrograde, though this may not be strictly optimal.
         //Note that you can pass in a negative apoapsis if the desired final orbit is hyperbolic
-        public static Vector3d DeltaVToChangeApoapsis(PatchedConicsOrbit o, double UT, double newApR)
+        public static Vector3d DeltaVToChangeApoapsis(PatchedConicsOrbit o, double ut, double newApR)
         {
-            double radius = o.Radius(UT);
+            double radius = o.Radius(ut);
 
             //sanitize input
             if (newApR > 0) newApR = Math.Max(newApR, radius + 1);
 
-            //are we raising or lowering the periapsis?
-            bool raising = ApoapsisIsHigher(newApR, o.Apoapsis);
+            (V3 r, V3 v) = o.RightHandedStateVectorsAtUT(ut);
 
-            // Why do we use o.Prograde here and o.Horizontal for DeltaVToChangePeriapsis?
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT);
-            var burDir = o.DeltaVToManeuverNodeCoordinates(UT, burnDirection);  // test code - delete
+            V3 dv = ChangeOrbitalElement.DeltaV(o.referenceBody.gravParameter, r, v, newApR, ChangeOrbitalElement.Type.APOAPSIS);
 
-            double minDeltaV = 0;
-            // 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
-            // This logic does not work! Assuming a max of 10000 can get you into a situation where the Apoapsis
-            // goes negative due to hyperbolic orbit. In such a case the user has asked for an Apoapsis that is
-            // not possible for this body. Perhaps we need a check to make sure newApR is within the SOI? In any
-            // event, simply doubling the max each time can get to a spot where SMA is NaN and Apoapsis goes
-            // negative (discontinuity). Setting the max too high results in finite check failure exceptions.
-            double maxDeltaV = raising ? 10000 : o.WorldOrbitalVelocityAtUT(UT).magnitude;
-            
-            // New Way to get maxDeltaV
-            if (raising)
-            {
-                // Max Delta-V based on escape velocity
-                var maxDeltaVCap = EscapeVelocity(o.referenceBody, radius) - o.WorldOrbitalVelocityAtUT(UT).magnitude - MuUtils.DBL_EPSILON;
-                //put an upper bound on the required deltaV:
-                maxDeltaV = 0.25;
-                // double lastMax = maxDeltaV;
-                // double riseFactor = 2;
-                // bool backoff = false;
-                var testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
-                while (testOrbit.eccentricity < 1)
-                {
-                    if (testOrbit.Apoapsis < newApR) // maxDeltaV is not high enough
-                    {
-                        // lastMax = maxDeltaV;     // record the previous max in case we need to back off
-                        minDeltaV = maxDeltaV;   // narrow the range
-                        maxDeltaV *= 2; // Boost the max by the riseFactor
-                        if (maxDeltaV > maxDeltaVCap)
-                        {
-                            maxDeltaV = maxDeltaVCap;
-                            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV Capped at {maxDeltaV} m/s");
-                            break; // safety precaution
-                        }
-                        // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
-                        testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
-                        //while (testOrbit.eccentricity >= 1 && maxDeltaV > minDeltaV) // If we've shot too high, back off
-                        //{
-                        //    backoff = true;
-                        //    maxDeltaV *= 0.9; // Back off by 10%
-                        //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
-                        //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
-                        //}
-                        //if (backoff)
-                        //    break; // We're done
-                    }
-                    else
-                        break; // We're done (in a good way)
-                }
-                if (testOrbit.eccentricity >= 1 || maxDeltaV < minDeltaV) // We got done in a bad way...
-                {
-                    FlightPlanPlugin.Logger.LogError($"DeltaVToChangeApoapsis: Unable to find a maxDeltaV that gets to an Apoapsis above {newApR}");
-                    return Vector3d.zero;
-                }
-            }
-            else
-            {
-                //when lowering apoapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
-                maxDeltaV = 0.999 * Math.Abs(Vector3d.Dot(o.WorldOrbitalVelocityAtUT(UT), burnDirection));
-            }
-            /*
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: radius    {radius} m");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: newApR    {newApR}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: raising   {raising}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: deltaVDir [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: burnDir   [{burDir.x}, {burDir.y}, {burDir.z}]");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: minDeltaV {minDeltaV} m/s");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV {maxDeltaV}");
+            ////are we raising or lowering the periapsis?
+            //bool raising = ApoapsisIsHigher(newApR, o.Apoapsis);
 
-            var initialTestOrbitMin = o.PerturbedOrbit(UT, minDeltaV * burnDirection);
-            var initialTestOrbitMax = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMin {initialTestOrbitMin}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Apoapsis}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax {initialTestOrbitMax}");
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Apoapsis}");
-            */
-            
-            // solve for the reciprocal of the ApR which is a continuous function that avoids the parabolic singularity and
-            // change of sign for hyperbolic orbits.
-            Func<double, object, double> f = delegate(double testDeltaV, object ign)
-            {
-                return 1.0/o.PerturbedOrbit(UT, testDeltaV * burnDirection).Apoapsis - 1.0/newApR;
-            };
-            double dV = 0;
-            try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
-            catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVToChangeApoapsis: Brents method threw a timeout Error (supressed)"); }
-            catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVToChangeApoapsis: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+            //// Why do we use o.Prograde here and o.Horizontal for DeltaVToChangePeriapsis?
+            //Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(ut);
+            //var burDir = o.DeltaVToManeuverNodeCoordinates(ut, burnDirection);  // test code - delete
 
-            var deltaV = dV * burnDirection;
+            //double minDeltaV = 0;
+            //// 10000 dV is a safety factor, max burn when lowering ApR would be to null out our current velocity
+            //// This logic does not work! Assuming a max of 10000 can get you into a situation where the Apoapsis
+            //// goes negative due to hyperbolic orbit. In such a case the user has asked for an Apoapsis that is
+            //// not possible for this body. Perhaps we need a check to make sure newApR is within the SOI? In any
+            //// event, simply doubling the max each time can get to a spot where SMA is NaN and Apoapsis goes
+            //// negative (discontinuity). Setting the max too high results in finite check failure exceptions.
+            //double maxDeltaV = raising ? 10000 : o.WorldOrbitalVelocityAtUT(ut).magnitude;
 
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+            //// New Way to get maxDeltaV
+            //if (raising)
+            //{
+            //    // Max Delta-V based on escape velocity
+            //    var maxDeltaVCap = EscapeVelocity(o.referenceBody, radius) - o.WorldOrbitalVelocityAtUT(ut).magnitude - MuUtils.DBL_EPSILON;
+            //    //put an upper bound on the required deltaV:
+            //    maxDeltaV = 0.25;
+            //    // double lastMax = maxDeltaV;
+            //    // double riseFactor = 2;
+            //    // bool backoff = false;
+            //    var testOrbit = o.PerturbedOrbit(ut, maxDeltaV * burnDirection);
+            //    while (testOrbit.eccentricity < 1)
+            //    {
+            //        if (testOrbit.Apoapsis < newApR) // maxDeltaV is not high enough
+            //        {
+            //            // lastMax = maxDeltaV;     // record the previous max in case we need to back off
+            //            minDeltaV = maxDeltaV;   // narrow the range
+            //            maxDeltaV *= 2; // Boost the max by the riseFactor
+            //            if (maxDeltaV > maxDeltaVCap)
+            //            {
+            //                maxDeltaV = maxDeltaVCap;
+            //                FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV Capped at {maxDeltaV} m/s");
+            //                break; // safety precaution
+            //            }
+            //            // FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
+            //            testOrbit = o.PerturbedOrbit(ut, maxDeltaV * burnDirection); // Get next test orbit
+            //            //while (testOrbit.eccentricity >= 1 && maxDeltaV > minDeltaV) // If we've shot too high, back off
+            //            //{
+            //            //    backoff = true;
+            //            //    maxDeltaV *= 0.9; // Back off by 10%
+            //            //    FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV    {maxDeltaV} m/s");
+            //            //    testOrbit = o.PerturbedOrbit(UT, maxDeltaV * burnDirection); // Get next test orbit
+            //            //}
+            //            //if (backoff)
+            //            //    break; // We're done
+            //        }
+            //        else
+            //            break; // We're done (in a good way)
+            //    }
+            //    if (testOrbit.eccentricity >= 1 || maxDeltaV < minDeltaV) // We got done in a bad way...
+            //    {
+            //        FlightPlanPlugin.Logger.LogError($"DeltaVToChangeApoapsis: Unable to find a maxDeltaV that gets to an Apoapsis above {newApR}");
+            //        return Vector3d.zero;
+            //    }
+            //}
+            //else
+            //{
+            //    //when lowering apoapsis, we burn horizontally, and max possible deltaV is the deltaV required to kill all horizontal velocity
+            //    maxDeltaV = 0.999 * Math.Abs(Vector3d.Dot(o.WorldOrbitalVelocityAtUT(ut), burnDirection));
+            //}
+            ///*
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: radius    {radius} m");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: newApR    {newApR}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: raising   {raising}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: deltaVDir [{burnDirection.x}, {burnDirection.y}, {burnDirection.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: burnDir   [{burDir.x}, {burDir.y}, {burDir.z}]");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: minDeltaV {minDeltaV} m/s");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: maxDeltaV {maxDeltaV}");
 
-            return deltaV;
+            //var initialTestOrbitMin = o.PerturbedOrbit(UT, minDeltaV * burnDirection);
+            //var initialTestOrbitMax = o.PerturbedOrbit(UT, maxDeltaV * burnDirection);
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMin {initialTestOrbitMin}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMin Ap {initialTestOrbitMin.Apoapsis}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax {initialTestOrbitMax}");
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: initialTestOrbitMax Ap {initialTestOrbitMax.Apoapsis}");
+            //*/
+
+            //// solve for the reciprocal of the ApR which is a continuous function that avoids the parabolic singularity and
+            //// change of sign for hyperbolic orbits.
+            //Func<double, object, double> f = delegate(double testDeltaV, object ign)
+            //{
+            //    return 1.0/o.PerturbedOrbit(ut, testDeltaV * burnDirection).Apoapsis - 1.0/newApR;
+            //};
+            //double dV = 0;
+            //try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
+            //catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVToChangeApoapsis: Brents method threw a timeout Error (supressed)"); }
+            //catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVToChangeApoapsis: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+
+            //var deltaV = dV * burnDirection;
+
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeApoapsis: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}] m/s");
+
+            //return deltaV;
+
+            return dv.V3ToWorld();
+        }
+
+        public static Vector3d DeltaVToChangeEccentricity(PatchedConicsOrbit o, double ut, double newEcc)
+        {
+            //sanitize input
+            if (newEcc < 0) newEcc = 0;
+
+            (V3 r, V3 v) = o.RightHandedStateVectorsAtUT(ut);
+
+            V3 dv = ChangeOrbitalElement.DeltaV(o.referenceBody.gravParameter, r, v, newEcc, ChangeOrbitalElement.Type.ECC);
+
+            return dv.V3ToWorld();
         }
 
         //Computes the heading of the ground track of an orbit with a given inclination at a given latitude.
@@ -403,16 +421,14 @@ namespace MuMech
             {
                 //If inclination < latitude, we get this case: the desired inclination is impossible
                 if (Math.Abs(MuUtils.ClampDegrees180(inclinationDegrees)) < 90) return 90;
-                else return 270;
+                return 270;
             }
-            else
-            {
-                double angleFromEast = (UtilMath.Rad2Deg) * Math.Acos(cosDesiredSurfaceAngle); //an angle between 0 and 180
-                if (inclinationDegrees < 0) angleFromEast *= -1;
-                //now angleFromEast is between -180 and 180
 
-                return MuUtils.ClampDegrees360(90 - angleFromEast);
-            }
+            double angleFromEast = UtilMath.Rad2Deg * Math.Acos(cosDesiredSurfaceAngle); //an angle between 0 and 180
+            if (inclinationDegrees < 0) angleFromEast *= -1;
+            //now angleFromEast is between -180 and 180
+
+            return MuUtils.ClampDegrees360(90 - angleFromEast);
         }
 
         //See #676
@@ -432,8 +448,8 @@ namespace MuMech
             var latitude = vessel.Latitude;
             var altitude = vessel.AltitudeFromRadius;
             vessel.mainBody.GetLatLonAltFromRadius(vessel.mainBody.Position, out lat, out lon, out alt); //   Latitude; // was: vesselState.latitude;
-            double latitudeDegrees = lat * UtilMath.Deg2Rad;
-            double orbVel = OrbitalManeuverCalculator.CircularOrbitSpeed(body, alt + body.radius); // was: vesselState.altitudeASL 
+            double latitudeDegrees = lat;
+            double orbVel = CircularOrbitSpeed(body, alt + body.radius); // was: vesselState.altitudeASL 
             double headingOne = HeadingForInclination(inclinationDegrees, latitudeDegrees) * UtilMath.Deg2Rad;
             double headingTwo = HeadingForInclination(-inclinationDegrees, latitudeDegrees) * UtilMath.Deg2Rad;
             double now = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -443,8 +459,8 @@ namespace MuMech
             Vector3d east = vessel._telemetryComponent.HorizonEast.vector; //  vesselState.east;   // (from VesselState.cs) east = vessel.east;   // IFlightTelemetry has a East Vector, can we use that?
 
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(now), o.WorldOrbitalVelocityAtUT(now));
-            Vector3d desiredHorizontalVelocityOne = orbVel * ( Math.Sin(headingOne) * east + Math.Cos(headingOne) * north );
-            Vector3d desiredHorizontalVelocityTwo = orbVel * ( Math.Sin(headingTwo) * east + Math.Cos(headingTwo) * north );
+            Vector3d desiredHorizontalVelocityOne = orbVel * (Math.Sin(headingOne) * east + Math.Cos(headingOne) * north);
+            Vector3d desiredHorizontalVelocityTwo = orbVel * (Math.Sin(headingTwo) * east + Math.Cos(headingTwo) * north);
 
             Vector3d deltaHorizontalVelocityOne = desiredHorizontalVelocityOne - actualHorizontalVelocity;
             Vector3d deltaHorizontalVelocityTwo = desiredHorizontalVelocityTwo - actualHorizontalVelocity;
@@ -455,35 +471,43 @@ namespace MuMech
             Vector3d up = vessel.Orbit.Position.localPosition.normalized; // (from VesselState.cs) was orbitalPosition.normalized
             Vector3d surfaceVelocity = vessel.Orbit.GetOrbitalVelocityAtUTZup(UT) - vessel.mainBody.GetFrameVelAtUTZup(UT); // (from VesselState.cs) was orbitalVelocity - vessel.mainBody.getRFrmVel(CoM)
             if (Vector3d.Exclude(up, surfaceVelocity).magnitude < 200) // was vesselState.speedSurfaceHorizontal
-            { // was: vesselState.speedSurfaceHorizontal
+            {
                 // at initial launch we have to head the direction the user specifies (90 north instead of -90 south).
                 // 200 m/s of surface velocity also defines a 'grace period' where someone can catch a rocket that they meant
                 // to launch at -90 and typed 90 into the inclination box fast after it started to initiate the turn.
                 // if the rocket gets outside of the 200 m/s surface velocity envelope, then there is no way to tell MJ to
                 // take a south travelling rocket and turn north or vice versa.
                 desiredHorizontalVelocity = desiredHorizontalVelocityOne;
-                deltaHorizontalVelocity = deltaHorizontalVelocityOne;
-            } else {
+                deltaHorizontalVelocity   = deltaHorizontalVelocityOne;
+            }
+            else
+            {
                 // now in order to get great circle tracks correct we pick the side which gives the lowest delta-V, which will get
                 // ground tracks that cross the maximum (or minimum) latitude of a great circle correct.
-                if ( deltaHorizontalVelocityOne.magnitude < deltaHorizontalVelocityTwo.magnitude ) {
+                if (deltaHorizontalVelocityOne.magnitude < deltaHorizontalVelocityTwo.magnitude)
+                {
                     desiredHorizontalVelocity = desiredHorizontalVelocityOne;
-                    deltaHorizontalVelocity = deltaHorizontalVelocityOne;
-                }  else {
+                    deltaHorizontalVelocity   = deltaHorizontalVelocityOne;
+                }
+                else
+                {
                     desiredHorizontalVelocity = desiredHorizontalVelocityTwo;
-                    deltaHorizontalVelocity = deltaHorizontalVelocityTwo;
+                    deltaHorizontalVelocity   = deltaHorizontalVelocityTwo;
                 }
             }
 
             // if you circularize in one burn, towards the end deltaHorizontalVelocity will whip around, but we want to
             // fall back to tracking desiredHorizontalVelocity
-            if ( Vector3d.Dot(desiredHorizontalVelocity.normalized, deltaHorizontalVelocity.normalized) < 0.90 )
+            if (Vector3d.Dot(desiredHorizontalVelocity.normalized, deltaHorizontalVelocity.normalized) < 0.90)
             {
                 // it is important that we do NOT do the fracReserveDV math here, we want to ignore the deltaHV entirely at ths point
-                return MuUtils.ClampDegrees360(UtilMath.Rad2Deg * Math.Atan2(Vector3d.Dot(desiredHorizontalVelocity, east), Vector3d.Dot(desiredHorizontalVelocity, north)));
+                return MuUtils.ClampDegrees360(UtilMath.Rad2Deg *
+                                               Math.Atan2(Vector3d.Dot(desiredHorizontalVelocity, east),
+                                                   Vector3d.Dot(desiredHorizontalVelocity, north)));
             }
 
-            return MuUtils.ClampDegrees360(UtilMath.Rad2Deg * Math.Atan2(Vector3d.Dot(deltaHorizontalVelocity, east), Vector3d.Dot(deltaHorizontalVelocity, north)));
+            return MuUtils.ClampDegrees360(UtilMath.Rad2Deg *
+                                           Math.Atan2(Vector3d.Dot(deltaHorizontalVelocity, east), Vector3d.Dot(deltaHorizontalVelocity, north)));
         }
 
         //Computes the delta-V of the burn required to change an orbit's inclination to a given value
@@ -494,29 +518,28 @@ namespace MuMech
         //   - first, clamp newInclination to the range -180, 180
         //   - if newInclination > 0, do the cheaper burn to set that inclination
         //   - if newInclination < 0, do the more expensive burn to set that inclination
-        public static Vector3d DeltaVToChangeInclination(PatchedConicsOrbit o, double UT, double newInclination)
+        public static Vector3d DeltaVToChangeInclination(PatchedConicsOrbit o, double UT, double newInclinationDeg)
         {
-            double latitude = GetLatitude(o, UT); // was o.ReferenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
-            double desiredHeading = HeadingForInclination(newInclination, latitude);
-            // var north = o.North(UT);
-            // var east = o.East(UT);
+            double latitudeDeg = GetLatitude(o, UT); // was o.ReferenceBody.GetLatitude(o.WorldPositionAtUT(UT));
+            double desiredHeadingDeg = HeadingForInclination(newInclinationDeg, latitudeDeg);
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.WorldOrbitalVelocityAtUT(UT));
-            Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: latitude {latitude}°, newInclination {newInclination}°");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHeading {desiredHeading}°");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.North(UT)               [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.East(UT)                [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
-            Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeading) * o.North(UT);
+            Vector3d eastComponent  = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeadingDeg) * o.East(UT);
+            Vector3d northComponent = actualHorizontalVelocity.magnitude * Math.Cos(UtilMath.Deg2Rad * desiredHeadingDeg) * o.North(UT);
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: latitudeDeg        {latitudeDeg}°, newInclination {newInclinationDeg}°");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHeadingDeg  {desiredHeadingDeg}°");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: actualHorizontalVelocity  [{actualHorizontalVelocity.x}, {actualHorizontalVelocity.y}, {actualHorizontalVelocity.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: eastComponent             [{eastComponent.x}, {eastComponent.y}, {eastComponent.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.East(UT)                [{o.East(UT).x}, {o.East(UT).y}, {o.East(UT).z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: o.North(UT)               [{o.North(UT).x}, {o.North(UT).y}, {o.North(UT).z}]");
             if (Vector3d.Dot(actualHorizontalVelocity, northComponent) < 0) northComponent *= -1;
-            if (MuUtils.ClampDegrees180(newInclination) < 0) northComponent *= -1;
+            if (MuUtils.ClampDegrees180(newInclinationDeg) < 0) northComponent             *= -1;
             Vector3d desiredHorizontalVelocity = eastComponent + northComponent;
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: northComponent            [{northComponent.x}, {northComponent.y}, {northComponent.z}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
             var deltaV = desiredHorizontalVelocity - actualHorizontalVelocity;
-            //FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
-            return deltaV;
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
+            return desiredHorizontalVelocity - actualHorizontalVelocity;
         }
 
         //Computes the delta-V and time of a burn to match planes with the target orbit. The output burnUT
@@ -533,7 +556,7 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeToMatchPlanesAscending: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
             var deltaV = desiredHorizontalVelocity - actualHorizontalVelocity;
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeToMatchPlanesAscending: deltaV                    [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
-            return deltaV;
+            return desiredHorizontalVelocity - actualHorizontalVelocity;
         }
 
         //Computes the delta-V and time of a burn to match planes with the target orbit. The output burnUT
@@ -550,7 +573,7 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeToMatchPlanesDescending: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
             var deltaV = desiredHorizontalVelocity - actualHorizontalVelocity;
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeToMatchPlanesDescending: deltaV                    [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
-            return deltaV;
+            return desiredHorizontalVelocity - actualHorizontalVelocity;
         }
 
         //Computes the dV of a Hohmann transfer burn at time UT that will put the apoapsis or periapsis
@@ -563,7 +586,7 @@ namespace MuMech
         private static Vector3d DeltaVAndApsisPhaseAngleOfHohmannTransfer(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double apsisPhaseAngle)
         {
             Vector3d apsisDirection = -o.WorldBCIPositionAtUT(UT);
-            double desiredApsis = target.RadiusAtTrueAnomaly(UtilMath.Deg2Rad * target.TrueAnomalyFromVector(apsisDirection));
+            double desiredApsis = target.RadiusAtTrueAnomaly(target.TrueAnomalyFromVector(apsisDirection));
 
             Vector3d dV;
             if (desiredApsis > o.Apoapsis)
@@ -571,20 +594,22 @@ namespace MuMech
                 dV = DeltaVToChangeApoapsis(o, UT, desiredApsis);
                 PatchedConicsOrbit transferOrbit = o.PerturbedOrbit(UT, dV);
                 double transferApTime = transferOrbit.NextApoapsisTime(UT);
-                Vector3d transferApDirection = transferOrbit.WorldBCIPositionAtApoapsis();  // getRelativePositionAtUT was returning NaNs! :(((((
-                double targetTrueAnomaly = target.TrueAnomalyFromVector(transferApDirection);
-                double meanAnomalyOffset = 360 * (target.TimeOfTrueAnomaly(targetTrueAnomaly, UT) - transferApTime) / target.period;
-                apsisPhaseAngle = meanAnomalyOffset;
+                Vector3d transferApDirection =
+                    transferOrbit.WorldBCIPositionAtApoapsis(); // getRelativePositionAtUT was returning NaNs! :(((((
+                double targetTrueAnomalyRad = target.TrueAnomalyFromVector(transferApDirection);
+                double meanAnomalyOffsetDeg = 360 * (target.TimeOfTrueAnomaly(targetTrueAnomalyRad, UT) - transferApTime) / target.period;
+                apsisPhaseAngle = meanAnomalyOffsetDeg;
             }
             else
             {
                 dV = DeltaVToChangePeriapsis(o, UT, desiredApsis);
                 PatchedConicsOrbit transferOrbit = o.PerturbedOrbit(UT, dV);
                 double transferPeTime = transferOrbit.NextPeriapsisTime(UT);
-                Vector3d transferPeDirection = transferOrbit.WorldBCIPositionAtPeriapsis();  // getRelativePositionAtUT was returning NaNs! :(((((
-                double targetTrueAnomaly = target.TrueAnomalyFromVector(transferPeDirection);
-                double meanAnomalyOffset = 360 * (target.TimeOfTrueAnomaly(targetTrueAnomaly, UT) - transferPeTime) / target.period;
-                apsisPhaseAngle = meanAnomalyOffset;
+                Vector3d transferPeDirection =
+                    transferOrbit.WorldBCIPositionAtPeriapsis(); // getRelativePositionAtUT was returning NaNs! :(((((
+                double targetTrueAnomalyRad = target.TrueAnomalyFromVector(transferPeDirection);
+                double meanAnomalyOffsetDeg = 360 * (target.TimeOfTrueAnomaly(targetTrueAnomalyRad, UT) - transferPeTime) / target.period;
+                apsisPhaseAngle = meanAnomalyOffsetDeg;
             }
 
             apsisPhaseAngle = MuUtils.ClampDegrees180(apsisPhaseAngle);
@@ -622,7 +647,7 @@ namespace MuMech
                 DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, t, out apsisPhaseAngle);
                 FlightPlanPlugin.Logger.LogDebug($"apsisPhaseAngle: {apsisPhaseAngle}");
 
-                if ((Math.Abs(apsisPhaseAngle) < 90) && (Math.Sign(lastApsisPhaseAngle) != Math.Sign(apsisPhaseAngle)))
+                if (Math.Abs(apsisPhaseAngle) < 90 && Math.Sign(lastApsisPhaseAngle) != Math.Sign(apsisPhaseAngle))
                 {
                     minTime = t - dt;
                     maxTime = t;
@@ -630,7 +655,7 @@ namespace MuMech
                     break;
                 }
 
-                if ((i == 1) && (Math.Abs(lastApsisPhaseAngle) < 0.5) && (Math.Sign(lastApsisPhaseAngle) == Math.Sign(apsisPhaseAngle)))
+                if (i == 1 && Math.Abs(lastApsisPhaseAngle) < 0.5 && Math.Sign(lastApsisPhaseAngle) == Math.Sign(apsisPhaseAngle))
                 {
                     //In this case we are JUST passed the center of the transfer window, but probably we
                     //can still do the transfer just fine. Don't do a search, just return an immediate burn
@@ -647,13 +672,14 @@ namespace MuMech
             }
 
             burnUT = 0;
-            Func<double, object, double> f = delegate(double testTime, object ign) {
+            Func<double, object, double> f = delegate(double testTime, object ign)
+            {
                 double testApsisPhaseAngle;
                 DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, testTime, out testApsisPhaseAngle);
                 return testApsisPhaseAngle;
             };
             try { burnUT = BrentRoot.Solve(f, maxTime, minTime, null); }
-            catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVAndTimeForHohmannTransfer: Brents method threw a timeout Error (supressed)"); }
+            catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVAndTimeForHohmannTransfer: Brents method threw a timeout error (supressed)"); }
             catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVAndTimeForHohmannTransfer: Brents method threw an argument exception Error (supressed): {e.Message}"); }
 
             Vector3d burnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, burnUT, out _);
@@ -673,12 +699,6 @@ namespace MuMech
         {
             (V3 ri, V3 vi) = o.RightHandedStateVectorsAtUT(t0);
             (V3 rf, V3 vf) = target.RightHandedStateVectorsAtUT(t0 + dt);
-
-            // var initialRelPos = o.WorldBCIPositionAtUT(initialUT).ToV3();
-            // var finalRelPos = target.WorldBCIPositionAtUT(initialUT + dt).ToV3();
-
-            // var initialVelocity = o.WorldOrbitalVelocityAtUT(initialUT).ToV3();
-            // var finalVelocity = target.WorldOrbitalVelocityAtUT(initialUT + dt).ToV3();
 
             (V3 transferVi, V3 transferVf) =
                 Gooding.Solve(o.referenceBody.gravParameter, ri, vi, rf, shortway ? dt : -dt, 0);
@@ -870,10 +890,10 @@ namespace MuMech
             //where we should do the ejection burn. Then convert this to a true anomaly and compute the time closest
             //to planetUT at which we will pass through that true anomaly.
             Vector3d ejectionPointDirection = Quaternion.AngleAxis(-(float)(90 + turningAngle), o.OrbitNormal()) * inPlaneSoiExitDirection;
-            double ejectionTrueAnomaly = o.TrueAnomalyFromVector(ejectionPointDirection);
-            burnUT = o.TimeOfTrueAnomaly(ejectionTrueAnomaly, idealBurnUT - o.period);
+            double ejectionTrueAnomalyRad = o.TrueAnomalyFromVector(ejectionPointDirection);
+            burnUT = o.TimeOfTrueAnomaly(ejectionTrueAnomalyRad, idealBurnUT - o.period);
 
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: ejectionTrueAnomaly = {ejectionTrueAnomaly}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: ejectionTrueAnomalyRad = {ejectionTrueAnomalyRad}");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
 
             if (idealBurnUT - burnUT > o.period / 2 || burnUT < UT)
@@ -891,13 +911,12 @@ namespace MuMech
             Vector3d preEjectionVelocity = o.WorldOrbitalVelocityAtUT(burnUT);
 
             var deltaV = ejectionVelocity - preEjectionVelocity;
-
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: ejectionVelocity:    [{ejectionVelocity.x}, {ejectionVelocity.y}, {ejectionVelocity.z}] = {ejectionVelocity.magnitude} m/s");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: preEjectionVelocity: [{preEjectionVelocity.x}, {preEjectionVelocity.y}, {preEjectionVelocity.z}] = {preEjectionVelocity.magnitude} m/s");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: deltaV:              [{deltaV.x}, {deltaV.y}, {deltaV.z}] = {deltaV.magnitude} m/s");
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryTransferEjection: burnUT:              {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
 
-            return deltaV;
+            return ejectionVelocity - preEjectionVelocity;
         }
 
         public struct LambertProblem
@@ -919,7 +938,7 @@ namespace MuMech
         //
         public static void LambertCost(double[] x, double[] f, object obj)
         {
-            LambertProblem prob = (LambertProblem) obj;
+            LambertProblem prob = (LambertProblem)obj;
             Vector3d secondBurn;
 
             try
@@ -973,7 +992,7 @@ namespace MuMech
             alglib.minlmcreatev(1, x, 0.000001, out state);
             alglib.minlmsetscale(state, scale);
             alglib.minlmsetbc(state, bndl, bndu);
-            if ( maxDTplusT != double.PositiveInfinity)
+            if (maxDTplusT != double.PositiveInfinity)
                 alglib.minlmsetlc(state, C, CT);
             alglib.minlmsetcond(state, eps, maxIter);
 
@@ -1043,7 +1062,7 @@ namespace MuMech
             Vector3d bestBurnVec = Vector3d.zero;
             bool bestshortway = false;
 
-            System.Random random = new System.Random();
+            Random random = new Random();
 
             double maxDTplusT = double.PositiveInfinity;
 
@@ -1060,9 +1079,10 @@ namespace MuMech
 
             // figure the max transfer time of a Hohmann orbit using the SMAs of the two orbits instead of the radius (as a guess), multiplied by 2
             double a = (Math.Abs(o.semiMajorAxis) + Math.Abs(target.semiMajorAxis)) / 2;
-            double maxTT = Math.PI * Math.Sqrt(a * a * a / o.referenceBody.gravParameter ); // FIXME: allow tweaking
+            double maxTT = Math.PI * Math.Sqrt(a * a * a / o.referenceBody.gravParameter); // FIXME: allow tweaking
 
-            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForBiImpulsiveAnnealed: Check1: minDT = " + minDT + " maxDT = " + maxDT + " maxTT = " + maxTT + " maxDTplusT = " + maxDTplusT);
+            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForBiImpulsiveAnnealed: Check1: minDT = " + minDT + " maxDT = " + maxDT + " maxTT = " + maxTT +
+                      " maxDTplusT = " + maxDTplusT);
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForBiImpulsiveAnnealed: target.patchEndTransition = " + target.PatchEndTransition);
 
             if (target.PatchEndTransition != PatchTransitionType.Final && target.PatchEndTransition != PatchTransitionType.Initial)
@@ -1097,7 +1117,7 @@ namespace MuMech
             double currentDT = maxDT / 2;
             double currentTT = maxTT / 2;
 
-            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            Stopwatch stopwatch = new Stopwatch();
 
             int n = 0;
 
@@ -1298,10 +1318,10 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: normal2 = " + (Vector3)(1000 * normal2));
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionPointDirection = " + ejectionPointDirection);
 
-            double ejectionTrueAnomaly = o.TrueAnomalyFromVector(ejectionPointDirection);
-            burnUT = o.TimeOfTrueAnomaly(ejectionTrueAnomaly, idealBurnUT - o.period);
+            double ejectionTrueAnomalyRad = o.TrueAnomalyFromVector(ejectionPointDirection);
+            burnUT = o.TimeOfTrueAnomaly(ejectionTrueAnomalyRad, idealBurnUT - o.period);
 
-            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomaly = " + ejectionTrueAnomaly);
+            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomalyRad = " + ejectionTrueAnomalyRad);
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
 
             if ((idealBurnUT - burnUT > o.period / 2) || (burnUT < UT))
@@ -1335,33 +1355,10 @@ namespace MuMech
             (V3 dv, double dt, double newPeR) = ReturnFromMoon.NextManeuver(primary.gravParameter, moon.gravParameter, moonR0,
                 moonV0, moonSOI, r0, v0, targetPrimaryRadius, 0, dtmin);
 
-            Debug.Log($"Solved PeR from calcluator: {newPeR}");
+            FlightPlanPlugin.Logger.LogDebug($"Solved PeR from calcluator: {newPeR}");
 
             return (dv.V3ToWorld(), ut + dt);
         }
-
-
-        //public static Vector3d DeltaVAndTimeForMoonReturnEjection(PatchedConicsOrbit o, double UT, double targetPrimaryRadius, out double burnUT)
-        //{
-        //    CelestialBodyComponent moon = o.referenceBody;
-        //    CelestialBodyComponent primary = moon.referenceBody;
-
-        //    //construct an orbit at the target radius around the primary, in the same plane as the moon. This is a fake target
-        //    // The inputs look like what would be in a KeplerOrbitState, but using that doesn't work?
-        //    PatchedConicsOrbit primaryOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel)
-        //    {
-        //        referenceBody = primary,
-        //        inclination = moon.Orbit.inclination,
-        //        eccentricity = moon.Orbit.eccentricity,
-        //        semiMajorAxis = targetPrimaryRadius,
-        //        longitudeOfAscendingNode = moon.Orbit.longitudeOfAscendingNode,
-        //        argumentOfPeriapsis = moon.Orbit.argumentOfPeriapsis,
-        //        meanAnomalyAtEpoch = moon.Orbit.meanAnomalyAtEpoch,
-        //        epoch = moon.Orbit.epoch
-        //    };
-
-        //    return DeltaVAndTimeForInterplanetaryTransferEjection(o, UT, primaryOrbit, false, out burnUT);
-        //}
 
         //Computes the delta-V of the burn at a given time required to zero out the difference in orbital velocities
         //between a given orbit and a target.
@@ -1378,15 +1375,16 @@ namespace MuMech
 
             // Thanks wolframAlpha for the Math
             // x = (a^3 f^2 + 3 a^2 f^2 p + 3 a f^2 p^2 + f^2 p^3)^(1/3)-a
-            double x = Math.Pow(Math.Pow(a, 3) * Math.Pow(f, 2) + 3 * Math.Pow(a, 2) * Math.Pow(f, 2) * p + 3 * a * Math.Pow(f, 2) * Math.Pow(p, 2) + Math.Pow(f, 2) * Math.Pow(p, 3), 1d / 3) - a;
+            double x = Math.Pow(
+                Math.Pow(a, 3) * Math.Pow(f, 2) + 3 * Math.Pow(a, 2) * Math.Pow(f, 2) * p + 3 * a * Math.Pow(f, 2) * Math.Pow(p, 2) +
+                Math.Pow(f, 2) * Math.Pow(p, 3), 1d / 3) - a;
 
             if (x < 0)
                 return Vector3d.zero;
 
             if (f > 1)
-                return OrbitalManeuverCalculator.DeltaVToChangeApoapsis(o, UT, x);
-            else
-                return OrbitalManeuverCalculator.DeltaVToChangePeriapsis(o, UT, x);
+                return DeltaVToChangeApoapsis(o, UT, x);
+            return DeltaVToChangePeriapsis(o, UT, x);
         }
 
         // Compute the angular distance between two points on a unit sphere
@@ -1399,8 +1397,10 @@ namespace MuMech
             double long_diff_rad = UtilMath.Deg2Rad * (long_b - long_a);
 
             return UtilMath.Rad2Deg * Math.Atan2(Math.Sqrt(Math.Pow(Math.Cos(lat_b_rad) * Math.Sin(long_diff_rad), 2) +
-                        Math.Pow(Math.Cos(lat_a_rad) * Math.Sin(lat_b_rad) - Math.Sin(lat_a_rad) * Math.Cos(lat_b_rad) * Math.Cos(long_diff_rad), 2)),
-                    Math.Sin(lat_a_rad) * Math.Sin(lat_b_rad) + Math.Cos(lat_a_rad) * Math.Cos(lat_b_rad) * Math.Cos(long_diff_rad));
+                                                           Math.Pow(
+                                                               Math.Cos(lat_a_rad) * Math.Sin(lat_b_rad) - Math.Sin(lat_a_rad) * Math.Cos(lat_b_rad) *
+                                                               Math.Cos(long_diff_rad), 2)),
+                Math.Sin(lat_a_rad) * Math.Sin(lat_b_rad) + Math.Cos(lat_a_rad) * Math.Cos(lat_b_rad) * Math.Cos(long_diff_rad));
         }
 
         // Compute an angular heading from point a to point b on a unit sphere
@@ -1414,24 +1414,21 @@ namespace MuMech
             double long_diff_rad = UtilMath.Deg2Rad * (long_b - long_a);
 
             return MuUtils.ClampDegrees360(180.0 / Math.PI * Math.Atan2(
-                        Math.Sin(long_diff_rad),
-                        Math.Cos(lat_a_rad) * Math.Tan(lat_b_rad) - Math.Sin(lat_a_rad) * Math.Cos(long_diff_rad)));
+                Math.Sin(long_diff_rad),
+                Math.Cos(lat_a_rad) * Math.Tan(lat_b_rad) - Math.Sin(lat_a_rad) * Math.Cos(long_diff_rad)));
         }
 
         //Computes the deltaV of the burn needed to set a given LAN at a given UT.
         public static Vector3d DeltaVToShiftLAN(PatchedConicsOrbit o, double UT, double newLAN)
         {
-            //Vector3d pos = o.SwappedAbsolutePositionAtUT(UT);
-            //// Burn Position in the same reference frame as LAN
-            //double latitude, longitude, altitude;
-            //KSP.Sim.Position Position = new KSP.Sim.Position(o.ReferenceBody.coordinateSystem, pos);
-            //o.ReferenceBody.GetLatLonAltFromRadius(Position, out latitude, out longitude, out altitude);
+            //Vector3d pos = o.WorldPositionAtUT(UT);
+            // Burn position in the same reference frame as LAN
             double longitude;
-            double burn_latitude = GetLatLon(o, UT, out longitude); // was o.ReferenceBody.GetLatitude(o.SwappedAbsolutePositionAtUT(UT));
-            double burn_longitude = longitude + o.referenceBody.rotationAngle;
+            double burn_latitude = GetLatLon(o, UT, out longitude); // was: o.referenceBody.GetLatitude(pos);
+            double burn_longitude = longitude + o.referenceBody.rotationAngle; // was: o.referenceBody.GetLongitude(pos) + o.referenceBody.rotationAngle;
 
             const double target_latitude = 0; // Equator
-            double target_longitude = 0; // Prime Meridian
+            double target_longitude = 0;      // Prime Meridian
 
             // Select the location of either the descending or ascending node.
             // If the descending node is closer than the ascending node, or there is no ascending node, target the reverse of the newLAN
@@ -1465,6 +1462,7 @@ namespace MuMech
             {
                 throw new ArgumentException("OrbitalManeuverCalculator.DeltaVToShiftLAN: No Equatorial Nodes");
             }
+
             double desiredHeading = MuUtils.ClampDegrees360(Heading(burn_latitude, burn_longitude, target_latitude, target_longitude));
             Vector3d actualHorizontalVelocity = Vector3d.Exclude(o.Up(UT), o.WorldOrbitalVelocityAtUT(UT));
             Vector3d eastComponent = actualHorizontalVelocity.magnitude * Math.Sin(UtilMath.Deg2Rad * desiredHeading) * o.East(UT);
@@ -1473,23 +1471,28 @@ namespace MuMech
             return desiredHorizontalVelocity - actualHorizontalVelocity;
         }
 
-
-        public static Vector3d DeltaVForSemiMajorAxis(PatchedConicsOrbit o, double UT, double newSMA)
+        public static Vector3d DeltaVForSemiMajorAxis(PatchedConicsOrbit o, double ut, double newSMA)
         {
-            bool raising = o.semiMajorAxis < newSMA;
-            Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT);
-            double minDeltaV = 0;
-            double maxDeltaV = raising ? 10000 :  Math.Abs(Vector3d.Dot(o.WorldOrbitalVelocityAtUT(UT), burnDirection));
+            (V3 r, V3 v) = o.RightHandedStateVectorsAtUT(ut);
 
-            // solve for the reciprocal of the SMA which is a continuous function that avoids the parabolic singularity and
-            // change of sign for hyperbolic orbits.
-            Func<double, object, double> f = delegate(double testDeltaV, object ign) { return 1.0/o.PerturbedOrbit(UT, testDeltaV * burnDirection).semiMajorAxis - 1.0/newSMA;  };
-            double dV = 0;
-            try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
-            catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVForSemiMajorAxis: Brents method threw a timeout Error (supressed)"); }
-            catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVForSemiMajorAxis: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+            V3 dv = ChangeOrbitalElement.DeltaV(o.referenceBody.gravParameter, r, v, newSMA, ChangeOrbitalElement.Type.SMA);
 
-            return dV * burnDirection;
+            return dv.V3ToWorld();
+
+            //bool raising = o.semiMajorAxis < newSMA;
+            //Vector3d burnDirection = (raising ? 1 : -1) * o.Prograde(UT);
+            //double minDeltaV = 0;
+            //double maxDeltaV = raising ? 10000 :  Math.Abs(Vector3d.Dot(o.WorldOrbitalVelocityAtUT(UT), burnDirection));
+
+            //// solve for the reciprocal of the SMA which is a continuous function that avoids the parabolic singularity and
+            //// change of sign for hyperbolic orbits.
+            //Func<double, object, double> f = delegate(double testDeltaV, object ign) { return 1.0/o.PerturbedOrbit(UT, testDeltaV * burnDirection).semiMajorAxis - 1.0/newSMA;  };
+            //double dV = 0;
+            //try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
+            //catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVForSemiMajorAxis: Brents method threw a timeout Error (supressed)"); }
+            //catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVForSemiMajorAxis: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+
+            //return dV * burnDirection;
         }
 
         public static Vector3d DeltaVToShiftNodeLongitude(PatchedConicsOrbit o, double UT, double newNodeLong)
@@ -1497,15 +1500,12 @@ namespace MuMech
             // Get the location underneath the burn location at the current moment.
             // Note that this does NOT account for the rotation of the body that will happen between now
             // and when the vessel reaches the apoapsis.
-            Vector3d pos = o.WorldPositionAtUT (UT);
-            double burnRadius = o.Radius (UT);
+            Vector3d pos = o.WorldPositionAtUT(UT);
+            double burnRadius = o.Radius(UT);
             double oppositeRadius = 0;
 
             // Back out the rotation of the body to calculate the longitude of the apoapsis when the vessel reaches the node
             double degreeRotationToNode = (UT - GameManager.Instance.Game.UniverseModel.UniversalTime) * 360 / o.referenceBody.rotationPeriod;
-            //double latitude, longitude, altitude;
-            //KSP.Sim.Position Position = new KSP.Sim.Position(o.ReferenceBody.coordinateSystem, pos);
-            //o.ReferenceBody.GetLatLonAltFromRadius(Position, out latitude, out longitude, out altitude);
             double NodeLongitude = GetLongitude(o, UT) - degreeRotationToNode;
 
             double LongitudeOffset = NodeLongitude - newNodeLong; // Amount we need to shift the Ap's longitude
@@ -1522,21 +1522,20 @@ namespace MuMech
             int N = -1;
             double target_sma = 0;
 
-            while (oppositeRadius-o.referenceBody.radius < o.referenceBody.TimeWarpAltitudeOffset*4 && N < 20)
-            { // was o.ReferenceBody.timeWarpAltitudeLimits[4] -> o.ReferenceBody.TimeWarpAltitudeOffset*4
+            while (oppositeRadius - o.referenceBody.radius < o.referenceBody.TimeWarpAltitudeOffset*4 && N < 20)
+            {
                 N++;
                 double target_period = o.referenceBody.rotationPeriod * (LongitudeOffset / 360 + N);
-                target_sma = Math.Pow ((o.referenceBody.gravParameter * target_period * target_period) / (4 * Math.PI * Math.PI), 1.0 / 3.0); // cube roo
-                oppositeRadius = 2 * (target_sma) - burnRadius;
+                target_sma = Math.Pow(o.referenceBody.gravParameter * target_period * target_period / (4 * Math.PI * Math.PI), 1.0 / 3.0); // cube roo
+                oppositeRadius = 2 * target_sma - burnRadius;
             }
             return DeltaVForSemiMajorAxis (o, UT, target_sma);
         }
 
         //
-        // Global OrbitPool for re-using orbit objects
+        // Global OrbitPool for re-using Orbit objects
         //
 
-        // public static readonly Pool<PatchedConicsOrbit> OrbitPool = new Pool<PatchedConicsOrbit>(createOrbit, resetOrbit);
         public static readonly IObjectPool<PatchedConicsOrbit> OrbitPool = new UtilScripts.Pool<PatchedConicsOrbit>(CreateOrbit, ResetOrbit);
         private static PatchedConicsOrbit CreateOrbit() { return new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel); }
         private static void ResetOrbit(PatchedConicsOrbit o) { }
@@ -1556,29 +1555,31 @@ namespace MuMech
         // FIXME: NREs when there's no next patch
         // FIXME: duplicates code with OrbitExtensions.CalculateNextOrbit()
         //
-        public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT, out PatchedConicsOrbit intercept)
+        public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT,
+            out PatchedConicsOrbit intercept)
         {
             PatchedConicsOrbit orbit = OrbitPool.FetchInstance(); // .Borrow();
-            Position position = new Position(initial.referenceBody.SimulationObject.transform.celestialFrame, initial.WorldBCIPositionAtUT(burnUT));
-            Velocity velocity = new Velocity(initial.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, initial.WorldOrbitalVelocityAtUT(burnUT) + dV.SwapYAndZ);
+            Position position = new Position(initial.referenceBody.SimulationObject.transform.celestialFrame, initial.GetRelativePositionAtUT(burnUT));
+            Velocity velocity = new Velocity(initial.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, initial.GetOrbitalVelocityAtUTZup(burnUT) + dV.SwapYAndZ);
             orbit.UpdateFromStateVectors(position, velocity, initial.referenceBody, burnUT);
             orbit.StartUT = burnUT;
-            orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
+            orbit.EndUT   = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
             PatchedConicsOrbit next_orbit = OrbitPool.FetchInstance(); //.Borrow();
 
             // bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null);
             orbit = orbit.NextPatch as PatchedConicsOrbit;
             bool ok = orbit != null; 
-            while (ok && (orbit.referenceBody != target) && (orbit.EndUT < arrivalUT))
+            while (ok && orbit.referenceBody != target && orbit.EndUT < arrivalUT)
             {
                 OrbitPool.ReleaseInstance(orbit); // .Release(orbit);
-                orbit = next_orbit;
+                orbit      = next_orbit;
                 next_orbit = OrbitPool.FetchInstance(); // .Borrow();
 
                 // ok = PatchedConics.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, null);
                 next_orbit = orbit.NextPatch as PatchedConicsOrbit;
                 ok = next_orbit != null;
             }
+
             intercept = orbit;
             intercept.UpdateFromOrbitAtUT(orbit, arrivalUT, orbit.referenceBody);
             OrbitPool.ReleaseInstance(orbit); // .Release(orbit);
@@ -1591,9 +1592,12 @@ namespace MuMech
         //
         public static void SOI_intercept(PatchedConicsOrbit transfer, CelestialBodyComponent target, double UT1, double UT2, out double UT)
         {
-            if ( transfer.referenceBody != target.Orbit.referenceBody )
+            if (transfer.referenceBody != target.Orbit.referenceBody)
                 throw new ArgumentException("[MechJeb] SOI_intercept: transfer orbit must be in the same SOI as the target celestial");
-            Func<double, object, double> f = delegate(double UT, object ign) { return ( transfer.GetRelativePositionAtUT(UT) - target.Orbit.GetRelativePositionAtUT(UT) ).magnitude - target.sphereOfInfluence;  };
+            Func<double, object, double> f = delegate(double UT, object ign)
+            {
+                return (transfer.GetRelativePositionAtUT(UT) - target.Orbit.GetRelativePositionAtUT(UT)).magnitude - target.sphereOfInfluence;
+            };
             UT = 0;
             try { UT = BrentRoot.Solve(f, UT1, UT2, null); }
             catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("SOI_intercept: Brents method threw a timeout Error (supressed)"); }
