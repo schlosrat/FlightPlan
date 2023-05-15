@@ -18,6 +18,8 @@ using UnityEngine;
 using FPUtilities;
 using MechJebLib.Core;
 using MechJebLib.Core.TwoBody;
+using KSP.Rendering.Planets;
+using KSP.Utilities;
 // using Smooth.Pools;
 
 namespace MuMech
@@ -1535,8 +1537,9 @@ namespace MuMech
         //
 
         // public static readonly Pool<PatchedConicsOrbit> OrbitPool = new Pool<PatchedConicsOrbit>(createOrbit, resetOrbit);
-        private static PatchedConicsOrbit createOrbit() { return new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel); }
-        private static void resetOrbit(PatchedConicsOrbit o) { }
+        public static readonly IObjectPool<PatchedConicsOrbit> OrbitPool = new UtilScripts.Pool<PatchedConicsOrbit>(CreateOrbit, ResetOrbit);
+        private static PatchedConicsOrbit CreateOrbit() { return new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel); }
+        private static void ResetOrbit(PatchedConicsOrbit o) { }
 
         // private static readonly PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
 
@@ -1553,28 +1556,34 @@ namespace MuMech
         // FIXME: NREs when there's no next patch
         // FIXME: duplicates code with OrbitExtensions.CalculateNextOrbit()
         //
-        //public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT, out PatchedConicsOrbit intercept)
-        //{
-        //    PatchedConicsOrbit orbit = OrbitPool.Borrow();
-        //    orbit.UpdateFromStateVectors(initial.SwappedRelativePositionAtUT(burnUT), initial.SwappedOrbitalVelocityAtUT(burnUT) + dV.xzy, initial.ReferenceBody, burnUT);
-        //    orbit.StartUT = burnUT;
-        //    orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
-        //    PatchedConicsOrbit next_orbit = OrbitPool.Borrow();
+        public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT, out PatchedConicsOrbit intercept)
+        {
+            PatchedConicsOrbit orbit = OrbitPool.FetchInstance(); // .Borrow();
+            Position position = new Position(initial.referenceBody.SimulationObject.transform.celestialFrame, initial.WorldBCIPositionAtUT(burnUT));
+            Velocity velocity = new Velocity(initial.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, initial.WorldOrbitalVelocityAtUT(burnUT) + dV.SwapYAndZ);
+            orbit.UpdateFromStateVectors(position, velocity, initial.referenceBody, burnUT);
+            orbit.StartUT = burnUT;
+            orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
+            PatchedConicsOrbit next_orbit = OrbitPool.FetchInstance(); //.Borrow();
 
-        //    bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null);
-        //    while (ok && (orbit.ReferenceBody != target) && (orbit.EndUT < arrivalUT))
-        //    {
-        //        OrbitPool.Release(orbit);
-        //        orbit = next_orbit;
-        //        next_orbit = OrbitPool.Borrow();
+            // bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null);
+            orbit = orbit.NextPatch as PatchedConicsOrbit;
+            bool ok = orbit != null; 
+            while (ok && (orbit.referenceBody != target) && (orbit.EndUT < arrivalUT))
+            {
+                OrbitPool.ReleaseInstance(orbit); // .Release(orbit);
+                orbit = next_orbit;
+                next_orbit = OrbitPool.FetchInstance(); // .Borrow();
 
-        //        ok = PatchedConics.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, null);
-        //    }
-        //    intercept = orbit;
-        //    intercept.UpdateFromOrbitAtUT(orbit, arrivalUT, orbit.ReferenceBody);
-        //    OrbitPool.Release(orbit);
-        //    OrbitPool.Release(next_orbit);
-        //}
+                // ok = PatchedConics.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, null);
+                next_orbit = orbit.NextPatch as PatchedConicsOrbit;
+                ok = next_orbit != null;
+            }
+            intercept = orbit;
+            intercept.UpdateFromOrbitAtUT(orbit, arrivalUT, orbit.referenceBody);
+            OrbitPool.ReleaseInstance(orbit); // .Release(orbit);
+            OrbitPool.ReleaseInstance(next_orbit); //  Release(next_orbit);
+        }
 
         // Takes an e.g. heliocentric orbit and a target planet celestial and finds the time of the SOI intercept.
         //
