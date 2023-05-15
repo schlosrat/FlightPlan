@@ -7,6 +7,7 @@
  */
 
 using FlightPlan;
+using FPUtilities;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
@@ -649,7 +650,13 @@ namespace MuMech
         //large enough that it never attains the given true anomaly
         public static double TimeOfTrueAnomaly(this PatchedConicsOrbit o, double trueAnomalyRad, double UT)
         {
-            //FlightPlanPlugin.Logger.LogDebug($"OrbitExtensions: trueAnomaly: {trueAnomalyRad*UtilMath.Rad2Deg}° = {trueAnomalyRad} radians");
+            //var eccAnom = o.GetEccentricAnomalyAtTrueAnomaly(trueAnomalyRad);
+            //var meanAnom = o.GetMeanAnomalyAtEccentricAnomaly(eccAnom);
+            //var utAtmeanAnom = o.UTAtMeanAnomaly(meanAnom, UT);
+            //FlightPlanPlugin.Logger.LogDebug($"TimeOfTrueAnomaly: trueAnomalyRad {trueAnomalyRad} = {trueAnomalyRad * UtilMath.Rad2Deg}°");
+            //FlightPlanPlugin.Logger.LogDebug($"TimeOfTrueAnomaly: GetEccentricAnomalyAtTrueAnomaly {eccAnom} = {eccAnom*UtilMath.Rad2Deg}°");
+            //FlightPlanPlugin.Logger.LogDebug($"TimeOfTrueAnomaly: GetMeanAnomalyAtEccentricAnomaly {meanAnom} = {meanAnom * UtilMath.Rad2Deg}°");
+            //FlightPlanPlugin.Logger.LogDebug($"TimeOfTrueAnomaly: utAtmeanAnom {utAtmeanAnom} = {FPUtility.SecondsToTimeString(utAtmeanAnom)}");
             return o.UTAtMeanAnomaly(o.GetMeanAnomalyAtEccentricAnomaly(o.GetEccentricAnomalyAtTrueAnomaly(trueAnomalyRad)), UT);
         }
 
@@ -693,6 +700,8 @@ namespace MuMech
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double TimeOfAscendingNodeEquatorial(this PatchedConicsOrbit o, double UT)
         {
+            // FlightPlanPlugin.Logger.LogDebug($"TimeOfAscendingNodeEquatorial: AscendingNodeEquatorialTrueAnomaly = {o.AscendingNodeEquatorialTrueAnomaly()} Rad");
+            // FlightPlanPlugin.Logger.LogDebug($"TimeOfAscendingNodeEquatorial: TimeOfTrueAnomaly = {FPUtility.SecondsToTimeString(o.TimeOfTrueAnomaly(o.AscendingNodeEquatorialTrueAnomaly(), UT))}");
             return o.TimeOfTrueAnomaly(o.AscendingNodeEquatorialTrueAnomaly(), UT);
         }
 
@@ -706,6 +715,8 @@ namespace MuMech
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double TimeOfDescendingNodeEquatorial(this PatchedConicsOrbit o, double UT)
         {
+            // FlightPlanPlugin.Logger.LogDebug($"TimeOfDescendingNodeEquatorial: DescendingNodeEquatorialTrueAnomaly = {o.DescendingNodeEquatorialTrueAnomaly()} Rad");
+            // FlightPlanPlugin.Logger.LogDebug($"TimeOfAscendingNodeEquatorial: TimeOfTrueAnomaly = {FPUtility.SecondsToTimeString(o.TimeOfTrueAnomaly(o.AscendingNodeEquatorialTrueAnomaly(), UT))}");
             return o.TimeOfTrueAnomaly(o.DescendingNodeEquatorialTrueAnomaly(), UT);
         }
 
