@@ -170,7 +170,7 @@ public class FPOtherModsInterface
         {
             GetK2D2Status();
             GUILayout.BeginHorizontal();
-            FlightPlan.KTools.UI.UI_Tools.Label($"K2D2: {_k2d2Status}");
+            KTools.UI.UI_Tools.Label($"K2D2: {_k2d2Status}");
             GUILayout.EndHorizontal();
         }
     }

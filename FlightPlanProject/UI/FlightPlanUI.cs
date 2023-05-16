@@ -335,8 +335,6 @@ public class FlightPlanUI
         }
 
         ManeuverDescription = $"{ManeuverTypeDesc} {BurnTimeOption.TimeRefDesc}";
-
-        BurnTimeOption.Instance.SetBurnTime();
     }
 
     public string ManeuverDescription;
@@ -375,6 +373,7 @@ public class FlightPlanUI
         if (ManeuverType == ManeuverType.None)
             return;
 
+        BurnTimeOption.Instance.SetBurnTime();
         double _requestedBurnTime = BurnTimeOption.RequestedBurnTime;
 
         bool _pass = false;

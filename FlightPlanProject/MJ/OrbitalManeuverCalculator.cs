@@ -540,7 +540,23 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: desiredHorizontalVelocity [{desiredHorizontalVelocity.x}, {desiredHorizontalVelocity.y}, {desiredHorizontalVelocity.z}]");
             var deltaV = desiredHorizontalVelocity - actualHorizontalVelocity;
             FlightPlanPlugin.Logger.LogDebug($"DeltaVToChangeInclination: deltaV [{deltaV.x}, {deltaV.y}, {deltaV.z}]");
-            return desiredHorizontalVelocity - actualHorizontalVelocity;
+
+            // Let's see how close we get
+            PatchedConicsOrbit testOrbit = o.PerturbedOrbit(UT, deltaV);
+            FlightPlanPlugin.Logger.LogDebug($"testOrbit: Inclination = {testOrbit.inclination}");
+            if (Math.Abs(testOrbit.inclination - newInclinationDeg) < 1)
+                return deltaV;
+
+            Vector3d burnDirection = deltaV.normalized;
+            double minDeltaV = 0.5 * deltaV.magnitude;
+            double maxDeltaV = 1.5 * deltaV.magnitude;
+            Func<double, object, double> f = delegate (double testDeltaV, object ign) { return Math.Abs(o.PerturbedOrbit(UT, testDeltaV * burnDirection).inclination - newInclinationDeg); };
+            double dV = 0;
+            try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
+            catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVToChangeInclination: Brents method threw a timeout Error (supressed)"); }
+            catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVToChangeInclination: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+
+            return dV* burnDirection;
         }
 
         //Computes the delta-V and time of a burn to match planes with the target orbit. The output burnUT
