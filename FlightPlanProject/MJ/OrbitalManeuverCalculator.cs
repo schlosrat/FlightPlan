@@ -16,12 +16,10 @@ using KSP.Utilities;
 using MechJebLib.Core;
 using MechJebLib.Core.TwoBody;
 using MechJebLib.Maneuvers;
-// using MechJebLib.Maths;
 using MechJebLib.Primitives;
 using System.Diagnostics;
 using UnityEngine;
 using Random = System.Random;
-// using Smooth.Pools;
 
 namespace MuMech
 {
@@ -72,6 +70,20 @@ namespace MuMech
             //v = sqrt(2GM/r)
             return Math.Sqrt(2 * body.gravParameter / radius);
         }
+
+        //returns a new PatchedConicsOrbit object that represents the result of applying a given dV to o at UT
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static PatchedConicsOrbit PerturbedOrbiter(VesselComponent v, double UT, Vector3d dV)
+        //{
+        //    PatchedConicsOrbit orbit = new(v.Orbit.referenceBody.universeModel);
+
+        //    Position pos = new Position(v.Orbit.referenceBody.SimulationObject.transform.celestialFrame, v.Orbit.WorldBCIPositionAtUT(UT));
+        //    Velocity vel = new Velocity(v.Orbit.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, v.Orbit.WorldOrbitalVelocityAtUT(UT) + dV);
+
+        //    v.Orbiter.UpdateFromStateVectors(pos, vel);
+
+        //    return orbit;
+        //}
 
         //Computes the deltaV of the burn needed to circularize an orbit at a given UT.
         public static Vector3d DeltaVToCircularize(PatchedConicsOrbit o, double UT)
