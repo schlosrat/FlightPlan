@@ -14,8 +14,6 @@ using KSP.Sim.impl;
 using MechJebLib.Primitives;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-// using UnityEngine.UIElements;
-// using static VehiclePhysics.TelemetryTemplateBase;
 // using static MuMech.KSPOrbitModule;
 
 namespace MuMech
