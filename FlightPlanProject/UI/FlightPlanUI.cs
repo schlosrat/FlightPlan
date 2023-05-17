@@ -417,7 +417,7 @@ public class FlightPlanUI
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var thisPe = vesselOrbit.Apoapsis;
                     var nextPe = PatchedConicsList[0].Periapsis;
-                    pError = (TargetPeR - nextPe) / (TargetPeR - thisPe);
+                    pError = (nextPe - TargetPeR) / (TargetPeR - thisPe);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Periapsis {(TargetPeR - ReferenceBody.radius) / 1000:N1} km, got {(nextPe - ReferenceBody.radius) / 1000:N1} km, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) > 0.01)
@@ -436,7 +436,7 @@ public class FlightPlanUI
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var thisAp = vesselOrbit.Apoapsis;
                     var nextAp = PatchedConicsList[0].Apoapsis;
-                    pError = (TargetApR - nextAp) / (TargetApR - thisAp);
+                    pError = (nextAp - TargetApR) / (TargetApR - thisAp);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Apoapsis {(TargetApR - ReferenceBody.radius) / 1000:N1} km, got {(nextAp - ReferenceBody.radius) / 1000:N1} km, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -459,7 +459,7 @@ public class FlightPlanUI
                     var nextAp = PatchedConicsList[0].Apoapsis;
                     var errorPe = Math.Abs(TargetPeR - nextPe);
                     var errorAp = Math.Abs(TargetApR - nextAp);
-                    pError = (targetEcc - nextEcc) / (targetEcc - thisEcc);
+                    pError = (nextEcc - targetEcc) / (targetEcc - thisEcc);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Eccentricity {targetEcc:N3}, got {nextEcc:N3}, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -475,7 +475,7 @@ public class FlightPlanUI
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var thisInc = vesselOrbit.inclination;
                     var nextInc = PatchedConicsList[0].inclination;
-                    pError = (FPSettings.TargetInc_deg - nextInc)/(FPSettings.TargetInc_deg - thisInc);
+                    pError = (nextInc - FPSettings.TargetInc_deg)/(FPSettings.TargetInc_deg - thisInc);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Inclination {FPSettings.TargetInc_deg:N1}°, got {nextInc:N1}°, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -499,7 +499,7 @@ public class FlightPlanUI
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var thisSMA = vesselOrbit.semiMajorAxis;
                     var nextSMA = PatchedConicsList[0].semiMajorAxis;
-                    pError = (TargetSMA - nextSMA) / (TargetSMA - thisSMA);
+                    pError = (nextSMA - TargetSMA) / (TargetSMA - thisSMA);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested SMA {TargetSMA/1000:N1} km, got {nextSMA/1000:N1} km, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -515,7 +515,7 @@ public class FlightPlanUI
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var thisInc = vesselOrbit.inclination;
                     var nextInc = PatchedConicsList[0].inclination;
-                    pError = (targetOrbit.inclination - nextInc) / (targetOrbit.inclination - thisInc);
+                    pError = (nextInc - targetOrbit.inclination) / (targetOrbit.inclination - thisInc);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Inclination {FPSettings.TargetInc_deg:N1}°, got {nextInc:N1}°, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -543,7 +543,7 @@ public class FlightPlanUI
                         var nextCATime = PatchedConicsList[1].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
                         var thisCA = (vesselOrbit.WorldBCIPositionAtUT(thisCATime) - targetOrbit.WorldBCIPositionAtUT(thisCATime)).magnitude;
                         var nextCA = (PatchedConicsList[1].WorldBCIPositionAtUT(nextCATime) - targetOrbit.WorldBCIPositionAtUT(nextCATime)).magnitude;
-                        pError = (FPSettings.InterceptDistanceCelestial * 1000 - nextCA) / (FPSettings.InterceptDistanceCelestial * 1000 - thisCA);
+                        pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000 - thisCA);
                         if (Math.Abs(pError) >= largeErr)
                             FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
                         else if (Math.Abs(pError) >= smallErr)
@@ -561,7 +561,7 @@ public class FlightPlanUI
                         var nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
                         var thisCA = (vesselOrbit.WorldBCIPositionAtUT(thisCATime) - targetOrbit.WorldBCIPositionAtUT(thisCATime)).magnitude;
                         var nextCA = (PatchedConicsList[0].WorldBCIPositionAtUT(nextCATime) - targetOrbit.WorldBCIPositionAtUT(nextCATime)).magnitude;
-                        pError = (FPSettings.InterceptDistanceVessel - nextCA) / (FPSettings.InterceptDistanceVessel - thisCA);
+                        pError = (nextCA - FPSettings.InterceptDistanceVessel) / (FPSettings.InterceptDistanceVessel - thisCA);
                         if (Math.Abs(pError) >= largeErr)
                             FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceVessel:N1} m, got {nextCA:N1} m, off by {pError * 100:N3}%");
                         else if (Math.Abs(pError) >= smallErr)
@@ -578,7 +578,7 @@ public class FlightPlanUI
                 {
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var nextPe = PatchedConicsList[1].Periapsis;
-                    pError = (TargetMRPeR - nextPe)/(TargetMRPeR - ReferenceBody.referenceBody.radius);
+                    pError = (nextPe - TargetMRPeR) /(TargetMRPeR - ReferenceBody.referenceBody.radius);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Periapsis {(TargetMRPeR - ReferenceBody.referenceBody.radius) / 1000:N1} km, got {(nextPe - ReferenceBody.referenceBody.radius) / 1000:N1} km, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -596,7 +596,7 @@ public class FlightPlanUI
                     var tgtVel = targetOrbit.WorldOrbitalVelocityAtUT(_requestedBurnTime);
                     var thisVel = vesselOrbit.WorldOrbitalVelocityAtUT(_requestedBurnTime);
                     var nextVel = PatchedConicsList[0].WorldOrbitalVelocityAtUT(_requestedBurnTime);
-                    pError = (tgtVel - nextVel).magnitude / (tgtVel - thisVel).magnitude;
+                    pError = (nextVel - tgtVel).magnitude / (tgtVel - thisVel).magnitude;
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Velocity {tgtVel.magnitude:N1} m/s, got {nextVel.magnitude:N1} m/s, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -616,7 +616,7 @@ public class FlightPlanUI
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var thisAp = vesselOrbit.Apoapsis;
                     var nextAp = PatchedConicsList[0].Apoapsis;
-                    pError = (TargetApR - nextAp) / (TargetApR - thisAp);
+                    pError = (nextAp - TargetApR) / (TargetApR - thisAp);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Apoapsis {(TargetApR - ReferenceBody.radius) / 1000:N1} km, got {(nextAp - ReferenceBody.radius) / 1000:N1} km, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
@@ -632,7 +632,7 @@ public class FlightPlanUI
                     var PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
                     var thisPe = vesselOrbit.Apoapsis;
                     var nextPe = PatchedConicsList[0].Periapsis;
-                    pError = (TargetPeR - nextPe) / (TargetPeR - thisPe);
+                    pError = (nextPe - TargetPeR) / (TargetPeR - thisPe);
                     if (Math.Abs(pError) >= largeErr)
                         FPStatus.Error($"Warning: Requested Periapsis {(TargetPeR - ReferenceBody.radius) / 1000:N1} km, got {(nextPe - ReferenceBody.radius) / 1000:N1} km, off by {pError * 100:N3}%");
                     else if (Math.Abs(pError) >= smallErr)
