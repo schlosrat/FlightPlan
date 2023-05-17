@@ -304,11 +304,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d burnParams;
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
         var orbit = _activeVessel.Orbit;
+        var Orbiter = _activeVessel.Orbiter;
+        var ManeuverPlanSolver = Orbiter?.ManeuverPlanSolver;
 
         burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
         Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
         Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
         NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, burnOffsetFactor);
+        ManeuverPlanSolver.UpdateManeuverTrajectory();
         // StartCoroutine(TestPerturbedOrbit(orbit, burnUT, _deltaV));
 
         // Recalculate node based on the Offset time
@@ -327,6 +330,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //CurrentNode.BurnVector = burnParams;
         //UpdateNode(CurrentNode);
 
+        // Update the node
+        _currentNode = NodeManagerPlugin.Instance.currentNode;
     }
 
     // Flight Plan API Methods
