@@ -136,7 +136,9 @@ public class FPOtherModsInterface
                 {
                     if (FlightPlanPlugin.Instance._currentNode.Time < GameManager.Instance.Game.UniverseModel.UniversalTime)
                     {
-                        NodeManagerPlugin.Instance.DeleteNodes(0);
+                        // NodeManagerPlugin.Instance.DeleteNodes(0);
+                        // NodeManagerPlugin.Instance.DeleteNode(0);
+                        NodeManagerPlugin.Instance.DeletePastNodes();
                     }
                     _checkK2D2status = false;
                 }
