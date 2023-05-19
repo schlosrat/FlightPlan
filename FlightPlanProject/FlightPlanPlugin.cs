@@ -96,6 +96,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // Config parameters
     internal ConfigEntry<bool> _experimental;
     internal ConfigEntry<bool> _autoLaunchMNC;
+    internal ConfigEntry<double> _smallError;
+    internal ConfigEntry<double> _largeError;
 
     // mod-wide Data
     internal VesselComponent _activeVessel;
@@ -181,7 +183,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         
         _experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable _experimental.Value features for testing - Warrantee Void if Enabled!");
         _autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when _experimental.Value nodes are created");
-    
+        _smallError = Config.Bind<double>("Status Reporting Section", "Small % Error Threashold", 1, "Percent error threshold used to assess quality of maneuver node goal for warning (yellow) status");
+        _largeError = Config.Bind<double>("Status Reporting Section", "Large % Error Threashold", 2, "Percent error threshold used to assess quality of maneuver node goal for error (red) status");
+
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {_experimental.Value}");
     }
@@ -299,7 +303,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         UI_Fields.GameInputState = true;
     }
 
-    private void CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
+    private IEnumerator CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
     {
         Vector3d burnParams;
         double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
@@ -311,7 +315,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
         Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
         NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, burnOffsetFactor);
-        ManeuverPlanSolver.UpdateManeuverTrajectory();
+        _currentNode = NodeManagerPlugin.Instance.currentNode;
+
+        yield return (object)new WaitForFixedUpdate();
+
+        // Having this here can sometimes result in a weird double node.
+        // ManeuverPlanSolver.UpdateManeuverTrajectory();
+
+        FlightPlanUI.Instance.CheckNodeQuality();
         // StartCoroutine(TestPerturbedOrbit(orbit, burnUT, _deltaV));
 
         // Recalculate node based on the Offset time
@@ -331,7 +342,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //UpdateNode(CurrentNode);
 
         // Update the node
-        _currentNode = NodeManagerPlugin.Instance.currentNode;
     }
 
     // Flight Plan API Methods
@@ -349,7 +359,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -381,7 +391,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(_orbit, burnUT, newPe);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -407,7 +417,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(_orbit, burnUT, newAp);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -438,7 +448,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(_orbit, burnUT, newPe, newAp);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -462,7 +472,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         _deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(_orbit, burnUT, inclination);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -491,7 +501,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(_orbit, burnUT, newLANvalue);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -517,7 +527,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToShiftNodeLongitude(_orbit, burnUT, newNodeLongValue);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -543,7 +553,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVForSemiMajorAxis(_orbit, burnUT, newSMA);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -587,7 +597,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUTout, burnOffsetFactor));
             return true;
         }
         else
@@ -627,7 +637,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
             return true;
         }
         else
@@ -662,7 +672,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         (_deltaV, _) = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit, _interceptUT, _offsetDistance);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -703,7 +713,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
             return true;
         }
         else
@@ -737,7 +747,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             (_deltaV, _burnUTout) = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(_orbit, _UT, targetMRPeR);
             if (_deltaV != Vector3d.zero)
             {
-                CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+                StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
                 return true;
             }
             else
@@ -761,7 +771,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -786,7 +796,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Vector3d _deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(_orbit, _UT, _currentTarget.orbit as PatchedConicsOrbit, out _burnUTout2);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
             return true;
         }
         else
