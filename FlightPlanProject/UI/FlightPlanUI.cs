@@ -479,6 +479,7 @@ public class FlightPlanUI
         double thisAp, nextAp, errorAp;
         double thisInc, nextInc;
         double thisSMA, nextSMA;
+        double thisLAN, nextLAN;
         double thisCA, thisCATime, nextCA, nextCATime;
         int patchIdx;
         Vector3d tgtVel, thisVel, nextVel;
@@ -553,10 +554,26 @@ public class FlightPlanUI
                 //    FPStatus.Ok($"Acceptable: Requested Inclination {FPSettings.TargetInc_deg:N1}°, got {nextInc:N1}°, off by {pError*100:N3}%");
                 break;
             case ManeuverType.newLAN: // Untested
-
+                thisLAN = vesselOrbit.longitudeOfAscendingNode;
+                nextLAN = PatchedConicsList[0].longitudeOfAscendingNode;
+                pError = (nextLAN - FPSettings.TargetLAN_deg) / (FPSettings.TargetLAN_deg - thisLAN);
+                if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
+                    FPStatus.Error($"Warning: Requested LAN {FPSettings.TargetLAN_deg:N1}°, got {nextLAN:N1}°, off by {pError * 100:N3}%");
+                else if (Math.Abs(pError) >= Plugin._smallError.Value / 100)
+                    FPStatus.Warning($"Warning: Requested LAN {FPSettings.TargetLAN_deg:N1}°, got {nextLAN:N1}°, off by {pError * 100:N3}%");
+                //else
+                //    FPStatus.Ok($"Acceptable: Requested LAN {FPSettings.TargetLAN_deg:N1}°, got {nextLAN:N1}°, off by {pError * 100:N3}%");
                 break;
             case ManeuverType.newNodeLon: // Untested
-
+                thisLAN = vesselOrbit.longitudeOfAscendingNode;
+                nextLAN = PatchedConicsList[0].longitudeOfAscendingNode;
+                pError = (nextLAN - FPSettings.TargetNodeLong_deg) / (FPSettings.TargetLAN_deg - thisLAN);
+                if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
+                    FPStatus.Error($"Warning: Requested LAN {FPSettings.TargetNodeLong_deg:N1}°, got {nextLAN:N1}°, off by {pError * 100:N3}%");
+                else if (Math.Abs(pError) >= Plugin._smallError.Value / 100)
+                    FPStatus.Warning($"Warning: Requested LAN {FPSettings.TargetNodeLong_deg:N1}°, got {nextLAN:N1}°, off by {pError * 100:N3}%");
+                //else
+                //    FPStatus.Ok($"Acceptable: Requested LAN {FPSettings.TargetLAN_deg:N1}°, got {nextLAN:N1}°, off by {pError * 100:N3}%");
                 break;
             case ManeuverType.newSMA: // Working
                 thisSMA = vesselOrbit.semiMajorAxis;
@@ -581,10 +598,68 @@ public class FlightPlanUI
                 //    FPStatus.Ok($"Acceptable Results: Requested Inclination {FPSettings.TargetInc_deg:N1}°, got {nextInc:N1}°, off by {pError * 100:N3}%");
                 break;
             case ManeuverType.hohmannXfer: // Works if we start in a good enough orbit (reasonably circular, close to target's orbital plane)
-
+                if (target.IsCelestialBody)
+                {
+                    if (_requestedBurnTime < 0)
+                        _requestedBurnTime = Plugin._currentNode.Time;
+                    patchIdx = -1;
+                    nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
+                    nextCA = (PatchedConicsList[0].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
+                    // Find the patch with the closest new closest approach
+                    for (int i = 0; i < PatchedConicsList.Count; i++)
+                    {
+                        if (PatchedConicsList[i].referenceBody.Name == Plugin._currentTarget.Name)
+                        {
+                            nextCA = PatchedConicsList[i].PeriapsisArl;
+                            nextCATime = PatchedConicsList[i].TimeToPe;
+                            patchIdx = i;
+                            break;
+                        }
+                    }
+                    if (patchIdx < 0)
+                        FlightPlanPlugin.Logger.LogInfo($"Hohmann transfer fails to intercept {target.Name}'s SOI");
+                    else
+                        FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime)} from now on patch {patchIdx}");
+                    // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
+                    pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
+                    if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
+                        FPStatus.Error($"Warning: Requested arrival Pe of {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                    else if (Math.Abs(pError) >= Plugin._smallError.Value / 100)
+                        FPStatus.Warning($"Warning: Requested arrival Pe of {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                    //else
+                    //    FPStatus.Ok($"Acceptable: Requested arrival Pe of {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                }
+                else
+                {
+                    if (_requestedBurnTime < 0)
+                        _requestedBurnTime = Plugin._currentNode.Time;
+                    nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
+                    nextCA = (PatchedConicsList[0].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
+                    pError = (nextCA - FPSettings.InterceptDistanceVessel) / (FPSettings.InterceptDistanceVessel);
+                    if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
+                        FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceVessel:N1} m, got {nextCA:N1} m, off by {pError * 100:N3}%");
+                    else if (Math.Abs(pError) >= Plugin._smallError.Value / 100)
+                        FPStatus.Warning($"Warning: Requested Intercept {FPSettings.InterceptDistanceVessel:N1} m, got {nextCA:N1} m, off by {pError * 100:N3}%");
+                    //else
+                    //    FPStatus.Ok($"Acceptable: Requested Intercept {FPSettings.InterceptDistanceVessel:N1} m, got {nextCA:N1} m, off by {pError * 100:N3}%");
+                }
                 break;
             case ManeuverType.interceptTgt: // Experimental
+                if (_requestedBurnTime < 0)
+                    _requestedBurnTime = Plugin._currentNode.Time;
+                //thisCATime = vesselOrbit.NextClosestApproachTime(targetOrbit, _requestedBurnTime);
+                //thisCA = (vesselOrbit.GetTruePositionAtUT(thisCATime).localPosition - targetOrbit.GetTruePositionAtUT(thisCATime).localPosition).magnitude;
+                //FlightPlanPlugin.Logger.LogInfo($"Started with closest approach of {thisCA / 1000:N3} km at {FPUtility.SecondsToTimeString(thisCATime - UT)} from now.");
 
+                nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
+                nextCA = (PatchedConicsList[0].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
+                pError = (nextCA - FPSettings.InterceptDistanceVessel) / (FPSettings.InterceptDistanceVessel);
+                if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
+                    FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceVessel:N1} m, got {nextCA:N1} m, off by {pError * 100:N3}%");
+                else if (Math.Abs(pError) >= Plugin._smallError.Value / 100)
+                    FPStatus.Warning($"Warning: Requested Intercept {FPSettings.InterceptDistanceVessel:N1} m, got {nextCA:N1} m, off by {pError * 100:N3}%");
+                //else
+                //    FPStatus.Ok($"Acceptable: Requested Intercept {FPSettings.InterceptDistanceVessel:N1} m, got {nextCA:N1} m, off by {pError * 100:N3}%");
                 break;
             case ManeuverType.courseCorrection: // Experimental Works at least some times...
                 if (target.IsCelestialBody)
@@ -595,12 +670,11 @@ public class FlightPlanUI
                     thisCA = (vesselOrbit.GetTruePositionAtUT(thisCATime).localPosition - targetOrbit.GetTruePositionAtUT(thisCATime).localPosition).magnitude;
                     FlightPlanPlugin.Logger.LogInfo($"Started with closest approach of {thisCA / 1000:N3} km at {FPUtility.SecondsToTimeString(thisCATime - UT)} from now.");
 
-                    patchIdx = 0;
-                    nextCATime = PatchedConicsList[patchIdx].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
-                    nextCA = (PatchedConicsList[patchIdx].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
-                    //ManeuverPlanSolver.FindPatchContainingUt(thisCATime, PatchedConicsList, out var patch, out var patchIdx);
+                    patchIdx = -1;
+                    nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
+                    nextCA = (PatchedConicsList[0].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
                     // Find the patch with the closest new closest approach
-                    for (int i = 1; i < PatchedConicsList.Count; i++)
+                    for (int i = 0; i < PatchedConicsList.Count; i++)
                     {
                         if (PatchedConicsList[i].referenceBody.Name == Plugin._currentTarget.Name)
                         {
@@ -610,7 +684,10 @@ public class FlightPlanUI
                             break;
                         }
                     }
-                    FlightPlanPlugin.Logger.LogInfo($"Found closest approach of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime - UT)} from now on patch {patchIdx}");
+                    if (patchIdx < 0)
+                        FlightPlanPlugin.Logger.LogInfo($"Course correction fails to intercept {target.Name}'s SOI");
+                    else
+                        FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime - UT)} from now on patch {patchIdx}");
                     // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
                     pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
                     if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
@@ -626,6 +703,8 @@ public class FlightPlanUI
                         _requestedBurnTime = Plugin._currentNode.Time;
                     thisCATime = vesselOrbit.NextClosestApproachTime(targetOrbit, _requestedBurnTime);
                     thisCA = (vesselOrbit.GetTruePositionAtUT(thisCATime).localPosition - targetOrbit.GetTruePositionAtUT(thisCATime).localPosition).magnitude;
+                    FlightPlanPlugin.Logger.LogInfo($"Started with closest approach of {thisCA / 1000:N3} km at {FPUtility.SecondsToTimeString(thisCATime - UT)} from now.");
+
                     nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
                     nextCA = (PatchedConicsList[0].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
                     pError = (nextCA - FPSettings.InterceptDistanceVessel) / (FPSettings.InterceptDistanceVessel);
@@ -662,7 +741,34 @@ public class FlightPlanUI
                 //    FPStatus.Ok($"Acceptable: Requested Periapsis {tgtVel.magnitude:N1} m/s, got {nextVel.magnitude:N1} m/s, off by {pError * 100:N3}%");
                 break;
             case ManeuverType.planetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
-
+                if (_requestedBurnTime < 0)
+                    _requestedBurnTime = Plugin._currentNode.Time;
+                patchIdx = -1;
+                nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
+                nextCA = (PatchedConicsList[0].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
+                // Find the patch with the closest new closest approach
+                for (int i = 0; i < PatchedConicsList.Count; i++)
+                {
+                    if (PatchedConicsList[i].referenceBody.Name == Plugin._currentTarget.Name)
+                    {
+                        nextCA = PatchedConicsList[i].PeriapsisArl;
+                        nextCATime = PatchedConicsList[i].TimeToPe;
+                        patchIdx = i;
+                        break;
+                    }
+                }
+                if (patchIdx < 0)
+                    FlightPlanPlugin.Logger.LogInfo($"Course correction fails to intercept {target.Name}'s SOI");
+                else
+                    FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime - UT)} from now on patch {patchIdx}");
+                // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
+                pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
+                if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
+                    FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                else if (Math.Abs(pError) >= Plugin._smallError.Value / 100)
+                    FPStatus.Warning($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                //else
+                //    FPStatus.Ok($"Acceptable: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
                 break;
             case ManeuverType.fixAp: // Working
                 thisAp = vesselOrbit.Apoapsis;
