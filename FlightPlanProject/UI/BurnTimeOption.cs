@@ -293,7 +293,7 @@ internal class BurnTimeOption
             case ManeuverType.hohmannXfer:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
-                ManeuverTypeDesc = "Performing Homann transfer";
+                ManeuverTypeDesc = "Performing Hohmann transfer";
                 break;
             case ManeuverType.courseCorrection:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
