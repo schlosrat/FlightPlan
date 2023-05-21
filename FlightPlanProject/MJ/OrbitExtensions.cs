@@ -325,6 +325,7 @@ namespace MuMech
         }
 
         //distance between two orbiting objects at a given time
+        // TODO: Explore using the built-in KPS2 orbit function for ClosestApproachDistance
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Separation(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
         {
@@ -335,6 +336,8 @@ namespace MuMech
         //If a is hyperbolic, the examined interval is the next 100 units of mean anomaly.
         //This is quite a large segment of the hyperbolic arc. However, for extremely high
         //hyperbolic eccentricity it may not find the actual closest approach.
+        // TODO: Explore using the built-in KSP2 orbit functions for closestEncounterBody, closestEncounterLevel,
+        // or closestEncounterPatch
         public static double NextClosestApproachTime(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
         {
             double closestApproachTime = UT;

@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using FlightPlan.KTools;
 using FlightPlan.KTools.UI;
+using FPUtilities;
 using HarmonyLib;
 using KSP.Game;
 using KSP.Sim.impl;
@@ -312,8 +313,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         var ManeuverPlanSolver = Orbiter?.ManeuverPlanSolver;
 
         burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
-        Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
-        Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
         NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, burnOffsetFactor);
         _currentNode = NodeManagerPlugin.Instance.currentNode;
 
@@ -617,21 +618,39 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double _burnUTout;
         Vector3d _deltaV;
 
-        FPStatus.Warning($"Ready to Transfer to {_currentTarget.Name} ?");
+        FPStatus.Warning($"Ready to Transfer to {_currentTarget.Name}");
 
         bool _simpleTransfer = false;
-        bool _intercept_only = true;
+        bool _intercept_only;
         if (_simpleTransfer)
         {
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout);
+            double offsetDist = 0;
+            if (_currentTarget.IsCelestialBody)
+            {
+                offsetDist = _currentTarget.CelestialBody.radius + FPSettings.InterceptDistanceCelestial * 1000;
+                Logger.LogDebug($"HohmannTransfer: HoffsetDist for celestial encounter {offsetDist/1000:N2} km");
+            }
+            else
+            {
+                offsetDist = FPSettings.InterceptDistanceVessel;
+                Logger.LogDebug($"HohmannTransfer: HoffsetDist for non-celestial encounter {offsetDist:N2} m");
+            }
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, offsetDist);
         }
         else
         {
-            bool _anExists = _orbit.AscendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
-            bool _dnExists = _orbit.DescendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
-            double _anTime = _orbit.TimeOfAscendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
-            double _dnTime = _orbit.TimeOfDescendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
-            // burnUT = timeSelector.ComputeManeuverTime(orbit, _UT, _currentTarget.orbit as PatchedConicsOrbit);
+            if (_currentTarget.IsCelestialBody)
+            {
+                _intercept_only = true;
+            }
+            else
+            {
+                _intercept_only = true;
+            }
+            //bool _anExists = _orbit.AscendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
+            //bool _dnExists = _orbit.DescendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
+            //double _anTime = _orbit.TimeOfAscendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
+            //double _dnTime = _orbit.TimeOfDescendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
             _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, intercept_only: _intercept_only);
         }
 
