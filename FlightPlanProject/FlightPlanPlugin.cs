@@ -628,12 +628,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             if (_currentTarget.IsCelestialBody)
             {
                 offsetDist = _currentTarget.CelestialBody.radius + FPSettings.InterceptDistanceCelestial * 1000;
-                Logger.LogDebug($"HohmannTransfer: HoffsetDist for celestial encounter {offsetDist/1000:N2} km");
+                Logger.LogDebug($"HohmannTransfer: OffsetDist for celestial encounter {offsetDist/1000:N2} km");
             }
             else
             {
                 offsetDist = FPSettings.InterceptDistanceVessel;
-                Logger.LogDebug($"HohmannTransfer: HoffsetDist for non-celestial encounter {offsetDist:N2} m");
+                Logger.LogDebug($"HohmannTransfer: OffsetDist for non-celestial encounter {offsetDist:N2} m");
             }
             _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, offsetDist);
         }
