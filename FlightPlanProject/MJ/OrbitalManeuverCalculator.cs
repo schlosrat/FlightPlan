@@ -612,7 +612,7 @@ namespace MuMech
         //of the transfer orbit.
         //Actually, it's not exactly the phase angle. It's a sort of mean anomaly phase angle. The
         //difference is not important for how this function is used by DeltaVAndTimeForHohmannTransfer.
-        private static Vector3d DeltaVAndApsisPhaseAngleOfHohmannTransfer(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double apsisPhaseAngle)
+        private static Vector3d DeltaVAndApsisPhaseAngleOfHohmannTransfer(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double apsisPhaseAngle, double offsetDist = 0)
         {
             Vector3d apsisDirection = -o.WorldBCIPositionAtUT(UT);
             double desiredApsis = target.RadiusAtTrueAnomaly(target.TrueAnomalyFromVector(apsisDirection));
@@ -620,6 +620,7 @@ namespace MuMech
             Vector3d dV;
             if (desiredApsis > o.Apoapsis)
             {
+                desiredApsis -= offsetDist;
                 dV = DeltaVToChangeApoapsis(o, UT, desiredApsis);
                 PatchedConicsOrbit transferOrbit = o.PerturbedOrbit(UT, dV);
                 double transferApTime = transferOrbit.NextApoapsisTime(UT);
@@ -631,6 +632,7 @@ namespace MuMech
             }
             else
             {
+                desiredApsis += offsetDist;
                 dV = DeltaVToChangePeriapsis(o, UT, desiredApsis);
                 PatchedConicsOrbit transferOrbit = o.PerturbedOrbit(UT, dV);
                 double transferPeTime = transferOrbit.NextPeriapsisTime(UT);
@@ -651,16 +653,17 @@ namespace MuMech
         //The output burnUT will be the first transfer window found after the given UT.
         //Assumes o and target are in approximately the same plane, and orbiting in the same direction.
         //Also assumes that o is a perfectly circular orbit (though result should be OK for small eccentricity).
-        public static Vector3d DeltaVAndTimeForHohmannTransfer(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT)
+        public static Vector3d DeltaVAndTimeForHohmannTransfer(PatchedConicsOrbit o, PatchedConicsOrbit target, double UT, out double burnUT, double offsetDist = 0)
         {
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForHohmannTransfer: Makeing transfer to {target.ClosestApproachDistance} with offsetDist = {offsetDist} m");
             //We do a binary search for the burn time that zeros out the phase angle between the
             //transferring vessel and the target at the apsis of the transfer orbit.
             double synodicPeriod = o.SynodicPeriod(target);
-            FlightPlanPlugin.Logger.LogDebug($"synodicPeriod: {synodicPeriod}");
+            // FlightPlanPlugin.Logger.LogDebug($"synodicPeriod: {synodicPeriod}");
 
             double lastApsisPhaseAngle;
-            Vector3d immediateBurnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, UT, out lastApsisPhaseAngle);
-            FlightPlanPlugin.Logger.LogDebug($"lastApsisPhaseAngle: {lastApsisPhaseAngle}");
+            Vector3d immediateBurnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, UT, out lastApsisPhaseAngle, offsetDist);
+            // FlightPlanPlugin.Logger.LogDebug($"lastApsisPhaseAngle: {lastApsisPhaseAngle}");
 
             double minTime = UT;
             double maxTime = UT + 1.5 * synodicPeriod;
@@ -673,14 +676,14 @@ namespace MuMech
                 double t = minTime + dt * i;
 
                 double apsisPhaseAngle;
-                DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, t, out apsisPhaseAngle);
-                FlightPlanPlugin.Logger.LogDebug($"apsisPhaseAngle: {apsisPhaseAngle}");
+                DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, t, out apsisPhaseAngle, offsetDist);
+                // FlightPlanPlugin.Logger.LogDebug($"apsisPhaseAngle: {apsisPhaseAngle}");
 
                 if (Math.Abs(apsisPhaseAngle) < 90 && Math.Sign(lastApsisPhaseAngle) != Math.Sign(apsisPhaseAngle))
                 {
                     minTime = t - dt;
                     maxTime = t;
-                    FlightPlanPlugin.Logger.LogDebug($"Found transfer window between {minTime - UT} and {FPUtility.SecondsToTimeString(maxTime - UT)} from now (test {i})");
+                    FlightPlanPlugin.Logger.LogDebug($"Found transfer window between {FPUtility.SecondsToTimeString(minTime - UT)} and {FPUtility.SecondsToTimeString(maxTime - UT)} from now (test {i})");
                     break;
                 }
 
@@ -704,14 +707,14 @@ namespace MuMech
             Func<double, object, double> f = delegate(double testTime, object ign)
             {
                 double testApsisPhaseAngle;
-                DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, testTime, out testApsisPhaseAngle);
+                DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, testTime, out testApsisPhaseAngle, offsetDist);
                 return testApsisPhaseAngle;
             };
             try { burnUT = BrentRoot.Solve(f, maxTime, minTime, null); }
             catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVAndTimeForHohmannTransfer: Brents method threw a timeout error (supressed)"); }
             catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVAndTimeForHohmannTransfer: Brents method threw an argument exception Error (supressed): {e.Message}"); }
 
-            Vector3d burnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, burnUT, out _);
+            Vector3d burnDV = DeltaVAndApsisPhaseAngleOfHohmannTransfer(o, target, burnUT, out _, offsetDist);
             FlightPlanPlugin.Logger.LogDebug($"Optimal Time for Transfer: {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
 
             return burnDV;
@@ -803,14 +806,27 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeForCheapestCourseCorrection(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target, CelestialBodyComponent targetBody, double finalPeR,
             out double burnUT)
         {
+            double now = GameManager.Instance.Game.UniverseModel.UniversalTime;
             Vector3d collisionDV = DeltaVAndTimeForCheapestCourseCorrection(o, UT, target, out burnUT);
             PatchedConicsOrbit collisionOrbit = o.PerturbedOrbit(burnUT, collisionDV);
             double collisionUT = collisionOrbit.NextClosestApproachTime(target, burnUT);
             Vector3d collisionPosition = target.WorldPositionAtUT(collisionUT);
             Vector3d collisionRelVel = collisionOrbit.WorldOrbitalVelocityAtUT(collisionUT) - target.WorldOrbitalVelocityAtUT(collisionUT);
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: collisionDV = [{collisionDV.x:N3}, {collisionDV.y:N3}, {collisionDV.z:N3}] m/s");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: collisionUT = {FPUtility.SecondsToTimeString(collisionUT - now)} from now");
 
-            double soiEnterUT = collisionUT - targetBody.sphereOfInfluence / collisionRelVel.magnitude;
+            // double soiEnterUT = collisionUT - targetBody.sphereOfInfluence / collisionRelVel.magnitude;
+            // FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: Time to SOI = {FPUtility.SecondsToTimeString(soiEnterUT - now)} from now");
+
+            int iterCount = 0;
+            double soiEnterUT = (now + collisionUT) / 2.0;
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: Time to SOI = {FPUtility.SecondsToTimeString(soiEnterUT - now)} from now");
+            soiEnterUT = o.UniversalTimeAtSoiEncounter;
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: Time to SOI = {FPUtility.SecondsToTimeString(soiEnterUT - now)} from now");
+            o.SolveSOI_BSP(collisionOrbit, ref soiEnterUT, 1000, targetBody.sphereOfInfluence, now, collisionUT, double.Epsilon, 100, ref iterCount);
             Vector3d soiEnterRelVel = collisionOrbit.WorldOrbitalVelocityAtUT(soiEnterUT) - target.WorldOrbitalVelocityAtUT(soiEnterUT);
+
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: Time to SOI = {FPUtility.SecondsToTimeString(soiEnterUT - now)} from now");
 
             double E = 0.5 * soiEnterRelVel.sqrMagnitude -
                        targetBody.gravParameter / targetBody.sphereOfInfluence; //total orbital energy on SoI enter
@@ -821,6 +837,10 @@ namespace MuMech
 
             Vector3d displacementDir = Vector3d.Cross(collisionRelVel, o.OrbitNormal()).normalized;
             Vector3d interceptTarget = collisionPosition + desiredImpactParameter * displacementDir;
+
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: desiredImpactParameter = {desiredImpactParameter:N3}");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: displacementDir        = [{displacementDir.x:N3}, {displacementDir.y:N3}, {displacementDir.z:N3}]");
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForCheapestCourseCorrection: interceptTarget        = [{interceptTarget.x:N3}, {interceptTarget.y:N3}, {interceptTarget.z:N3}]");
 
             (V3 velAfterBurn, _) = Gooding.Solve(o.referenceBody.gravParameter, o.WorldBCIPositionAtUT(burnUT).ToV3(),
                 o.WorldOrbitalVelocityAtUT(burnUT).ToV3(), (interceptTarget - o.referenceBody.Position.localPosition).ToV3(), collisionUT - burnUT, 0);
