@@ -284,6 +284,7 @@ public class FlightPlanUI
     public void OnGUI()
     {
         CreateTabs();
+        var op = new OperationAdvancedTransfer();
 
         // All Tabs get the current situation
         DrawEntry("Situation", String.Format("{0} {1}", SituationToString(FlightPlanPlugin.Instance._activeVessel.Situation), FlightPlanPlugin.Instance._activeVessel.mainBody.bodyName));
@@ -314,14 +315,14 @@ public class FlightPlanUI
         if (TimeRef == TimeRef.LIMITED_TIME)
         {
             FPSettings.LimitedTime = DrawSoloToggle("<b>Limited Time</b>", FPSettings.Occlusion);
-            // double UT = Game.UniverseModel.UniversalTime;
+            double UT = Game.UniverseModel.UniversalTime;
             // if (FPSettings.LimitedTime) { OperationAdvancedTransfer.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody); }
         }
         if (TimeRef == TimeRef.PORKCHOP)
         {
             FPSettings.Porkchop = DrawSoloToggle("<b>Porkchop Selection</b>", FPSettings.Porkchop);
-            //double UT = Game.UniverseModel.UniversalTime;
-            //if (FPSettings.Porkchop) { OperationAdvancedTransfer.DoPorkchopGui(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody); }
+            double UT = Game.UniverseModel.UniversalTime;
+            if (FPSettings.Porkchop) { op.DoPorkchopGui(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody); }
         }
         // Draw the GUI Status at the end of this tab
         double _UT = Game.UniverseModel.UniversalTime;

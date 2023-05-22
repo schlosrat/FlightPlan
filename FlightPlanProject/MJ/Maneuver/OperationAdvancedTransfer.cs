@@ -146,7 +146,7 @@ namespace MuMech
 
         private bool layoutSkipped;
 
-        private void DoPorkchopGui(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target) // was: MechJebModuleTargetController target
+        public void DoPorkchopGui(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target) // was: MechJebModuleTargetController target
         {
             var targetCelestial = target as CelestialBodyComponent;
 
