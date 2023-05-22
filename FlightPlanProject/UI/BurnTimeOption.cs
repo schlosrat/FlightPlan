@@ -8,6 +8,8 @@ namespace FlightPlan;
 
 internal class BurnTimeOption
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public static BurnTimeOption _instance;
     public static BurnTimeOption Instance { get => _instance; }
 
@@ -101,7 +103,7 @@ internal class BurnTimeOption
     public void SetBurnTime()
     {
         // Set the requested burn time based on the selected timing _option
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         FlightPlanPlugin Plugin = FlightPlanPlugin.Instance;
         PatchedConicsOrbit Orbit = Plugin._activeVessel.Orbit;
 
@@ -320,6 +322,11 @@ internal class BurnTimeOption
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
                 ManeuverTypeDesc = "Performing planetary transfer";
+                break;
+            case ManeuverType.advancedPlanetaryXfer:
+                Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
+
+                ManeuverTypeDesc = "Performing advanced planetary transfer";
                 break;
             case ManeuverType.fixAp:
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"

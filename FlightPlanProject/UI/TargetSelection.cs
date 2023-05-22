@@ -9,6 +9,8 @@ namespace FlightPlan;
 
 public class TargetSelection
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     FlightPlanPlugin Plugin;
     private bool selecting = false;
     private Vector2 scrollPosition;
@@ -126,7 +128,7 @@ public class TargetSelection
         else
         {
             // Make a list of all vessels other than this one
-            allVessels = GameManager.Instance.Game.SpaceSimulation.UniverseModel.GetAllVessels();
+            allVessels = Game.SpaceSimulation.UniverseModel.GetAllVessels();
             allVessels.Remove(Plugin._activeVessel);
             allVessels.RemoveAll(v => v.IsDebris());
         }
@@ -177,7 +179,7 @@ public class TargetSelection
         if (!selecting)
             return false;
 
-        //bodies = GameManager.Instance.Game.SpaceSimulation.GetBodyNameKeys().ToList();
+        //bodies = Game.SpaceSimulation.GetBodyNameKeys().ToList();
 
         CelestialBodyComponent _rootBody = Plugin._activeVessel.mainBody;
         while (_rootBody.referenceBody != null)
@@ -185,7 +187,7 @@ public class TargetSelection
             _rootBody = _rootBody.referenceBody;
         }
 
-        // bodies = GameManager.Instance.Game.SpaceSimulation.GetAllObjectsWithComponent<CelestialBodyComponent>();
+        // bodies = Game.SpaceSimulation.GetAllObjectsWithComponent<CelestialBodyComponent>();
 
         GUILayout.BeginHorizontal();
         // UI_Tools.Label("Select target ");

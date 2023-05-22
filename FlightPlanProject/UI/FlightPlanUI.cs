@@ -14,6 +14,8 @@ public class FlightPlanUI
     private static FlightPlanUI _instance;
     public static FlightPlanUI Instance { get => _instance; }
 
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public FlightPlanUI(FlightPlanPlugin main_plugin)
     {
         _instance = this;
@@ -294,7 +296,7 @@ public class FlightPlanUI
             return;
 
         // game = GameManager.Instance.Game;
-        //ActiveNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
+        //ActiveNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(Game.ViewController.GetActiveVehicle(true).Guid);
         //CurrentNode = (ActiveNodes.Count() > 0) ? ActiveNodes[0] : null;
         FPUtility.RefreshActiveVesselAndCurrentManeuver();
         
@@ -312,7 +314,7 @@ public class FlightPlanUI
         }
 
         // Draw the GUI Status at the end of this tab
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         if (Plugin._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN && FPStatus.status != FPStatus.Status.ERROR)
         {
             FPStatus.Ok("");
@@ -448,6 +450,10 @@ public class FlightPlanUI
                 _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
                 _launchMNC = true;
                 break;
+            case ManeuverType.advancedPlanetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
+                _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
+                _launchMNC = true;
+                break;
             case ManeuverType.fixAp: // Working
                 _pass = Plugin.SetNewAp(_requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);
                 break;
@@ -485,7 +491,7 @@ public class FlightPlanUI
         Vector3d tgtVel, thisVel, nextVel;
         PatchedConicsOrbit vesselOrbit = Plugin._activeVessel.Orbit;
         var target = Plugin._currentTarget;
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit = null;
         if (target != null)
             targetOrbit = target.Orbit as PatchedConicsOrbit;
@@ -741,6 +747,36 @@ public class FlightPlanUI
                 //    FPStatus.Ok($"Acceptable: Requested Periapsis {tgtVel.magnitude:N1} m/s, got {nextVel.magnitude:N1} m/s, off by {pError * 100:N3}%");
                 break;
             case ManeuverType.planetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
+                if (_requestedBurnTime < 0)
+                    _requestedBurnTime = Plugin._currentNode.Time;
+                patchIdx = -1;
+                nextCATime = PatchedConicsList[0].NextClosestApproachTime(targetOrbit, _requestedBurnTime);
+                nextCA = (PatchedConicsList[0].GetTruePositionAtUT(nextCATime).localPosition - targetOrbit.GetTruePositionAtUT(nextCATime).localPosition).magnitude;
+                // Find the patch with the closest new closest approach
+                for (int i = 0; i < PatchedConicsList.Count; i++)
+                {
+                    if (PatchedConicsList[i].referenceBody.Name == Plugin._currentTarget.Name)
+                    {
+                        nextCA = PatchedConicsList[i].PeriapsisArl;
+                        nextCATime = PatchedConicsList[i].TimeToPe;
+                        patchIdx = i;
+                        break;
+                    }
+                }
+                if (patchIdx < 0)
+                    FlightPlanPlugin.Logger.LogInfo($"Course correction fails to intercept {target.Name}'s SOI");
+                else
+                    FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime - UT)} from now on patch {patchIdx}");
+                // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
+                pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
+                if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
+                    FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                else if (Math.Abs(pError) >= Plugin._smallError.Value / 100)
+                    FPStatus.Warning($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                //else
+                //    FPStatus.Ok($"Acceptable: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
+                break;
+            case ManeuverType.advancedPlanetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
                 if (_requestedBurnTime < 0)
                     _requestedBurnTime = Plugin._currentNode.Time;
                 patchIdx = -1;

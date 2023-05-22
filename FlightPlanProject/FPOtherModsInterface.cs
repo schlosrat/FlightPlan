@@ -21,7 +21,9 @@ namespace FlightPlan;
 public class FPOtherModsInterface
 {
     public static FPOtherModsInterface instance = null;
- 
+
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanPlugin.OtherModsInterface");
 
     // Reflection access variables for launching MNC & K2-D2
@@ -54,6 +56,7 @@ public class FPOtherModsInterface
 
             // Get _mncInfo buton Icon
             mncButtonTex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/mnc_icon_white_50.png");
+            // mncButtonTex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/mnc_icon_white_50.png");
             MNCButtonTexCon = new GUIContent(mncButtonTex, "Launch Maneuver Node Controller");
 
             // Reflections method to attempt the same thing more cleanly
@@ -134,7 +137,7 @@ public class FPOtherModsInterface
 
                 if (_k2d2Status == "Done")
                 {
-                    if (FlightPlanPlugin.Instance._currentNode.Time < GameManager.Instance.Game.UniverseModel.UniversalTime)
+                    if (FlightPlanPlugin.Instance._currentNode.Time < Game.UniverseModel.UniversalTime)
                     {
                         // NodeManagerPlugin.Instance.DeleteNodes(0);
                         // NodeManagerPlugin.Instance.DeleteNode(0);

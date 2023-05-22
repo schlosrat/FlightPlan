@@ -10,7 +10,7 @@ public class UI_Fields
     public static Dictionary<string, string> TempDict = new Dictionary<string, string>();
     public static List<string> InputFields = new List<string>();
     static bool InputState = true;
-
+    private static readonly GameInstance Game = GameManager.Instance.Game;
 
     public static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("KTools.UI_Fields");
 
@@ -24,9 +24,9 @@ public class UI_Fields
                 Logger.LogWarning("input mode changed");
 
                 if (value)
-                    GameManager.Instance.Game.Input.Enable();
+                    Game.Input.Enable();
                 else
-                    GameManager.Instance.Game.Input.Disable();
+                    Game.Input.Disable();
             }
             InputState = value;
         }

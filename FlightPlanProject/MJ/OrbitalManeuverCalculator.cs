@@ -25,6 +25,8 @@ namespace MuMech
 {
     public static class OrbitalManeuverCalculator
     {
+        private static readonly GameInstance Game = GameManager.Instance.Game;
+
         // A stand in for the KSP1 function o.ReferenceBody.GetLatitude(Vector3d pos)
         // KSP2 doesn't appear to have such a function, but does have GetLatLonAltFromRadius
         // ISSUE all the o.*Position*() values return Vector3d, need type Position
@@ -464,7 +466,7 @@ namespace MuMech
             double orbVel = CircularOrbitSpeed(body, alt + body.radius); // was: vesselState.altitudeASL 
             double headingOne = HeadingForInclination(inclinationDegrees, latitudeDegrees) * UtilMath.Deg2Rad;
             double headingTwo = HeadingForInclination(-inclinationDegrees, latitudeDegrees) * UtilMath.Deg2Rad;
-            double now = GameManager.Instance.Game.UniverseModel.UniversalTime;
+            double now = Game.UniverseModel.UniversalTime;
             PatchedConicsOrbit o = vessel.Orbit;
 
             Vector3d north = vessel._telemetryComponent.HorizonNorth.vector; // vesselState.north; // (from VesselState.cs) north = vessel.north; // IFlightTelemetry has a North Vector, can we use that?
@@ -479,7 +481,7 @@ namespace MuMech
 
             Vector3d desiredHorizontalVelocity;
             Vector3d deltaHorizontalVelocity;
-            double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+            double UT = Game.UniverseModel.UniversalTime;
             Vector3d up = vessel.Orbit.Position.localPosition.normalized; // (from VesselState.cs) was orbitalPosition.normalized
             Vector3d surfaceVelocity = vessel.Orbit.GetOrbitalVelocityAtUTZup(UT) - vessel.mainBody.GetFrameVelAtUTZup(UT); // (from VesselState.cs) was orbitalVelocity - vessel.mainBody.getRFrmVel(CoM)
             if (Vector3d.Exclude(up, surfaceVelocity).magnitude < 200) // was vesselState.speedSurfaceHorizontal
@@ -559,16 +561,17 @@ namespace MuMech
             if (Math.Abs(testOrbit.inclination - newInclinationDeg) < 1)
                 return deltaV;
 
-            Vector3d burnDirection = deltaV.normalized;
-            double minDeltaV = 0.5 * deltaV.magnitude;
-            double maxDeltaV = 1.5 * deltaV.magnitude;
-            Func<double, object, double> f = delegate (double testDeltaV, object ign) { return Math.Abs(o.PerturbedOrbit(UT, testDeltaV * burnDirection).inclination - newInclinationDeg); };
-            double dV = 0;
-            try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
-            catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVToChangeInclination: Brents method threw a timeout Error (supressed)"); }
-            catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVToChangeInclination: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+            //Vector3d burnDirection = deltaV.normalized;
+            //double minDeltaV = 0.5 * deltaV.magnitude;
+            //double maxDeltaV = 1.5 * deltaV.magnitude;
+            //Func<double, object, double> f = delegate (double testDeltaV, object ign) { return Math.Abs(o.PerturbedOrbit(UT, testDeltaV * burnDirection).inclination - newInclinationDeg); };
+            //double dV = 0;
+            //try { dV = BrentRoot.Solve(f, minDeltaV, maxDeltaV, null); }
+            //catch (TimeoutException) { FlightPlanPlugin.Logger.LogError("DeltaVToChangeInclination: Brents method threw a timeout Error (supressed)"); }
+            //catch (ArgumentException e) { FlightPlanPlugin.Logger.LogError($"DeltaVToChangeInclination: Brents method threw an argument exception Error (supressed): {e.Message}"); }
+            // return dV* burnDirection;
 
-            return dV* burnDirection;
+            return deltaV;
         }
 
         //Computes the delta-V and time of a burn to match planes with the target orbit. The output burnUT
@@ -806,7 +809,7 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeForCheapestCourseCorrection(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target, CelestialBodyComponent targetBody, double finalPeR,
             out double burnUT)
         {
-            double now = GameManager.Instance.Game.UniverseModel.UniversalTime;
+            double now = Game.UniverseModel.UniversalTime;
             Vector3d collisionDV = DeltaVAndTimeForCheapestCourseCorrection(o, UT, target, out burnUT);
             PatchedConicsOrbit collisionOrbit = o.PerturbedOrbit(burnUT, collisionDV);
             double collisionUT = collisionOrbit.NextClosestApproachTime(target, burnUT);
@@ -1554,7 +1557,7 @@ namespace MuMech
             double oppositeRadius = 0;
 
             // Back out the rotation of the body to calculate the longitude of the apoapsis when the vessel reaches the node
-            double degreeRotationToNode = (UT - GameManager.Instance.Game.UniverseModel.UniversalTime) * 360 / o.referenceBody.rotationPeriod;
+            double degreeRotationToNode = (UT - Game.UniverseModel.UniversalTime) * 360 / o.referenceBody.rotationPeriod;
             double NodeLongitude = GetLongitude(o, UT) - degreeRotationToNode;
 
             double LongitudeOffset = NodeLongitude - newNodeLong; // Amount we need to shift the Ap's longitude
@@ -1586,7 +1589,7 @@ namespace MuMech
         //
 
         public static readonly IObjectPool<PatchedConicsOrbit> OrbitPool = new UtilScripts.Pool<PatchedConicsOrbit>(CreateOrbit, ResetOrbit);
-        private static PatchedConicsOrbit CreateOrbit() { return new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel); }
+        private static PatchedConicsOrbit CreateOrbit() { return new PatchedConicsOrbit(Game.UniverseModel); }
         private static void ResetOrbit(PatchedConicsOrbit o) { }
 
         // private static readonly PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();

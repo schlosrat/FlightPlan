@@ -17,6 +17,7 @@ namespace MuMech
 {
     public static class MuUtils
     {
+        private static readonly GameInstance Game = GameManager.Instance.Game;
 
         public const double DBL_EPSILON = 2.2204460492503131e-16;
 
@@ -170,7 +171,7 @@ namespace MuMech
         // ret.UpdateFromStateVectors(OrbitExtensions.SwapYZ(pos - body.Position), OrbitExtensions.SwapYZ(vel), body, UT);
         public static PatchedConicsOrbit OrbitFromStateVectors(Vector3d pos, Vector3d vel, ICoordinateSystem coordinateSystem, CelestialBodyComponent body, double UT)
         {
-            PatchedConicsOrbit ret = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+            PatchedConicsOrbit ret = new PatchedConicsOrbit(Game.UniverseModel);
             // Create the type Position and Velocty inputs needed for KSP2's UpdateFromStateVectors
             Position position = new(body.SimulationObject.transform.celestialFrame, (pos - body.Position.localPosition).SwapYAndZ); // OrbitExtensions.SwapYZ(pos - body.Position.localPosition)
             Velocity velocity = new(body.SimulationObject.transform.celestialFrame.motionFrame, vel.SwapYAndZ); // OrbitExtensions.SwapYZ(vel)

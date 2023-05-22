@@ -13,6 +13,8 @@ namespace MuMech
     [UsedImplicitly]
     public class OperationAdvancedTransfer : Operation
     {
+        private static readonly GameInstance Game = GameManager.Instance.Game;
+
         private enum Mode
         {
             LimitedTime,
@@ -211,10 +213,10 @@ namespace MuMech
                 if (p > 0)
                 {
                     dv = p.ToSI() + "m/s";
-                    if (worker.DateFromIndex(point[0]) < GameManager.Instance.Game.UniverseModel.UniversalTime) // Planetarium.GetUniversalTime())
+                    if (worker.DateFromIndex(point[0]) < Game.UniverseModel.UniversalTime) // Planetarium.GetUniversalTime())
                         departure = "any time now"; // Localizer.Format("#MechJeb_adv_label1")
                     else
-                        departure = GuiUtils.TimeToDHMS(worker.DateFromIndex(point[0]) - GameManager.Instance.Game.UniverseModel.UniversalTime);
+                        departure = GuiUtils.TimeToDHMS(worker.DateFromIndex(point[0]) - Game.UniverseModel.UniversalTime);
                     duration = GuiUtils.TimeToDHMS(worker.DurationFromIndex(point[1]));
                 }
 

@@ -11,6 +11,8 @@ namespace FlightPlan;
 
 public class BasePageContent : IPageContent
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public BasePageContent()
     {
         this.MainUI = FlightPlanUI.Instance;
@@ -84,6 +86,8 @@ public class OwnshipManeuversPage : BasePageContent
 
 public class TargetPageShip2Ship : BasePageContent
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public override string Name => "Target";
 
     readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TRM_50_Ship2Ship.png");
@@ -108,7 +112,7 @@ public class TargetPageShip2Ship : BasePageContent
 
     public override void OnGUI()
     {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit;
         string recommendedManeuver;
         const int maxPhasingOrbits = 5;
@@ -211,6 +215,8 @@ public class TargetPageShip2Celestial : BasePageContent
 {
     public override string Name => "Target";
 
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     // readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TargetRelManeuver_50v2.png");
     readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TRM_50_Ship2Celestial.png");
 
@@ -229,7 +235,7 @@ public class TargetPageShip2Celestial : BasePageContent
 
     public override void OnGUI()
     {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit;
         double nextWindow;
 
@@ -282,6 +288,8 @@ public class TargetPageShip2Celestial : BasePageContent
 
 public class InterplanetaryPage : BasePageContent
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public override string Name => "Target";
 
     readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/OTM_50_Planet.png");
@@ -307,7 +315,7 @@ public class InterplanetaryPage : BasePageContent
         FPStyles.DrawSectionHeader("Orbital Transfer Maneuvers");
         BurnTimeOption.Instance.OptionSelectionGUI();
 
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit = Plugin._currentTarget.Orbit as PatchedConicsOrbit;
         double synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
         double relativeInc = Orbit.RelativeInclination(targetOrbit);
@@ -332,6 +340,8 @@ public class InterplanetaryPage : BasePageContent
         if (Plugin._experimental.Value) // No maneuvers relative to a star
         {
             MainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
+            // MainUI.DrawToggleButton("Advanced Interplanetary Transfer", ManeuverType.advancedPlanetaryXfer);
+            //
         }
         else
         {

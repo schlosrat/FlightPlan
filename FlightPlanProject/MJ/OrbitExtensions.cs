@@ -20,6 +20,8 @@ namespace MuMech
 {
     public static class OrbitExtensions
     {
+        private static readonly GameInstance Game = GameManager.Instance.Game;
+
         public static double RelativeDistance(this PatchedConicsOrbit a, PatchedConicsOrbit b, double UT)
         {
             return (b.WorldBCIPositionAtUT(UT) - a.WorldBCIPositionAtUT(UT)).magnitude;
@@ -265,9 +267,9 @@ namespace MuMech
 
             // hack up a dynamic default value to the current time
             if (UT == double.NegativeInfinity)
-                UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+                UT = Game.UniverseModel.UniversalTime;
 
-            PatchedConicsOrbit newOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+            PatchedConicsOrbit newOrbit = new PatchedConicsOrbit(Game.UniverseModel);
             o.GetOrbitalStateVectorsAtUT(UT, out pos, out vel);
             Position position = new Position(o.referenceBody.SimulationObject.transform.celestialFrame, (pos - o.referenceBody.Position.localPosition).SwapYAndZ);
             Velocity velocity = new Velocity(o.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, vel.SwapYAndZ); // OrbitExtensions.SwapYZ(vel)
@@ -283,11 +285,11 @@ namespace MuMech
 
             // hack up a dynamic default value to the current time
             if (UT == double.NegativeInfinity)
-                UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+                UT = Game.UniverseModel.UniversalTime;
 
             o.StartUT = UT;
             o.EndUT   = o.eccentricity >= 1.0 ? o.period : UT + o.period;
-            // PatchedConicsOrbit nextOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+            // PatchedConicsOrbit nextOrbit = new PatchedConicsOrbit(Game.UniverseModel);
             // PatchedConics.CalculatePatch(o, nextOrbit, UT, solverParameters, null); // Maybe this need to be CalculatePatchConicList, or CalculatePatchList ???
             // Assuming nextOrbit can be obtained from o.NextPatch
             PatchedConicsOrbit nextOrbit = o.NextPatch as PatchedConicsOrbit;
@@ -298,7 +300,7 @@ namespace MuMech
         // This does not allocate a new orbit object and the caller should call new PatchedConicsOrbit if/when required
         public static void MutatedOrbit(this PatchedConicsOrbit o, double periodOffset = double.NegativeInfinity)
         {
-            double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+            double UT = Game.UniverseModel.UniversalTime;
 
             if (periodOffset.IsFinite())
             {
@@ -751,7 +753,7 @@ namespace MuMech
 
         public static double Transfer(this PatchedConicsOrbit currentOrbit, PatchedConicsOrbit targetOrbit, out double time)
         {
-            // GameInstance game = GameManager.Instance.Game;
+            // GameInstance game = Game;
             // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
             CelestialBodyComponent cur = currentOrbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
 
@@ -842,7 +844,7 @@ namespace MuMech
             if (vessel.mainBody == null) return 0;
             if (orbit.PeriapsisArl > 0) return double.PositiveInfinity;
 
-            double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+            double UT = Game.UniverseModel.UniversalTime;
             double angleFromHorizontal = 90 - Vector3d.Angle(-vessel.SurfaceVelocity.vector, vessel.Orbit.Up(UT));
             angleFromHorizontal = MuUtils.Clamp(angleFromHorizontal, 0, 90);
             double sine = Math.Sin(angleFromHorizontal * UtilMath.Deg2Rad);

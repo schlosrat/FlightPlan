@@ -18,6 +18,8 @@ namespace MuMech
 {
     public class TransferCalculator
     {
+        private static readonly GameInstance Game = GameManager.Instance.Game;
+
         public int  BestDate;
         public int  BestDuration;
         public bool Stop = false;
@@ -72,9 +74,9 @@ namespace MuMech
             OriginOrbit      = o;
             DestinationOrbit = target;
 
-            _origin = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+            _origin = new PatchedConicsOrbit(Game.UniverseModel);
             _origin.UpdateFromOrbitAtUT(o, minDepartureTime, o.referenceBody);
-            _destination = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+            _destination = new PatchedConicsOrbit(Game.UniverseModel);
             _destination.UpdateFromOrbitAtUT(target, minDepartureTime, target.referenceBody);
             MaxDurationSamples  = height;
             DateSamples         = width;
@@ -355,7 +357,7 @@ namespace MuMech
 
             double[] x = new double[VARS];
 
-            Debug.Log("epoch: " + GameManager.Instance.Game.UniverseModel.UniversalTime);
+            Debug.Log("epoch: " + Game.UniverseModel.UniversalTime);
             Debug.Log("initial orbit around source: " + _initialOrbit.MuString());
             Debug.Log("source: " + _initialOrbit.referenceBody.Orbit.MuString());
             Debug.Log("target: " + _targetBody.Orbit.MuString());
@@ -427,7 +429,7 @@ namespace MuMech
                 PatchedConicsOrbit source = initialOrbit.referenceBody.Orbit; // helicentric orbit of the source planet
 
                 // helicentric transfer orbit
-                var transferOrbit = new PatchedConicsOrbit(GameManager.Instance.Game.UniverseModel);
+                var transferOrbit = new PatchedConicsOrbit(Game.UniverseModel);
                 Position position = new Position(source.referenceBody.SimulationObject.transform.celestialFrame, source.GetRelativePositionAtUT(utTransfer));
                 Velocity velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.GetOrbitalVelocityAtUTZup(utTransfer) + exitDV.SwapYAndZ);
                 transferOrbit.UpdateFromStateVectors(position, velocity, source.referenceBody, utTransfer);
