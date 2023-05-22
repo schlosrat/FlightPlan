@@ -341,7 +341,6 @@ public class InterplanetaryPage : BasePageContent
         {
             MainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
             // MainUI.DrawToggleButton("Advanced Interplanetary Transfer", ManeuverType.advancedPlanetaryXfer);
-            //
         }
         else
         {

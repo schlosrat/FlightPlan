@@ -66,7 +66,9 @@ public enum TimeRef
     EQ_NEAREST_AD,
     EQ_HIGHEST_AD,
     REL_NEAREST_AD,
-    REL_HIGHEST_AD
+    REL_HIGHEST_AD,
+    LIMITED_TIME,
+    PORKCHOP
 }
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]

@@ -6,6 +6,7 @@ using FlightPlan.KTools.UI;
 using KSP.Sim.impl;
 using MuMech;
 using KSP.Sim;
+// using K2D2;
 
 namespace FlightPlan;
 
@@ -60,9 +61,7 @@ public class FlightPlanUI
     }
 
     public string ManeuverTypeDesc;
-
-
-    FlightPlanPlugin Plugin;
+    readonly FlightPlanPlugin Plugin;
 
     public ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FlightPlanUI");
 
@@ -312,7 +311,18 @@ public class FlightPlanUI
         {
             FPSettings.TimeOffset = DrawLabelWithTextField("Time From Now", FPSettings.TimeOffset, "s");
         }
-
+        if (TimeRef == TimeRef.LIMITED_TIME)
+        {
+            FPSettings.LimitedTime = DrawSoloToggle("<b>Limited Time</b>", FPSettings.Occlusion);
+            // double UT = Game.UniverseModel.UniversalTime;
+            // if (FPSettings.LimitedTime) { OperationAdvancedTransfer.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody); }
+        }
+        if (TimeRef == TimeRef.PORKCHOP)
+        {
+            FPSettings.Porkchop = DrawSoloToggle("<b>Porkchop Selection</b>", FPSettings.Porkchop);
+            //double UT = Game.UniverseModel.UniversalTime;
+            //if (FPSettings.Porkchop) { OperationAdvancedTransfer.DoPorkchopGui(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody); }
+        }
         // Draw the GUI Status at the end of this tab
         double _UT = Game.UniverseModel.UniversalTime;
         if (Plugin._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN && FPStatus.status != FPStatus.Status.ERROR)

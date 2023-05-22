@@ -39,7 +39,9 @@ internal class BurnTimeOption
         { TimeRef.EQ_NEAREST_AD,     "at nearest Eq. AN/DN"     }, //"at the nearest equatorial AN/DN"
         { TimeRef.EQ_HIGHEST_AD,     "at cheapest Eq. AN/DN"    }, //"at the cheapest equatorial AN/DN"
         { TimeRef.REL_NEAREST_AD,    "at nearest AN/DN w/Target"  }, //"at the nearest AN/DN with the target"
-        { TimeRef.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target" } //"at the cheapest AN/DN with the target"
+        { TimeRef.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target" }, //"at the cheapest AN/DN with the target"
+        { TimeRef.LIMITED_TIME,      "Limited Time"             }, //"at the cheapest AN/DN with the target"
+        { TimeRef.PORKCHOP,          "Porkchop Selection"       } //"at the cheapest AN/DN with the target"
     };
 
     public List<TimeRef> Options = new List<TimeRef>();
@@ -324,7 +326,8 @@ internal class BurnTimeOption
                 ManeuverTypeDesc = "Performing planetary transfer";
                 break;
             case ManeuverType.advancedPlanetaryXfer:
-                Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
+                Options.Add(TimeRef.PORKCHOP); //"Porkchop Selection"
+                Options.Add(TimeRef.LIMITED_TIME); //"Limited Time"
 
                 ManeuverTypeDesc = "Performing advanced planetary transfer";
                 break;
