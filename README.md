@@ -48,16 +48,16 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 ![Flight Plan Burn Time Option Menu](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUI-10.png)
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 
-### Ownship Maneuvers:
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png) **Always Available**
+### Ownship Maneuvers: Always Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png)
 * **Circularize**
 * **New Pe** (user specified value - km)
 * **New Ap** (user specified value - km)
 * **New Pe & Ap** (uses inputs for **New Pe** and **New Ap** above changing both in one maneuver)
 * **New Inclination** (user specified value - degrees)
 * **New SMA** (user specified value - km)
-### Target Relative Maneuvers - Ship to Ship: (only available if a target vessel or part is selected and both active vessel and target are in the same SOI)
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Conditionally Available**
+### Target Relative Maneuvers - Ship to Ship: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Only available if a target vessel or part is selected and both active vessel and target are in the same SOI**
 * Display of Rendezvous Planning Info:
 * *Target Orbit* (Ap x Pe - km)
 * *Current Orbit* (Ap x Pe - km)
@@ -73,8 +73,8 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
 * **Match Velocity** with target
-### Target Relative Maneuvers - Ship to Celestial: (only available if a celestial target is selected and both active vessel and target are in the same SOI)
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png) **Conditionally Available**
+### Target Relative Maneuvers - Ship to Celestial: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png) **Only available if a celestial target is selected and both active vessel and target are in the same SOI**
 * Display of Transfer Planning Info:
 * *Target Orbit* (Ap x Pe - km)
 * *Current Orbit* (Ap x Pe - km)
@@ -88,11 +88,11 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
-### Orbital Transfer Maneuvers - Moon Specific: (only available when at a moon)
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Conditionally Available**
+### Orbital Transfer Maneuvers - Moon Specific: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Only available when in orbit about a moon*
 * **Moon Return** (User specified target Pe (km) for arrival back at the parent planet)
-### Orbital Transfer Maneuvers - Interplanetary: (only available when at a planet targeting another planet)
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Conditionally Available**
+### Orbital Transfer Maneuvers - Interplanetary: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Only available when orbiting a planet targeting another planet**
 * Display of Planetary Transfer Parameters:
 * *Relative Inclination* (Destination Planet's orbit relative to Origin Planet's orbit - degrees)
 * *Phase Angle* to target (the current angle between the radius vectors for the origin and destination planets - degrees)
@@ -101,8 +101,8 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 * *Synodic Period* (the time between transfer windows)
 * *Approximate Next Window* (Days HH:MM:SS)
 * *Approximate Eject DeltaV* (based on Hohman transfer orbit, but neglecting the Delta-V needed to escape from the origin)
-### Resonant Orbit Maneuvers
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/ROM_50.png) **Always Available**
+### Resonant Orbit Maneuvers: Always Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/ROM_50.png)
 * Display of Resonant Orbit Configuration Parameters
 * *Payloads* (Number of payloads to deployments. Click + / - buttons to change. May be 2 to *)
 * *Deploy Orbits* (Number of resonant orbit cycles between deployments. Click + / - buttons to change. May be 1 to *)
