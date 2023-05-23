@@ -335,63 +335,12 @@ public class InterplanetaryPage : BasePageContent
         MainUI.DrawEntry("Aproximate Next Window", FPUtility.SecondsToTimeString(nextWindow, false, false, true), " ");
         // MainUI.DrawEntry("Next Window", FPUtility.SecondsToTimeString(nextWindow2), " ");
         MainUI.DrawEntry("Aproximate Eject DeltaV", DeltaV().ToString(), "m/s");
+        MainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
 
         if (Plugin._experimental.Value) // No maneuvers relative to a star
         {
-            MainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
-            // MainUI.DrawToggleButton("Advanced Interplanetary Transfer", ManeuverType.advancedPlanetaryXfer);
+            MainUI.DrawToggleButton("Advanced Interplanetary Transfer", ManeuverType.advancedPlanetaryXfer);
         }
-        else
-        {
-            // Let the user know they need to switch on Experimental Features to get this functionality
-            GUILayout.Label("No non-experimental capabilities available. Turn on <b>Experimental Features</b> in the Flight Plan <b>Configuration Menu</b> (Press Alt-M, click Open Configuration Manager) to access maneuvers from this tab.", KBaseStyle.Warning);
-        }
-    }
-
-    double Phase()
-    {
-        // GameInstance game = GameManager.Instance.Game;
-        // Plugin._activeVessel
-        // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
-        CelestialBodyComponent cur = Plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
-
-        // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
-        while (cur.Orbit.referenceBody.Name != Plugin._currentTarget.Orbit.referenceBody.Name)
-        {
-            cur = cur.Orbit.referenceBody;
-        }
-
-        CelestialBodyComponent star = Plugin._currentTarget.CelestialBody.GetRelevantStar();
-        Vector3d to = star.coordinateSystem.ToLocalPosition(Plugin._currentTarget.Position); // radius vector of destination planet
-        Vector3d from = star.coordinateSystem.ToLocalPosition(cur.Position); // radius vector of origin planet
-
-        double phase = Vector3d.SignedAngle(to, from, Vector3d.up);
-        return Math.Round(phase, 1);
-    }
-
-    double Transfer(out double time)
-    {
-        // GameInstance game = GameManager.Instance.Game;
-        // SimulationObjectModel target = Plugin._currentTarget; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().TargetObject;
-        CelestialBodyComponent cur = Plugin._activeVessel.Orbit.referenceBody; // game.ViewController.GetActiveVehicle(true)?.GetSimVessel().orbit.referenceBody;
-
-        double ellipseA, transfer;
-
-        // This deals with if we're at a moon and backing thing off so that cur would be the planet about which this moon is orbitting
-        while (cur.Orbit.referenceBody.Name != Plugin._currentTarget.Orbit.referenceBody.Name)
-        {
-            cur = cur.Orbit.referenceBody;
-        }
-
-        IKeplerOrbit targetOrbit = Plugin._currentTarget.Orbit;
-        IKeplerOrbit currentOrbit = cur.Orbit;
-
-        ellipseA = (targetOrbit.semiMajorAxis + currentOrbit.semiMajorAxis) / 2;
-        time = Mathf.PI * Mathf.Sqrt((float)((ellipseA) * (ellipseA) * (ellipseA)) / ((float)targetOrbit.referenceBody.gravParameter));
-
-        transfer = 180 - ((time / targetOrbit.period) * 360);
-        while (transfer < -180) { transfer += 360; }
-        return Math.Round(transfer, 1);
     }
 
     double DeltaV()
