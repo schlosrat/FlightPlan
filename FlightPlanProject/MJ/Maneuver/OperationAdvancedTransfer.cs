@@ -304,7 +304,7 @@ namespace MuMech
 
             // selectionMode = (Mode)GuiUtils.ComboBox.Box((int)selectionMode, modeNames, this);
             if (Event.current.type == EventType.Repaint)
-                windowWidth = FlightPlanPlugin.Instance._windowWidth; //  (int)GUILayoutUtility.GetLastRect().width;
+                windowWidth = FlightPlanPlugin.Instance.windowWidth; //  (int)GUILayoutUtility.GetLastRect().width;
 
             switch (selectionMode)
             {

@@ -91,7 +91,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private bool _interfaceEnabled = false;
     private bool _GUIenabled = true;
     private Rect _windowRect = Rect.zero;
-    private int _windowWidth = 250; //384px on 1920x1080
+    public int windowWidth = 250; //384px on 1920x1080
 
    
 
@@ -257,7 +257,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 FillWindow,
                 "<color=#696DFF>FLIGHT PLAN</color>",
                 GUILayout.Height(0),
-                GUILayout.Width(_windowWidth));
+                GUILayout.Width(windowWidth));
 
             save_rect_pos();
             // Draw the tool tip if needed
