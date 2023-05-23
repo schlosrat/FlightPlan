@@ -9,7 +9,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 **Note:** Version 0.8.0 has received significant updates and improvements in the GUI from [cfloutier](https://raw.githubusercontent.com/cfloutier) who richly deserves the credit for those parts. His contributions have dramatically improved the quality of the user interface and make the mod not only more modern and visually pleasing, but also easier and more fun to use.
 
 ## Compatibility
-* Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
+* Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.2.0
 * Requires [SpaceWarp](https://spacedock.info/mod/3277/Space%20Warp%20+%20BepInEx) 1.0.1+
 * Requires [Node Manager](https://spacedock.info/mod/3366/Node%20Manager) 0.5.4+
 * Optional, but highly recommended: [K2-D2](https://spacedock.info/mod/3325/K2-D2) 0.8.1+. See capabilities described below.
