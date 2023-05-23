@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using FlightPlan;
 using KSP.Localization;
 using KSP.Sim.impl;
 using UnityEngine;
@@ -39,7 +40,7 @@ namespace MuMech
 
         // Draw the parameter part of the Operation (ask for time, altitudes etc)
         // Input parameters are orbit and time parameters after the last maneuver and current target
-        public abstract void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target); // was: MechJebModuleTargetController
+        public abstract void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target, OperationAdvancedTransfer.Mode selectionMode); // was: MechJebModuleTargetController
 
         // Function called when create node is pressed; input parameters are orbit and time parameters after the last maneuver and current target
         // ManeuverParameters contain a single time and dV describing the node that should be executed
@@ -60,7 +61,7 @@ namespace MuMech
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                FlightPlanPlugin.Logger.LogError(e);
                 ErrorMessage = "An error occurred while creating the node."; //  Localizer.Format("#MechJeb_Maneu_errorMessage");
                 return null;
             }
@@ -101,7 +102,7 @@ namespace MuMech
                     }
                 }
 
-                Debug.Log("ManeuverPlanner initialization: found " + _operations.Count + " maneuvers");
+                FlightPlanPlugin.Logger.LogDebug("ManeuverPlanner initialization: found " + _operations.Count + " maneuvers");
             }
 
             List<Operation> res = _operations.ConvertAll(t => (Operation)t.GetConstructor(Type.EmptyTypes)!.Invoke(null));

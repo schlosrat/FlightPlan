@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using FlightPlan;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
@@ -194,14 +195,14 @@ namespace MuMech
                 _pendingJobs = -1;
 
 #if DEBUG
-                string dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                StreamWriter f = File.CreateText(dir + "/DeltaVWorking.csv");
-                f.WriteLine(OriginOrbit.referenceBody.referenceBody.gravParameter);
-                for (int dateIndex = 0; dateIndex < DateSamples; dateIndex++)
-                {
-                    int n = DurationSamplesForDate(dateIndex);
-                    for (int durationIndex = 0; durationIndex < n; durationIndex++) f.WriteLine(_log[dateIndex, durationIndex]);
-                }
+                //string dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                //StreamWriter f = File.CreateText(dir + "/DeltaVWorking.csv");
+                //f.WriteLine(OriginOrbit.referenceBody.referenceBody.gravParameter);
+                //for (int dateIndex = 0; dateIndex < DateSamples; dateIndex++)
+                //{
+                //    int n = DurationSamplesForDate(dateIndex);
+                //    for (int durationIndex = 0; durationIndex < n; durationIndex++) f.WriteLine(_log[dateIndex, durationIndex]);
+                //}
 #endif
             }
         }
@@ -242,10 +243,11 @@ namespace MuMech
 
             if (!dt.IsFinite() || !r.magnitude.IsFinite() || !vpos.magnitude.IsFinite() || !vneg.magnitude.IsFinite())
             {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    Debug.Log($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
-                });
+                // Dispatcher.InvokeAsync(() =>
+                //{
+                    // Debug.Log($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
+                    FlightPlanPlugin.Logger.LogDebug($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
+                //} );
             }
 
             return new ManeuverParameters((vpos - vneg).V3ToWorld(), ut0 + dt);

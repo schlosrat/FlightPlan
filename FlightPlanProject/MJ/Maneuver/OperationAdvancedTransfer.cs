@@ -7,6 +7,7 @@ using UnityEngine;
 using static MechJebLib.Utils.Statics;
 using Object = UnityEngine.Object;
 using KSP.Game;
+using FlightPlan;
 
 namespace MuMech
 {
@@ -15,7 +16,7 @@ namespace MuMech
     {
         private static readonly GameInstance Game = GameManager.Instance.Game;
 
-        private enum Mode
+        public enum Mode
         {
             LimitedTime,
             Porkchop
@@ -291,7 +292,7 @@ namespace MuMech
             lastTargetCelestial = targetCelestial;
         }
 
-        public override void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target) // was: MechJebModuleTargetController target
+        public override void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target, Mode selectionMode) // was: MechJebModuleTargetController target
         {
             _draggable = true;
             if (worker != null && target == null && Event.current.type == EventType.Layout) // was: !target.NormalTargetExists
@@ -301,9 +302,9 @@ namespace MuMech
                 plot        = null;
             }
 
-            selectionMode = (Mode)GuiUtils.ComboBox.Box((int)selectionMode, modeNames, this);
+            // selectionMode = (Mode)GuiUtils.ComboBox.Box((int)selectionMode, modeNames, this);
             if (Event.current.type == EventType.Repaint)
-                windowWidth = (int)GUILayoutUtility.GetLastRect().width;
+                windowWidth = FlightPlanPlugin.Instance._windowWidth; //  (int)GUILayoutUtility.GetLastRect().width;
 
             switch (selectionMode)
             {
