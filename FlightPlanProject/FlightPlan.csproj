@@ -26,6 +26,14 @@
 		<Title>Flight Plan</Title>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="MJ\Dispatcher\Dispatcher.cs.bak" />
+	  <None Remove="MJ\Maneuver\TimeSelector.cs.bak" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Include="MJ\Dispatcher\Dispatcher.cs.bak" />
+	  <Compile Include="MJ\Maneuver\TimeSelector.cs.bak" />
+	</ItemGroup>
+	<ItemGroup>
 		<None Include="..\README.md" Pack="true" PackagePath="" />
 	</ItemGroup>
 	<ItemGroup>
