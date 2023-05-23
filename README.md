@@ -127,10 +127,10 @@ This mod includes a number of user configurable parameters which can be accessed
 Using the configuration parameters you can change a variety of things such as how long a status message sticks around before it start to fade, and also how long it will take to fade.
 
 **NOTE:** The following settings are dynamically managed and may be set by the user while the game is running. All others will require exiting and restart to take effect.
-* Large % Error Threashold
-* Small % Error Threashold
 * Experimental Features: Enable/Disable
 * Launch Maneuver Node Controller: Enable/Disable
+* Large % Error Threashold
+* Small % Error Threashold
 * Status Fade Time: Seconds
 * Status Hold Time: Seconds
 
