@@ -71,12 +71,11 @@ public class OwnshipManeuversPage : BasePageContent
         }
 
         FPSettings.TargetInc_deg = MainUI.DrawToggleButtonWithTextField("New Inclination", ManeuverType.newInc, FPSettings.TargetInc_deg, "°");
+        FPSettings.TargetLAN_deg = MainUI.DrawToggleButtonWithTextField("New LAN", ManeuverType.newLAN, FPSettings.TargetLAN_deg, "°");
 
         if (Plugin._experimental.Value)
         {
-            FPSettings.TargetLAN_deg = MainUI.DrawToggleButtonWithTextField("New LAN", ManeuverType.newLAN, FPSettings.TargetLAN_deg, "°");
-
-            // FPSettings.TargetNodeLong_deg = DrawToggleButtonWithTextField("New Node Longitude", ref newNodeLon, FPSettings.TargetNodeLong_deg, "°");
+            FPSettings.TargetNodeLong_deg = MainUI.DrawToggleButtonWithTextField("New Node Longitude", ManeuverType.newNodeLon, FPSettings.TargetNodeLong_deg, "°");
         }
 
         FPSettings.TargetSMA_km = MainUI.DrawToggleButtonWithTextField("New SMA", ManeuverType.newSMA, FPSettings.TargetSMA_km, "km");
@@ -158,19 +157,19 @@ public class TargetPageShip2Ship : BasePageContent
         else
         {
             MainUI.DrawEntry("Separation at CA:", $"{closestApproach:N1} m");
-            MainUI.DrawEntry("Relative Velocity:", $"{relVelocityNow:N1} m/s");
+            MainUI.DrawEntry("Relative Velocity:", $"{relVelocityCA:N1} m/s");
         }
 
         MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
         FPSettings.ApAltitude_km = MainUI.DrawToggleButtonWithTextField("New Ap", ManeuverType.newAp, FPSettings.ApAltitude_km, "km");
         MainUI.DrawToggleButton("Circularize", ManeuverType.circularize);
         MainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
+        FPSettings.InterceptDistanceVessel = MainUI.DrawToggleButtonWithTextField("Course Correction", ManeuverType.courseCorrection, FPSettings.InterceptDistanceVessel, "m");
         MainUI.DrawToggleButton("Match Velocity", ManeuverType.matchVelocity);
 
         if (Plugin._experimental.Value)
         {
             FPSettings.InterceptTime = MainUI.DrawToggleButtonWithTextField("Intercept", ManeuverType.interceptTgt, FPSettings.InterceptTime, "s", true);
-            FPSettings.InterceptDistanceVessel = MainUI.DrawToggleButtonWithTextField("Course Correction", ManeuverType.courseCorrection, FPSettings.InterceptDistanceVessel, "m");
         }
 
         // Compose a recommened action based on the range to the target and relative velocity now and at closest approach
@@ -263,6 +262,7 @@ public class TargetPageShip2Celestial : BasePageContent
         MainUI.DrawEntry("Next Window", FPUtility.SecondsToTimeString(nextWindow, false, false, true), " ");
 
         MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach, false, false, true), " ");
+        // TODO: Added info here on if there's an SOI encounter, and if so what the expected Pe will be
         //if (closestApproach > 1000)
         //    MainUI.DrawEntry("Separation at CA:", $"{closestApproach / 1000:N1} km");
         //else
@@ -270,7 +270,6 @@ public class TargetPageShip2Celestial : BasePageContent
         //    MainUI.DrawEntry("Separation at CA:", $"{closestApproach:N1} m");
         //    MainUI.DrawEntry("Relative Velocity:", $"{relVelocityNow:N1} m/s");
         //}
-
 
         MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
         MainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
