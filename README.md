@@ -56,27 +56,50 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 * **New Pe & Ap** (uses inputs for **New Pe** and **New Ap** above changing both in one maneuver)
 * **New Inclination** (user specified value - degrees)
 * **New SMA** (user specified value - km)
-### Target Relative Maneuvers: (only available if a target is selected)
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
+### Target Relative Maneuvers - Ship to Ship: (only available if a target vessel or part is selected and both active vessel and target are in the same SOI)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Conditionally Available**
+* Display of Rendezvous Planning Info:
+* *Target Orbit* (Ap x Pe - km)
+* *Current Orbit* (Ap x Pe - km)
+* *Relative Inclination* (degrees)
+* *Synodic Period* (Days HH:MM:SS)
+* *Next Window* (Days HH:MM:SS)
+* *Next Closest Approach* (Days HH:MM:SS)
+* *Separation at Closest Approach* (km or m depending on CA)
+* *Relative Velocity* (displayed if Closest Approach < 1 km - m/s)
+* **Match Planes** with Target
+* **New Ap** (user specified value - km)
+* **Circularize**
+* **Hohmann Transfer** to Target
+* **Course Correction** (requires being on an intercept trajectory)
+* **Match Velocity** with target
+### Target Relative Maneuvers - Ship to Celestial: (only available if a celestial target is selected and both active vessel and target are in the same SOI)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png) **Conditionally Available**
+* Display of Transfer Planning Info:
+* *Target Orbit* (Ap x Pe - km)
+* *Current Orbit* (Ap x Pe - km)
+* *Relative Inclination* (Destination Moon's orbit relative to Active Vessel's orbit - degrees)
+* *Phase Angle* to target (the current angle between the radius vectors for the active vessel and destination moon - degrees)
+* *Transfer Window Phase Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go - degrees)
+* *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination - Days HH:MM:SS)
+* *Synodic Period* (the time between transfer windows - Days HH:MM:SS)
+* *Next Window* (Days HH:MM:SS)
+* *Next Closest Approach* (Days HH:MM:SS)
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
-
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png) **Available If Selected Target is Celestial Body**
-* **Match Planes** with Target
-* **Hohmann Transfer** to Target
-* **Course Correction** (requires being on an intercept trajectory)
-### Orbital Transfer Maneuvers:
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Available If Active Vessel is Orbiting a Moon**
+### Orbital Transfer Maneuvers - Moon Specific: (only available when at a moon)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Conditionally Available**
 * **Moon Return** (User specified target Pe (km) for arrival back at the parent planet)
-
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
+### Orbital Transfer Maneuvers - Interplanetary: (only available when at a planet targeting another planet)
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Conditionally Available**
 * Display of Planetary Transfer Parameters:
-* *Phase Angle* to target (the current angle between the radius vectors for the origin and destination planets)
-* *Transfer Window Phase Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go)
-* *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination)
+* *Relative Inclination* (Destination Planet's orbit relative to Origin Planet's orbit - degrees)
+* *Phase Angle* to target (the current angle between the radius vectors for the origin and destination planets - degrees)
+* *Transfer Window Phase Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go - degrees)
+* *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination - Years Days HH:MM:SS)
 * *Synodic Period* (the time between transfer windows)
-* *Time to Next Window*
+* *Approximate Next Window* (Days HH:MM:SS)
 * *Approximate Eject DeltaV* (based on Hohman transfer orbit, but neglecting the Delta-V needed to escape from the origin)
 ### Resonant Orbit Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/ROM_50.png) **Always Available**
@@ -141,10 +164,13 @@ Using the configuration parameters you can change a variety of things such as ho
 ### Ownship Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png) **Always Available**
 * **New LAN** (user specified value - degrees)
-### Target Relative Maneuvers
+### Target Relative Maneuvers - Ship to Ship
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
 * **Intercept** Target (user specified intercept time - seconds)
-* **Match Velocity**
+* **Course Correction**
+### Target Relative Maneuvers - Ship to Celestial
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
+* **Intercept** Target (user specified intercept time - seconds)
 ### Orbital Transfer Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
 * **Interplanetary Transfer** (only available if a planet is the selected target)
