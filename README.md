@@ -89,7 +89,7 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
 ### Orbital Transfer Maneuvers - Moon Specific: Conditionally Available
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Only available when in orbit about a moon*
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Only available when in orbit about a moon**
 * **Moon Return** (User specified target Pe (km) for arrival back at the parent planet)
 ### Orbital Transfer Maneuvers - Interplanetary: Conditionally Available
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Only available when orbiting a planet targeting another planet**
