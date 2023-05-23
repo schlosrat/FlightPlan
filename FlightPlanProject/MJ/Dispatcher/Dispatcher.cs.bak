@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlightPlan;
+using System;
 using System.Collections;
 using System.Threading;
 using UnityEngine;
@@ -34,7 +35,7 @@ namespace UnityToolbag
         {
             if (!_instanceExists)
             {
-                Debug.LogError("No Dispatcher exists in the scene. Actions will not be invoked!");
+                FlightPlanPlugin.Logger.LogError("No Dispatcher exists in the scene. Actions will not be invoked!");
                 return;
             }
 
@@ -61,7 +62,7 @@ namespace UnityToolbag
         {
             if (!_instanceExists)
             {
-                Debug.LogError("No Dispatcher exists in the scene. Actions will not be invoked!");
+                FlightPlanPlugin.Logger.LogError("No Dispatcher exists in the scene. Actions will not be invoked!");
                 return;
             }
 
@@ -119,7 +120,7 @@ namespace UnityToolbag
         {
             if (_instanceExists)
                 return;
-            Debug.Log("[MechJeb2] Starting the Dispatcher");
+            FlightPlanPlugin.Logger.LogDebug("[MechJeb2] Starting the Dispatcher");
             new GameObject(typeof(Dispatcher).Name).AddComponent<Dispatcher>();
         }
     }
