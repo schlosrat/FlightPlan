@@ -9,9 +9,9 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 **Note:** Version 0.8.0 has received significant updates and improvements in the GUI from [cfloutier](https://raw.githubusercontent.com/cfloutier) who richly deserves the credit for those parts. His contributions have dramatically improved the quality of the user interface and make the mod not only more modern and visually pleasing, but also easier and more fun to use.
 
 ## Compatibility
-* Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.1.3
+* Tested with Kerbal Space Program 2 v0.1.2.0.22258 & SpaceWarp 1.2.0
 * Requires [SpaceWarp](https://spacedock.info/mod/3277/Space%20Warp%20+%20BepInEx) 1.0.1+
-* Requires [Node Manager](https://spacedock.info/mod/3366/Node%20Manager) 0.5.3+
+* Requires [Node Manager](https://spacedock.info/mod/3366/Node%20Manager) 0.5.4+
 * Optional, but highly recommended: [K2-D2](https://spacedock.info/mod/3325/K2-D2) 0.8.1+. See capabilities described below.
 * Optional, but highly recommended: [Maneuver Node Controller](https://spacedock.info/mod/3270/Maneuver%20Node%20Controller) 0.8.3+. See capabilities described below.
 
@@ -22,7 +22,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 
 ## Installation
 1. Download and extract the **BepInEx mod loader with SpaceWarp** 1.0.1 or later (see link above) into your game folder and run the game, then close it. If you've done this before, you can skip this step. If you've installed the game via Steam, then this is probably here: `C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2`. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
-1. Install **Node Manager** 0.5.3 or later (see link above). From the NodeManager-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\node_manager`.
+1. Install **Node Manager** 0.5.4 or later (see link above). From the NodeManager-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\node_manager`.
 1. Download and extract this mod into the game folder. From the FlightPlan-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\flight_plan`.
 1. *Optional*: Download and install **K2-D2**, your friendly KSP Astromech ready to perform precision node execution for you! (see link above). From the K2D2_vx.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\K2D2`.
 1. *Optional*: Download and install **Maneuver Node Controller** to assist you with fine tuning your maneuver nodes! (see link above). From the ManeuverNodeController-x.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\maneuver_node_controller`.
@@ -48,38 +48,61 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 ![Flight Plan Burn Time Option Menu](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-GUI-10.png)
 * Automatically populated menu for available burn time options consistent with the selected maneuver type and the current situation. The options available for a **New Inclination** maneuver are shown above. When a maneuver type is selected, if the previously selected burn time option is not a valid option for that maneuver type and your current situation, then a default will be populated. If the displayed maneuver time option is not what you need simply click the option to display a menu of available options to customize your maneuver.
 
-### Ownship Maneuvers:
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png) **Always Available**
+### Ownship Maneuvers: Always Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png)
 * **Circularize**
 * **New Pe** (user specified value - km)
 * **New Ap** (user specified value - km)
 * **New Pe & Ap** (uses inputs for **New Pe** and **New Ap** above changing both in one maneuver)
 * **New Inclination** (user specified value - degrees)
 * **New SMA** (user specified value - km)
-### Target Relative Maneuvers: (only available if a target is selected)
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
+### Target Relative Maneuvers - Ship to Ship: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Only available if a target vessel or part is selected and both active vessel and target are in the same SOI**
+* Display of Rendezvous Planning Info:
+* *Target Orbit* (Ap x Pe - km)
+* *Current Orbit* (Ap x Pe - km)
+* *Relative Inclination* (degrees)
+* *Synodic Period* (Days HH:MM:SS)
+* *Next Window* (Days HH:MM:SS)
+* *Next Closest Approach* (Days HH:MM:SS)
+* *Separation at Closest Approach* (km or m depending on CA)
+* *Relative Velocity* (displayed if Closest Approach < 1 km - m/s)
+* **Match Planes** with Target
+* **New Ap** (user specified value - km)
+* **Circularize**
+* **Hohmann Transfer** to Target
+* **Course Correction** (requires being on an intercept trajectory)
+* **Match Velocity** with target
+### Target Relative Maneuvers - Ship to Celestial: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png) **Only available if a celestial target is selected and both active vessel and target are in the same SOI**
+* Display of Transfer Planning Info:
+* *Target Orbit* (Ap x Pe - km)
+* *Current Orbit* (Ap x Pe - km)
+* *Relative Inclination* (Destination Moon's orbit relative to Active Vessel's orbit - degrees)
+* *Phase Angle* to target (the current angle between the radius vectors for the active vessel and destination moon - degrees)
+* *Transfer Window Phase Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go - degrees)
+* *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination - Days HH:MM:SS)
+* *Synodic Period* (the time between transfer windows - Days HH:MM:SS)
+* *Next Window* (Days HH:MM:SS)
+* *Next Closest Approach* (Days HH:MM:SS)
 * **Match Planes** with Target
 * **Hohmann Transfer** to Target
 * **Course Correction** (requires being on an intercept trajectory)
-
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Celestial.png) **Available If Selected Target is Celestial Body**
-* **Match Planes** with Target
-* **Hohmann Transfer** to Target
-* **Course Correction** (requires being on an intercept trajectory)
-### Orbital Transfer Maneuvers:
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Available If Active Vessel is Orbiting a Moon**
+### Orbital Transfer Maneuvers - Moon Specific: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Moon.png) **Only available when in orbit about a moon*
 * **Moon Return** (User specified target Pe (km) for arrival back at the parent planet)
-
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
+### Orbital Transfer Maneuvers - Interplanetary: Conditionally Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Only available when orbiting a planet targeting another planet**
 * Display of Planetary Transfer Parameters:
-* *Phase Angle* to target (the current angle between the radius vectors for the origin and destination planets)
-* *Transfer Window Phase Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go)
-* *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination)
+* *Relative Inclination* (Destination Planet's orbit relative to Origin Planet's orbit - degrees)
+* *Phase Angle* to target (the current angle between the radius vectors for the origin and destination planets - degrees)
+* *Transfer Window Phase Angle* (the phase angle needed to be at or in a transfer window. When this equals Phase Angle you're ready to go - degrees)
+* *Transfer Time* (the approximate travel time for a vessel taking a Hohmann transfer from the origin planet to the destination - Years Days HH:MM:SS)
 * *Synodic Period* (the time between transfer windows)
-* *Time to Next Window*
+* *Approximate Next Window* (Days HH:MM:SS)
 * *Approximate Eject DeltaV* (based on Hohman transfer orbit, but neglecting the Delta-V needed to escape from the origin)
-### Resonant Orbit Maneuvers
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/ROM_50.png) **Always Available**
+### Resonant Orbit Maneuvers: Always Available
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/ROM_50.png)
 * Display of Resonant Orbit Configuration Parameters
 * *Payloads* (Number of payloads to deployments. Click + / - buttons to change. May be 2 to *)
 * *Deploy Orbits* (Number of resonant orbit cycles between deployments. Click + / - buttons to change. May be 1 to *)
@@ -102,8 +125,8 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
-* Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
-* Failures are shown in **Red** indicating no node has been generated with some clue as to why.
+* Warnings and Cautions are shown in **Yellow** indicating a node was generated, but the % error between the requiested outcome and the actual outcome is above the threshold for small % error. you should inspect it carefully first and may need to modify it. If auto-launch is enabled for Maneuver Node Controller, and that mod is installed, then it will be automatically brought up if it's not already up.
+* Failures are shown in **Red** indicating that either no node has been generated, or the node quality does not fall below the threshold for large % error. If auto-launch is enabled for Maneuver Node Controller, and that mod is installed, then it will be automatically brought up if it's not already up. If no node is generated there will be a message stating why.
 ### Game Input Enable/Disable Status
 * To prevent things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your time warp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full functionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
 ### Integration with K2-D2, v0.8.1+
@@ -129,6 +152,8 @@ Using the configuration parameters you can change a variety of things such as ho
 **NOTE:** The following settings are dynamically managed and may be set by the user while the game is running. All others will require exiting and restart to take effect.
 * Experimental Features: Enable/Disable
 * Launch Maneuver Node Controller: Enable/Disable
+* Large % Error Threashold
+* Small % Error Threashold
 * Status Fade Time: Seconds
 * Status Hold Time: Seconds
 
@@ -139,10 +164,13 @@ Using the configuration parameters you can change a variety of things such as ho
 ### Ownship Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png) **Always Available**
 * **New LAN** (user specified value - degrees)
-### Target Relative Maneuvers
+### Target Relative Maneuvers - Ship to Ship
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
 * **Intercept** Target (user specified intercept time - seconds)
-* **Match Velocity**
+* **Course Correction**
+### Target Relative Maneuvers - Ship to Celestial
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
+* **Intercept** Target (user specified intercept time - seconds)
 ### Orbital Transfer Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
 * **Interplanetary Transfer** (only available if a planet is the selected target)
