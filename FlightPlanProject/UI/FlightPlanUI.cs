@@ -281,10 +281,11 @@ public class FlightPlanUI
         }
     }
 
+    OperationAdvancedTransfer op = new OperationAdvancedTransfer();
+
     public void OnGUI()
     {
         CreateTabs();
-        var op = new OperationAdvancedTransfer();
 
         // All Tabs get the current situation
         DrawEntry("Situation", String.Format("{0} {1}", SituationToString(FlightPlanPlugin.Instance._activeVessel.Situation), FlightPlanPlugin.Instance._activeVessel.mainBody.bodyName));
@@ -316,13 +317,19 @@ public class FlightPlanUI
         {
             FPSettings.LimitedTime = DrawSoloToggle("<b>Limited Time</b>", FPSettings.Occlusion);
             double UT = Game.UniverseModel.UniversalTime;
-            // if (FPSettings.LimitedTime) { OperationAdvancedTransfer.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody); }
+            if (FPSettings.LimitedTime)
+            {
+                op.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
+            }
         }
         if (TimeRef == TimeRef.PORKCHOP)
         {
             FPSettings.Porkchop = DrawSoloToggle("<b>Porkchop Selection</b>", FPSettings.Porkchop);
             double UT = Game.UniverseModel.UniversalTime;
-            if (FPSettings.Porkchop) { op.DoPorkchopGui(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody); }
+            if (FPSettings.Porkchop)
+            {
+                op.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
+            }
         }
         // Draw the GUI Status at the end of this tab
         double _UT = Game.UniverseModel.UniversalTime;
@@ -513,7 +520,11 @@ public class FlightPlanUI
             case ManeuverType.circularize: // Working
                 thisEcc = vesselOrbit.eccentricity;
                 nextEcc = PatchedConicsList[0].eccentricity;
-                pError = nextEcc / thisEcc;
+                //nextPe = PatchedConicsList[0].Periapsis;
+                //nextAp = PatchedConicsList[0].Apoapsis;
+                //errorPe = Math.Abs(TargetPeR - nextPe);
+                //errorAp = Math.Abs(TargetApR - nextAp);
+                pError = nextEcc; // thisEcc;
                 if (pError >= Plugin._largeError.Value / 100)
                     FPStatus.Error($"Warning: Requested Eccentricity 0, got {nextEcc:N3}, off by {pError * 100:N3}%");
                 else if (pError >= Plugin._smallError.Value / 100)
