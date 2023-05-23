@@ -102,8 +102,8 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 
 ### Display Status of Last Command
 * Normal/Good results are shown in **Green** indicating a maneuver node was generated and it's ready for you to execute it. *Don't forget to get your craft pointed in the right direction first!*
-* Warnings and Cautions are shown in **Yellow** indicating a node was generated, but you should inspect it carefully first and may need to modify it.
-* Failures are shown in **Red** indicating no node has been generated with some clue as to why.
+* Warnings and Cautions are shown in **Yellow** indicating a node was generated, but the % error between the requiested outcome and the actual outcome is above the threshold for small % error. you should inspect it carefully first and may need to modify it. If auto-launch is enabled for Maneuver Node Controller, and that mod is installed, then it will be automatically brought up if it's not already up.
+* Failures are shown in **Red** indicating that either no node has been generated, or the node quality does not fall below the threshold for large % error. If auto-launch is enabled for Maneuver Node Controller, and that mod is installed, then it will be automatically brought up if it's not already up. If no node is generated there will be a message stating why.
 ### Game Input Enable/Disable Status
 * To prevent things you type in a user input field from passing through to the game and affecting things in odd ways, the game input is automatically disabled when you click inside a *text input field*. This will cause the game to not respond to your mouse or to anything you type, although you can freely type what you need into the input field. Typing a "." as part of a decimal number will not increase your time warp setting, and using the 1 and 2 keys on your number pad will not mute the game or the music. To restore full functionality for keyboard and mouse inputs simply click anywhere else other than the text input field. Closing the Flight Plan GUI will also have this effect.
 ### Integration with K2-D2, v0.8.1+
@@ -127,6 +127,8 @@ This mod includes a number of user configurable parameters which can be accessed
 Using the configuration parameters you can change a variety of things such as how long a status message sticks around before it start to fade, and also how long it will take to fade.
 
 **NOTE:** The following settings are dynamically managed and may be set by the user while the game is running. All others will require exiting and restart to take effect.
+* Large % Error Threashold
+* Small % Error Threashold
 * Experimental Features: Enable/Disable
 * Launch Maneuver Node Controller: Enable/Disable
 * Status Fade Time: Seconds
