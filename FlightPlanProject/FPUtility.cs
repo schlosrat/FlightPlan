@@ -59,13 +59,13 @@ public static class FPUtility
         return $"{heightInMeters:N0}";
     }
 
-    public static string SecondsToTimeString(double seconds, bool addSpacing = true, bool returnLastUnit = false)
+    public static string SecondsToTimeString(double seconds, bool addSpacing = true, bool returnLastUnit = false, bool omitFractionalSeconds = false)
     {
-        if (seconds == Double.PositiveInfinity)
+        if (seconds == double.PositiveInfinity)
         {
             return "∞";
         }
-        else if (seconds == Double.NegativeInfinity)
+        else if (seconds == double.NegativeInfinity)
         {
             return "-∞";
         }
@@ -123,11 +123,17 @@ public static class FPUtility
 
         if (_minutes > 0 || _hours > 0 || _days > 0)
         {
-            _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
+            if (omitFractionalSeconds)
+                _result += returnLastUnit ? $"{_secs:00}{_spacing}" : $"{_secs:00}";
+            else
+                _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
         }
         else
         {
-            _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
+            if (omitFractionalSeconds)
+                _result += returnLastUnit ? $"{_secs:00}{_spacing}" : $"{_secs:00}";
+            else
+                _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
         }
 
         return _result;

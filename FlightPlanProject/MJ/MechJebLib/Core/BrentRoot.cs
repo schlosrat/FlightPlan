@@ -4,27 +4,20 @@
  * and GPLv2 (GPLv2-LICENSE) license or any later version.
  */
 
-/*
- * This Software was obtained from the MechJeb2 project (https://github.com/MuMech/MechJeb2) on 3/25/23
- * and was further modified as needed for compatibility with KSP2 and/or for incorporation into the
- * FlightPlan project (https://github.com/schlosrat/FlightPlan)
- * 
- * This work is relaesed under the same licenses noted above from the originating version.
- */
-
 #nullable enable
 
 using System;
 using MechJebLib.Utils;
+using static MechJebLib.Utils.Statics;
 
-namespace MechJebLib.Maths
+namespace MechJebLib.Core
 {
     /// <summary>
     ///     Brent's rootfinding method.
     /// </summary>
     public static class BrentRoot
     {
-        private const double EPS = 2.24e-15;
+        // private const double EPS = 2.24e-15;
 
         /// <summary>
         ///     Brent's rootfinding method, bounded search.  Uses secant, inverse quadratic interpolation and bisection.
@@ -64,7 +57,7 @@ namespace MechJebLib.Maths
                 (fa, fb) = (fb, fa); // swap fa and fb
             }
 
-            return InternalSolve(f, a, b, fa, fb, o, maxiter, rtol, sign);
+            return _Solve(f, a, b, fa, fb, o, maxiter, rtol, sign);
         }
 
         /// <summary>
@@ -126,11 +119,11 @@ namespace MechJebLib.Maths
                     return b;
             }
 
-            return InternalSolve(f, a, b, fa, fb, o, maxiter, rtol, sign);
+            return _Solve(f, a, b, fa, fb, o, maxiter, rtol, sign);
         }
 
         // This is the actual algorithm
-        private static double InternalSolve(Func<double, object?, double> f, double a, double b, double fa, double fb, object? o, int maxiter,
+        private static double _Solve(Func<double, object?, double> f, double a, double b, double fa, double fb, object? o, int maxiter,
             double rtol, int sign)
         {
             bool maybeOneMore = sign != 0;

@@ -14,7 +14,10 @@
 
 #nullable enable
 
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using MechJebLib.Primitives;
 using FlightPlan;
@@ -51,6 +54,7 @@ namespace MechJebLib.Utils
         /// <param name="min">Min value</param>
         /// <param name="max">Max value</param>
         /// <returns>Clamped value</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Clamp(double x, double min, double max)
         {
             return x < min ? min : x > max ? max : x;
@@ -63,6 +67,7 @@ namespace MechJebLib.Utils
         /// <param name="min">Min value</param>
         /// <param name="max">Max value</param>
         /// <returns>Clamped value</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Clamp(int x, int min, int max)
         {
             return x < min ? min : x > max ? max : x;
@@ -73,6 +78,7 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="x">Value to clamp</param>
         /// <returns>Clamped value</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Clamp01(double x)
         {
             return Clamp(x, 0, 1);
@@ -83,6 +89,7 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="deg">degrees</param>
         /// <returns>radians</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Deg2Rad(double deg)
         {
             return deg * UtilMath.Deg2Rad;
@@ -93,6 +100,7 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="rad">Radians</param>
         /// <returns>Degrees</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Rad2Deg(double rad)
         {
             return rad * UtilMath.Rad2Deg;
@@ -103,6 +111,7 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="x">Cosine value</param>
         /// <returns>Radians</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double SafeAcos(double x)
         {
             return Math.Acos(Clamp(x, -1.0, 1.0));
@@ -113,9 +122,86 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="x">Sine value</param>
         /// <returns>Radians</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double SafeAsin(double x)
         {
             return Math.Asin(Clamp(x, -1.0, 1.0));
+        }
+
+        /// <summary>
+        ///     Inverse hyperbolic tangent funtion.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Atanh(double x)
+        {
+            if (Math.Abs(x) > 1)
+                throw new ArgumentException($"Argument to Atanh is out of range: {x}");
+
+            return 0.5 * Math.Log((1 + x) / (1 - x));
+        }
+
+        /// <summary>
+        ///     Inverse hyperbolic cosine function.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Acosh(double x)
+        {
+            if (x < 1)
+                throw new ArgumentException($"Argument to Acosh is out of range: {x}");
+
+            return Math.Log(x + Math.Sqrt(x * x - 1));
+        }
+
+        /// <summary>
+        ///     Inverse hyperbolic sine function.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Asinh(double x)
+        {
+            return Math.Log(x + Math.Sqrt(x * x + 1));
+        }
+
+        /// <summary>
+        ///     Raise floating point number to an integral power using exponentiation by squaring.
+        /// </summary>
+        /// <param name="x">base</param>
+        /// <param name="n">integral exponent</param>
+        /// <returns>x raised to n</returns>
+        public static double Powi(double x, int n)
+        {
+            if (n < 0)
+            {
+                x = 1 / x;
+                n = -n;
+            }
+
+            if (n == 0)
+                return 1;
+            double y = 1;
+            while (n > 1)
+            {
+                if (n % 2 == 0)
+                {
+                    x *= x;
+                    n /= 2;
+                }
+                else
+                {
+                    y *= x;
+                    x *= x;
+                    n =  (n - 1) / 2;
+                }
+            }
+
+            return x * y;
         }
 
         /// <summary>
@@ -123,6 +209,7 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="x">Radians</param>
         /// <returns>Radians</returns>
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Clamp2Pi(double x)
         {
             x %= TAU;
@@ -134,6 +221,7 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="x">Radians</param>
         /// <returns>Radians</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ClampPi(double x)
         {
             x = Clamp2Pi(x);
@@ -145,7 +233,8 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="x">Value</param>
         /// <returns>True if the value is finite</returns>
-        public static bool IsFinite(double x)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsFinite(this double x)
         {
             return !double.IsNaN(x) && !double.IsInfinity(x);
         }
@@ -155,19 +244,40 @@ namespace MechJebLib.Utils
         /// </summary>
         /// <param name="v">Vector</param>
         /// <returns>True if all the components are finite</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsFinite(V3 v)
         {
             return IsFinite(v[0]) && IsFinite(v[1]) && IsFinite(v[2]);
         }
 
+        /*
         /// <summary>
         ///     Helper to check if a vector is finite in all its compoenents (not NaN or Ininity).
         /// </summary>
         /// <param name="v">Vector</param>
         /// <returns>True if all the components are finite</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsFinite(Vector3d v)
         {
             return IsFinite(v[0]) && IsFinite(v[1]) && IsFinite(v[2]);
+        }
+        */
+
+        /// <summary>
+        ///     Helper to check if a number is within a range.  The first bound does not need to
+        ///     be lower than the second bound.
+        /// </summary>
+        /// <param name="x">Number to check</param>
+        /// <param name="a">First Bound</param>
+        /// <param name="b">Second Bound</param>
+        /// <returns>True if the number is between the bounds</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsWithin(this double x, double a, double b)
+        {
+            if (a < b)
+                return a <= x && x <= b;
+
+            return b <= x && x <= a;
         }
 
         /// <summary>
@@ -177,6 +287,7 @@ namespace MechJebLib.Utils
         /// <param name="about"></param>
         /// <param name="range"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Approx(double val, double about, double range)
         {
             return val > about - range && val < about + range;
@@ -191,16 +302,17 @@ namespace MechJebLib.Utils
         /// <returns>true if the values are nearly the same</returns>
         public static bool NearlyEqual(double a, double b, double epsilon = EPS)
         {
-            const double MIN_NORMAL = 2.2250738585072014E-308d;
-            double absA = Math.Abs(a);
-            double absB = Math.Abs(b);
-            double diff = Math.Abs(a - b);
-
             if (a.Equals(b))
                 return true;
-            if (a == 0 || b == 0 || absA + absB < MIN_NORMAL)
-                return diff < epsilon * MIN_NORMAL;
-            return diff / (absA + absB) < epsilon;
+
+            double diff = Math.Abs(a - b);
+
+            if (a == 0 || b == 0)
+                return diff < epsilon;
+
+            epsilon = Math.Max(Math.Abs(a), Math.Abs(b)) * epsilon;
+
+            return diff < epsilon;
         }
 
         /// <summary>
@@ -212,9 +324,51 @@ namespace MechJebLib.Utils
         /// <returns>true if the values are nearly the same</returns>
         public static bool NearlyEqual(V3 a, V3 b, double epsilon = EPS)
         {
-            return NearlyEqual(a[0], b[0], epsilon) && NearlyEqual(a[1], b[1], epsilon) && NearlyEqual(a[2], b[2], epsilon);
+            if (a.Equals(b))
+                return true;
+
+            var diff = V3.Abs(a - b);
+
+            double epsilon2 = Math.Max(a.magnitude, b.magnitude) * epsilon;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if ((a[i] == 0 || b[i] == 0) && diff[i] > epsilon)
+                    return false;
+                if (diff[i] > epsilon2)
+                    return false;
+            }
+
+            return true;
         }
 
+        /// <summary>
+        ///     Compares two M3 matricies with a relative tolerance.
+        /// </summary>
+        /// <param name="a">first vector</param>
+        /// <param name="b">second vector</param>
+        /// <param name="epsilon">relative tolerance (e.g. 1e-15)</param>
+        /// <returns>true if the values are nearly the same</returns>
+        public static bool NearlyEqual(M3 a, M3 b, double epsilon = EPS)
+        {
+            if (a.Equals(b))
+                return true;
+
+            double epsilon2 = Math.Max(a.max_magnitude, b.max_magnitude) * epsilon;
+
+            for (int i = 0; i < 9; i++)
+            {
+                if ((a[i] == 0 || b[i] == 0) && Math.Abs(a[i] - b[i]) > epsilon)
+                    return false;
+
+                if (Math.Abs(a[i] - b[i]) > epsilon2)
+                    return false;
+            }
+
+            return true;
+        }
+
+        /*
         /// <summary>
         ///     Compares two Vector3d values with a relative tolerance.
         /// </summary>
@@ -226,6 +380,7 @@ namespace MechJebLib.Utils
         {
             return NearlyEqual(a[0], b[0], epsilon) && NearlyEqual(a[1], b[1], epsilon) && NearlyEqual(a[2], b[2], epsilon);
         }
+        */
 
         /// <summary>
         ///     Debugging helper for printing double arrays to logs
@@ -252,6 +407,20 @@ namespace MechJebLib.Utils
             return sb.ToString();
         }
 
+        public static double DoubleArrayMagnitude(IList<double> array)
+        {
+            int last = array.Count - 1;
+
+            double sumsq = 0;
+
+            for (int i = 0; i <= last; i++)
+            {
+                sumsq += array[i] * array[i];
+            }
+
+            return Math.Sqrt(sumsq);
+        }
+
         private static readonly string[] _posPrefix = { " ", "k", "M", "G", "T", "P", "E", "Z", "Y" };
         private static readonly string[] _negPrefix = { " ", "m", "μ", "n", "p", "f", "a", "z", "y" };
 
@@ -259,7 +428,7 @@ namespace MechJebLib.Utils
         {
             if (!IsFinite(d)) return d.ToString();
 
-            // this is an Offset to d to deal with rounding (e.g. 9.9995 gets rounded to 10.00 so gains a wholeDigit)
+            // this is an offset to d to deal with rounding (e.g. 9.9995 gets rounded to 10.00 so gains a wholeDigit)
             // (also 999.95 should be rounded to 1k, so bumps up an SI prefix)
             // FIXME: probably needs to be fixed to work when maxPrecision kicks in
             double offset = 5 * (d != 0 ? Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(d))) - sigFigs) : 0);
@@ -281,9 +450,69 @@ namespace MechJebLib.Utils
             return $"{d.ToString("F" + decimalDigits)} {unit}";
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ToSI(this float f, int maxPrecision = -99, int sigFigs = 4)
+        {
+            return ((double)f).ToSI(maxPrecision, sigFigs);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Log(string message)
         {
             FlightPlanPlugin.Logger.LogInfo(message);
+        }
+
+        public static void CopyFrom(this double[] dest, double[] source)
+        {
+            for (int i = 0; i < source.Length && i < dest.Length; i++)
+                dest[i] = source[i];
+        }
+
+        public static void CopyTo(this double[] source, double[] dest)
+        {
+            for (int i = 0; i < source.Length && i < dest.Length; i++)
+                dest[i] = source[i];
+        }
+
+        public static void CopyFrom(this IList<double> dest, IReadOnlyList<double> source)
+        {
+            for (int i = 0; i < source.Count && i < dest.Count; i++)
+                dest[i] = source[i];
+        }
+
+        public static void CopyTo(this IReadOnlyList<double> source, IList<double> dest)
+        {
+            for (int i = 0; i < source.Count && i < dest.Count; i++)
+                dest[i] = source[i];
+        }
+
+        public static void Set(this IList<double> a, int index, V3 v)
+        {
+            a[index]     = v.x;
+            a[index + 1] = v.y;
+            a[index + 2] = v.z;
+        }
+
+        public static V3 Get(this IList<double> a, int index)
+        {
+            return new V3(a[index], a[index + 1], a[index + 2]);
+        }
+
+        public static void Set(this double[] a, int index, V3 v)
+        {
+            a[index]     = v.x;
+            a[index + 1] = v.y;
+            a[index + 2] = v.z;
+        }
+
+        public static V3 Get(this double[] a, int index)
+        {
+            return new V3(a[index], a[index + 1], a[index + 2]);
+        }
+
+        public static double[] Expand(this double[] a, int n)
+        {
+            return a.Length < n ? new double[n] : a;
         }
     }
 }

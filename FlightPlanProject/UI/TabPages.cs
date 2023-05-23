@@ -11,6 +11,8 @@ namespace FlightPlan;
 
 public class BasePageContent : IPageContent
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public BasePageContent()
     {
         this.MainUI = FlightPlanUI.Instance;
@@ -84,6 +86,8 @@ public class OwnshipManeuversPage : BasePageContent
 
 public class TargetPageShip2Ship : BasePageContent
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public override string Name => "Target";
 
     readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TRM_50_Ship2Ship.png");
@@ -108,7 +112,7 @@ public class TargetPageShip2Ship : BasePageContent
 
     public override void OnGUI()
     {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit;
         string recommendedManeuver;
         const int maxPhasingOrbits = 5;
@@ -128,7 +132,7 @@ public class TargetPageShip2Ship : BasePageContent
             targetOrbit = Plugin._currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit;
         }
 
-        double targetDistance = (Orbit.SwappedAbsolutePositionAtUT(UT) - targetOrbit.SwappedAbsolutePositionAtUT(UT)).magnitude;
+        double targetDistance = (Orbit.WorldPositionAtUT(UT) - targetOrbit.WorldPositionAtUT(UT)).magnitude;
         if (targetDistance < closestApproachLimit1)
             TargetSelection.SelectDockingPort = UI_Tools.SmallToggleButton(TargetSelection.SelectDockingPort, "Select Docking Port", "Select Docking Port");
 
@@ -146,9 +150,9 @@ public class TargetPageShip2Ship : BasePageContent
         MainUI.DrawEntry("Target Orbit:", $"{targetOrbit.PeriapsisArl / 1000:N0} km x {targetOrbit.ApoapsisArl / 1000:N0} km");
         MainUI.DrawEntry("Current Orbit:", $"{Orbit.PeriapsisArl / 1000:N0} km x {Orbit.ApoapsisArl / 1000:N0} km");
         MainUI.DrawEntry("Relative Inclination:", $"{relativeInc:N2}°");
-        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
-        MainUI.DrawEntry("Next Window:", FPUtility.SecondsToTimeString(nextWindow));
-        MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach));
+        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod, false, false, true), " ");
+        MainUI.DrawEntry("Next Window:", FPUtility.SecondsToTimeString(nextWindow, false, false, true), " ");
+        MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach, false, false, true), " ");
         if (closestApproach > 1000)
             MainUI.DrawEntry("Separation at CA:", $"{closestApproach / 1000:N1} km");
         else
@@ -211,6 +215,8 @@ public class TargetPageShip2Celestial : BasePageContent
 {
     public override string Name => "Target";
 
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     // readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TargetRelManeuver_50v2.png");
     readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TRM_50_Ship2Celestial.png");
 
@@ -229,7 +235,7 @@ public class TargetPageShip2Celestial : BasePageContent
 
     public override void OnGUI()
     {
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit;
         double nextWindow;
 
@@ -252,11 +258,11 @@ public class TargetPageShip2Celestial : BasePageContent
         MainUI.DrawEntry("Relative Inclination:", $"{relativeInc:N2}°");
         MainUI.DrawEntry($"Phase Angle to {Plugin._currentTarget.Name}", $"{phase:N1}°");
         MainUI.DrawEntry($"Transfer Window Phase Angle", $"{transfer:N1}°");
-        MainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime), " ");
-        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
-        MainUI.DrawEntry("Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
+        MainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime, false, false, true), " ");
+        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod, false, false, true), " ");
+        MainUI.DrawEntry("Next Window", FPUtility.SecondsToTimeString(nextWindow, false, false, true), " ");
 
-        MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach));
+        MainUI.DrawEntry("Next Closest Apporoach:", FPUtility.SecondsToTimeString(timeToClosestApproach, false, false, true), " ");
         //if (closestApproach > 1000)
         //    MainUI.DrawEntry("Separation at CA:", $"{closestApproach / 1000:N1} km");
         //else
@@ -282,6 +288,8 @@ public class TargetPageShip2Celestial : BasePageContent
 
 public class InterplanetaryPage : BasePageContent
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public override string Name => "Target";
 
     readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/OTM_50_Planet.png");
@@ -307,7 +315,7 @@ public class InterplanetaryPage : BasePageContent
         FPStyles.DrawSectionHeader("Orbital Transfer Maneuvers");
         BurnTimeOption.Instance.OptionSelectionGUI();
 
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit targetOrbit = Plugin._currentTarget.Orbit as PatchedConicsOrbit;
         double synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
         double relativeInc = Orbit.RelativeInclination(targetOrbit);
@@ -323,15 +331,16 @@ public class InterplanetaryPage : BasePageContent
         // MainUI.DrawEntry($"Phase Angle to {Plugin._currentTarget.Name}", $"{phase2:N1}°");
         MainUI.DrawEntry("Transfer Window Phase Angle", $"{transfer:N1}°");
         // MainUI.DrawEntry("Transfer Window Phase Angle", $"{transfer2:N1}°");
-        MainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime), " ");
-        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod), " ");
-        MainUI.DrawEntry("Aproximate Next Window", FPUtility.SecondsToTimeString(nextWindow), " ");
+        MainUI.DrawEntry("Transfer Time", FPUtility.SecondsToTimeString(_transferTime, false, false, true), " ");
+        MainUI.DrawEntry("Synodic Period", FPUtility.SecondsToTimeString(synodicPeriod, false, false, true), " ");
+        MainUI.DrawEntry("Aproximate Next Window", FPUtility.SecondsToTimeString(nextWindow, false, false, true), " ");
         // MainUI.DrawEntry("Next Window", FPUtility.SecondsToTimeString(nextWindow2), " ");
         MainUI.DrawEntry("Aproximate Eject DeltaV", DeltaV().ToString(), "m/s");
 
         if (Plugin._experimental.Value) // No maneuvers relative to a star
         {
             MainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
+            // MainUI.DrawToggleButton("Advanced Interplanetary Transfer", ManeuverType.advancedPlanetaryXfer);
         }
         else
         {
@@ -574,7 +583,7 @@ public class ResonantOrbitPage : BasePageContent
         }
         double _ce = (Ap2 - Pe2) / (Ap2 + Pe2);
         
-        MainUI.DrawEntry("Period", $"{FPUtility.SecondsToTimeString(_xferPeriod)}", "s");
+        MainUI.DrawEntry("Period", $"{FPUtility.SecondsToTimeString(_xferPeriod, false, false, true)}", " ");
         MainUI.DrawEntry("Apoapsis", $"{FPUtility.MetersToDistanceString((Ap2 - Plugin._activeVessel.mainBody.radius) / 1000)}", "km");
         MainUI.DrawEntry("Periapsis", $"{FPUtility.MetersToDistanceString((Pe2 - Plugin._activeVessel.mainBody.radius) / 1000)}", "km");
         MainUI.DrawEntry("Eccentricity", _ce.ToString("N3"), " ");

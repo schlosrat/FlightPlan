@@ -15,6 +15,7 @@
 // using System;
 using System.Diagnostics;
 using System.Globalization;
+using MechJebLib.Utils;
 using static MechJebLib.Utils.Statics;
 
 #nullable enable
@@ -30,8 +31,6 @@ namespace MechJebLib.Primitives
     /// </summary>
     public struct V3 : IEquatable<V3>, IFormattable
     {
-        public const double EPS = 2.2204e-16;
-        public const double EPS2 = EPS * 2;
         private const double KEPS = EPS2; // for equality checking
 
         public double x;
@@ -353,6 +352,36 @@ namespace MechJebLib.Primitives
         // This defines the north pole that is valid for body cenetered inertial coordinate systems
         public static V3 northpole { get; } = new V3(0, 0, 1);
 
+        // X,Y,Z axis
+        public static V3 xaxis { get; } = new V3(1, 0, 0);
+
+        public static V3 yaxis { get; } = new V3(0, 1, 0);
+
+        public static V3 zaxis { get; } = new V3(0, 0, 1);
+
+        /// <summary>
+        ///     Convert vector stored as spherical radius, theta, phi to cartesian x,y,z
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public V3 sph2cart => x * new V3(Math.Cos(z) * Math.Sin(y), Math.Sin(z) * Math.Sin(y), Math.Cos(y));
+
+        /// <summary>
+        ///     Convert vector stored as cartesian x,y,z to spherical radius, theta, phi
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public V3 cart2sph
+        {
+            get
+            {
+                double r = magnitude;
+                return new V3(r, SafeAcos(z/r), Clamp2Pi(Math.Atan2(y, x)));
+            }
+        }
+
+        public V3 xzy { get => new V3(this[0], this[2], this[1]); }
+
         public static V3 operator +(V3 a, V3 b)
         {
             return new V3(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -425,9 +454,9 @@ namespace MechJebLib.Primitives
                 $"[{x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)}, {z.ToString(format, formatProvider)}]";
         }
 
-        //public bool IsFinite()
-        //{
-        //    return Statics.IsFinite(x) && Statics.IsFinite(y) && Statics.IsFinite(z);
-        //}
+        public bool IsFinite()
+        {
+            return Statics.IsFinite(x) && Statics.IsFinite(y) && Statics.IsFinite(z);
+        }
     }
 }

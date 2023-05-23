@@ -12,6 +12,7 @@
  * This work is relaesed under the same licenses noted above from the originating version.
  */
 
+using System;
 using System.Globalization;
 using static MechJebLib.Utils.Statics;
 
@@ -25,8 +26,6 @@ namespace MechJebLib.Primitives
 {
     public struct Q3 : IEquatable<Q3>, IFormattable
     {
-        public const double EPS = 2.2204e-16;
-        public const double EPS2 = EPS * 2;
         private const double KEPS = EPS * 2.0; // for equality checking
 
         public double x, y, z, w;
@@ -209,7 +208,7 @@ namespace MechJebLib.Primitives
 
             // negative pitch (y-axis rotation)
             double sinp = 2 * (q.w * q.y - q.z * q.x);
-            angles.y = Math.Asin(Clamp(sinp, -1, 1));
+            angles.y = SafeAsin(sinp);
 
             // negative yaw (z-axis rotation)
             double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
@@ -226,7 +225,7 @@ namespace MechJebLib.Primitives
         public static Q3 Euler(V3 euler) { return Internal_FromEulerRad(Deg2Rad(euler)); }
         public void ToAngleAxis(out double angle, out V3 axis) { Internal_ToAxisAngleRad(this, out axis, out angle); angle = Rad2Deg(angle);  }
         public void SetFromToRotation(V3 fromDirection, V3 toDirection) { this = FromToRotation(fromDirection, toDirection); }
-    
+
         public static Q3 RotateTowards(Q3 from, Q3 to, double maxDegreesDelta)
         {
             double angle = Q3.Angle(from, to);
@@ -303,10 +302,10 @@ namespace MechJebLib.Primitives
         {
             var q = new Q3();
             V3 a = axis.normalized;
-            q.x = a.x * Math.Sin(angle / 2);
-            q.y = a.y * Math.Sin(angle / 2);
-            q.z = a.z * Math.Sin(angle / 2);
-            q.w = Math.Cos(angle / 2);
+            q.x = a.x * Math.Sin(angle / 2.0);
+            q.y = a.y * Math.Sin(angle / 2.0);
+            q.z = a.z * Math.Sin(angle / 2.0);
+            q.w = Math.Cos(angle / 2.0);
             return q;
         }
 

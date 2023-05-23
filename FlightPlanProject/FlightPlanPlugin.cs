@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using FlightPlan.KTools;
 using FlightPlan.KTools.UI;
+using FPUtilities;
 using HarmonyLib;
 using KSP.Game;
 using KSP.Sim.impl;
@@ -41,6 +42,7 @@ public enum ManeuverType
     matchVelocity,
     moonReturn,
     planetaryXfer,
+    advancedPlanetaryXfer,
     fixAp,
     fixPe
 }
@@ -64,7 +66,9 @@ public enum TimeRef
     EQ_NEAREST_AD,
     EQ_HIGHEST_AD,
     REL_NEAREST_AD,
-    REL_HIGHEST_AD
+    REL_HIGHEST_AD,
+    LIMITED_TIME,
+    PORKCHOP
 }
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
@@ -87,7 +91,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private bool _interfaceEnabled = false;
     private bool _GUIenabled = true;
     private Rect _windowRect = Rect.zero;
-    private int _windowWidth = 250; //384px on 1920x1080
+    public int windowWidth = 250; //384px on 1920x1080
 
    
 
@@ -96,6 +100,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // Config parameters
     internal ConfigEntry<bool> _experimental;
     internal ConfigEntry<bool> _autoLaunchMNC;
+    internal ConfigEntry<double> _smallError;
+    internal ConfigEntry<double> _largeError;
 
     // mod-wide Data
     internal VesselComponent _activeVessel;
@@ -181,7 +187,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         
         _experimental  = Config.Bind<bool>("Experimental Section", "Experimental Features",      false, "Enable/Disable _experimental.Value features for testing - Warrantee Void if Enabled!");
         _autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when _experimental.Value nodes are created");
-    
+        _smallError = Config.Bind<double>("Status Reporting Section", "Small % Error Threashold", 1, "Percent error threshold used to assess quality of maneuver node goal for warning (yellow) status");
+        _largeError = Config.Bind<double>("Status Reporting Section", "Large % Error Threashold", 2, "Percent error threshold used to assess quality of maneuver node goal for error (red) status");
+
         // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
         Logger.LogInfo($"Experimental Features: {_experimental.Value}");
     }
@@ -249,7 +257,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 FillWindow,
                 "<color=#696DFF>FLIGHT PLAN</color>",
                 GUILayout.Height(0),
-                GUILayout.Width(_windowWidth));
+                GUILayout.Width(windowWidth));
 
             save_rect_pos();
             // Draw the tool tip if needed
@@ -262,7 +270,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     private ManeuverNodeData GetCurrentNode()
     {
-        ActiveNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(GameManager.Instance.Game.ViewController.GetActiveVehicle(true).Guid);
+        ActiveNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(Game.ViewController.GetActiveVehicle(true).Guid);
         return (ActiveNodes.Count() > 0) ? ActiveNodes[0] : null;
     }
 
@@ -299,16 +307,26 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         UI_Fields.GameInputState = true;
     }
 
-    private void CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
+    private IEnumerator CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
     {
         Vector3d burnParams;
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         var orbit = _activeVessel.Orbit;
+        var Orbiter = _activeVessel.Orbiter;
+        var ManeuverPlanSolver = Orbiter?.ManeuverPlanSolver;
 
         burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
-        Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
-        Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {(burnUT - UT):F3} s from _UT");
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
+        Logger.LogDebug($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
         NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, burnOffsetFactor);
+        _currentNode = NodeManagerPlugin.Instance.currentNode;
+
+        yield return (object)new WaitForFixedUpdate();
+
+        // Having this here can sometimes result in a weird double node.
+        // ManeuverPlanSolver.UpdateManeuverTrajectory();
+
+        FlightPlanUI.Instance.CheckNodeQuality();
         // StartCoroutine(TestPerturbedOrbit(orbit, burnUT, _deltaV));
 
         // Recalculate node based on the Offset time
@@ -327,12 +345,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //CurrentNode.BurnVector = burnParams;
         //UpdateNode(CurrentNode);
 
+        // Update the node
     }
 
     // Flight Plan API Methods
     public bool Circularize(double burnUT, double burnOffsetFactor = -0.5)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"Circularize {BurnTimeOption.TimeRefDesc}");
@@ -344,7 +363,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -356,7 +375,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNewPe(double burnUT, double newPe, double burnOffsetFactor = -0.5)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewPe {BurnTimeOption.TimeRefDesc}");
@@ -376,7 +395,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(_orbit, burnUT, newPe);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -388,7 +407,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNewAp(double burnUT, double newAp, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewAp {BurnTimeOption.TimeRefDesc}");
@@ -402,7 +421,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(_orbit, burnUT, newAp);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -414,7 +433,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool Ellipticize(double burnUT, double newAp, double newPe, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"Ellipticize: Set New Pe and Ap {BurnTimeOption.TimeRefDesc}");
@@ -433,7 +452,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(_orbit, burnUT, newPe, newAp);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -445,7 +464,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetInclination(double burnUT, double inclination, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetInclination: Set New Inclination {inclination}° {BurnTimeOption.TimeRefDesc}");
@@ -457,7 +476,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         _deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(_orbit, burnUT, inclination);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -469,7 +488,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     
     public bool SetNewLAN(double burnUT, double newLANvalue, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {BurnTimeOption.TimeRefDesc}");
@@ -477,13 +496,16 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
-        FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.TimeRefDesc}");
+        if (Math.Abs(_orbit.inclination) < 10)
+            FPStatus.Warning($"WARNING: Orbital plane has low inclination of {_orbit.inclination:N2}° (recommend i > 10°). Maneuver many not be accurate.");
+        else
+            FPStatus.Warning($"Experimental LAN Change {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: newLANvalue {newLANvalue}°");
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(_orbit, burnUT, newLANvalue);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -495,7 +517,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNodeLongitude(double burnUT, double newNodeLongValue, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {BurnTimeOption.TimeRefDesc}");
@@ -509,7 +531,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToShiftNodeLongitude(_orbit, burnUT, newNodeLongValue);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -521,7 +543,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNewSMA(double burnUT, double newSMA, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewSMA {BurnTimeOption.TimeRefDesc}");
@@ -529,13 +551,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
-        FPStatus.Error($"Ready to Change SMA Change {BurnTimeOption.TimeRefDesc}");
+        FPStatus.Ok($"Ready to Change SMA Change {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: newSMA {newSMA} m");
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVForSemiMajorAxis(_orbit, burnUT, newSMA);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -548,7 +570,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // No longer takes double burnUT. Need to sort out how this can be called as an API method
     public bool MatchPlanes(TimeRef time_ref, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"MatchPlanes: Match Planes with {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
@@ -579,7 +601,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUTout, burnOffsetFactor));
             return true;
         }
         else
@@ -591,7 +613,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool HohmannTransfer(double burnUT, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
@@ -599,27 +621,45 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         double _burnUTout;
         Vector3d _deltaV;
 
-        FPStatus.Warning($"Ready to Transfer to {_currentTarget.Name} ?");
+        FPStatus.Warning($"Ready to Transfer to {_currentTarget.Name}");
 
-        bool _simpleTransfer = true;
-        bool _intercept_only = true;
+        bool _simpleTransfer = false;
+        bool _intercept_only;
         if (_simpleTransfer)
         {
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout);
+            double offsetDist = 0;
+            if (_currentTarget.IsCelestialBody)
+            {
+                offsetDist = _currentTarget.CelestialBody.radius + FPSettings.InterceptDistanceCelestial * 1000;
+                Logger.LogDebug($"HohmannTransfer: OffsetDist for celestial encounter {offsetDist/1000:N2} km");
+            }
+            else
+            {
+                offsetDist = FPSettings.InterceptDistanceVessel;
+                Logger.LogDebug($"HohmannTransfer: OffsetDist for non-celestial encounter {offsetDist:N2} m");
+            }
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, offsetDist);
         }
         else
         {
-            bool _anExists = _orbit.AscendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
-            bool _dnExists = _orbit.DescendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
-            double _anTime = _orbit.TimeOfAscendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
-            double _dnTime = _orbit.TimeOfDescendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
-            // burnUT = timeSelector.ComputeManeuverTime(orbit, _UT, _currentTarget.orbit as PatchedConicsOrbit);
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, intercept_only: _intercept_only, fixed_ut: false);
+            if (_currentTarget.IsCelestialBody)
+            {
+                _intercept_only = true;
+            }
+            else
+            {
+                _intercept_only = true;
+            }
+            //bool _anExists = _orbit.AscendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
+            //bool _dnExists = _orbit.DescendingNodeExists(_currentTarget.Orbit as PatchedConicsOrbit);
+            //double _anTime = _orbit.TimeOfAscendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
+            //double _dnTime = _orbit.TimeOfDescendingNode(_currentTarget.Orbit as PatchedConicsOrbit, _UT);
+            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(_orbit, _currentTarget.Orbit as PatchedConicsOrbit, _UT, out _burnUTout, intercept_only: _intercept_only);
         }
 
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
             return true;
         }
         else
@@ -635,13 +675,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
         // Similar to code in MechJebModuleRendezvousGuidance.cs for "Get Closer" Button code.
 
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"InterceptTgt: Intercept {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
         // var burnUT = _UT + 30;
         double _interceptUT = _UT + tgtUT;
         double _offsetDistance;
+        Vector3d _deltaV;
 
         FPStatus.Warning($"Experimental Intercept of {_currentTarget.Name} Ready");
 
@@ -650,10 +691,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             _offsetDistance = _currentTarget.Orbit.referenceBody.radius + 50000;
         else
             _offsetDistance = 100;
-        Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit, _interceptUT, _offsetDistance);
+        (_deltaV, _) = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit, _interceptUT, _offsetDistance);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -665,7 +706,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool CourseCorrection(double burnUT, double interceptDistance, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"CourseCorrection: Course Correction burn to improve trajectory to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
@@ -694,7 +735,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
             return true;
         }
         else
@@ -706,8 +747,9 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool MoonReturn(double burnUT, double targetMRPeR, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
+        Vector3d _deltaV;
 
         Logger.LogDebug($"MoonReturn: Return from {_orbit.referenceBody.Name} {BurnTimeOption.TimeRefDesc}");
         var _e = _orbit.eccentricity;
@@ -724,10 +766,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             double _burnUTout;
             // double primaryRaidus = orbit.ReferenceBody.orbit.ReferenceBody.radius + 100000; // m
             Logger.LogDebug($"Moon Return Attempting to Solve...");
-            Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(_orbit, _UT, targetMRPeR, out _burnUTout);
+            (_deltaV, _burnUTout) = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(_orbit, _UT, targetMRPeR);
             if (_deltaV != Vector3d.zero)
             {
-                CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+                StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
                 return true;
             }
             else
@@ -740,7 +782,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool MatchVelocity(double burnUT, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"MatchVelocity: Match Velocity with {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
@@ -751,7 +793,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(_orbit, burnUT, _currentTarget.Orbit as PatchedConicsOrbit);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, burnUT, burnOffsetFactor));
             return true;
         }
         else
@@ -763,7 +805,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool PlanetaryXfer(double burnUT, double burnOffsetFactor)
     {
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"PlanetaryXfer: Transfer to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
@@ -776,7 +818,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Vector3d _deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(_orbit, _UT, _currentTarget.orbit as PatchedConicsOrbit, out _burnUTout2);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor);
+            StartCoroutine(CreateManeuverNode(_deltaV, _burnUTout, burnOffsetFactor));
             return true;
         }
         else

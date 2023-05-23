@@ -18,6 +18,8 @@ public class FPStatus
         ERROR
     }
 
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     static public Status status = Status.VIRGIN; // Everyone starts out this way...
 
     static string StatusText;
@@ -32,7 +34,7 @@ public class FPStatus
     public static void K2D2Status(string txt, double duration)
     {
         StatusText = txt;
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         StatusTime = _UT + duration;
     }
 
@@ -61,7 +63,7 @@ public class FPStatus
     {
         FPStatus.status = status;
         StatusText = txt;
-        double _UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniversalTime;
         StatusTime = _UT + StatusPersistence.Value;
     }
 

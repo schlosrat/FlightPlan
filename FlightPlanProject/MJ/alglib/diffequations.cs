@@ -116,11 +116,11 @@ public partial class alglib
                       X[1] and don't interested in intermediate values.
                     * M=1 means that you don't want to integrate :)
                       it is degenerate case, but it will be handled correctly.
-                    * M<1 means Error
-        Eps     -   tolerance (absolute/relative Error on each  step  will  be
+                    * M<1 means error
+        Eps     -   tolerance (absolute/relative error on each  step  will  be
                     less than Eps). When passing:
-                    * Eps>0, it means desired ABSOLUTE Error
-                    * Eps<0, it means desired RELATIVE Error.  Relative errors
+                    * Eps>0, it means desired ABSOLUTE error
+                    * Eps<0, it means desired RELATIVE error.  Relative errors
                       are calculated with respect to maximum values of  Y seen
                       so far. Be careful to use this criterion  when  starting
                       from Y[] that are close to zero.
@@ -216,7 +216,7 @@ public partial class alglib
     public static void odesolversolve(odesolverstate state, ndimensional_ode_rp diff, object obj, alglib.xparams _params)
     {
         if( diff==null )
-            throw new alglibexception("ALGLIB: Error in 'odesolversolve()' (diff is null)");
+            throw new alglibexception("ALGLIB: error in 'odesolversolve()' (diff is null)");
         while( alglib.odesolveriteration(state, _params) )
         {
             if( state.needdy )
@@ -224,7 +224,7 @@ public partial class alglib
                 diff(state.innerobj.y, state.innerobj.x, state.innerobj.dy, obj);
                 continue;
             }
-            throw new alglibexception("ALGLIB: unexpected Error in 'odesolversolve'");
+            throw new alglibexception("ALGLIB: unexpected error in 'odesolversolve'");
         }
     }
 
@@ -406,11 +406,11 @@ public partial class alglib
                           X[1] and don't interested in intermediate values.
                         * M=1 means that you don't want to integrate :)
                           it is degenerate case, but it will be handled correctly.
-                        * M<1 means Error
-            Eps     -   tolerance (absolute/relative Error on each  step  will  be
+                        * M<1 means error
+            Eps     -   tolerance (absolute/relative error on each  step  will  be
                         less than Eps). When passing:
-                        * Eps>0, it means desired ABSOLUTE Error
-                        * Eps<0, it means desired RELATIVE Error.  Relative errors
+                        * Eps>0, it means desired ABSOLUTE error
+                        * Eps<0, it means desired RELATIVE error.  Relative errors
                           are calculated with respect to maximum values of  Y seen
                           so far. Be careful to use this criterion  when  starting
                           from Y[] that are close to zero.
@@ -548,8 +548,8 @@ public partial class alglib
             // some preliminary checks for internal errors
             // after this we assume that H>0 and M>1
             //
-            alglib.ap.assert((double)(state.h)>(double)(0), "ODESolver: internal Error");
-            alglib.ap.assert(m>1, "ODESolverIteration: internal Error");
+            alglib.ap.assert((double)(state.h)>(double)(0), "ODESolver: internal error");
+            alglib.ap.assert(m>1, "ODESolverIteration: internal error");
             
             //
             // choose solver
@@ -652,7 +652,7 @@ public partial class alglib
             }
             
             //
-            // Update Error scale maximums
+            // Update error scale maximums
             //
             // These maximums are initialized by zeros,
             // then updated every iterations.
@@ -689,7 +689,7 @@ public partial class alglib
             }
             
             //
-            // prepare Data for the next update of YN/YNS
+            // prepare data for the next update of YN/YNS
             //
             state.x = state.xscale*(xc+state.rka[k]*h);
             for(i_=0; i_<=n-1;i_++)
@@ -734,7 +734,7 @@ public partial class alglib
         lbl_10:
             
             //
-            // estimate Error
+            // estimate error
             //
             err = 0;
             for(j=0; j<=n-1; j++)
@@ -743,7 +743,7 @@ public partial class alglib
                 {
                     
                     //
-                    // absolute Error is estimated
+                    // absolute error is estimated
                     //
                     err = Math.Max(err, Math.Abs(state.yn[j]-state.yns[j]));
                 }
@@ -751,7 +751,7 @@ public partial class alglib
                 {
                     
                     //
-                    // Relative Error is estimated
+                    // Relative error is estimated
                     //
                     v = state.escale[j];
                     if( (double)(v)==(double)(0) )
@@ -784,7 +784,7 @@ public partial class alglib
             }
             
             //
-            // advance Position
+            // advance position
             //
             xc = xc+h;
             for(i_=0; i_<=n-1;i_++)

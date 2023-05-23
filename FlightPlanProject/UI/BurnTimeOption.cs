@@ -8,6 +8,8 @@ namespace FlightPlan;
 
 internal class BurnTimeOption
 {
+    private static readonly GameInstance Game = GameManager.Instance.Game;
+
     public static BurnTimeOption _instance;
     public static BurnTimeOption Instance { get => _instance; }
 
@@ -37,7 +39,9 @@ internal class BurnTimeOption
         { TimeRef.EQ_NEAREST_AD,     "at nearest Eq. AN/DN"     }, //"at the nearest equatorial AN/DN"
         { TimeRef.EQ_HIGHEST_AD,     "at cheapest Eq. AN/DN"    }, //"at the cheapest equatorial AN/DN"
         { TimeRef.REL_NEAREST_AD,    "at nearest AN/DN w/Target"  }, //"at the nearest AN/DN with the target"
-        { TimeRef.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target" } //"at the cheapest AN/DN with the target"
+        { TimeRef.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target" }, //"at the cheapest AN/DN with the target"
+        { TimeRef.LIMITED_TIME,      "Limited Time"             }, //"at the cheapest AN/DN with the target"
+        { TimeRef.PORKCHOP,          "Porkchop Selection"       } //"at the cheapest AN/DN with the target"
     };
 
     public List<TimeRef> Options = new List<TimeRef>();
@@ -101,7 +105,7 @@ internal class BurnTimeOption
     public void SetBurnTime()
     {
         // Set the requested burn time based on the selected timing _option
-        double UT = GameManager.Instance.Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniversalTime;
         FlightPlanPlugin Plugin = FlightPlanPlugin.Instance;
         PatchedConicsOrbit Orbit = Plugin._activeVessel.Orbit;
 
@@ -293,7 +297,7 @@ internal class BurnTimeOption
             case ManeuverType.hohmannXfer:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
-                ManeuverTypeDesc = "Performing Homann transfer";
+                ManeuverTypeDesc = "Performing Hohmann transfer";
                 break;
             case ManeuverType.courseCorrection:
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
@@ -320,6 +324,12 @@ internal class BurnTimeOption
                 Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
 
                 ManeuverTypeDesc = "Performing planetary transfer";
+                break;
+            case ManeuverType.advancedPlanetaryXfer:
+                Options.Add(TimeRef.PORKCHOP); //"Porkchop Selection"
+                Options.Add(TimeRef.LIMITED_TIME); //"Limited Time"
+
+                ManeuverTypeDesc = "Performing advanced planetary transfer";
                 break;
             case ManeuverType.fixAp:
                 Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"

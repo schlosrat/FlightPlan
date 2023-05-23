@@ -89,7 +89,7 @@ namespace MechJebLib.Utils
         [Conditional("DEBUG")]
         public static void Finite(double d)
         {
-            DoCheck(IsFinite(d), "Test for Finite");
+            DoCheck(d.IsFinite(), "Test for Finite");
         }
 
         [Conditional("DEBUG")]
@@ -97,12 +97,25 @@ namespace MechJebLib.Utils
         {
             DoCheck(d > 0);
         }
-        
+
         [Conditional("DEBUG")]
         public static void PositiveFinite(double d)
         {
             DoCheck(d > 0, "Test for positive");
-            DoCheck(IsFinite(d), "Test for Finite");
+            DoCheck(d.IsFinite(), "Test for Finite");
+        }
+
+        [Conditional("DEBUG")]
+        public static void NonNegative(double d)
+        {
+            DoCheck(d >= 0, "Test for Non-Negative");
+        }
+
+        [Conditional("DEBUG")]
+        public static void NonNegativeFinite(double d)
+        {
+            DoCheck(d >= 0, "Test for Non-Negative");
+            DoCheck(d.IsFinite(), "Test for Finite");
         }
 
         [Conditional("DEBUG")]
@@ -110,12 +123,25 @@ namespace MechJebLib.Utils
         {
             DoCheck(d < 0, "Test for negative");
         }
-        
+
         [Conditional("DEBUG")]
         public static void NegativeFinite(double d)
         {
             DoCheck(d < 0, "Test for negative");
-            DoCheck(IsFinite(d), "Test for Finite");
+            DoCheck(d.IsFinite(), "Test for Finite");
+        }
+
+        [Conditional("DEBUG")]
+        public static void NonPositive(double d)
+        {
+            DoCheck(d <= 0, "Test for Non-Positive");
+        }
+
+        [Conditional("DEBUG")]
+        public static void NonPositiveFinite(double d)
+        {
+            DoCheck(d <= 0, "Test for Non-Positive");
+            DoCheck(d.IsFinite(), "Test for Finite");
         }
 
         [Conditional("DEBUG")]
@@ -129,23 +155,25 @@ namespace MechJebLib.Utils
         {
             DoCheck(d != 0, "Test for non-zero");
         }
-        
+
         [Conditional("DEBUG")]
         public static void NonZeroFinite(double d)
         {
             DoCheck(d != 0, "Test for non-zero");
-            DoCheck(IsFinite(d), "Test for Finite");
+            DoCheck(d.IsFinite(), "Test for Finite");
         }
 
         /*
          * Vectors
          */
 
+        /*
         [Conditional("DEBUG")]
         public static void Finite(Vector3d v)
         {
             DoCheck(IsFinite(v), "Test for Finite Vector3d");
         }
+        */
 
         [Conditional("DEBUG")]
         public static void Finite(V3 v)
@@ -158,7 +186,7 @@ namespace MechJebLib.Utils
         {
             DoCheck(v != V3.zero, "Test for non-zero V3");
         }
-        
+
         [Conditional("DEBUG")]
         public static void NonZeroFinite(V3 v)
         {
