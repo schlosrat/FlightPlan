@@ -6,6 +6,7 @@ using FlightPlan.KTools.UI;
 using KSP.Sim.impl;
 using MuMech;
 using KSP.Sim;
+using NodeManager;
 // using K2D2;
 
 namespace FlightPlan;
@@ -182,9 +183,9 @@ public class FlightPlanUI
         value = UI_Fields.DoubleField(entryName, value, thisStyle ?? KBaseStyle.TextInputStyle);
         GUILayout.Space(3);
         if (thisStyle != null)
-            UI_Tools.Label(unit); // , KBaseStyle.UnitLabelStyle
+            UI_Tools.Label(unit, thisStyle); // , KBaseStyle.UnitLabelStyle
         else
-            UI_Tools.Label(entryName);
+            UI_Tools.Label(unit);
         // UI_Tools.Label(unit, thisStyle ?? KBaseStyle.UnitLabelStyle);
         GUILayout.EndHorizontal();
         GUILayout.Space(FPStyles.SpacingAfterTallEntry);
@@ -315,21 +316,13 @@ public class FlightPlanUI
         }
         if (TimeRef == TimeRef.LIMITED_TIME)
         {
-            FPSettings.LimitedTime = DrawSoloToggle("<b>Limited Time</b>", FPSettings.Occlusion);
             double UT = Game.UniverseModel.UniversalTime;
-            if (FPSettings.LimitedTime)
-            {
-                op.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
-            }
+            op.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
         }
         if (TimeRef == TimeRef.PORKCHOP)
         {
-            FPSettings.Porkchop = DrawSoloToggle("<b>Porkchop Selection</b>", FPSettings.Porkchop);
             double UT = Game.UniverseModel.UniversalTime;
-            if (FPSettings.Porkchop)
-            {
-                op.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
-            }
+            op.DoParametersGUI(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
         }
         // Draw the GUI Status at the end of this tab
         double _UT = Game.UniverseModel.UniversalTime;
@@ -401,6 +394,7 @@ public class FlightPlanUI
         bool _pass = false;
         bool _launchMNC = false;
         var target = Plugin._currentTarget;
+        double UT = Game.UniverseModel.UniversalTime;
 
         switch (ManeuverType)
         {
@@ -469,8 +463,19 @@ public class FlightPlanUI
                 _launchMNC = true;
                 break;
             case ManeuverType.advancedPlanetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
-                _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
-                _launchMNC = true;
+                // _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
+                var nodes = op.MakeNodes(Plugin._activeVessel.Orbit, UT, Plugin._currentTarget.CelestialBody);
+                if (nodes != null)
+                {
+                    foreach (var node in nodes)
+                    {
+                        Vector3d burnParams = Plugin._activeVessel.Orbit.DeltaVToManeuverNodeCoordinates(node.UT, node.dV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
+                        NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, node.UT, -0.5);
+                    }
+                    _pass = true;
+                    _launchMNC = true;
+                }
+
                 break;
             case ManeuverType.fixAp: // Working
                 _pass = Plugin.SetNewAp(_requestedBurnTime, ResonantOrbitPage.Ap2, - 0.5);

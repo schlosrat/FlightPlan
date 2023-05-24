@@ -379,7 +379,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewPe {BurnTimeOption.TimeRefDesc}");
-        // Debug.Log("Set New Pe");
+        // FlightPlanPlugin.Logger.LogDebug("Set New Pe");
         //var TimeToAp = orbit.TimeToAp;
         //double burnUT, _e;
         //_e = orbit.eccentricity;
@@ -391,7 +391,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         FPStatus.Ok($"Ready to Change Pe {BurnTimeOption.TimeRefDesc}");
 
         Logger.LogDebug($"Seeking Solution: TargetPeR {newPe} m, currentPeR {_orbit.Periapsis} m, body.radius {_orbit.referenceBody.radius} m");
-        // Debug.Log($"Seeking Solution: TargetPeR {TargetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.ReferenceBody.radius} m");
+        // FlightPlanPlugin.Logger.LogDebug($"Seeking Solution: TargetPeR {TargetPeR} m, currentPeR {orbit.Periapsis} m, body.radius {orbit.ReferenceBody.radius} m");
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(_orbit, burnUT, newPe);
         if (_deltaV != Vector3d.zero)
         {
@@ -411,7 +411,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewAp {BurnTimeOption.TimeRefDesc}");
-        // Debug.Log("Set New Ap");
+        // FlightPlanPlugin.Logger.LogDebug("Set New Ap");
         //var TimeToPe = orbit.TimeToPe;
         //var burnUT = _UT + TimeToPe;
 
@@ -492,7 +492,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {BurnTimeOption.TimeRefDesc}");
-        // Debug.Log("Set New Ap");
+        // FlightPlanPlugin.Logger.LogDebug("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
@@ -521,7 +521,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {BurnTimeOption.TimeRefDesc}");
-        // Debug.Log("Set New Ap");
+        // FlightPlanPlugin.Logger.LogDebug("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
@@ -547,7 +547,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewSMA {BurnTimeOption.TimeRefDesc}");
-        // Debug.Log("Set New Ap");
+        // FlightPlanPlugin.Logger.LogDebug("Set New Ap");
         // var TimeToPe = orbit.TimeToPe;
         // var burnUT = _UT + 30;
 
@@ -617,7 +617,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
-        // Debug.Log("Hohmann Transfer");
+        // FlightPlanPlugin.Logger.LogDebug("Hohmann Transfer");
         double _burnUTout;
         Vector3d _deltaV;
 

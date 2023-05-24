@@ -112,16 +112,4 @@ public class FPSettings
         get => KBaseSettings.SFile.GetDouble("OccModVac", 0.9);
         set { KBaseSettings.SFile.SetDouble("OccModVac", value); }
     }
-
-    public static bool LimitedTime
-    {
-        get => KBaseSettings.SFile.GetBool("LimitedTime", true);
-        set { KBaseSettings.SFile.SetBool("LimitedTime", value); }
-    }
-
-    public static bool Porkchop
-    {
-        get => KBaseSettings.SFile.GetBool("Porkchop", true);
-        set { KBaseSettings.SFile.SetBool("Porkchop", value); }
-    }
 }
