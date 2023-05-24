@@ -1,9 +1,8 @@
 // #define DEBUG
 
-using System;
-using System.IO;
-using System.Reflection;
+using FlightPlan;
 using JetBrains.Annotations;
+using System.Reflection;
 using UnityEngine;
 
 namespace MuMech
@@ -54,7 +53,7 @@ namespace MuMech
                 }
             }
 
-            Debug.Log("[MechJeb] porkchop scanning found DVminsqr = " + dVminsqr + " DVmaxsqr = " + dVmaxsqr);
+            FlightPlanPlugin.Logger.LogDebug("[MechJeb] porkchop scanning found DVminsqr = " + dVminsqr + " DVmaxsqr = " + dVmaxsqr);
 
             double logDVminsqr = Math.Log(dVminsqr);
             double logDVmaxsqr = Math.Min(Math.Log(dVmaxsqr), logDVminsqr + 4);

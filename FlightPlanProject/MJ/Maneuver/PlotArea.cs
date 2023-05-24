@@ -1,4 +1,4 @@
-﻿using System;
+﻿using FlightPlan;
 using UnityEngine;
 
 namespace MuMech
@@ -62,7 +62,7 @@ namespace MuMech
             if (Math.Abs(SelectedPoint[0] - hoveredPoint[0]) > 5 &&
                 Math.Abs(SelectedPoint[1] - hoveredPoint[1]) > 5)
             {
-                Debug.Log("[MechJeb] porkchop plotter, zooming plotarea");
+                FlightPlanPlugin.Logger.LogDebug("[MechJeb] porkchop plotter, zooming plotarea");
                 _callback(
                     X(Math.Min(SelectedPoint[0], hoveredPoint[0])),
                     X(Math.Max(SelectedPoint[0], hoveredPoint[0])),

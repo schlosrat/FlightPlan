@@ -13,13 +13,13 @@ public class AssetsLoader
         if (_imageTexture == null)
         {
             // Print an Error message to the Console
-            Debug.LogError("Failed to load image texture from path: " + path);
+            FlightPlanPlugin.Logger.LogError("Failed to load image texture from path: " + path);
 
             // Print the full path of the resource
-            Debug.Log("Full resource path: " + Application.dataPath + "/" + path);
+            FlightPlanPlugin.Logger.LogDebug("Full resource path: " + Application.dataPath + "/" + path);
 
             // Print the type of resource that was expected
-            Debug.Log("Expected resource type: Texture2D");
+            FlightPlanPlugin.Logger.LogDebug("Expected resource type: Texture2D");
         }
 
         return _imageTexture;

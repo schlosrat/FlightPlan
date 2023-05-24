@@ -11,7 +11,7 @@ public class ToolTipsManager
         {
             if (LastToolTip != tooltip)
             {
-                //Debug.Log("changed");
+                //FlightPlanPlugin.Logger.LogDebug("changed");
 
                 if (!string.IsNullOrEmpty(tooltip))
                 {
@@ -54,7 +54,7 @@ public class ToolTipsManager
 
     static void WindowFunction(int windowID)
     {
-        //Debug.Log(DrawToolTip);
+        //FlightPlanPlugin.Logger.LogDebug(DrawToolTip);
         GUILayout.Label(DrawToolTip);
     }
 }

@@ -63,12 +63,12 @@ public class ColorTools
     public static Color FromHSV(float hue, float saturation, float value, float alpha)
     {
         hue *= 360;
-        //Debug.Log("hue : " + hue);
+        //FlightPlanPlugin.Logger.LogDebug("hue : " + hue);
 
         int _hi = ((int)(Mathf.Floor(hue / 60f))) % 6;
-        //Debug.Log("_hi : " + _hi);
+        //FlightPlanPlugin.Logger.LogDebug("_hi : " + _hi);
         float _f = hue / 60f - Mathf.Floor(hue / 60f);
-        //Debug.Log("_f : " + _f);
+        //FlightPlanPlugin.Logger.LogDebug("_f : " + _f);
 
         float _v = value;
         float _p = value * (1 - saturation);
