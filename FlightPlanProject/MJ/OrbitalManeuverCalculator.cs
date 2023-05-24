@@ -1619,8 +1619,7 @@ namespace MuMech
             PatchedConicsOrbit next_orbit = OrbitPool.FetchInstance(); //.Borrow();
 
             // bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null);
-            orbit = orbit.NextPatch as PatchedConicsOrbit;
-            bool ok = orbit != null; 
+            bool ok = orbit.NextPatch != null; 
             while (ok && orbit.referenceBody != target && orbit.EndUT < arrivalUT)
             {
                 OrbitPool.ReleaseInstance(orbit); // .Release(orbit);
