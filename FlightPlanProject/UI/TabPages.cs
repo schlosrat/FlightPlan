@@ -162,6 +162,7 @@ public class TargetPageShip2Ship : BasePageContent
 
         MainUI.DrawToggleButton("Match Planes", ManeuverType.matchPlane);
         FPSettings.ApAltitude_km = MainUI.DrawToggleButtonWithTextField("New Ap", ManeuverType.newAp, FPSettings.ApAltitude_km, "km");
+        MainUI.TargetApR = FPSettings.ApAltitude_km * 1000 + ReferenceBody.radius;
         MainUI.DrawToggleButton("Circularize", ManeuverType.circularize);
         MainUI.DrawToggleButton("Hohmann Transfer", ManeuverType.hohmannXfer);
         FPSettings.InterceptDistanceVessel = MainUI.DrawToggleButtonWithTextField("Course Correction", ManeuverType.courseCorrection, FPSettings.InterceptDistanceVessel, "m");
@@ -186,7 +187,7 @@ public class TargetPageShip2Ship : BasePageContent
         else if (targetDistance < closestApproachLimit1) // If we're close, but not very close
         { 
             if (Math.Abs(relVelocityCA) < maxDockingSpeed) // We're stopped or nearly stopped relative to the target
-                recommendedManeuver = $"Need to get closer. HINT: Point at target, burn GENTLY toward target, Match Velocity at closest approch. Rinse and repeat until distance < {closestApproachLimit2} m";
+                recommendedManeuver = $"Need to get closer. HINT: Point at target, burn GENTLY toward target ({maxApproachSpeed} m/s or less), Match Velocity at closest approch. Rinse and repeat until distance < {closestApproachLimit2} m";
             else if (relVelocityCA > 0)
                 recommendedManeuver = $"Moving away from target. Match Velocity after fixed time to stop and plan next maneuver";
             else
