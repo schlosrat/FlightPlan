@@ -14,21 +14,13 @@ namespace MuMech
     [UsedImplicitly]
     public class OperationAdvancedTransfer : Operation
     {
-        private static readonly GameInstance Game = GameManager.Instance.Game;
-
-        public OperationAdvancedTransfer()
-        {
-            this.MainUI = FlightPlanUI.Instance;
-            this.Plugin = FlightPlanPlugin.Instance;
-        }
-        protected FlightPlanUI MainUI;
-        protected FlightPlanPlugin Plugin;
-
         public enum Mode
         {
             LimitedTime,
             Porkchop
         }
+
+        private static readonly GameInstance Game = GameManager.Instance.Game;
 
         private static readonly string[]
             modeNames =
@@ -251,7 +243,7 @@ namespace MuMech
                         font      = Skins.ConsoleSkin.font, // GuiUtils.skin.font,
                         fontSize  = Skins.ConsoleSkin.label.fontSize, // GuiUtils.skin.label.fontSize,
                         fontStyle = Skins.ConsoleSkin.label.fontStyle, // GuiUtils.skin.label.fontStyle,
-                        normal = { textColor = Skins.ConsoleSkin.label.normal.textColor } //GuiUtils.skin.label.normal.textColor }
+                        normal    = { textColor = Skins.ConsoleSkin.label.normal.textColor } //GuiUtils.skin.label.normal.textColor }
                     };
                 GUILayout.Box("Computing: " + worker.Progress + "%", progressStyle, GUILayout.Width(windowWidth), // Localizer.Format("#MechJeb_adv_computing")
                     GUILayout.Height(porkchop_Height)); //"Computing:"
@@ -265,7 +257,6 @@ namespace MuMech
             GUILayout.EndHorizontal();
 
             // includeCaptureBurn = GUILayout.Toggle(includeCaptureBurn, "Include Capture Burn"); // Localizer.Format("#MechJeb_adv_captureburn")
-            // includeCaptureBurn = MainUI.DrawSoloToggle("Include Capture Burn", includeCaptureBurn); // Localizer.Format("#MechJeb_adv_captureburn")
             includeCaptureBurn = DrawSoloToggle("Include Capture Burn", includeCaptureBurn); // Localizer.Format("#MechJeb_adv_captureburn")
 
             // fixup the default value of the periapsis if the target changes
@@ -282,7 +273,6 @@ namespace MuMech
             }
 
             // GuiUtils.SimpleTextBox("Periapsis", periapsisHeight, "km"); // Localizer.Format("#MechJeb_adv_periapsis")
-            // periapsisHeight = MainUI.DrawEntryTextField("Periapsis", periapsisHeight, "km");
             periapsisHeight = DrawEntryTextField("Periapsis", periapsisHeight, "km");
             GUILayout.BeginHorizontal();
             GUILayout.Label("Select: "); // Localizer.Format("#MechJeb_adv_label2")
@@ -308,8 +298,6 @@ namespace MuMech
 
             GUILayout.EndHorizontal();
 
-            // MainUI.DrawEntry("Departure in ", departure, " ");
-            // MainUI.DrawEntry("Transit duration ", duration, " ");
             DrawEntry("Departure in ", departure, " ");
             DrawEntry("Transit duration ", duration, " ");
             // GUILayout.Label("Departure in" + " " + departure); // Localizer.Format("#MechJeb_adv_label3")

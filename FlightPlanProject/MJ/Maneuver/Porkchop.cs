@@ -53,7 +53,7 @@ namespace MuMech
                 }
             }
 
-            FlightPlanPlugin.Logger.LogDebug("[MechJeb] porkchop scanning found DVminsqr = " + dVminsqr + " DVmaxsqr = " + dVmaxsqr);
+            FlightPlanPlugin.Logger.LogInfo("[MechJeb] porkchop scanning found DVminsqr = " + dVminsqr + " DVmaxsqr = " + dVmaxsqr);
 
             double logDVminsqr = Math.Log(dVminsqr);
             double logDVmaxsqr = Math.Min(Math.Log(dVmaxsqr), logDVminsqr + 4);
