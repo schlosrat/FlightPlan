@@ -7,7 +7,7 @@ public class AssetsLoader
 {
     public static Texture2D LoadIcon(string path)
     {
-        Texture2D _imageTexture = AssetManager.GetAsset<Texture2D>($"flight_plan/images/{path}.png");
+        Texture2D _imageTexture = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/{path}.png");
 
         //   Check if the texture is null
         if (_imageTexture == null)

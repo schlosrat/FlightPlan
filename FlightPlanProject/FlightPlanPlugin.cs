@@ -175,7 +175,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Appbar.RegisterAppButton(
             "Flight Plan",
             _ToolbarFlightButtonID,
-            AssetManager.GetAsset<Texture2D>($"{SpaceWarpMetadata.ModID}/images/Icon.png"),
+            AssetManager.GetAsset<Texture2D>($"{Info.Metadata.GUID}/images/Icon.png"),
             ToggleButton);
 
         // Register all Harmony patches in the project

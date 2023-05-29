@@ -47,7 +47,7 @@ public class OwnshipManeuversPage : BasePageContent
 {
     public override string Name => "Own Orbit";
 
-    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/OSM_50.png");
+    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/OSM_50.png");
 
     public override GUIContent Icon => new(_tabIcon, "Ownship Maneuvers");
 
@@ -89,7 +89,7 @@ public class TargetPageShip2Ship : BasePageContent
 
     public override string Name => "Target";
 
-    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TRM_50_Ship2Ship.png");
+    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/TRM_50_Ship2Ship.png");
 
     public override GUIContent Icon => new(_tabIcon, "Target Relative Maneuvers");
 
@@ -217,8 +217,7 @@ public class TargetPageShip2Celestial : BasePageContent
 
     private static readonly GameInstance Game = GameManager.Instance.Game;
 
-    // readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TargetRelManeuver_50v2.png");
-    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/TRM_50_Ship2Celestial.png");
+    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/TRM_50_Ship2Celestial.png");
 
     public override GUIContent Icon => new(_tabIcon, "Target Relative Maneuvers");
 
@@ -292,7 +291,7 @@ public class InterplanetaryPage : BasePageContent
 
     public override string Name => "Target";
 
-    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/OTM_50_Planet.png");
+    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/OTM_50_Planet.png");
 
     public override GUIContent Icon => new(_tabIcon, "Orbital Transfer Maneuvers");
 
@@ -378,7 +377,7 @@ public class MoonPage : BasePageContent
 {
     public override string Name => "Moon";
 
-    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/OTM_50_Moon.png");
+    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/OTM_50_Moon.png");
 
     public override GUIContent Icon => new(_tabIcon, "Orbital Transfer Maneuvers");
 
@@ -422,7 +421,7 @@ public class ResonantOrbitPage : BasePageContent
 
     public override string Name => "Resonant Orbit";
 
-    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/ROM_50.png");
+    readonly Texture2D _tabIcon = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/ROM_50.png");
 
     public override GUIContent Icon => new(_tabIcon, "Resonant Orbit Maneuvers");
 
