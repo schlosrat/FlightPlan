@@ -337,7 +337,7 @@ public class InterplanetaryPage : BasePageContent
         MainUI.DrawEntry("Aproximate Eject DeltaV", DeltaV().ToString(), "m/s");
         MainUI.DrawToggleButton("Interplanetary Transfer", ManeuverType.planetaryXfer);
 
-        if (Plugin._experimental.Value) // No maneuvers relative to a star
+        if (Plugin._experimental.Value) // Allow Advanced Interplanetary Transfer if experimental features are enabled
         {
             MainUI.DrawToggleButton("Advanced Interplanetary Transfer", ManeuverType.advancedPlanetaryXfer);
         }
