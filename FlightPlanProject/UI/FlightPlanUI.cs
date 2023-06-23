@@ -248,7 +248,7 @@ public class FlightPlanUI
         if (result != active) { SetManeuverType(result ? this_maneuver_type : ManeuverType.None); }
     }
 
-    private string SituationToString(VesselSituations situation)
+    public static string SituationToString(VesselSituations situation)
     {
         return situation switch
         {
@@ -653,7 +653,7 @@ public class FlightPlanUI
                         FlightPlanPlugin.Logger.LogInfo($"Hohmann transfer fails to intercept {target.Name}'s SOI");
                     else
                         FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime)} from now on patch {patchIdx}");
-                    // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
+                    // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {_newPeValue / 1000:N3} km on patch {patchIdx}");
                     pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
                     if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
                         FPStatus.Error($"Warning: Requested arrival Pe of {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
@@ -721,7 +721,7 @@ public class FlightPlanUI
                         FlightPlanPlugin.Logger.LogInfo($"Course correction fails to intercept {target.Name}'s SOI");
                     else
                         FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime - UT)} from now on patch {patchIdx}");
-                    // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
+                    // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {_newPeValue / 1000:N3} km on patch {patchIdx}");
                     pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
                     if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
                         FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
@@ -794,7 +794,7 @@ public class FlightPlanUI
                     FlightPlanPlugin.Logger.LogInfo($"Course correction fails to intercept {target.Name}'s SOI");
                 else
                     FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime - UT)} from now on patch {patchIdx}");
-                // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
+                // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {_newPeValue / 1000:N3} km on patch {patchIdx}");
                 pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
                 if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
                     FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
@@ -824,7 +824,7 @@ public class FlightPlanUI
                     FlightPlanPlugin.Logger.LogInfo($"Course correction fails to intercept {target.Name}'s SOI");
                 else
                     FlightPlanPlugin.Logger.LogInfo($"Obtained Pe of {nextCA / 1000:N3} km at {FPUtility.SecondsToTimeString(nextCATime - UT)} from now on patch {patchIdx}");
-                // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {newPe / 1000:N3} km on patch {patchIdx}");
+                // FlightPlanPlugin.Logger.LogInfo($"Found closest approach Pe {_newPeValue / 1000:N3} km on patch {patchIdx}");
                 pError = (nextCA - FPSettings.InterceptDistanceCelestial * 1000) / (FPSettings.InterceptDistanceCelestial * 1000);
                 if (Math.Abs(pError) >= Plugin._largeError.Value / 100)
                     FPStatus.Error($"Warning: Requested Intercept {FPSettings.InterceptDistanceCelestial:N1} km, got {nextCA / 1000:N1} km, off by {pError * 100:N3}%");
