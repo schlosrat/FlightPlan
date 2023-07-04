@@ -8,7 +8,7 @@
 		<AssemblyName>com.github.schlosrat.flight_plan</AssemblyName>
 		<Product>Flight Plan</Product>
 		<Description>Plan your (Space) Flight! Fly your Plan! Set up useful maneuver nodes to get you where you want to go</Description>
-		<Version Label="Version of the mod">0.8.8</Version>
+		<Version Label="Version of the mod">0.8.9</Version>
 		<RestoreAdditionalProjectSources>
 			https://nuget.spacewarp.org/v3/index.json
 		</RestoreAdditionalProjectSources>
@@ -34,16 +34,18 @@
 		<PackageReference Include="BepInEx.Core" Version="5.*" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
 		<PackageReference Include="HarmonyX" Version="2.10.1" />
-		<PackageReference Include="SpaceWarp" Version="1.1.1" />
-		<PackageReference Include="NodeManager" Version="0.5.4" />
-		<PackageReference Include="UnityEngine.Modules" Version="2020.3.33" IncludeAssets="compile" />
+		<PackageReference Include="SpaceWarp" Version="1.3.0" />
+		<PackageReference Include="NodeManager" Version="0.5.5" />
+		<PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1"/>
+		<PackageReference Include="UitkForKsp2" Version="1.3.0" />
+		<PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" IncludeAssets="compile" />
 	</ItemGroup>
-    <ItemGroup>
-        <Reference Include="Assembly-CSharp">
-            <HintPath>..\external_dlls\Assembly-CSharp.dll</HintPath>
-            <Publicize>true</Publicize>
-            <Private>false</Private>
-        </Reference>
+	<ItemGroup>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>..\external_dlls\Assembly-CSharp.dll</HintPath>
+			<Publicize>true</Publicize>
+			<Private>false</Private>
+		</Reference>
 		<Reference Include="maneuver_node_controller">
 			<HintPath>..\external_dlls\maneuver_node_controller.dll</HintPath>
 			<Private>false</Private>
@@ -53,7 +55,7 @@
 			<Private>false</Private>
 		</Reference>
 	</ItemGroup>
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="REM copy dll, pdb images infos ands readme to the Debug or Release Dir&#xD;&#xA;&#xD;&#xA;ECHO off&#xD;&#xA;SET DEST_DIR=$(ProjectDir)..\$(ConfigurationName)&#xD;&#xA;&#xD;&#xA;if not exist &quot;%25DEST_DIR%25&quot; rmdir /s /q &quot;%25DEST_DIR%25&quot;&#xD;&#xA;if not exist &quot;%25DEST_DIR%25&quot; mkdir &quot;%25DEST_DIR%25&quot;&#xD;&#xA;&#xD;&#xA;echo d | xcopy /y /s &quot;$(ProjectDir)..\$(ModId)\&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\&quot;&#xD;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\$(ModId).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug echo f | xcopy /y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\LICENSE.md&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\&quot;&#xD;&#xA;echo f | xcopy /y &quot;$(ProjectDir)..\README.md&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\README.txt&quot;&#xD;&#xA;&#xD;&#xA;cd $(ProjectDir)..\batches&#xD;&#xA;call post_build.bat $(ConfigurationName) $(ModId)" />
-    </Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="REM copy dll, pdb images infos and readme to the Debug or Release Dir&#xD;&#xA;&#xD;&#xA;ECHO off&#xD;&#xA;SET DEST_DIR=$(ProjectDir)..\$(ConfigurationName)&#xD;&#xA;&#xD;&#xA;if not exist &quot;%25DEST_DIR%25&quot; rmdir /s /q &quot;%25DEST_DIR%25&quot;&#xD;&#xA;if not exist &quot;%25DEST_DIR%25&quot; mkdir &quot;%25DEST_DIR%25&quot;&#xD;&#xA;&#xD;&#xA;echo d | xcopy /y /s &quot;$(ProjectDir)..\$(ModId)\&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\&quot;&#xD;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\$(ModId).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug echo f | xcopy /y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot;&#xD;&#xA;xcopy /y &quot;$(ProjectDir)..\LICENSE.md&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\&quot;&#xD;&#xA;echo f | xcopy /y &quot;$(ProjectDir)..\README.md&quot; &quot;%25DEST_DIR%25\BepInEx\plugins\$(ModId)\README.txt&quot;&#xD;&#xA;&#xD;&#xA;cd $(ProjectDir)..\batches&#xD;&#xA;call post_build.bat $(ConfigurationName) $(ModId)" />
+	</Target>
 </Project>
