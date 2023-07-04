@@ -1,0 +1,12 @@
+ManifestFileVersion: 0
+CRC: 2240718793
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: kerbalui
+      Dependencies:
+        Dependency_0: fp_ui.bundle
+    Info_1:
+      Name: fp_ui.bundle
+      Dependencies:
+        Dependency_0: kerbalui
