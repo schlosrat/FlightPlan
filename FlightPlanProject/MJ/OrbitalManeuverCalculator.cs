@@ -751,7 +751,7 @@ namespace MuMech
 
         // Lambert Solver Driver function.
         //
-        // This uses Shepperd's method instead of using KSP's Orbit class.
+        // This uses Shepperd's method instead of using KSP's orbit class.
         //
         // The reference time is usually 'now' or the first time the burn can start.
         //
@@ -1377,6 +1377,9 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomalyRad = " + ejectionTrueAnomalyRad);
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
 
+            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomaly = " + ejectionTrueAnomaly);
+            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
+
             if ((idealBurnUT - burnUT > o.period / 2) || (burnUT < UT))
             {
                 burnUT += o.period;
@@ -1586,7 +1589,7 @@ namespace MuMech
         }
 
         //
-        // Global OrbitPool for re-using Orbit objects
+        // Global OrbitPool for re-using orbit objects
         //
 
         public static readonly IObjectPool<PatchedConicsOrbit> OrbitPool = new UtilScripts.Pool<PatchedConicsOrbit>(CreateOrbit, ResetOrbit);
