@@ -1,6 +1,6 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using FlightPlan.KTools.UI;
+// using FlightPlan.KTools.UI;
 using KSP.Game;
 using MuMech;
 using UnityEngine;
@@ -22,12 +22,12 @@ public class FPStatus
 
     static public Status status = Status.VIRGIN; // Everyone starts out this way...
 
-    static string StatusText;
-    static double StatusTime = 0; // _UT of last Status update
+    static public string StatusText;
+    static public double StatusTime = 0; // _UT of last Status update
 
     static ConfigEntry<string> InitialStatusText;
-    static ConfigEntry<double> StatusPersistence;
-    static ConfigEntry<double> StatusFadeTime;
+    static public ConfigEntry<double> StatusPersistence;
+    static public ConfigEntry<double> StatusFadeTime;
 
     static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("FPStatus");
 
@@ -77,23 +77,23 @@ public class FPStatus
         StatusText = InitialStatusText.Value;
     }
 
-    public static void DrawUI(double UT)
-    {
-        // Indicate Status of last GUI function
-        float _transparency = 1;
-        if (UT > StatusTime) _transparency = (float)MuUtils.Clamp(1 - (UT - StatusTime) / StatusFadeTime.Value, 0, 1);
+    //public static void DrawUI(double UT)
+    //{
+    //    // Indicate Status of last GUI function
+    //    float _transparency = 1;
+    //    if (UT > StatusTime) _transparency = (float)MuUtils.Clamp(1 - (UT - StatusTime) / StatusFadeTime.Value, 0, 1);
 
-        var status_style = FPStyles.Status;
-        //if (Status == Status.VIRGIN)
-        //    status_style = FPStyles.Label;  
-        if (status == Status.OK)
-            status_style.normal.textColor = new Color(0, 1, 0, _transparency); // FPStyles.PhaseOk;
-        if (status == Status.WARNING)
-            status_style.normal.textColor = new Color(1, 1, 0, _transparency); // FPStyles.PhaseWarning;
-        if (status == Status.ERROR)
-            status_style.normal.textColor = new Color(1, 0, 0, _transparency); // FPStyles.PhaseError;
+    //    var status_style = FPStyles.Status;
+    //    //if (Status == Status.VIRGIN)
+    //    //    status_style = FPStyles.Label;  
+    //    if (status == Status.OK)
+    //        status_style.normal.textColor = new Color(0, 1, 0, _transparency); // FPStyles.PhaseOk;
+    //    if (status == Status.WARNING)
+    //        status_style.normal.textColor = new Color(1, 1, 0, _transparency); // FPStyles.PhaseWarning;
+    //    if (status == Status.ERROR)
+    //        status_style.normal.textColor = new Color(1, 0, 0, _transparency); // FPStyles.PhaseError;
 
-        UI_Tools.Separator();
-        FPStyles.DrawSectionHeader("Status:", StatusText, 60, status_style);
-    }
+    //    UI_Tools.Separator();
+    //    FPStyles.DrawSectionHeader("Status:", StatusText, 60, status_style);
+    //}
 }

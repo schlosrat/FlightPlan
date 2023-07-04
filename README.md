@@ -55,6 +55,7 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 * **New Ap** (user specified value - km)
 * **New Pe & Ap** (uses inputs for **New Pe** and **New Ap** above changing both in one maneuver)
 * **New Inclination** (user specified value - degrees)
+* **New LAN** (user specified value - degrees)
 * **New SMA** (user specified value - km)
 ### Target Relative Maneuvers - Ship to Ship: Conditionally Available
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Only available if a target vessel or part is selected and both active vessel and target are in the same SOI**
@@ -163,17 +164,17 @@ Using the configuration parameters you can change a variety of things such as ho
 **Work In Progress** developmental features may be enabled by switching on the *Experimental Features* in the mod's configuration screen. You do not need to restart the game for this setting to take effect, and it will allow you to play with some broken toys if you like. As these features mature and become reliable enough to use they will be moved up into the main feature set available without turning on the *Experimental Features* setting.
 ### Ownship Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OSM_50.png) **Always Available**
-* **New LAN** (user specified value - degrees)
+* **New Node Longitude** (user specified value - degrees)
 ### Target Relative Maneuvers - Ship to Ship
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
 * **Intercept** Target (user specified intercept time - seconds)
-* **Course Correction**
 ### Target Relative Maneuvers - Ship to Celestial
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
 * **Intercept** Target (user specified intercept time - seconds)
 ### Orbital Transfer Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/assets/images/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and a Another Planet is the Selected Target**
 * **Interplanetary Transfer** (only available if a planet is the selected target)
+* **Advanced Interplanetary Transfer** (only available if a planet is the selected target)
 
 ## Example: Take a Trip to Minmus
 ### Step 1: Match Planes

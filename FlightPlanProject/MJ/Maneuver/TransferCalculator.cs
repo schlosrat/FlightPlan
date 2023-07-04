@@ -1,19 +1,11 @@
 ﻿// #define DEBUG
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Threading;
 using FlightPlan;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using MechJebLib.Core;
 using MechJebLib.Primitives;
-using UnityEngine;
-using UnityToolbag;
-using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace MuMech
 {
@@ -74,13 +66,15 @@ namespace MuMech
         {
             OriginOrbit      = o;
             DestinationOrbit = target;
+            int minHeight = 200; //  1000; // 200;
+            int minWidth = 330; //  1000; // 290;
 
             _origin = new PatchedConicsOrbit(Game.UniverseModel);
             _origin.UpdateFromOrbitAtUT(o, minDepartureTime, o.referenceBody);
             _destination = new PatchedConicsOrbit(Game.UniverseModel);
             _destination.UpdateFromOrbitAtUT(target, minDepartureTime, target.referenceBody);
-            MaxDurationSamples  = height;
-            DateSamples         = width;
+            MaxDurationSamples  = Math.Max(minHeight,height);
+            DateSamples         = Math.Max(minWidth, width);
             NextDateIndex       = DateSamples;
             MinDepartureTime    = minDepartureTime;
             MaxDepartureTime    = maxDepartureTime;
@@ -245,7 +239,7 @@ namespace MuMech
             {
                 // Dispatcher.InvokeAsync(() =>
                 //{
-                    // Debug.Log($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
+                    // FlightPlanPlugin.Logger.LogDebug($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
                     FlightPlanPlugin.Logger.LogDebug($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
                 //} );
             }
@@ -317,8 +311,8 @@ namespace MuMech
             alglib.minnlcoptimize(state, FindSOIObjective, null, null);
             alglib.minnlcresults(state, out x, out alglib.minnlcreport rep);
 
-            Debug.Log("Transfer calculator: termination type=" + rep.terminationtype);
-            Debug.Log("Transfer calculator: iteration count=" + rep.iterationscount);
+            FlightPlanPlugin.Logger.LogInfo("Transfer calculator: termination type=" + rep.terminationtype);
+            FlightPlanPlugin.Logger.LogInfo("Transfer calculator: iteration count=" + rep.iterationscount);
 
             maneuver.dV = new Vector3d(x[0], x[1], x[2]) * _impulseScale;
             maneuver.UT = _initialTime + x[3] * _timeScale;
@@ -359,22 +353,22 @@ namespace MuMech
 
             double[] x = new double[VARS];
 
-            Debug.Log("epoch: " + Game.UniverseModel.UniversalTime);
-            Debug.Log("initial orbit around source: " + _initialOrbit.MuString());
-            Debug.Log("source: " + _initialOrbit.referenceBody.Orbit.MuString());
-            Debug.Log("target: " + _targetBody.Orbit.MuString());
-            Debug.Log("source mu: " + _initialOrbit.referenceBody.gravParameter);
-            Debug.Log("target mu: " + _targetBody.gravParameter);
-            Debug.Log("sun mu: " + _initialOrbit.referenceBody.referenceBody.gravParameter);
-            Debug.Log("maneuver guess dV: " + maneuver.dV);
-            Debug.Log("maneuver guess UT: " + maneuver.UT);
-            Debug.Log("arrival guess UT: " + utArrival);
+            FlightPlanPlugin.Logger.LogInfo("epoch: " + Game.UniverseModel.UniversalTime);
+            FlightPlanPlugin.Logger.LogInfo("initial orbit around source: " + _initialOrbit.MuString());
+            FlightPlanPlugin.Logger.LogInfo("source: " + _initialOrbit.referenceBody.Orbit.MuString());
+            FlightPlanPlugin.Logger.LogInfo("target: " + _targetBody.Orbit.MuString());
+            FlightPlanPlugin.Logger.LogInfo("source mu: " + _initialOrbit.referenceBody.gravParameter);
+            FlightPlanPlugin.Logger.LogInfo("target mu: " + _targetBody.gravParameter);
+            FlightPlanPlugin.Logger.LogInfo("sun mu: " + _initialOrbit.referenceBody.referenceBody.gravParameter);
+            FlightPlanPlugin.Logger.LogInfo("maneuver guess dV: " + maneuver.dV);
+            FlightPlanPlugin.Logger.LogInfo("maneuver guess UT: " + maneuver.UT);
+            FlightPlanPlugin.Logger.LogInfo("arrival guess UT: " + utArrival);
             _initialOrbit.GetOrbitalStateVectorsAtUT(maneuver.UT, out Vector3d r1, out Vector3d v1);
-            Debug.Log($"initial orbit at {maneuver.UT} x = {r1}; v = {v1}");
+            FlightPlanPlugin.Logger.LogInfo($"initial orbit at {maneuver.UT} x = {r1}; v = {v1}");
             _initialOrbit.referenceBody.Orbit.GetOrbitalStateVectorsAtUT(maneuver.UT, out Vector3d r2, out Vector3d v2);
-            Debug.Log($"source at {maneuver.UT} x = {r2}; v = {v2}");
+            FlightPlanPlugin.Logger.LogInfo($"source at {maneuver.UT} x = {r2}; v = {v2}");
             _targetBody.Orbit.GetOrbitalStateVectorsAtUT(utArrival, out Vector3d r3, out Vector3d v3);
-            Debug.Log($"source at {utArrival} x = {r3}; v = {v3}");
+            FlightPlanPlugin.Logger.LogInfo($"source at {utArrival} x = {r3}; v = {v3}");
 
             _impulseScale = maneuver.dV.magnitude;
             _timeScale    = _initialOrbit.period;
@@ -404,8 +398,8 @@ namespace MuMech
             alglib.minnlcoptimize(state, PeriapsisObjective, null, null);
             alglib.minnlcresults(state, out x, out alglib.minnlcreport rep);
 
-            Debug.Log("Transfer calculator: termination type=" + rep.terminationtype);
-            Debug.Log("Transfer calculator: iteration count=" + rep.iterationscount);
+            FlightPlanPlugin.Logger.LogInfo("Transfer calculator: termination type=" + rep.terminationtype);
+            FlightPlanPlugin.Logger.LogInfo("Transfer calculator: iteration count=" + rep.iterationscount);
 
             maneuver.dV = new Vector3d(x[0], x[1], x[2]) * _impulseScale;
             maneuver.UT = _initialTime;
@@ -433,7 +427,7 @@ namespace MuMech
                 // helicentric transfer orbit
                 var transferOrbit = new PatchedConicsOrbit(Game.UniverseModel);
                 Position position = new Position(source.referenceBody.SimulationObject.transform.celestialFrame, source.GetRelativePositionAtUT(utTransfer));
-                Velocity velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.GetOrbitalVelocityAtUTZup(utTransfer) + exitDV.SwapYAndZ);
+                Velocity velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.GetOrbitalVelocityAtUTZup(utTransfer) + exitDV); // was: exitDV.SwapYAndZ
                 transferOrbit.UpdateFromStateVectors(position, velocity, source.referenceBody, utTransfer);
 
                 OrbitalManeuverCalculator.SOI_intercept(transferOrbit, initialOrbit.referenceBody, utTransfer, utArrival, out double utSoiExit);
@@ -463,7 +457,7 @@ namespace MuMech
 
                 if (orbit2.referenceBody != _targetBody)
                 {
-                    Debug.Log("Transfer calculator:  analytic solution does not intersect SOI, doing some expensive thinking to move it closer...");
+                    FlightPlanPlugin.Logger.LogInfo("Transfer calculator:  analytic solution does not intersect SOI, doing some expensive thinking to move it closer...");
                     // update the maneuver and arrival times to move into the SOI
                     FindSOI(maneuver, ref utArrival);
                 }
@@ -475,25 +469,25 @@ namespace MuMech
 
                 if (orbit3.referenceBody == _targetBody)
                 {
-                    Debug.Log("Transfer calculator: adjusting periapsis target");
+                    FlightPlanPlugin.Logger.LogInfo("Transfer calculator: adjusting periapsis target");
                     AdjustPeriapsis(maneuver, ref extraArrival);
                 }
                 else
                 {
                     failed = true;
-                    Debug.Log("Transfer calculator: failed to find the SOI");
+                    FlightPlanPlugin.Logger.LogInfo("Transfer calculator: failed to find the SOI");
                 }
 
                 // try again in one orbit if the maneuver node is in the past
                 if (maneuver.UT < earliestUT || failed)
                 {
-                    Debug.Log("Transfer calculator: maneuver is " + (earliestUT - maneuver.UT) + " s too early, trying again in " +
+                    FlightPlanPlugin.Logger.LogInfo("Transfer calculator: maneuver is " + (earliestUT - maneuver.UT) + " s too early, trying again in " +
                               initialOrbit.period + " s");
                     utTransfer += initialOrbit.period;
                 }
                 else
                 {
-                    Debug.Log("from optimizer DV = " + maneuver.dV + " t = " + maneuver.UT + " original arrival = " + utArrival);
+                    FlightPlanPlugin.Logger.LogInfo("from optimizer DV = " + maneuver.dV + " t = " + maneuver.UT + " original arrival = " + utArrival);
                     nodeList.Add(maneuver);
                     break;
                 }

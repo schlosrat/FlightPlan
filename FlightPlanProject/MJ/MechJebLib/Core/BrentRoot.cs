@@ -1,7 +1,6 @@
 /*
- * Copyright Lamont Granquist (lamont@scriptkiddie.org)
- * Dual licensed under the MIT (MIT-LICENSE) license
- * and GPLv2 (GPLv2-LICENSE) license or any later version.
+ * Copyright Lamont Granquist, Sebastien Gaggini and the MechJeb contributors
+ * SPDX-License-Identifier: MIT-0 OR LGPL-2.1+ OR CC0-1.0
  */
 
 #nullable enable
@@ -10,6 +9,7 @@ using System;
 using MechJebLib.Utils;
 using static MechJebLib.Utils.Statics;
 
+// ReSharper disable CompareOfFloatsByEqualityOperator
 namespace MechJebLib.Core
 {
     /// <summary>
@@ -17,8 +17,6 @@ namespace MechJebLib.Core
     /// </summary>
     public static class BrentRoot
     {
-        // private const double EPS = 2.24e-15;
-
         /// <summary>
         ///     Brent's rootfinding method, bounded search.  Uses secant, inverse quadratic interpolation and bisection.
         /// </summary>
