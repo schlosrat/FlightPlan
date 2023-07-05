@@ -1377,8 +1377,8 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomalyRad = " + ejectionTrueAnomalyRad);
             FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
 
-            FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomaly = " + ejectionTrueAnomaly);
-            FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
+            //FlightPlanPlugin.Logger.LogDebug("DeltaVAndTimeForInterplanetaryLambertTransferEjection: ejectionTrueAnomaly = " + ejectionTrueAnomaly);
+            //FlightPlanPlugin.Logger.LogDebug($"DeltaVAndTimeForInterplanetaryLambertTransferEjection: burnUT = {burnUT} = {FPUtility.SecondsToTimeString(burnUT - UT)} from now.");
 
             if ((idealBurnUT - burnUT > o.period / 2) || (burnUT < UT))
             {
