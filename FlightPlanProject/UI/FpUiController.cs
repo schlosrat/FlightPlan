@@ -1155,7 +1155,8 @@ public class FpUiController : KerbalMonoBehaviour
         }
       }
 
-      FlightPlanPlugin.Logger.LogInfo($"Selected Target: {_currentTarget.Name}");
+      if (_currentTarget != null)
+        FlightPlanPlugin.Logger.LogInfo($"Selected Target: {_currentTarget.Name}");
 
     });
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}");
@@ -2291,8 +2292,12 @@ public class FpUiController : KerbalMonoBehaviour
       default: break;
     }
 
+    if (_pass)
+      CheckNodeQuality();
+
     if (_pass && FlightPlanPlugin.Instance._autoLaunchMNC.Value && _launchMNC) // || Math.Abs(pError) >= Plugin._smallError.Value/100))
       FPOtherModsInterface.instance.CallMNC();
+
 
 
     //switch (selectedManeuver)
@@ -2346,14 +2351,14 @@ public class FpUiController : KerbalMonoBehaviour
   void LaunchMNC()
   {
     // do stuff
-    FlightPlanPlugin.Logger.LogInfo($"LaunchMNC: UITK button pressed");
+    FlightPlanPlugin.Logger.LogDebug($"LaunchMNC: UITK button pressed");
     FPOtherModsInterface.instance.CallMNC();
   }
 
   void K2D2()
   {
     // do stuff
-    FlightPlanPlugin.Logger.LogInfo($"K2D2: UITK button pressed");
+    FlightPlanPlugin.Logger.LogDebug($"K2D2: UITK button pressed");
     FPOtherModsInterface.instance.CallK2D2();
     // FPOtherModsInterface.instance.GetK2D2Status();
   }
