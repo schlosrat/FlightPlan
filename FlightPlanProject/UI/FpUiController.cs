@@ -273,6 +273,8 @@ public class FpUiController : KerbalMonoBehaviour
   Button K2D2Button;
   Label K2D2Status;
 
+  public FPOtherModsInterface OtherMods = null;
+
   ManeuverType selectedManeuver;
 
   private void Start()
@@ -297,6 +299,154 @@ public class FpUiController : KerbalMonoBehaviour
       _ => "UNKNOWN",
     };
   }
+
+  public void SetEnabled(bool newState)
+  {
+    if (newState)
+    {
+      _container.style.display = DisplayStyle.Flex;
+    }
+    else _container.style.display = DisplayStyle.None;
+
+    GameObject.Find(FlightPlanPlugin._ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(newState);
+    // FlightPlanPlugin.Instance.ToggleButton(newState);
+
+    //interfaceEnabled = newState;
+    //GameObject.Find(_ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(interfaceEnabled);
+  }
+
+  public void SetupDocument()
+  {
+    var document = GetComponent<UIDocument>();
+    if (document.TryGetComponent<DocumentLocalization>(out var localization))
+    {
+      localization.Localize();
+    }
+    else
+    {
+      document.EnableLocalization();
+    }
+    // document.rootVisualElement.transform.position.z = 42;
+
+    _container = document.rootVisualElement;
+    _container[0].transform.position = new Vector2(500, 50);
+    _container[0].CenterByDefault();
+    _container.style.display = DisplayStyle.None;
+    // FlightPlanPlugin.Logger.LogInfo($"_container {_container.}. nValue = {evt.newValue}. setting color to white");
+
+    document.rootVisualElement.Query<TextField>().ForEach(textField =>
+    {
+      textField.RegisterCallback<FocusInEvent>(_ => GameManager.Instance?.Game?.Input.Disable());
+      textField.RegisterCallback<FocusOutEvent>(_ => GameManager.Instance?.Game?.Input.Enable());
+
+      textField.RegisterValueChangedCallback((evt) =>
+      {
+        bool pass = false;
+        FlightPlanPlugin.Logger.LogDebug($"TryParse attempt for {textField.name}. Tooltip = {textField.tooltip}");
+        if (textField.tooltip != "Time in hh:mm:ss format")
+          pass = float.TryParse(evt.newValue, out _);
+        else
+          pass = MyTryParse(evt.newValue, out _);
+        if (pass)
+        {
+          textField.RemoveFromClassList("unity-text-field-invalid");
+          FlightPlanPlugin.Logger.LogDebug($"TryParse success for {textField.name}, nValue = '{evt.newValue}': Removed unity-text-field-invalid from class list");
+        }
+        else
+        {
+          textField.AddToClassList("unity-text-field-invalid");
+          FlightPlanPlugin.Logger.LogDebug($"TryParse failure for {textField.name}, nValue = '{evt.newValue}': Added unity-text-field-invalid to class list");
+          FlightPlanPlugin.Logger.LogDebug($"document.rootVisualElement.transform.position.z = {document.rootVisualElement.transform.position.z}");
+        }
+      });
+
+      textField.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+      textField.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
+      textField.RegisterCallback<PointerMoveEvent>(evt => evt.StopPropagation());
+    });
+  }
+
+  private bool MyTryParse(string input, out double totalSeconds)
+  {
+    totalSeconds = 0;
+    int years = 0;
+    int days = 0;
+    int hours = 0;
+    int minutes = 0;
+    double seconds = 0;
+    bool pass;
+
+    string[] timeParts = input.ToLower().Split(':');
+    if (timeParts.Length > 4)
+      return false;
+
+    // Process years if present
+    if (input.Contains('y'))
+    {
+      string[] partsY = timeParts[0].Split('y');
+      if (partsY.Length > 2 || !int.TryParse(partsY[0], out years))
+        return false;
+      totalSeconds += (double)years * 426.08 * 6.0 * 3600.0;
+      timeParts[0] = partsY[1];
+    }
+
+    // Proces days if present
+    if (input.Contains('d'))
+    {
+      string[] partsD = timeParts[0].Split('d');
+      if (partsD.Length > 2 || !int.TryParse(partsD[0], out days))
+        return false;
+      totalSeconds += (double)days * 6.0 * 3600.0;
+      timeParts[0] = partsD[1];
+    }
+
+    // Process hours, minutes, seconds
+    // FlightPlanPlugin.Logger.LogInfo($"MyTryParse: parts_t.Length = {parts_t.Length}, parts_t = '{test}'");
+    int i = 0;
+    foreach (string part in timeParts.Reverse())
+    {
+      switch (i)
+      {
+        case 0: // handle seconds
+          pass = double.TryParse(part, out seconds);
+          if (pass)
+            if (timeParts.Length > 1 || years > 0 || days > 0) // we have more than just seconds
+              if (seconds < 60) // limit seconds to less than 60
+                totalSeconds += seconds;
+              else
+                return false;
+            else // all we have are seconds, so no limit
+              totalSeconds += seconds;
+          else
+            return false;
+          break;
+        case 1: // handle minutes
+          pass = int.TryParse(part, out minutes);
+          if (pass && minutes < 60 && minutes >= 0)
+            totalSeconds += (double)minutes * 60.0;
+          else
+            return false;
+          break;
+        case 2: // handle hours
+          pass = int.TryParse(part, out hours);
+          if (pass && hours < 6 && hours >= 0)
+            totalSeconds += (double)hours * 3600.0;
+          else
+            return false;
+          break;
+        default: return false;
+      }
+      i++;
+    }
+    if (years > 0)
+      FlightPlanPlugin.Logger.LogDebug($"MyTryParse: newValue = '{input}', time = {years}y {days}d {hours}:{minutes}:{seconds} = {totalSeconds} seconds");
+    else if (days > 0)
+      FlightPlanPlugin.Logger.LogDebug($"MyTryParse: newValue = '{input}', time = {days}d {hours}:{minutes}:{seconds} = {totalSeconds} seconds");
+    else
+      FlightPlanPlugin.Logger.LogDebug($"MyTryParse: newValue = '{input}', time = {hours}:{minutes}:{seconds} = {totalSeconds} seconds");
+    return true;
+  }
+
 
   private void Update()
   {
@@ -942,153 +1092,6 @@ public class FpUiController : KerbalMonoBehaviour
 
     return Math.Round(100 * Math.Abs(sdv - cdv)) / 100;
   }
-
-  public void SetEnabled(bool newState)
-  {
-    if (newState)
-    {
-      _container.style.display = DisplayStyle.Flex;
-    }
-    else _container.style.display = DisplayStyle.None;
-
-    GameObject.Find(FlightPlanPlugin._ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(newState);
-    // FlightPlanPlugin.Instance.ToggleButton(newState);
-
-    //interfaceEnabled = newState;
-    //GameObject.Find(_ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(interfaceEnabled);
-  }
-
-  public void SetupDocument()
-  {
-    var document = GetComponent<UIDocument>();
-    if (document.TryGetComponent<DocumentLocalization>(out var localization))
-    {
-      localization.Localize();
-    }
-    else
-    {
-      document.EnableLocalization();
-    }
-    // document.rootVisualElement.transform.position.z = 42;
-
-    _container = document.rootVisualElement;
-    _container[0].transform.position = new Vector2(500, 50);
-    _container[0].CenterByDefault();
-    _container.style.display = DisplayStyle.None;
-    // FlightPlanPlugin.Logger.LogInfo($"_container {_container.}. nValue = {evt.newValue}. setting color to white");
-
-    document.rootVisualElement.Query<TextField>().ForEach(textField =>
-    {
-      textField.RegisterCallback<FocusInEvent>(_ => GameManager.Instance?.Game?.Input.Disable());
-      textField.RegisterCallback<FocusOutEvent>(_ => GameManager.Instance?.Game?.Input.Enable());
-      textField.RegisterValueChangedCallback((evt) =>
-      {
-        bool pass = false;
-        FlightPlanPlugin.Logger.LogDebug($"TryParse attempt for {textField.name}. Tooltip = {textField.tooltip}");
-        if (textField.tooltip != "Time in hh:mm:ss format")
-          pass = float.TryParse(evt.newValue, out _);
-        else
-          pass = MyTryParse(evt.newValue, out _);
-        if (pass)
-        {
-          textField.RemoveFromClassList("unity-text-field-invalid");
-          FlightPlanPlugin.Logger.LogInfo($"TryParse success for {textField.name}, nValue = '{evt.newValue}': Removed unity-text-field-invalid from class list");
-        }
-        else
-        {
-          textField.AddToClassList("unity-text-field-invalid");
-          FlightPlanPlugin.Logger.LogInfo($"TryParse failure for {textField.name}, nValue = '{evt.newValue}': Added unity-text-field-invalid to class list");
-          FlightPlanPlugin.Logger.LogInfo($"document.rootVisualElement.transform.position.z = {document.rootVisualElement.transform.position.z}");
-        }
-      });
-      textField.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
-      textField.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
-      textField.RegisterCallback<PointerMoveEvent>(evt => evt.StopPropagation());
-    });
-  }
-
-  private bool MyTryParse(string input, out double totalSeconds)
-  {
-    totalSeconds = 0;
-    int years = 0;
-    int days = 0;
-    int hours = 0;
-    int minutes = 0;
-    double seconds = 0;
-    bool pass;
-
-    string[] timeParts = input.ToLower().Split(':');
-    if (timeParts.Length > 4)
-      return false;
-
-    // Process years if present
-    if (input.Contains('y'))
-    {
-      string[] partsY = timeParts[0].Split('y');
-      if (partsY.Length > 2 || !int.TryParse(partsY[0], out years))
-        return false;
-      totalSeconds += (double)years * 426.08 * 6.0 * 3600.0;
-      timeParts[0] = partsY[1];
-    }
-
-    // Proces days if present
-    if (input.Contains('d'))
-    {
-      string[] partsD = timeParts[0].Split('d');
-      if (partsD.Length > 2 || !int.TryParse(partsD[0], out days))
-        return false;
-      totalSeconds += (double)days * 6.0 * 3600.0;
-      timeParts[0] = partsD[1];
-    }
-
-    // Process hours, minutes, seconds
-    // FlightPlanPlugin.Logger.LogInfo($"MyTryParse: parts_t.Length = {parts_t.Length}, parts_t = '{test}'");
-    int i = 0;
-    foreach (string part in timeParts.Reverse())
-    {
-      switch (i)
-      {
-        case 0: // handle seconds
-          pass = double.TryParse(part, out seconds);
-          if (pass)
-            if (timeParts.Length > 1 || years > 0 || days > 0) // we have more than just seconds
-              if (seconds < 60) // limit seconds to less than 60
-                totalSeconds += seconds;
-              else
-                return false;
-            else // all we have are seconds, so no limit
-              totalSeconds += seconds;
-          else
-            return false;
-          break;
-        case 1: // handle minutes
-          pass = int.TryParse(part, out minutes);
-          if (pass && minutes < 60 && minutes >= 0)
-            totalSeconds += (double)minutes * 60.0;
-          else
-            return false;
-          break;
-        case 2: // handle hours
-          pass = int.TryParse(part, out hours);
-          if (pass && hours < 6 && hours >= 0)
-            totalSeconds += (double)hours * 3600.0;
-          else
-            return false;
-          break;
-        default: return false;
-      }
-      i++;
-    }
-    if (years > 0)
-      FlightPlanPlugin.Logger.LogInfo($"MyTryParse: newValue = '{input}', time = {years}y {days}d {hours}:{minutes}:{seconds} = {totalSeconds} seconds");
-    else if (days > 0)
-      FlightPlanPlugin.Logger.LogInfo($"MyTryParse: newValue = '{input}', time = {days}d {hours}:{minutes}:{seconds} = {totalSeconds} seconds");
-    else
-      FlightPlanPlugin.Logger.LogInfo($"MyTryParse: newValue = '{input}', time = {hours}:{minutes}:{seconds} = {totalSeconds} seconds");
-    return true;
-  }
-
-  public FPOtherModsInterface OtherMods = null;
 
   public void InitializeElements()
   {
