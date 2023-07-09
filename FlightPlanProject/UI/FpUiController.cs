@@ -28,9 +28,11 @@ public class FpUiController : KerbalMonoBehaviour
   private static FpUiController _instance;
   public static FpUiController Instance { get => _instance; }
 
-
-  private VisualElement _container;
+  // GUI Stuff
+  public static VisualElement container;
   private bool initialized = false;
+  public static bool GUIenabled = true;
+  GameState _gameState = GameState.Invalid;
 
   public static double TargetMRPeR_m = 100000;
   public static double TargetPeR_m = 100000;
@@ -304,9 +306,9 @@ public class FpUiController : KerbalMonoBehaviour
   {
     if (newState)
     {
-      _container.style.display = DisplayStyle.Flex;
+      container.style.display = DisplayStyle.Flex;
     }
-    else _container.style.display = DisplayStyle.None;
+    else container.style.display = DisplayStyle.None;
 
     GameObject.Find(FlightPlanPlugin._ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(newState);
     // FlightPlanPlugin.Instance.ToggleButton(newState);
@@ -328,10 +330,10 @@ public class FpUiController : KerbalMonoBehaviour
     }
     // document.rootVisualElement.transform.position.z = 42;
 
-    _container = document.rootVisualElement;
-    _container[0].transform.position = new Vector2(500, 50);
-    _container[0].CenterByDefault();
-    _container.style.display = DisplayStyle.None;
+    container = document.rootVisualElement;
+    container[0].transform.position = new Vector2(500, 50);
+    container[0].CenterByDefault();
+    container.style.display = DisplayStyle.None;
     // FlightPlanPlugin.Logger.LogInfo($"_container {_container.}. nValue = {evt.newValue}. setting color to white");
 
     document.rootVisualElement.Query<TextField>().ForEach(textField =>
@@ -474,6 +476,31 @@ public class FpUiController : KerbalMonoBehaviour
     {
       FlightPlanPlugin.Logger.LogInfo($"Calling InitializeElements from Update");
       InitializeElements();
+      return;
+    }
+
+    // _GUIenabled = false;
+    var _newGameState = Game?.GlobalGameState?.GetState();
+    // var _newLastGameState = Game?.GlobalGameState?.GetLastState();
+    bool _gameStateUpdated = _gameState != _newGameState;
+    if (_newGameState == null)
+      return;
+    //if (_newLastGameState != _gameState)
+    //  FlightPlanPlugin.Logger.LogInfo($"GameState Transitioned?: {_gameState} -> {_newGameState2}");
+    if (_gameStateUpdated)
+    {
+      FlightPlanPlugin.Logger.LogInfo($"GameState Transitioned: {_gameState} -> {_newGameState}");
+      _gameState = (GameState)_newGameState;
+    }
+
+    //if (_gameState == GameState.Map3DView) _GUIenabled = true;
+    //if (_gameState == GameState.FlightView) _GUIenabled = true;
+
+    if (GUIenabled && FlightPlanPlugin._interfaceEnabled)
+      container.style.display = DisplayStyle.Flex;
+    else
+    {
+      container.style.display = DisplayStyle.None;
       return;
     }
 
@@ -1113,16 +1140,16 @@ public class FpUiController : KerbalMonoBehaviour
     // Set up variables to be able to access UITK GUI panel groups quickly (Queries are expensive) 
 
     // Close Button
-    CloseButton = _container.Q<Button>("CloseButton");
+    CloseButton = container.Q<Button>("CloseButton");
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}");
 
     // Vessel Situation
-    VesselSituation = _container.Q<Label>("VesselSituation");
+    VesselSituation = container.Q<Label>("VesselSituation");
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}");
 
     // TargetSelection
-    TargetTypeButton = _container.Q<Button>("TargetTypeButton");
-    TargetSelectionDropdown = _container.Q<DropdownField>("TargetSelectionDropdown");
+    TargetTypeButton = container.Q<Button>("TargetTypeButton");
+    TargetSelectionDropdown = container.Q<DropdownField>("TargetSelectionDropdown");
     TargetTypeButton.clicked += TargetType;
     TargetSelectionDropdown.RegisterValueChangedCallback(evt =>
     {
@@ -1170,29 +1197,29 @@ public class FpUiController : KerbalMonoBehaviour
 
     // TabBar button boxes (used to control visibility and placement of TabBar buttons)
     // OSMButtonBox = _container.Q<VisualElement>("OSMButtonBox");
-    TRMShipToShipButtonBox = _container.Q<VisualElement>("TRMShipToShipButtonBox");
-    TRMShipToCelestialButtonBox = _container.Q<VisualElement>("TRMShipToCelestialButtonBox");
-    OTMMoonButtonBox = _container.Q<VisualElement>("OTMMoonButtonBox");
-    OTMPlanetButtonBox = _container.Q<VisualElement>("OTMPlanetButtonBox");
+    TRMShipToShipButtonBox = container.Q<VisualElement>("TRMShipToShipButtonBox");
+    TRMShipToCelestialButtonBox = container.Q<VisualElement>("TRMShipToCelestialButtonBox");
+    OTMMoonButtonBox = container.Q<VisualElement>("OTMMoonButtonBox");
+    OTMPlanetButtonBox = container.Q<VisualElement>("OTMPlanetButtonBox");
     // ROMButtonBox = _container.Q<VisualElement>("ROMButtonBox");
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}");
 
     // TabBar buttons (control which panel is displayed)
-    OSMButton = _container.Q<Button>("OSMButton");
-    TRMShipToShipButton = _container.Q<Button>("TRMShipToShipButton");
-    TRMShipToCelestialButton = _container.Q<Button>("TRMShipToCelestialButton");
-    OTMMoonButton = _container.Q<Button>("OTMMoonButton");
-    OTMPlanetButton = _container.Q<Button>("OTMPlanetButton");
-    ROMButton = _container.Q<Button>("ROMButton");
+    OSMButton = container.Q<Button>("OSMButton");
+    TRMShipToShipButton = container.Q<Button>("TRMShipToShipButton");
+    TRMShipToCelestialButton = container.Q<Button>("TRMShipToCelestialButton");
+    OTMMoonButton = container.Q<Button>("OTMMoonButton");
+    OTMPlanetButton = container.Q<Button>("OTMPlanetButton");
+    ROMButton = container.Q<Button>("ROMButton");
 
     // FlightPlanPlugin.Logger.LogInfo($"FP: Top panel initialized. initialized is set to {initialized}");
 
     // Panel Label (set this whenever activating a panel to identify the panel)
-    PanelLabel = _container.Q<Label>("PanelLabel");
+    PanelLabel = container.Q<Label>("PanelLabel");
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: PanelLabel");
 
     // BurnTimeOptions dropdown
-    BurnOptionsDropdown = _container.Q<DropdownField>("BurnOptionsDropdown");
+    BurnOptionsDropdown = container.Q<DropdownField>("BurnOptionsDropdown");
     BurnOptionsDropdown.RegisterValueChangedCallback(evt =>
     {
       _burnTimeOption = evt.newValue;
@@ -1212,12 +1239,12 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: BurnOptionsDropdown");
 
     // UI panels (used to control center part of UI based on the selected tab bar button)
-    OSMPanel = _container.Q<VisualElement>("OSMPanel");
-    TRMShipToShipPanel = _container.Q<VisualElement>("TRMShipToShipPanel");
-    TRMShipToCelestialPanel = _container.Q<VisualElement>("TRMShipToCelestialPanel");
-    OTMMoonPanel = _container.Q<VisualElement>("OTMMoonPanel");
-    OTMPlanetPanel = _container.Q<VisualElement>("OTMPlanetPanel");
-    ROMPanel = _container.Q<VisualElement>("ROMPanel");
+    OSMPanel = container.Q<VisualElement>("OSMPanel");
+    TRMShipToShipPanel = container.Q<VisualElement>("TRMShipToShipPanel");
+    TRMShipToCelestialPanel = container.Q<VisualElement>("TRMShipToCelestialPanel");
+    OTMMoonPanel = container.Q<VisualElement>("OTMMoonPanel");
+    OTMPlanetPanel = container.Q<VisualElement>("OTMPlanetPanel");
+    ROMPanel = container.Q<VisualElement>("ROMPanel");
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: ROMPanel");
     panels.Add(OSMPanel);
     panels.Add(TRMShipToShipPanel);
@@ -1246,18 +1273,18 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: panelNames.Add(\"Resonant Orbit Maneuvers\")");
 
     // OMSPanel UI controls
-    CircularizeButtonOSM = _container.Q<Button>("CircularizeButtonOSM");
-    NewPeButtonOSM = _container.Q<Button>("NewPeButtonOSM");
-    NewPeValueOSM = _container.Q<TextField>("NewPeValueOSM");
-    NewApButtonOSM = _container.Q<Button>("NewApButtonOSM");
-    NewApValueOSM = _container.Q<TextField>("NewApValueOSM");
-    NewPeApButtonOSM = _container.Q<Button>("NewPeApButtonOSM");
-    NewIncButtonOSM = _container.Q<Button>("NewIncButtonOSM");
-    NewIncValueOSM = _container.Q<TextField>("NewIncValueOSM");
-    NewLANButtonOSM = _container.Q<Button>("NewLANButtonOSM");
-    NewLANValueOSM = _container.Q<TextField>("NewLANValueOSM");
-    NewSMAButtonOSM = _container.Q<Button>("NewSMAButtonOSM");
-    NewSMAValueOSM = _container.Q<TextField>("NewSMAValueOSM");
+    CircularizeButtonOSM = container.Q<Button>("CircularizeButtonOSM");
+    NewPeButtonOSM = container.Q<Button>("NewPeButtonOSM");
+    NewPeValueOSM = container.Q<TextField>("NewPeValueOSM");
+    NewApButtonOSM = container.Q<Button>("NewApButtonOSM");
+    NewApValueOSM = container.Q<TextField>("NewApValueOSM");
+    NewPeApButtonOSM = container.Q<Button>("NewPeApButtonOSM");
+    NewIncButtonOSM = container.Q<Button>("NewIncButtonOSM");
+    NewIncValueOSM = container.Q<TextField>("NewIncValueOSM");
+    NewLANButtonOSM = container.Q<Button>("NewLANButtonOSM");
+    NewLANValueOSM = container.Q<TextField>("NewLANValueOSM");
+    NewSMAButtonOSM = container.Q<Button>("NewSMAButtonOSM");
+    NewSMAValueOSM = container.Q<TextField>("NewSMAValueOSM");
 
     PeAltitude_km = TargetPeR_m / 1000;
     NewPeValueOSM.RegisterValueChangedCallback((evt) =>
@@ -1352,27 +1379,27 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: OMSPanel initialized");
 
     // TRMSPanel UI controls
-    SelectPortToggle = _container.Q<Toggle>("SelectPortToggle");
-    TargetOrbitTRMS = _container.Q<Label>("TargetOrbitTRMS");
-    CurrentOrbitTRMS = _container.Q<Label>("CurrentOrbitTRMS");
-    RelativeIncTRMS = _container.Q<Label>("RelativeIncTRMS");
-    SynodicPeriodTRMS = _container.Q<Label>("SynodicPeriodTRMS");
-    NextWindowTRMS = _container.Q<Label>("NextWindowTRMS");
-    NextClosestApproachTRMS = _container.Q<Label>("NextClosestApproachTRMS");
-    SeparationAtCaTRMS = _container.Q<Label>("SeparationAtCaTRMS");
-    RelativeVelocityRowTRMS = _container.Q<VisualElement>("RelativeVelocityRowTRMS");
-    RelativeVelocityTRMS = _container.Q<Label>("RelativeVelocityTRMS");
-    MatchPlanesButtonTRMS = _container.Q<Button>("MatchPlanesButtonTRMS");
-    NewApButtonTRMS = _container.Q<Button>("NewApButtonTRMS");
-    NewApValueTRMS = _container.Q<TextField>("NewApValueTRMS");
-    CircularizeButtonTRMS = _container.Q<Button>("CircularizeButtonTRMS");
-    HohmannTransferButtonTRMS = _container.Q<Button>("HohmannTransferButtonTRMS");
-    CourseCorrectionButtonTRMS = _container.Q<Button>("CourseCorrectionButtonTRMS");
-    CourseCorrectionValueTRMS = _container.Q<TextField>("CourseCorrectionValueTRMS");
-    MatchVelocityButtonTRMS = _container.Q<Button>("MatchVelocityButtonTRMS");
-    InterceptButtonTRMS = _container.Q<Button>("InterceptButtonTRMS");
-    InterceptValueTRMS = _container.Q<TextField>("InterceptValueTRMS");
-    TRMStatus = _container.Q<Label>("TRMStatus");
+    SelectPortToggle = container.Q<Toggle>("SelectPortToggle");
+    TargetOrbitTRMS = container.Q<Label>("TargetOrbitTRMS");
+    CurrentOrbitTRMS = container.Q<Label>("CurrentOrbitTRMS");
+    RelativeIncTRMS = container.Q<Label>("RelativeIncTRMS");
+    SynodicPeriodTRMS = container.Q<Label>("SynodicPeriodTRMS");
+    NextWindowTRMS = container.Q<Label>("NextWindowTRMS");
+    NextClosestApproachTRMS = container.Q<Label>("NextClosestApproachTRMS");
+    SeparationAtCaTRMS = container.Q<Label>("SeparationAtCaTRMS");
+    RelativeVelocityRowTRMS = container.Q<VisualElement>("RelativeVelocityRowTRMS");
+    RelativeVelocityTRMS = container.Q<Label>("RelativeVelocityTRMS");
+    MatchPlanesButtonTRMS = container.Q<Button>("MatchPlanesButtonTRMS");
+    NewApButtonTRMS = container.Q<Button>("NewApButtonTRMS");
+    NewApValueTRMS = container.Q<TextField>("NewApValueTRMS");
+    CircularizeButtonTRMS = container.Q<Button>("CircularizeButtonTRMS");
+    HohmannTransferButtonTRMS = container.Q<Button>("HohmannTransferButtonTRMS");
+    CourseCorrectionButtonTRMS = container.Q<Button>("CourseCorrectionButtonTRMS");
+    CourseCorrectionValueTRMS = container.Q<TextField>("CourseCorrectionValueTRMS");
+    MatchVelocityButtonTRMS = container.Q<Button>("MatchVelocityButtonTRMS");
+    InterceptButtonTRMS = container.Q<Button>("InterceptButtonTRMS");
+    InterceptValueTRMS = container.Q<TextField>("InterceptValueTRMS");
+    TRMStatus = container.Q<Label>("TRMStatus");
 
     SelectPortToggle.RegisterValueChangedCallback((evt) => UpdateTargets());
 
@@ -1441,22 +1468,22 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: TRMSPanel initialized");
 
     // TRMCPanel UI controls
-    TargetOrbitTRMC = _container.Q<Label>("TargetOrbitTRMC");
-    CurrentOrbitTRMC = _container.Q<Label>("CurrentOrbitTRMC");
-    RelativeIncTRMC = _container.Q<Label>("RelativeIncTRMC");
-    PhaseAngleTRMC = _container.Q<Label>("PhaseAngleTRMC");
-    XferPhaseAngleTRMC = _container.Q<Label>("XferPhaseAngleTRMC");
-    XferTimeTRMC = _container.Q<Label>("XferTimeTRMC");
-    SynodicPeriodTRMC = _container.Q<Label>("SynodicPeriodTRMC");
-    NextWindowTRMC = _container.Q<Label>("NextWindowTRMC");
-    NextClosestApproachTRMC = _container.Q<Label>("MatchPlanesButtonTRMC");
-    MatchPlanesButtonTRMC = _container.Q<Button>("MatchPlanesButtonTRMC");
-    HohmannTransferButtonTRMC = _container.Q<Button>("HohmannTransferButtonTRMC");
-    CourseCorrectionButtonTRMC = _container.Q<Button>("CourseCorrectionButtonTRMC");
-    CourseCorrectionValueTRMC = _container.Q<TextField>("CourseCorrectionValueTRMC");
-    InterceptButtonTRMC = _container.Q<Button>("InterceptButtonTRMC");
-    InterceptValueTRMC = _container.Q<TextField>("InterceptValueTRMC");
-    MatchVelocityButtonTRMC = _container.Q<Button>("MatchVelocityButtonTRMC");
+    TargetOrbitTRMC = container.Q<Label>("TargetOrbitTRMC");
+    CurrentOrbitTRMC = container.Q<Label>("CurrentOrbitTRMC");
+    RelativeIncTRMC = container.Q<Label>("RelativeIncTRMC");
+    PhaseAngleTRMC = container.Q<Label>("PhaseAngleTRMC");
+    XferPhaseAngleTRMC = container.Q<Label>("XferPhaseAngleTRMC");
+    XferTimeTRMC = container.Q<Label>("XferTimeTRMC");
+    SynodicPeriodTRMC = container.Q<Label>("SynodicPeriodTRMC");
+    NextWindowTRMC = container.Q<Label>("NextWindowTRMC");
+    NextClosestApproachTRMC = container.Q<Label>("MatchPlanesButtonTRMC");
+    MatchPlanesButtonTRMC = container.Q<Button>("MatchPlanesButtonTRMC");
+    HohmannTransferButtonTRMC = container.Q<Button>("HohmannTransferButtonTRMC");
+    CourseCorrectionButtonTRMC = container.Q<Button>("CourseCorrectionButtonTRMC");
+    CourseCorrectionValueTRMC = container.Q<TextField>("CourseCorrectionValueTRMC");
+    InterceptButtonTRMC = container.Q<Button>("InterceptButtonTRMC");
+    InterceptValueTRMC = container.Q<TextField>("InterceptValueTRMC");
+    MatchVelocityButtonTRMC = container.Q<Button>("MatchVelocityButtonTRMC");
 
     CourseCorrectionValueTRMC.RegisterValueChangedCallback((evt) =>
     {
@@ -1500,8 +1527,8 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: TRMCPanel initialized");
 
     // OTMMoonPanel UI controls
-    ReturnFromMoonButtonOTM = _container.Q<Button>("ReturnFromMoonButtonOTM");
-    MoonReturnPeValue = _container.Q<TextField>("MoonReturnPeValue");
+    ReturnFromMoonButtonOTM = container.Q<Button>("ReturnFromMoonButtonOTM");
+    MoonReturnPeValue = container.Q<TextField>("MoonReturnPeValue");
 
     MoonReturnPeValue.RegisterValueChangedCallback((evt) =>
     {
@@ -1526,29 +1553,29 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: OTMMoonPanel initialized");
 
     // OTMPlanetPanel UI controls
-    DataDisplayGroup = _container.Q<VisualElement>("DataDisplayGroup");
-    RelativeIncOTM = _container.Q<Label>("RelativeIncOTM");
-    PhaseAngleOTM = _container.Q<Label>("PhaseAngleOTM");
-    XferPhaseAngleOTM = _container.Q<Label>("XferPhaseAngleOTM");
-    XferTimeOTM = _container.Q<Label>("XferTimeOTM");
-    SynodicPeriodOTM = _container.Q<Label>("SynodicPeriodOTM");
-    NextWindowOTM = _container.Q<Label>("NextWindowOTM");
-    EjectionDvOTM = _container.Q<Label>("EjectionDvOTM");
-    InterplanetaryXferButton = _container.Q<Button>("InterplanetaryXferButton");
-    AdvInterplanetaryXferButton = _container.Q<Button>("AdvInterplanetaryXferButton");
-    AdvInterplanetaryXferGroup = _container.Q<VisualElement>("AdvInterplanetaryXferGroup");
-    AdvXferGroup = _container.Q<VisualElement>("AdvXferGroup");
-    PorkchopToggle = _container.Q<Toggle>("PorkchopToggle");
-    MaxArrivalTime = _container.Q<Label>("MaxArrivalTime");
-    Computing = _container.Q<Label>("Computing");
-    PorkchopDisplay = _container.Q<VisualElement>("PorkchopDisplay");
-    XferDeltaVLabel = _container.Q<Label>("XferDeltaVLabel");
-    ResetButton = _container.Q<Button>("ResetButton");
-    AdvXferPeriapsisInput = _container.Q<TextField>("AdvXferPeriapsisInput");
-    LowestDvButton = _container.Q<Button>("LowestDvButton");
-    ASAPButton = _container.Q<Button>("ASAPButton");
-    DepartureTimeLabel = _container.Q<Label>("DepartureTimeLabel");
-    TransitDurationTimeLabel = _container.Q<Label>("TransitDurationTimeLabel");
+    DataDisplayGroup = container.Q<VisualElement>("DataDisplayGroup");
+    RelativeIncOTM = container.Q<Label>("RelativeIncOTM");
+    PhaseAngleOTM = container.Q<Label>("PhaseAngleOTM");
+    XferPhaseAngleOTM = container.Q<Label>("XferPhaseAngleOTM");
+    XferTimeOTM = container.Q<Label>("XferTimeOTM");
+    SynodicPeriodOTM = container.Q<Label>("SynodicPeriodOTM");
+    NextWindowOTM = container.Q<Label>("NextWindowOTM");
+    EjectionDvOTM = container.Q<Label>("EjectionDvOTM");
+    InterplanetaryXferButton = container.Q<Button>("InterplanetaryXferButton");
+    AdvInterplanetaryXferButton = container.Q<Button>("AdvInterplanetaryXferButton");
+    AdvInterplanetaryXferGroup = container.Q<VisualElement>("AdvInterplanetaryXferGroup");
+    AdvXferGroup = container.Q<VisualElement>("AdvXferGroup");
+    PorkchopToggle = container.Q<Toggle>("PorkchopToggle");
+    MaxArrivalTime = container.Q<Label>("MaxArrivalTime");
+    Computing = container.Q<Label>("Computing");
+    PorkchopDisplay = container.Q<VisualElement>("PorkchopDisplay");
+    XferDeltaVLabel = container.Q<Label>("XferDeltaVLabel");
+    ResetButton = container.Q<Button>("ResetButton");
+    AdvXferPeriapsisInput = container.Q<TextField>("AdvXferPeriapsisInput");
+    LowestDvButton = container.Q<Button>("LowestDvButton");
+    ASAPButton = container.Q<Button>("ASAPButton");
+    DepartureTimeLabel = container.Q<Label>("DepartureTimeLabel");
+    TransitDurationTimeLabel = container.Q<Label>("TransitDurationTimeLabel");
 
     InterplanetaryXferButton.clicked += InterplanetaryXfer;
     AdvInterplanetaryXferButton.clicked += AdvInterplanetaryXfer;
@@ -1589,42 +1616,42 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: OTMPlanetPanel initialized");
 
     // ROMPanel UI controls
-    IncreasePayloadsButton = _container.Q<Button>("IncreasePayloadsButton");
-    DecreasePayloadsButton = _container.Q<Button>("DecreasePayloadsButton");
-    NumPayloads = _container.Q<Label>("NumPayloads");
-    IncreaseOrbitsButton = _container.Q<Button>("IncreaseOrbitsButton");
-    DecreaseOrbitsButton = _container.Q<Button>("DecreaseOrbitsButton");
-    NumOrbits = _container.Q<Label>("NumOrbits");
-    OrbitalResonance = _container.Q<Label>("OrbitalResonance");
-    TargetAltitudeInput = _container.Q<TextField>("TargetAltitudeInput");
-    SetApoapsisButton = _container.Q<Button>("SetApoapsisButton");
-    CurrentApoapsis = _container.Q<Label>("CurrentApoapsis");
-    SetPeriapsisButton = _container.Q<Button>("SetPeriapsisButton");
-    CurrentPeriapsis = _container.Q<Label>("CurrentPeriapsis");
-    SetSynchronousAltButton = _container.Q<Button>("SetSynchronousAltButton");
-    SynchronousAlt = _container.Q<Label>("SynchronousAlt");
-    SetSemiSynchronousAltButton = _container.Q<Button>("SetSemiSynchronousAltButton");
-    SemiSynchronousAlt = _container.Q<Label>("SemiSynchronousAlt");
-    SOIAlt = _container.Q<Label>("SOIAlt");
-    SetMinLOSAltButton = _container.Q<Button>("SetMinLOSAltButton");
-    MinLOSAlt = _container.Q<Label>("MinLOSAlt");
-    Occlusion = _container.Q<Toggle>("Occlusion");
-    AtmOccRow = _container.Q<VisualElement>("AtmOccRow");
-    AtmOccInput = _container.Q<TextField>("AtmOccInput");
-    VacOccRow = _container.Q<VisualElement>("VacOccRow");
-    VacOccInput = _container.Q<TextField>("VacOccInput");
-    Dive = _container.Q<Toggle>("Dive");
-    ResonantOrbitPeriod = _container.Q<Label>("ResonantOrbitPeriod");
-    ResonantOrbitAp = _container.Q<Label>("ResonantOrbitAp");
-    ResonantOrbitPe = _container.Q<Label>("ResonantOrbitPe");
-    ResonantOrbitEcc = _container.Q<Label>("ResonantOrbitEcc");
-    ResonantOrbitInjection = _container.Q<Label>("ResonantOrbitInjection");
-    FixPeGroup = _container.Q<VisualElement>("FixPeGroup");
-    FixPeButton = _container.Q<Button>("FixPeButton");
-    FixPeStatus = _container.Q<Label>("FixPeStatus");
-    FixApGroup = _container.Q<VisualElement>("FixApGroup");
-    FixApButton = _container.Q<Button>("FixApButton");
-    FixApStatus = _container.Q<Label>("FixApStatus");
+    IncreasePayloadsButton = container.Q<Button>("IncreasePayloadsButton");
+    DecreasePayloadsButton = container.Q<Button>("DecreasePayloadsButton");
+    NumPayloads = container.Q<Label>("NumPayloads");
+    IncreaseOrbitsButton = container.Q<Button>("IncreaseOrbitsButton");
+    DecreaseOrbitsButton = container.Q<Button>("DecreaseOrbitsButton");
+    NumOrbits = container.Q<Label>("NumOrbits");
+    OrbitalResonance = container.Q<Label>("OrbitalResonance");
+    TargetAltitudeInput = container.Q<TextField>("TargetAltitudeInput");
+    SetApoapsisButton = container.Q<Button>("SetApoapsisButton");
+    CurrentApoapsis = container.Q<Label>("CurrentApoapsis");
+    SetPeriapsisButton = container.Q<Button>("SetPeriapsisButton");
+    CurrentPeriapsis = container.Q<Label>("CurrentPeriapsis");
+    SetSynchronousAltButton = container.Q<Button>("SetSynchronousAltButton");
+    SynchronousAlt = container.Q<Label>("SynchronousAlt");
+    SetSemiSynchronousAltButton = container.Q<Button>("SetSemiSynchronousAltButton");
+    SemiSynchronousAlt = container.Q<Label>("SemiSynchronousAlt");
+    SOIAlt = container.Q<Label>("SOIAlt");
+    SetMinLOSAltButton = container.Q<Button>("SetMinLOSAltButton");
+    MinLOSAlt = container.Q<Label>("MinLOSAlt");
+    Occlusion = container.Q<Toggle>("Occlusion");
+    AtmOccRow = container.Q<VisualElement>("AtmOccRow");
+    AtmOccInput = container.Q<TextField>("AtmOccInput");
+    VacOccRow = container.Q<VisualElement>("VacOccRow");
+    VacOccInput = container.Q<TextField>("VacOccInput");
+    Dive = container.Q<Toggle>("Dive");
+    ResonantOrbitPeriod = container.Q<Label>("ResonantOrbitPeriod");
+    ResonantOrbitAp = container.Q<Label>("ResonantOrbitAp");
+    ResonantOrbitPe = container.Q<Label>("ResonantOrbitPe");
+    ResonantOrbitEcc = container.Q<Label>("ResonantOrbitEcc");
+    ResonantOrbitInjection = container.Q<Label>("ResonantOrbitInjection");
+    FixPeGroup = container.Q<VisualElement>("FixPeGroup");
+    FixPeButton = container.Q<Button>("FixPeButton");
+    FixPeStatus = container.Q<Label>("FixPeStatus");
+    FixApGroup = container.Q<VisualElement>("FixApGroup");
+    FixApButton = container.Q<Button>("FixApButton");
+    FixApStatus = container.Q<Label>("FixApStatus");
 
     TargetAltitudeInput.RegisterValueChangedCallback((evt) =>
     {
@@ -1699,10 +1726,10 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: ROMPanel initialized");
 
     // BurnTimeOption situational inputs (display or not depending on the burn time option selected)
-    AfterFixedTime = _container.Q<VisualElement>("AfterFixedTime");
-    AfterFixedTimeInput = _container.Q<TextField>("AfterFixedTimeInput");
-    AtAnAltitude = _container.Q<VisualElement>("AtAnAltitude");
-    ManeuverAltitudeInput = _container.Q<TextField>("ManeuverAltitudeInput");
+    AfterFixedTime = container.Q<VisualElement>("AfterFixedTime");
+    AfterFixedTimeInput = container.Q<TextField>("AfterFixedTimeInput");
+    AtAnAltitude = container.Q<VisualElement>("AtAnAltitude");
+    ManeuverAltitudeInput = container.Q<TextField>("ManeuverAltitudeInput");
 
     TimeOffset_s = FpUiController.TimeOffset_s;
     AfterFixedTimeInput.RegisterValueChangedCallback((evt) =>
@@ -1737,16 +1764,16 @@ public class FpUiController : KerbalMonoBehaviour
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: Burn time option inputs initialized.");
 
     // General All-Purpose UI Status display field
-    Status = _container.Q<Label>("Status");
+    Status = container.Q<Label>("Status");
 
     // BottomBar UI elements
-    MakeNodeButtonBox = _container.Q<VisualElement>("MakeNodeButtonBox");
-    MNCButtonBox = _container.Q<VisualElement>("MNCButtonBox");
-    K2D2ButtonBox = _container.Q<VisualElement>("K2D2ButtonBox");
-    MakeNodeButton = _container.Q<Button>("MakeNodeButton");
-    MNCButton = _container.Q<Button>("MNCButton");
-    K2D2Button = _container.Q<Button>("K2D2Button");
-    K2D2Status = _container.Q<Label>("K2D2Status");
+    MakeNodeButtonBox = container.Q<VisualElement>("MakeNodeButtonBox");
+    MNCButtonBox = container.Q<VisualElement>("MNCButtonBox");
+    K2D2ButtonBox = container.Q<VisualElement>("K2D2ButtonBox");
+    MakeNodeButton = container.Q<Button>("MakeNodeButton");
+    MNCButton = container.Q<Button>("MNCButton");
+    K2D2Button = container.Q<Button>("K2D2Button");
+    K2D2Status = container.Q<Label>("K2D2Status");
 
     FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: Panel groups initialized.");
 
