@@ -234,10 +234,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     //  FpUiController.GUIenabled = false;
     //  Logger.LogInfo($"TrainingCenterEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     //};
-    ////StateChanges.TrainingCenterLoadedMessage += message =>
+    ////StateChanges.TrainingCenterLoaded += message =>
     ////{
-    ////  FpUiController.GUIenabled = false;
-    ////  Logger.LogInfo($"TrainingCenterLoadedMessage message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    ////  fpuicontroller.guienabled = false;
+    ////  logger.loginfo($"TrainingCenterLoaded message received, fpuicontroller.guienabled = {fpuicontroller.guienabled}");
     ////};
     //StateChanges.MissionControlEntered += message =>
     //{ 
