@@ -496,7 +496,7 @@ public class FpUiController : KerbalMonoBehaviour
     //if (_gameState == GameState.Map3DView) _GUIenabled = true;
     //if (_gameState == GameState.FlightView) _GUIenabled = true;
 
-    if (GUIenabled && FlightPlanPlugin._interfaceEnabled)
+    if (GUIenabled && FlightPlanPlugin.InterfaceEnabled)
       container.style.display = DisplayStyle.Flex;
     else
     {
