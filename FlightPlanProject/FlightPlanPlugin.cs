@@ -181,11 +181,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     //  FpUiController.GUIenabled = true;
     //  Logger.LogInfo($"FlightViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     //};
-    //StateChanges.Map3DViewEntered += message =>
-    //{
-    //  FpUiController.GUIenabled = true;
-    //  Logger.LogInfo($"Map3DViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
-    //};
+    StateChanges.Map3DViewEntered += message =>
+    {
+      FpUiController.GUIenabled = true;
+      Logger.LogInfo($"Map3DViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    };
 
     //StateChanges.GameStateChanged += (message, previousState, newState) => {
     //  FpUiController._GUIenabled = newState == GameState.FlightView || newState == GameState.Map3DView;
@@ -199,11 +199,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     //  FpUiController.GUIenabled = false;
     //  Logger.LogInfo($"FlightViewLeft message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     //};
-    //StateChanges.Map3DViewLeft += message =>
-    //{
-    //  FpUiController.GUIenabled = false;
-    //  Logger.LogInfo($"Map3DViewLeft message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
-    //};
+    StateChanges.Map3DViewLeft += message =>
+    {
+      FpUiController.GUIenabled = false;
+      Logger.LogInfo($"Map3DViewLeft message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    };
     //StateChanges.VehicleAssemblyBuilderEntered += message =>
     //{
     //  FpUiController.GUIenabled = false;
@@ -234,11 +234,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     //  FpUiController.GUIenabled = false;
     //  Logger.LogInfo($"TrainingCenterEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     //};
-    ////StateChanges.TrainingCenterLoaded += message =>
-    ////{
-    ////  fpuicontroller.guienabled = false;
-    ////  logger.loginfo($"TrainingCenterLoaded message received, fpuicontroller.guienabled = {fpuicontroller.guienabled}");
-    ////};
+    //statechanges.trainingcenterloaded += message =>
+    //{
+    //  fpuicontroller.guienabled = false;
+    //  logger.loginfo($"trainingcenterloaded message received, fpuicontroller.guienabled = {fpuicontroller.guienabled}");
+    //};
     //StateChanges.MissionControlEntered += message =>
     //{ 
     //  FpUiController.GUIenabled = false;
@@ -249,11 +249,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     //  FpUiController.GUIenabled = false;
     //  Logger.LogInfo($"TrackingStationEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     //};
-    ////StateChanges.TrackingStationLoadedMessage += message =>
-    ////{
-    ////  FpUiController.GUIenabled = false;
-    ////  Logger.LogInfo($"TrackingStationLoadedMessage message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
-    ////};
+    //StateChanges.TrackingStationLoadedMessage += message =>
+    //{
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"TrackingStationLoadedMessage message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
     //StateChanges.ResearchAndDevelopmentEntered += message =>
     //{ 
     //  FpUiController.GUIenabled = false;
@@ -324,20 +324,32 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     Logger.LogInfo("TrainingCenterLoadedMessage message subscribed");
 
     // Subscribe to the TrackingStationLoadedMessage so we can control if the GUI should be disabled given this state change
-    MessageCenter.Subscribe<TrackingStationLoadedMessage>(new Action<MessageCenterMessage>(this.TrackingStationLoaded));
+    MessageCenter.Subscribe<TrackingStationLoadedAudioCueMessage>(new Action<MessageCenterMessage>(this.TrackingStationLoaded));
 
-    Logger.LogInfo("TrackingStationLoadedMessage message subscribed");
+    Logger.LogInfo("TrackingStationLoadedAudioCueMessage message subscribed");
 
   }
 
   public static GameStateConfiguration ThisGameState;
   public static GameState LastGameState;
+  public static CurtainContext ThisCurtainContext;
 
   public static void RefreshGameManager()
   {
     ThisGameState = GameManager.Instance?.Game?.GlobalGameState?.GetGameState();
     LastGameState = (GameState)(GameManager.Instance?.Game?.GlobalGameState?.GetLastState());
     MessageCenter = GameManager.Instance?.Game?.Messages;
+    ThisCurtainContext = (CurtainContext)(GameManager.Instance?.Game?.UI.Curtain.CurtainContextData.CurtainContext);
+    Logger.LogInfo($"RefreshGameManager ThisCurtainContext = {ThisCurtainContext}");
+
+    // Log out every type of message in the game...
+    //foreach (var type in typeof(GameManager).Assembly.GetTypes())
+    //{
+    //  if (typeof(MessageCenterMessage).IsAssignableFrom(type) && !type.IsAbstract)
+    //  {
+    //    Logger.LogInfo(type.Name);
+    //  }
+    //}
   }
 
   private void GameStateChanged(MessageCenterMessage message)
@@ -387,13 +399,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
   private void TrackingStationLoaded(MessageCenterMessage message)
   {
     RefreshGameManager();
-    Logger.LogInfo($"TrackingStationLoaded Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+    Logger.LogInfo($"TrackingStationLoadedAudioCue Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
 
     // if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
     FpUiController.GUIenabled = false;
     FpUiController.container.style.display = DisplayStyle.None;
 
-    Logger.LogInfo($"TrackingStationLoaded FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    Logger.LogInfo($"TrackingStationLoadedAudioCue FpUiController.GUIenabled = {FpUiController.GUIenabled}");
   }
 
   private void TrainingCenterLoaded(MessageCenterMessage message)
