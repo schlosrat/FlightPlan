@@ -4,6 +4,7 @@ using FPUtilities;
 using JetBrains.Annotations;
 using KSP.Game;
 using KSP.Sim.impl;
+using RTG;
 using SpaceWarp.API.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -23,12 +24,12 @@ namespace MuMech
 
     private static readonly GameInstance Game = GameManager.Instance.Game;
 
-    private static readonly string[]
-        modeNames =
-        {
-                "Limited time", "Porkchop selection"
-                // Localizer.Format("#MechJeb_adv_modeName1"), Localizer.Format("#MechJeb_adv_modeName2")
-            }; //"Limited time","Porkchop selection"
+    private static readonly string[] modeNames =
+    {
+      "Limited time", "Porkchop selection"
+      // Localizer.Format("#MechJeb_adv_modeName1"), Localizer.Format("#MechJeb_adv_modeName2")
+    };
+    //"Limited time","Porkchop selection"
 
     public override string GetName() { return "advanced transfer to another planet"; } // Localizer.Format("#MechJeb_AdvancedTransfer_title"); } //"advanced transfer to another planet"
 
@@ -39,16 +40,20 @@ namespace MuMech
 
     public EditableTime maxArrivalTime = new EditableTime();
 
-    private bool includeCaptureBurn;
+    // private bool includeCaptureBurn;
 
     public bool guiChanged = false;
+    public bool doReset = false;
+    public bool doSetLowestDv = false;
+    public bool doSetASAP = false;
 
-    private EditableDouble periapsisHeight = new EditableDouble(0);
+    // private EditableDouble periapsisHeight = new EditableDouble(0);
 
     private const double minSamplingStep = 12 * 3600;
 
     private Mode selectionMode = Mode.Porkchop;
-    private int windowWidth = 330; // 290;
+    private int windowWidth = 330;
+    // int minWindowWidth = 330;
 
     private CelestialBodyComponent lastTargetCelestial;
 
@@ -119,18 +124,11 @@ namespace MuMech
       switch (selectionMode)
       {
         case Mode.LimitedTime:
-          worker = new TransferCalculator(o, target.Orbit, universalTime, maxArrivalTime, minSamplingStep, includeCaptureBurn);
+          worker = new TransferCalculator(o, target.Orbit, universalTime, maxArrivalTime, minSamplingStep, FpUiController.CaptureBurnToggle.value);
           break;
         case Mode.Porkchop:
-          if (windowWidth < minWindowWidth)
-          {
-            FlightPlanPlugin.Logger.LogDebug($"windowWidth = {windowWidth} < {minWindowWidth}! Updating it to minimum acceptable value.");
-            windowWidth = minWindowWidth;
-          }
-          //worker = new AllGraphTransferCalculator(o, target.Orbit, minDepartureTime, maxDepartureTime, minTransferTime,
-          //    maxTransferTime, windowWidth, porkchop_Height, includeCaptureBurn);
           worker = new AllGraphTransferCalculator(o, target.Orbit, minDepartureTime, maxDepartureTime, minTransferTime,
-              maxTransferTime, windowWidth, porkchop_Height, includeCaptureBurn);
+              maxTransferTime, windowWidth, porkchop_Height, FpUiController.CaptureBurnToggle.value);
           break;
       }
     }
@@ -156,7 +154,7 @@ namespace MuMech
       maxArrivalTime.val = synodic_period * 1.5 + hohmann_transfer_time * 2.0;
     }
 
-    private bool layoutSkipped;
+    // private bool layoutSkipped;
 
     public void DoPorkchopGui(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target) // was: MechJebModuleTargetController target
     {
@@ -164,27 +162,67 @@ namespace MuMech
 
       FpUiController.MaxArrivalTime.style.display = DisplayStyle.None;
       FpUiController.Computing.style.display = DisplayStyle.None;
+      FpUiController.PorkchopDisplay.style.display = DisplayStyle.Flex;
+
+      // If the Reset Button has been pressed
+      if (doReset) // Localizer.Format("#MechJeb_adv_reset_button")
+      {
+        FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doReset = {doReset}");
+        ComputeTimes(o, target.Orbit, universalTime);
+        doReset = false;
+        worker = null;
+      }
+
+      // If the Lowest Dv Button has been pressed
+      if (doSetLowestDv) // Localizer.Format("#MechJeb_adv_button1")
+      {
+        FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doSetLowestDv = {doSetLowestDv}");
+        plot.SelectedPoint = new[] { worker.BestDate, worker.BestDuration };
+        guiChanged = false;
+        GUI.changed = false;
+        doSetLowestDv = false;
+      }
+
+      // If the ASAP Button has been pressed
+      if (doSetASAP) // Localizer.Format("#MechJeb_adv_button2")
+      {
+        FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doSetASAP = {doSetASAP}");
+
+        int bestDuration = 0;
+        for (int i = 1; i < worker.Computed.GetLength(1); i++)
+        {
+          if (worker.Computed[0, bestDuration] > worker.Computed[0, i])
+            bestDuration = i;
+        }
+
+        plot.SelectedPoint = new[] { 0, bestDuration };
+        GUI.changed = false;
+        guiChanged = false;
+        doSetASAP = false;
+      }
+
+      // includeCaptureBurn = FpUiController.CaptureBurnToggle.value;
 
       // That mess is why you should not compute anything inside a GUI call
       // TODO : rewrite all that...
       if (worker == null)
       {
-        if (Event.current.type == EventType.Layout)
-          layoutSkipped = true;
+        //if (Event.current.type == EventType.Layout)
+        //  layoutSkipped = true;
         return;
       }
 
-      if (Event.current.type == EventType.Layout)
-        layoutSkipped = false;
-      if (layoutSkipped)
-        return;
+      //if (Event.current.type == EventType.Layout)
+      //  layoutSkipped = false;
+      //if (layoutSkipped)
+      //  return;
 
       string dv = " - ";
       string departure = " - ";
       string duration = " - ";
       if (worker.Finished && worker.Computed.GetLength(1) == porkchop_Height)
       {
-        // UITK: We never gonna see an EventType.Layout, so do it on Repaint
+        // UITK: We're never gonna see an EventType.Layout, so do it on Repaint
         if (plot == null && Event.current.type == EventType.Repaint) // was: EventType.Layout
         {
           int width = worker.Computed.GetLength(0);
@@ -200,7 +238,7 @@ namespace MuMech
             texture = new Texture2D(width, height, TextureFormat.RGB24, false);
 
           Porkchop.RefreshTexture(worker.Computed, texture);
-          
+
           plot = new PlotArea(
               worker.MinDepartureTime,
               worker.MaxDepartureTime,
@@ -213,8 +251,8 @@ namespace MuMech
                 maxDepartureTime = xmax;
                 minTransferTime  = Math.Max(ymin, 3600);
                 maxTransferTime  = ymax;
+                GUI.changed      = true;
                 guiChanged       = true;
-                // GUI.changed   = true;
               });
           plot.SelectedPoint = new[] { worker.BestDate, worker.BestDuration };
         }
@@ -249,32 +287,22 @@ namespace MuMech
       }
       else
       {
-        if (progressStyle == null)
-          progressStyle = new GUIStyle()
-          {
-            font      = Skins.ConsoleSkin.font, // GuiUtils.skin.font,
-            fontSize  = Skins.ConsoleSkin.label.fontSize, // GuiUtils.skin.label.fontSize,
-            fontStyle = Skins.ConsoleSkin.label.fontStyle, // GuiUtils.skin.label.fontStyle,
-            normal    = { textColor = Skins.ConsoleSkin.label.normal.textColor } //GuiUtils.skin.label.normal.textColor }
-          };
         FpUiController.Computing.style.display = DisplayStyle.Flex;
         FpUiController.Computing.text = $"Computing: {worker.Progress}%";
-        // GUILayout.Box("Computing: " + worker.Progress + "%", progressStyle, GUILayout.Width(windowWidth), // Localizer.Format("#MechJeb_adv_computing")
-        //   GUILayout.Height(porkchop_Height)); //"Computing:"
       }
 
-      // GUILayout.BeginHorizontal();
-      // GUILayout.Label("ΔV: " + dv);
+      // Display the DeltaV of the hovered/selected point
       FpUiController.XferDeltaVLabel.text = dv;
-      // GUILayout.FlexibleSpace();
-      // if (GUILayout.Button("Reset", GuiUtils.yellowOnHover)) // Localizer.Format("#MechJeb_adv_reset_button")
-      //   ComputeTimes(o, target.Orbit, universalTime);
-      // GUILayout.EndHorizontal();
+
+      //// If the Reset Button has been pressed
+      //if (doReset) // Localizer.Format("#MechJeb_adv_reset_button")
+      //{
+      //  FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doReset = {doReset}");
+      //  ComputeTimes(o, target.Orbit, universalTime);
+      //  doReset = false;
+      //}
 
       // includeCaptureBurn = GUILayout.Toggle(includeCaptureBurn, "Include Capture Burn"); // Localizer.Format("#MechJeb_adv_captureburn")
-      // TOFO: Make UITK GUI with this toggle
-      // includeCaptureBurn = DrawSoloToggle("Include Capture Burn", includeCaptureBurn); // Localizer.Format("#MechJeb_adv_captureburn")
-      includeCaptureBurn = false;
 
       // fixup the default value of the periapsis if the target changes
       if (targetCelestial != null && lastTargetCelestial != targetCelestial)
@@ -291,21 +319,22 @@ namespace MuMech
         }
       }
 
-      // GuiUtils.SimpleTextBox("Periapsis", periapsisHeight, "km"); // Localizer.Format("#MechJeb_adv_periapsis")
-      // TODO: Build UITK GUI that includes these this input text field
-      // periapsisHeight = DrawEntryTextField("Periapsis", periapsisHeight, "km");
-      // periapsisHeight = 100;
-      //GUILayout.BeginHorizontal();
-      //GUILayout.Label("Select: "); // Localizer.Format("#MechJeb_adv_label2")
-      //GUILayout.FlexibleSpace();
-      //if (GUILayout.Button("Lowest ΔV")) // Localizer.Format("#MechJeb_adv_button1")
+      // UITK periapsisHeight is now FpUiController.TargetAdvXferPe_m 
+
+      //// If the Lowest Dv Button has been pressed
+      //if (doSetLowestDv) // Localizer.Format("#MechJeb_adv_button1")
       //{
+      //  FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doSetLowestDv = {doSetLowestDv}");
       //  plot.SelectedPoint = new[] { worker.BestDate, worker.BestDuration };
-      //  GUI.changed = false;
+      //  guiChanged = false;
+      //  doSetLowestDv = false;
       //}
 
-      //if (GUILayout.Button("ASAP")) // Localizer.Format("#MechJeb_adv_button2")
+      //// If the ASAP Button has been pressed
+      //if (doSetASAP) // Localizer.Format("#MechJeb_adv_button2")
       //{
+      //  FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doSetASAP = {doSetASAP}");
+
       //  int bestDuration = 0;
       //  for (int i = 1; i < worker.Computed.GetLength(1); i++)
       //  {
@@ -313,44 +342,44 @@ namespace MuMech
       //      bestDuration = i;
       //  }
 
-      //  plot.SelectedPoint = new[] { 0, bestDuration };
-      //  GUI.changed = false;
+      //  guiChanged = false;
+      //  doSetASAP = false;
       //}
 
-      //GUILayout.EndHorizontal();
-
-      // TODO: Build UITK GUI that includes these two entries
-      // DrawEntry("Departure in ", departure, " ");
-      // DrawEntry("Transit duration ", duration, " ");
-
-      // GUILayout.Label("Departure in" + " " + departure); // Localizer.Format("#MechJeb_adv_label3")
-      // GUILayout.Label("Transit duration" + " " + duration);  // Localizer.Format("#MechJeb_adv_label4")
+      // Display the DeltaV of the hovered/selected point
+      // FpUiController.DepartureTimeLabel.text = departure;
+      // FpUiController.TransitDurationTimeLabel.text = duration;
 
       lastTargetCelestial = targetCelestial;
     }
 
-    int minWindowWidth = 330; // 290;
-
     public override void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target, Mode selectionMode) // was: MechJebModuleTargetController target
     {
       _draggable = true;
+
+      // What's this for?
       if (worker != null && target == null && Event.current.type == EventType.Layout) // was: !target.NormalTargetExists
       {
+        FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Stopping/Clearing worker and plot. Target = {target}, Event = {Event.current.type}");
         worker.Stop = true;
         worker      = null;
         plot        = null;
       }
 
       // selectionMode = (Mode)GuiUtils.ComboBox.Box((int)selectionMode, modeNames, this);
-      if (Event.current.type == EventType.Repaint)
-        windowWidth = minWindowWidth; // FlightPlanPlugin.Instance.windowWidth; //  (int)GUILayoutUtility.GetLastRect().width;
+      //if (Event.current.type == EventType.Repaint)
+      //{
+      //  FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Event = {Event.current.type}, windowWidth = {windowWidth}, minWindowWidth = {minWindowWidth}");
+      //  windowWidth = minWindowWidth; // FlightPlanPlugin.Instance.windowWidth; //  (int)GUILayoutUtility.GetLastRect().width;
+      //}
 
       switch (selectionMode)
       {
         case Mode.LimitedTime:
+          // Display Max Arrival Time
           FpUiController.MaxArrivalTime.style.display = DisplayStyle.Flex;
           FpUiController.MaxArrivalTime.text = $"Max Arrival Time: {maxArrivalTime.text}";
-          // GuiUtils.SimpleTextBox("Max Arrival Time", maxArrivalTime, null, 175); // Localizer.Format("#MechJeb_adv_label5")
+          // Display Computing if needed
           if (worker != null && !worker.Finished)
           {
             FpUiController.Computing.style.display = DisplayStyle.Flex;
@@ -359,19 +388,38 @@ namespace MuMech
           }
           else
             FpUiController.Computing.style.display = DisplayStyle.None;
+          // Switch off the PorkchopDisplay
+          FpUiController.PorkchopDisplay.style.display = DisplayStyle.None;
           break;
         case Mode.Porkchop:
-          windowWidth = minWindowWidth;
+          // windowWidth = minWindowWidth;
           DoPorkchopGui(o, universalTime, target);
           break;
       }
 
       if (worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
+      {
+        bool test1 = worker == null;
+        if (test1)
+          FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeTimes. worker == null {worker == null}");
+        else
+        {
+          FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeTimes. worker == null {worker == null}, DestinationOrbit != target.Orbit = {worker.DestinationOrbit != target.Orbit}, worker.OriginOrbit != o = {worker.OriginOrbit != o}");
+        }
         ComputeTimes(o, target.Orbit, universalTime);
+      }
 
       // if (GUI.changed || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
-      if (guiChanged || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
+      if (GUI.changed || guiChanged || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
+      {
+        bool test1 = worker == null;
+        if (test1)
+          FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeStuff. guiChanged = {guiChanged}, worker == null {worker == null}");
+        else
+          FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeStuff. guiChanged = {guiChanged}, worker == null {worker == null}, DestinationOrbit != target.Orbit = {worker.DestinationOrbit != target.Orbit}, worker.OriginOrbit != o = {worker.OriginOrbit != o}");
+
         ComputeStuff(o, universalTime, target);
+      }
     }
 
     protected override List<ManeuverParameters> MakeNodesImpl(PatchedConicsOrbit o, double UT, CelestialBodyComponent target) // was: MechJebModuleTargetController target
@@ -405,74 +453,14 @@ namespace MuMech
             worker.DateFromIndex(plot.SelectedPoint[0]),
             o, target as CelestialBodyComponent,
             worker.DateFromIndex(plot.SelectedPoint[0]) + worker.DurationFromIndex(plot.SelectedPoint[1]),
-            UT, target_PeR, includeCaptureBurn);
+            UT, target_PeR, FpUiController.CaptureBurnToggle.value);
       }
 
       return worker.OptimizeEjection(
           worker.DateFromIndex(worker.BestDate),
           o, target as CelestialBodyComponent,
           worker.DateFromIndex(worker.BestDate) + worker.DurationFromIndex(worker.BestDuration),
-          UT, target_PeR, includeCaptureBurn);
+          UT, target_PeR, FpUiController.CaptureBurnToggle.value);
     }
-
-    //public bool DrawSoloToggle(string toggleStr, bool toggle, bool error = false)
-    //{
-    //    GUILayout.Space(FPStyles.SpacingAfterSection);
-    //    GUILayout.BeginHorizontal();
-    //    if (error)
-    //    {
-    //        GUILayout.Toggle(toggle, toggleStr, KBaseStyle.ToggleError);
-    //        toggle = false;
-    //    }
-    //    else
-    //        toggle = GUILayout.Toggle(toggle, toggleStr, KBaseStyle.Toggle);
-    //    GUILayout.FlexibleSpace();
-    //    GUILayout.EndHorizontal();
-    //    GUILayout.Space(-FPStyles.SpacingAfterSection);
-    //    return toggle;
-    //}
-
-    //public void DrawEntry(string entryName, string value = "", string unit = "")
-    //{
-    //    GUILayout.BeginHorizontal();
-    //    UI_Tools.Label(entryName);
-    //    if (value.Length > 0)
-    //    {
-    //        GUILayout.FlexibleSpace();
-    //        UI_Tools.Label(value);
-    //        if (unit.Length > 0)
-    //        {
-    //            GUILayout.Space(5);
-    //            UI_Tools.Label(unit);
-    //        }
-    //    }
-    //    GUILayout.EndHorizontal();
-    //    GUILayout.Space(FPStyles.SpacingAfterEntry);
-    //}
-
-    //public double DrawEntryTextField(string entryName, double value, string unit = "", GUIStyle thisStyle = null)
-    //{
-    //    if (!UI_Fields.InputFields.Contains(entryName))
-    //        UI_Fields.InputFields.Add(entryName);
-
-    //    GUILayout.BeginHorizontal();
-    //    if (thisStyle != null)
-    //        UI_Tools.Label(entryName, KBaseStyle.Label); // NameLabelStyle
-    //    else
-    //        UI_Tools.Label(entryName);
-    //    // UI_Tools.Label(entryName, thisStyle ?? KBaseStyle.NameLabelStyle);
-    //    GUILayout.FlexibleSpace();
-    //    GUI.SetNextControlName(entryName);
-    //    value = UI_Fields.DoubleField(entryName, value, thisStyle ?? KBaseStyle.TextInputStyle);
-    //    GUILayout.Space(3);
-    //    if (thisStyle != null)
-    //        UI_Tools.Label(unit, thisStyle); // , KBaseStyle.UnitLabelStyle
-    //    else
-    //        UI_Tools.Label(unit);
-    //    // UI_Tools.Label(unit, thisStyle ?? KBaseStyle.UnitLabelStyle);
-    //    GUILayout.EndHorizontal();
-    //    GUILayout.Space(FPStyles.SpacingAfterTallEntry);
-    //    return value;
-    //}
   }
 }

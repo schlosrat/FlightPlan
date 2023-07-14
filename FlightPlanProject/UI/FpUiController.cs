@@ -213,6 +213,7 @@ public class FpUiController : KerbalMonoBehaviour
   public static Label Computing;
   public static Label XferDeltaVLabel;
   Button ResetButton;
+  public static Toggle CaptureBurnToggle;
   public static TextField AdvXferPeriapsisInput;
   Button LowestDvButton;
   Button ASAPButton;
@@ -1236,6 +1237,8 @@ public class FpUiController : KerbalMonoBehaviour
 
       FlightPlanPlugin.Logger.LogInfo($"Burn Time Option: {_burnTimeOption}");
     });
+    BurnOptionsDropdown.choices = new List<string> { "" };
+
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: BurnOptionsDropdown");
 
     // UI panels (used to control center part of UI based on the selected tab bar button)
@@ -1571,6 +1574,7 @@ public class FpUiController : KerbalMonoBehaviour
     PorkchopDisplay = container.Q<VisualElement>("PorkchopDisplay");
     XferDeltaVLabel = container.Q<Label>("XferDeltaVLabel");
     ResetButton = container.Q<Button>("ResetButton");
+    CaptureBurnToggle = container.Q<Toggle>("CaptureBurnToggle");
     AdvXferPeriapsisInput = container.Q<TextField>("AdvXferPeriapsisInput");
     LowestDvButton = container.Q<Button>("LowestDvButton");
     ASAPButton = container.Q<Button>("ASAPButton");
@@ -1587,6 +1591,8 @@ public class FpUiController : KerbalMonoBehaviour
     PorkchopDisplay.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
     PorkchopDisplay.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
     PorkchopDisplay.RegisterCallback<PointerMoveEvent>(evt => evt.StopPropagation());
+
+    CaptureBurnToggle.RegisterValueChangedCallback((evt) => op.worker = null);
 
     AdvXferPeriapsisInput.RegisterValueChangedCallback((evt) =>
     {
@@ -1731,7 +1737,7 @@ public class FpUiController : KerbalMonoBehaviour
     AtAnAltitude = container.Q<VisualElement>("AtAnAltitude");
     ManeuverAltitudeInput = container.Q<TextField>("ManeuverAltitudeInput");
 
-    TimeOffset_s = FpUiController.TimeOffset_s;
+    // TimeOffset_s = FpUiController.TimeOffset_s;
     AfterFixedTimeInput.RegisterValueChangedCallback((evt) =>
     {
       if (float.TryParse(evt.newValue, out float newFloat))
@@ -1746,7 +1752,7 @@ public class FpUiController : KerbalMonoBehaviour
     AfterFixedTimeInput.value = TimeOffset_s.ToString();
     FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: AfterFixedTimeInput.RegisterValueChangedCallback event initialized.");
 
-    Altitude_km = FpUiController.Altitude_km;
+    // Altitude_km = FpUiController.Altitude_km;
     ManeuverAltitudeInput.RegisterValueChangedCallback((evt) =>
     {
       if (float.TryParse(evt.newValue, out float newFloat))
@@ -2152,24 +2158,27 @@ public class FpUiController : KerbalMonoBehaviour
 
   void ResetPorkchop()
   {
-    op.ComputeTimes(_activeVessel.Orbit, _currentTarget.Orbit as PatchedConicsOrbit, Game.UniverseModel.UniversalTime);
+    op.doReset = true;
+    // op.ComputeTimes(_activeVessel.Orbit, _currentTarget.Orbit as PatchedConicsOrbit, Game.UniverseModel.UniversalTime);
   }
 
   void LowestDv()
   {
-    op.plot.SelectedPoint = new[] { op.worker.BestDate, op.worker.BestDuration };
+    op.doSetLowestDv = true;
+    // op.plot.SelectedPoint = new[] { op.worker.BestDate, op.worker.BestDuration };
   }
 
   void ASAPTransfer()
   {
-    int bestDuration = 0;
-    for (int i = 1; i < op.worker.Computed.GetLength(1); i++)
-    {
-      if (op.worker.Computed[0, bestDuration] > op.worker.Computed[0, i])
-        bestDuration = i;
-    }
+    op.doSetASAP = true;
+    //int bestDuration = 0;
+    //for (int i = 1; i < op.worker.Computed.GetLength(1); i++)
+    //{
+    //  if (op.worker.Computed[0, bestDuration] > op.worker.Computed[0, i])
+    //    bestDuration = i;
+    //}
 
-    op.plot.SelectedPoint = new[] { 0, bestDuration };
+    //op.plot.SelectedPoint = new[] { 0, bestDuration };
   }
 
   void IncrementPayloads(int increment)
@@ -2300,6 +2309,8 @@ public class FpUiController : KerbalMonoBehaviour
         break;
       case ManeuverType.advancedPlanetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
                                                // _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
+        FPStatus.Error($"Advancved Planetary Transfer Not Implemented Yet. Sorry!");
+        break;
         var nodes = op.MakeNodes(FlightPlanPlugin.Instance._activeVessel.Orbit, UT, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
         if (nodes != null)
         {
@@ -2328,54 +2339,6 @@ public class FpUiController : KerbalMonoBehaviour
     if (_pass && FlightPlanPlugin.Instance._autoLaunchMNC.Value && _launchMNC) // || Math.Abs(pError) >= Plugin._smallError.Value/100))
       FPOtherModsInterface.instance.CallMNC();
 
-
-
-    //switch (selectedManeuver)
-    //{
-    //  case ManeuverType.circularize:
-    //    FlightPlanPlugin.Instance.Circularize(BurnTimeOption.RequestedBurnTime);
-    //    break;
-    //  case ManeuverType.newPe:
-    //    FlightPlanPlugin.Instance.SetNewPe(BurnTimeOption.RequestedBurnTime, _targetPeR);
-    //    break;
-    //  case ManeuverType.newAp:
-    //    FlightPlanPlugin.Instance.SetNewAp(BurnTimeOption.RequestedBurnTime, _targetApR);
-    //    break;
-    //  case ManeuverType.newPeAp:
-    //    FlightPlanPlugin.Instance.Ellipticize(BurnTimeOption.RequestedBurnTime, _targetApR, _targetPeR);
-    //    break;
-    //  case ManeuverType.newInc:
-    //    FlightPlanPlugin.Instance.SetInclination(BurnTimeOption.RequestedBurnTime, FpUiController.TargetInc_deg);
-    //    break;
-    //  case ManeuverType.newLAN:
-    //    FlightPlanPlugin.Instance.SetNewLAN(BurnTimeOption.RequestedBurnTime, FpUiController.TargetLAN_deg);
-    //    break;
-    //  case ManeuverType.newSMA:
-    //    FlightPlanPlugin.Instance.SetNewSMA(BurnTimeOption.RequestedBurnTime, _targetSMA);
-    //    break;
-    //  case ManeuverType.matchPlane:
-    //    FlightPlanPlugin.Instance.MatchPlanes(FlightPlanUI.TimeRef);
-    //    break;
-    //  case ManeuverType.hohmannXfer:
-    //    FlightPlanPlugin.Instance.HohmannTransfer(BurnTimeOption.RequestedBurnTime);
-    //    break;
-    //  case ManeuverType.matchVelocity:
-    //    FlightPlanPlugin.Instance.MatchVelocity(BurnTimeOption.RequestedBurnTime);
-    //    break;
-    //  case ManeuverType.interceptTgt:
-    //    FlightPlanPlugin.Instance.InterceptTgt(BurnTimeOption.RequestedBurnTime, FpUiController.InterceptTime);
-    //    break;
-    //  case ManeuverType.courseCorrection:
-    //    FlightPlanPlugin.Instance.CourseCorrection(BurnTimeOption.RequestedBurnTime, _courseCorrectionValue);
-    //    break;
-    //  case ManeuverType.moonReturn:
-    //    FlightPlanPlugin.Instance.MoonReturn(BurnTimeOption.RequestedBurnTime, _targetMRPeR);
-    //    break;
-    //  case ManeuverType.planetaryXfer:
-    //    FlightPlanPlugin.Instance.PlanetaryXfer(BurnTimeOption.RequestedBurnTime);
-    //    break;
-    //  default: break;
-    //}
   }
 
   void LaunchMNC()
