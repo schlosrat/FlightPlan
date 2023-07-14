@@ -1627,7 +1627,7 @@ namespace MuMech
             orbit.EndUT   = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
 
             FlightPlanPlugin.Logger.LogInfo($"orbit: {orbit}");
-            FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {orbit.referenceBody}");
+            FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {orbit.referenceBody.Name}");
             FlightPlanPlugin.Logger.LogInfo($"activePatch:           {orbit.ActivePatch}");
             FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {orbit.NextPatch}");
             FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {orbit.closestEncounterBody}");

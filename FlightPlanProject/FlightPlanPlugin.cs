@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using FPUtilities;
 using HarmonyLib;
 using KSP.Game;
+using KSP.Messages;
 using KSP.Sim.impl;
 using KSP.Sim.Maneuver;
 using KSP.UI.Binding;
@@ -11,6 +12,7 @@ using MuMech;
 using NodeManager;
 using SpaceWarp;
 using SpaceWarp.API.Assets;
+using SpaceWarp.API.Game.Messages;
 using SpaceWarp.API.Mods;
 using SpaceWarp.API.UI.Appbar;
 using System.Collections;
@@ -19,6 +21,7 @@ using UitkForKsp2;
 using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
+
 
 namespace FlightPlan;
 
@@ -90,10 +93,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
   // GUI stuff
   static bool Loaded = false;
-  private bool _interfaceEnabled = false;
-  private bool _GUIenabled = true;
-  private Rect _windowRect = Rect.zero;
-  public int windowWidth = 250; //384px on 1920x1080
+  public static bool InterfaceEnabled = false;
+  // private bool _GUIenabled = true;
+  // private Rect _windowRect = Rect.zero;
+  // public int windowWidth = 250; //384px on 1920x1080
 
   private ConfigEntry<KeyboardShortcut> _keybind;
   private ConfigEntry<KeyboardShortcut> _keybind2;
@@ -112,7 +115,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
   internal ManeuverNodeData _currentNode = null;
   List<ManeuverNodeData> ActiveNodes;
 
-  private GameInstance game;
+  // private GameInstance game;
 
   FpUiController controller;
 
@@ -133,6 +136,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
   // private string MNCGUID = "com.github.xyz3211.maneuver_node_controller";
 
+  public static MessageCenter MessageCenter;
+
   /// <summary>
   /// Runs when the mod is first initialized.
   /// </summary>
@@ -145,16 +150,19 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     Instance = this;
 
-    game = GameManager.Instance.Game;
+    // game = GameManager.Instance.Game;
     Logger = base.Logger;
 
+    // Load UITK GUI
     var fpUxml = AssetManager.GetAsset<VisualTreeAsset>($"{Info.Metadata.GUID}/fp_ui/fp_ui.uxml");
-    var fpWindow = Window.CreateFromUxml(fpUxml, "Maneuver Node Controller Main Window", transform, true);
+    var fpWindow = Window.CreateFromUxml(fpUxml, "Flight Plan Main Window", transform, true);
     UnityEngine.Object.DontDestroyOnLoad(fpWindow);
     fpWindow.hideFlags |= HideFlags.HideAndDontSave;
 
+    // Initialze an instance of the UITK GUI controller
     controller = fpWindow.gameObject.AddComponent<FpUiController>();
 
+    // Setup keybindings with default values
     _keybind = Config.Bind(
     new ConfigDefinition("Keybindings", "First Keybind"),
     new KeyboardShortcut(KeyCode.P, KeyCode.LeftAlt),
@@ -168,23 +176,99 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     );
 
     // Subscribe to messages that indicate it's OK to raise the GUI
-    // StateChanges.FlightViewEntered += message => _GUIenabled = true;
-    // StateChanges.Map3DViewEntered += message => _GUIenabled = true;
+    //StateChanges.FlightViewEntered += message =>
+    //{
+    //  FpUiController.GUIenabled = true;
+    //  Logger.LogInfo($"FlightViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    StateChanges.Map3DViewEntered += message =>
+    {
+      FpUiController.GUIenabled = true;
+      Logger.LogInfo($"Map3DViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    };
+
+    //StateChanges.GameStateChanged += (message, previousState, newState) => {
+    //  FpUiController._GUIenabled = newState == GameState.FlightView || newState == GameState.Map3DView;
+    //};
+
+
 
     // Subscribe to messages that indicate it's not OK to raise the GUI
-    // StateChanges.FlightViewLeft += message => _GUIenabled = false;
-    // StateChanges.Map3DViewLeft += message => _GUIenabled = false;
-    // StateChanges.VehicleAssemblyBuilderEntered += message => _GUIenabled = false;
-    // StateChanges.KerbalSpaceCenterStateEntered += message => _GUIenabled = false;
-    // StateChanges.BaseAssemblyEditorEntered += message => _GUIenabled = false;
-    // StateChanges.MainMenuStateEntered += message => _GUIenabled = false;
-    // StateChanges.ColonyViewEntered += message => _GUIenabled = false;
-    // StateChanges.TrainingCenterEntered += message => _GUIenabled = false;
-    // StateChanges.MissionControlEntered += message => _GUIenabled = false;
-    // StateChanges.TrackingStationEntered += message => _GUIenabled = false;
-    // StateChanges.ResearchAndDevelopmentEntered += message => _GUIenabled = false;
-    // StateChanges.LaunchpadEntered += message => _GUIenabled = false;
-    // StateChanges.RunwayEntered += message => _GUIenabled = false;
+    //StateChanges.FlightViewLeft += message =>
+    //{
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"FlightViewLeft message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    StateChanges.Map3DViewLeft += message =>
+    {
+      FpUiController.GUIenabled = false;
+      Logger.LogInfo($"Map3DViewLeft message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    };
+    //StateChanges.VehicleAssemblyBuilderEntered += message =>
+    //{
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"VehicleAssemblyBuilderEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.KerbalSpaceCenterStateEntered += message =>
+    //{
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"KerbalSpaceCenterStateEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.BaseAssemblyEditorEntered += message =>
+    //{
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"BaseAssemblyEditorEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.MainMenuStateEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"MainMenuStateEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.ColonyViewEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"ColonyViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.TrainingCenterEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"TrainingCenterEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //statechanges.trainingcenterloaded += message =>
+    //{
+    //  fpuicontroller.guienabled = false;
+    //  logger.loginfo($"trainingcenterloaded message received, fpuicontroller.guienabled = {fpuicontroller.guienabled}");
+    //};
+    //StateChanges.MissionControlEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"MissionControlEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.TrackingStationEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"TrackingStationEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.TrackingStationLoadedMessage += message =>
+    //{
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"TrackingStationLoadedMessage message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.ResearchAndDevelopmentEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"ResearchAndDevelopmentEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.LaunchpadEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"LaunchpadEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
+    //StateChanges.RunwayEntered += message =>
+    //{ 
+    //  FpUiController.GUIenabled = false;
+    //  Logger.LogInfo($"RunwayEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    //};
 
     Logger.LogInfo("Loaded");
     if (Loaded)
@@ -216,12 +300,131 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     // Log the config value into <KSP2 Root>/BepInEx/LogOutput.log
     Logger.LogInfo($"Experimental Features: {_experimental.Value}");
+
+    RefreshGameManager();
+
+    // Subscribe to the GameStateEnteredMessage so we can control if the GUI should be displaid upon entering this state
+    MessageCenter.Subscribe<GameStateEnteredMessage>(new Action<MessageCenterMessage>(this.GameStateEntered));
+
+    Logger.LogInfo("GameStateEnteredMessage message subscribed");
+
+    // Subscribe to the GameStateLeftMessage so we can control if the GUI should be disabled upon leaving this state
+    MessageCenter.Subscribe<GameStateLeftMessage>(new Action<MessageCenterMessage>(this.GameStateLeft));
+
+    Logger.LogInfo("GameStateLeftMessage message subscribed");
+
+    // Subscribe to the GameStateChangedMessage so we can control if the GUI should be disabled given this state change
+    MessageCenter.Subscribe<GameStateChangedMessage>(new Action<MessageCenterMessage>(this.GameStateChanged));
+
+    Logger.LogInfo("GameStateChangedMessage message subscribed");
+
+    // Subscribe to the TrainingCenterLoadedMessage so we can control if the GUI should be disabled given this state change
+    MessageCenter.Subscribe<TrainingCenterLoadedMessage>(new Action<MessageCenterMessage>(this.TrainingCenterLoaded));
+
+    Logger.LogInfo("TrainingCenterLoadedMessage message subscribed");
+
+    // Subscribe to the TrackingStationLoadedMessage so we can control if the GUI should be disabled given this state change
+    MessageCenter.Subscribe<TrackingStationLoadedAudioCueMessage>(new Action<MessageCenterMessage>(this.TrackingStationLoaded));
+
+    Logger.LogInfo("TrackingStationLoadedAudioCueMessage message subscribed");
+
   }
+
+  public static GameStateConfiguration ThisGameState;
+  public static GameState LastGameState;
+  public static CurtainContext ThisCurtainContext;
+
+  public static void RefreshGameManager()
+  {
+    ThisGameState = GameManager.Instance?.Game?.GlobalGameState?.GetGameState();
+    LastGameState = (GameState)(GameManager.Instance?.Game?.GlobalGameState?.GetLastState());
+    MessageCenter = GameManager.Instance?.Game?.Messages;
+    ThisCurtainContext = (CurtainContext)(GameManager.Instance?.Game?.UI.Curtain.CurtainContextData.CurtainContext);
+    Logger.LogInfo($"RefreshGameManager ThisCurtainContext = {ThisCurtainContext}");
+
+    // Log out every type of message in the game...
+    //foreach (var type in typeof(GameManager).Assembly.GetTypes())
+    //{
+    //  if (typeof(MessageCenterMessage).IsAssignableFrom(type) && !type.IsAbstract)
+    //  {
+    //    Logger.LogInfo(type.Name);
+    //  }
+    //}
+  }
+
+  private void GameStateChanged(MessageCenterMessage message)
+  {
+    RefreshGameManager();
+    Logger.LogInfo($"GameStateChanged Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+    if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
+    {
+      FpUiController.GUIenabled = true;
+    }
+    else
+    {
+      FpUiController.GUIenabled = false;
+      FpUiController.container.style.display = DisplayStyle.None;
+    }
+    Logger.LogInfo($"GameStateChanged FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+  }
+
+  private void GameStateEntered(MessageCenterMessage message)
+  {
+    RefreshGameManager();
+    Logger.LogInfo($"GameStateEntered Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+    if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
+    {
+      FpUiController.GUIenabled = true;
+    }
+    else
+    {
+      FpUiController.GUIenabled = false;
+      FpUiController.container.style.display = DisplayStyle.None;
+    }
+    Logger.LogInfo($"GameStateEntered FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+  }
+
+  private void GameStateLeft(MessageCenterMessage message)
+  {
+    RefreshGameManager();
+    Logger.LogInfo($"GameStateLeft Message Recived. GameState: {ThisGameState.GameState}");
+
+    // if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
+    FpUiController.GUIenabled = false;
+    FpUiController.container.style.display = DisplayStyle.None;
+
+    Logger.LogInfo($"GameStateLeft FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+  }
+
+  private void TrackingStationLoaded(MessageCenterMessage message)
+  {
+    RefreshGameManager();
+    Logger.LogInfo($"TrackingStationLoadedAudioCue Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+
+    // if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
+    FpUiController.GUIenabled = false;
+    FpUiController.container.style.display = DisplayStyle.None;
+
+    Logger.LogInfo($"TrackingStationLoadedAudioCue FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+  }
+
+  private void TrainingCenterLoaded(MessageCenterMessage message)
+  {
+    RefreshGameManager();
+    Logger.LogInfo($"TrainingCenterLoaded Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+
+    // if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
+    FpUiController.GUIenabled = false;
+    FpUiController.container.style.display = DisplayStyle.None;
+
+    Logger.LogInfo($"TrainingCenterLoaded FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+  }
+
 
   public void ToggleButton(bool toggle)
   {
-    _interfaceEnabled = toggle;
-    GameObject.Find(_ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(_interfaceEnabled);
+    InterfaceEnabled = toggle;
+    GameObject.Find(_ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(InterfaceEnabled);
     controller.SetEnabled(toggle);
   }
 
@@ -234,7 +437,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
   {
     if ((_keybind != null && _keybind.Value.IsDown()) || (_keybind2 != null && _keybind2.Value.IsDown()))
     {
-      ToggleButton(!_interfaceEnabled);
+      ToggleButton(!InterfaceEnabled);
       if (_keybind != null && _keybind.Value.IsDown())
         Logger.LogDebug($"Update: UI toggled with _keybind, hotkey {_keybind.Value}");
       if (_keybind2 != null && _keybind2.Value.IsDown())
@@ -265,10 +468,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
   /// </summary>
   private void OnGUI()
   {
-    _GUIenabled = false;
-    var _gameState = Game?.GlobalGameState?.GetState();
-    if (_gameState == GameState.Map3DView) _GUIenabled = true;
-    if (_gameState == GameState.FlightView) _GUIenabled = true;
+    //_GUIenabled = false;
+    //var _gameState = Game?.GlobalGameState?.GetState();
+    //if (_gameState == GameState.Map3DView) _GUIenabled = true;
+    //if (_gameState == GameState.FlightView) _GUIenabled = true;
     //if (Game.GlobalGameState.GetState() == GameState.TrainingCenter) _GUIenabled = false;
     //if (Game.GlobalGameState.GetState() == GameState.TrackingStation) _GUIenabled = false;
     //if (Game.GlobalGameState.GetState() == GameState.VehicleAssemblyBuilder) _GUIenabled = false;
@@ -307,7 +510,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
   private ManeuverNodeData GetCurrentNode()
   {
-    ActiveNodes = game.SpaceSimulation.Maneuvers.GetNodesForVessel(Game.ViewController.GetActiveVehicle(true).Guid);
+    ActiveNodes = Game.SpaceSimulation.Maneuvers.GetNodesForVessel(Game.ViewController.GetActiveVehicle(true).Guid);
     return (ActiveNodes.Count() > 0) ? ActiveNodes[0] : null;
   }
 
@@ -338,8 +541,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
   private void CloseWindow()
   {
     GameObject.Find(_ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(false);
-    _interfaceEnabled = false;
-    ToggleButton(_interfaceEnabled);
+    InterfaceEnabled = false;
+    ToggleButton(InterfaceEnabled);
 
     // UI_Fields.GameInputState = true;
   }

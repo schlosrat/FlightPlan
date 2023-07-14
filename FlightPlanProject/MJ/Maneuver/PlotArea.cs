@@ -39,6 +39,7 @@ namespace MuMech
 
     static PlotArea()
     {
+      // Used by MJ2 IMGUI code when making the selection box for zooming
       _selectionStyle = new GUIStyle();
       var background = new Texture2D(1, 1, TextureFormat.RGBA32, false);
       background.SetPixel(0, 0, new Color(0, 0, 1, 0.3f));
@@ -60,7 +61,7 @@ namespace MuMech
 
     private void ZoomSelectionBox(int[] hoveredPoint)
     {
-      FlightPlanPlugin.Logger.LogInfo($"[ZoomSelectionBox] SelectedPoint = ({SelectedPoint[0]}, {SelectedPoint[0]}), hoveredPoint = ({hoveredPoint[0]}, {hoveredPoint[1]})");
+      FlightPlanPlugin.Logger.LogInfo($"[ZoomSelectionBox] SelectedPoint = ({SelectedPoint[0]}, {SelectedPoint[1]}), hoveredPoint = ({hoveredPoint[0]}, {hoveredPoint[1]})");
       _mouseDown = false;
       if (Math.Abs(SelectedPoint[0] - hoveredPoint[0]) > 5 &&
           Math.Abs(SelectedPoint[1] - hoveredPoint[1]) > 5)
@@ -94,7 +95,7 @@ namespace MuMech
         {
           Vector2 pos = mouse - rect.position;
           HoveredPoint = new[] { (int)pos.x, (int)(rect.height - pos.y - 1) };
-          FlightPlanPlugin.Logger.LogInfo($"HoveredPoint: ({HoveredPoint[0]}, {HoveredPoint[1]})");
+          // FlightPlanPlugin.Logger.LogInfo($"HoveredPoint: ({HoveredPoint[0]}, {HoveredPoint[1]})");
         }
         else
         {
@@ -107,6 +108,8 @@ namespace MuMech
 
         if (_mouseDown)
         {
+          // Preview the zoom selection box by overlaying a box on top of the current plot to show the extent of the current selection
+
           //GUI.Box(new Rect(rect.x + Math.Min(SelectedPoint[0], HoveredPoint[0]),
           //    rect.y + rect.height - Math.Max(SelectedPoint[1], HoveredPoint[1]),
           //    Math.Abs(SelectedPoint[0] - HoveredPoint[0]),
