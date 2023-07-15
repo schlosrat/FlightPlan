@@ -550,8 +550,12 @@ public class FpUiController : KerbalMonoBehaviour
         }
         else
         {
+          bool atPlanet = true;
           bool targetIsPlanet = _currentTarget.Orbit.referenceBody.IsStar;
-          bool atPlanet = ReferenceBody.Orbit.referenceBody.IsStar;
+          if (ReferenceBody.IsStar)
+            atPlanet = false;
+          else if (!ReferenceBody.Orbit.referenceBody.IsStar)
+            atPlanet = false;
           if (_currentTarget.Orbit.referenceBody.Name == ReferenceBody.Name)
           {
             TRMShipToCelestialButtonBox.style.display = DisplayStyle.Flex;
@@ -853,8 +857,28 @@ public class FpUiController : KerbalMonoBehaviour
         phase = Orbit.PhaseAngle(targetOrbit, UT);
         transfer = Orbit.Transfer(targetOrbit, out double _transferTime);
         nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360; // transfer - phase
-        TargetOrbitTRMC.text = $"{targetOrbit.PeriapsisArl / 1000:N0} km x {targetOrbit.ApoapsisArl / 1000:N0} km";
-        CurrentOrbitTRMC.text = $"{Orbit.PeriapsisArl / 1000:N0} km x {Orbit.ApoapsisArl / 1000:N0} km";
+        string tgtPeArlStr;
+        if (targetOrbit.PeriapsisArl < 1e6)
+          tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000:N0} km";
+        else
+          tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000000:N0} Mm";
+        string tgtApArlStr;
+        if (targetOrbit.ApoapsisArl < 1e6)
+          tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000:N0} km";
+        else
+          tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000000:N0} Mm";
+        TargetOrbitTRMC.text = $"{tgtPeArlStr} x {tgtApArlStr}";
+        string osPeArlStr;
+        if (Orbit.PeriapsisArl < 1e6)
+          osPeArlStr = $"{Orbit.PeriapsisArl / 1000:N0} km";
+        else
+          osPeArlStr = $"{Orbit.PeriapsisArl / 1000000:N0} Mm";
+        string osApArlStr;
+        if (Orbit.ApoapsisArl < 1e6)
+          osApArlStr = $"{Orbit.ApoapsisArl / 1000:N0} km";
+        else
+          osApArlStr = $"{Orbit.ApoapsisArl / 1000000:N0} Mm";
+        CurrentOrbitTRMC.text = $"{osPeArlStr} x {osApArlStr}";
         RelativeIncTRMC.text = $"{relativeInc:N2}°";
         PhaseAngleTRMC.text = $"{phase:N1}°"; // _currentTarget.Name
         XferPhaseAngleTRMC.text = $"{transfer:N1}°";
@@ -1267,8 +1291,8 @@ public class FpUiController : KerbalMonoBehaviour
 
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: panels.Add(ROMPanel)");
     panelNames.Add("Ownship Maneuvers");
-    panelNames.Add("Target Relative Maneuvers - Ship to Ship");
-    panelNames.Add("Target Relative Maneuvers - Ship to Celestial");
+    panelNames.Add("Target Relative Maneuvers - Vessel");
+    panelNames.Add("Target Relative Maneuvers - Celestial");
     panelNames.Add("Orbital Transfer Maneuvers - Moon");
     panelNames.Add("Orbital Transfer Maneuvers - Planet");
     panelNames.Add("Resonant Orbit Maneuvers");
@@ -1479,7 +1503,7 @@ public class FpUiController : KerbalMonoBehaviour
     XferTimeTRMC = container.Q<Label>("XferTimeTRMC");
     SynodicPeriodTRMC = container.Q<Label>("SynodicPeriodTRMC");
     NextWindowTRMC = container.Q<Label>("NextWindowTRMC");
-    NextClosestApproachTRMC = container.Q<Label>("MatchPlanesButtonTRMC");
+    NextClosestApproachTRMC = container.Q<Label>("NextClosestApproachTRMC");
     MatchPlanesButtonTRMC = container.Q<Button>("MatchPlanesButtonTRMC");
     HohmannTransferButtonTRMC = container.Q<Button>("HohmannTransferButtonTRMC");
     CourseCorrectionButtonTRMC = container.Q<Button>("CourseCorrectionButtonTRMC");
