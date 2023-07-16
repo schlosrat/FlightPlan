@@ -118,7 +118,7 @@ public class FpUiController : KerbalMonoBehaviour
   Label PanelLabel;
 
   // BurnTimeOptions dropdown
-  DropdownField BurnOptionsDropdown;
+  public static DropdownField BurnOptionsDropdown;
 
   // UI panels (used to control center part of UI based on the selected tab bar button)
   VisualElement OSMPanel;
@@ -719,7 +719,11 @@ public class FpUiController : KerbalMonoBehaviour
 
     if (_currentTarget != null)
     {
-      if (TargetSelectionDropdown.choices.Contains(_currentTarget.Name))
+      var thisList = new List<string>(TargetSelectionDropdown.choices);
+      for (int i = 0; i < thisList.Count; i++)
+        thisList[i] = thisList[i].Trim();
+
+      if (thisList.Contains(_currentTarget.Name))
         TargetSelectionDropdown.value = _currentTarget.Name;
       else
         TargetSelectionDropdown.value = "";
@@ -857,28 +861,28 @@ public class FpUiController : KerbalMonoBehaviour
         phase = Orbit.PhaseAngle(targetOrbit, UT);
         transfer = Orbit.Transfer(targetOrbit, out double _transferTime);
         nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360; // transfer - phase
-        string tgtPeArlStr;
-        if (targetOrbit.PeriapsisArl < 1e6)
-          tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000:N0} km";
-        else
-          tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000000:N0} Mm";
-        string tgtApArlStr;
-        if (targetOrbit.ApoapsisArl < 1e6)
-          tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000:N0} km";
-        else
-          tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000000:N0} Mm";
-        TargetOrbitTRMC.text = $"{tgtPeArlStr} x {tgtApArlStr}";
-        string osPeArlStr;
-        if (Orbit.PeriapsisArl < 1e6)
-          osPeArlStr = $"{Orbit.PeriapsisArl / 1000:N0} km";
-        else
-          osPeArlStr = $"{Orbit.PeriapsisArl / 1000000:N0} Mm";
-        string osApArlStr;
-        if (Orbit.ApoapsisArl < 1e6)
-          osApArlStr = $"{Orbit.ApoapsisArl / 1000:N0} km";
-        else
-          osApArlStr = $"{Orbit.ApoapsisArl / 1000000:N0} Mm";
-        CurrentOrbitTRMC.text = $"{osPeArlStr} x {osApArlStr}";
+        //string tgtPeArlStr;
+        //if (targetOrbit.PeriapsisArl < 1e6)
+        //  tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000:N0} km";
+        //else
+        //  tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000000:N0} Mm";
+        //string tgtApArlStr;
+        //if (targetOrbit.ApoapsisArl < 1e6)
+        //  tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000:N0} km";
+        //else
+        //  tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000000:N0} Mm";
+        TargetOrbitTRMC.text = $"{FPUtility.MetersToScaledDistanceString(targetOrbit.PeriapsisArl)} x {FPUtility.MetersToScaledDistanceString(targetOrbit.ApoapsisArl)}";
+        //string osPeArlStr;
+        //if (Orbit.PeriapsisArl < 1e6)
+        //  osPeArlStr = $"{Orbit.PeriapsisArl / 1000:N0} km";
+        //else
+        //  osPeArlStr = $"{Orbit.PeriapsisArl / 1000000:N0} Mm";
+        //string osApArlStr;
+        //if (Orbit.ApoapsisArl < 1e6)
+        //  osApArlStr = $"{Orbit.ApoapsisArl / 1000:N0} km";
+        //else
+        //  osApArlStr = $"{Orbit.ApoapsisArl / 1000000:N0} Mm";
+        CurrentOrbitTRMC.text = $"{FPUtility.MetersToScaledDistanceString(Orbit.PeriapsisArl)} x {FPUtility.MetersToScaledDistanceString(Orbit.ApoapsisArl)}";
         RelativeIncTRMC.text = $"{relativeInc:N2}°";
         PhaseAngleTRMC.text = $"{phase:N1}°"; // _currentTarget.Name
         XferPhaseAngleTRMC.text = $"{transfer:N1}°";
@@ -1054,6 +1058,7 @@ public class FpUiController : KerbalMonoBehaviour
     }
   }
 
+  
   double DeltaV()
   {
     // GameInstance game = GameManager.Instance.Game;
@@ -1181,37 +1186,37 @@ public class FpUiController : KerbalMonoBehaviour
 
       if (TargetTypeButton.text == "Celestial")
       {
-        FlightPlanPlugin.Logger.LogInfo($"Selected Body: '{evt.newValue}'");
+        FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Body: '{evt.newValue}'");
         if (targetBodies.Keys.Contains(evt.newValue))
         {
-          FlightPlanPlugin.Logger.LogInfo($"Selected Body GlobalId: {targetBodies[evt.newValue].GlobalId}");
+          FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Body GlobalId: {targetBodies[evt.newValue].GlobalId}");
           _activeVessel.SetTargetByID(targetBodies[evt.newValue].GlobalId);
           _currentTarget = _activeVessel.TargetObject;
         }
       }
       else if (TargetTypeButton.text == "Vessel")
       {
-        FlightPlanPlugin.Logger.LogInfo($"Selected Vessel: '{evt.newValue}'");
+        FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Vessel: '{evt.newValue}'");
         if (targetVessels.Keys.Contains(evt.newValue))
         {
-          FlightPlanPlugin.Logger.LogInfo($"Selected Vessle GlobalId: {targetVessels[evt.newValue].GlobalId}");
+          FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Vessle GlobalId: {targetVessels[evt.newValue].GlobalId}");
           _activeVessel.SetTargetByID(targetVessels[evt.newValue].GlobalId);
           _currentTarget = _activeVessel.TargetObject;
         }
       }
       else if (TargetTypeButton.text == "Port")
       {
-        FlightPlanPlugin.Logger.LogInfo($"Selected Port: '{evt.newValue}'");
+        FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Port: '{evt.newValue}'");
         if (targetPorts.Keys.Contains(evt.newValue))
         {
-          FlightPlanPlugin.Logger.LogInfo($"Selected Port GlobalId: {targetPorts[evt.newValue].GlobalId}");
+          FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Port GlobalId: {targetPorts[evt.newValue].GlobalId}");
           _activeVessel.SetTargetByID(targetPorts[evt.newValue].GlobalId);
           _currentTarget = _activeVessel.TargetObject;
         }
       }
 
       if (_currentTarget != null)
-        FlightPlanPlugin.Logger.LogInfo($"Selected Target: {_currentTarget.Name}");
+        FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Target: {_currentTarget.Name}");
 
     });
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}");
@@ -1291,10 +1296,10 @@ public class FpUiController : KerbalMonoBehaviour
 
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: panels.Add(ROMPanel)");
     panelNames.Add("Ownship Maneuvers");
-    panelNames.Add("Target Relative Maneuvers - Vessel");
-    panelNames.Add("Target Relative Maneuvers - Celestial");
-    panelNames.Add("Orbital Transfer Maneuvers - Moon");
-    panelNames.Add("Orbital Transfer Maneuvers - Planet");
+    panelNames.Add("Target Relative Maneuvers: Vessel");
+    panelNames.Add("Target Relative Maneuvers: Celestial");
+    panelNames.Add("Orbital Transfer Maneuvers: Moon");
+    panelNames.Add("Orbital Transfer Maneuvers: Planet");
     panelNames.Add("Resonant Orbit Maneuvers");
 
     // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: panelNames.Add(\"Resonant Orbit Maneuvers\")");
@@ -2466,127 +2471,128 @@ public class FpUiController : KerbalMonoBehaviour
         break;
       case ManeuverType.circularize:
         if (ActiveVessel.Orbit.eccentricity < 1)
-          Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
-        Options.Add(TimeRef.ALTITUDE); //"At An Altittude"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
+          Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
+        Options.Add(TimeRef.PERIAPSIS);  //"at Next Periapsis"
+        Options.Add(TimeRef.ALTITUDE);   //"at An Altittude"
+        Options.Add(TimeRef.X_FROM_NOW); //"after Fixed Time"
 
         ManeuverTypeDesc = "Circularizing";
         break;
       case ManeuverType.newPe:
         if (ActiveVessel.Orbit.eccentricity < 1)
-          Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
-        Options.Add(TimeRef.ALTITUDE); //"At An Altittude"
+          Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
+        Options.Add(TimeRef.PERIAPSIS);  //"at Next Periapsis"
+        Options.Add(TimeRef.X_FROM_NOW); //"after Fixed Time"
+        Options.Add(TimeRef.ALTITUDE);   //"at An Altittude"
 
         ManeuverTypeDesc = "Setting new Pe";
         break;
       case ManeuverType.newAp:
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
+        Options.Add(TimeRef.PERIAPSIS);  //"at Next Periapsis"
         if (ActiveVessel.Orbit.eccentricity < 1)
-          Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
-        Options.Add(TimeRef.ALTITUDE); //"At An Altittude"
+          Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
+        Options.Add(TimeRef.X_FROM_NOW); //"after Fixed Time"
+        Options.Add(TimeRef.ALTITUDE);   //"at An Altittude"
 
         ManeuverTypeDesc = "Setting new Ap";
         break;
       case ManeuverType.newPeAp:
         if (ActiveVessel.Orbit.eccentricity < 1)
-          Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
-        Options.Add(TimeRef.ALTITUDE); //"At An Altittude"
-        Options.Add(TimeRef.EQ_ASCENDING); //"At Equatorial AN"
-        Options.Add(TimeRef.EQ_DESCENDING); //"At Equatorial DN"
+          Options.Add(TimeRef.APOAPSIS);    // "at Next Apoapsis"
+        Options.Add(TimeRef.PERIAPSIS);     // "at Next Periapsis"
+        Options.Add(TimeRef.X_FROM_NOW);    // "after Fixed Time"
+        Options.Add(TimeRef.ALTITUDE);      // "at An Altittude"
+        Options.Add(TimeRef.EQ_ASCENDING);  // "at Equatorial AN"
+        Options.Add(TimeRef.EQ_DESCENDING); // "at Equatorial DN"
 
         ManeuverTypeDesc = "Elipticizing";
         break;
       case ManeuverType.newInc:
-        Options.Add(TimeRef.EQ_HIGHEST_AD); //"At Cheapest eq AN/DN"
-        Options.Add(TimeRef.EQ_NEAREST_AD); //"At Nearest eq AN/DN"
-        Options.Add(TimeRef.EQ_ASCENDING); //"At Equatorial AN"
-        Options.Add(TimeRef.EQ_DESCENDING); //"At Equatorial DN"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
+        Options.Add(TimeRef.EQ_HIGHEST_AD); // "at Cheapest eq AN/DN"
+        Options.Add(TimeRef.EQ_NEAREST_AD); // "at Nearest eq AN/DN"
+        Options.Add(TimeRef.EQ_ASCENDING);  // "at Equatorial AN"
+        Options.Add(TimeRef.EQ_DESCENDING); // "at Equatorial DN"
+        Options.Add(TimeRef.X_FROM_NOW);    // "after Fixed Time"
 
         ManeuverTypeDesc = "Setting new inclination";
         break;
       case ManeuverType.newLAN:
         if (ActiveVessel.Orbit.eccentricity < 1)
-          Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
+          Options.Add(TimeRef.APOAPSIS); // "at Next Apoapsis"
+        Options.Add(TimeRef.PERIAPSIS);  // "at Next Periapsis"
+        Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
 
         ManeuverTypeDesc = "Setting new LAN";
         break;
       case ManeuverType.newNodeLon:
         if (ActiveVessel.Orbit.eccentricity < 1)
-          Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
+          Options.Add(TimeRef.APOAPSIS); // "at Next Apoapsis"
+        Options.Add(TimeRef.PERIAPSIS);  // "at Next Periapsis"
+        Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
 
         ManeuverTypeDesc = "Shifting Node LongitudeN";
         break;
       case ManeuverType.newSMA:
         if (ActiveVessel.Orbit.eccentricity < 1)
-          Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
+          Options.Add(TimeRef.APOAPSIS); // "at Next Apoapsis"
+        Options.Add(TimeRef.PERIAPSIS);  // "at Next Periapsis"
+        Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
 
         ManeuverTypeDesc = "Setting new SMA";
         break;
       case ManeuverType.matchPlane:
-        Options.Add(TimeRef.REL_HIGHEST_AD); //"At Cheapest AN/DN With Target"
-        Options.Add(TimeRef.REL_NEAREST_AD); //"At Nearest AN/DN With Target"
-        Options.Add(TimeRef.REL_ASCENDING); //"At Next AN With Target"
-        Options.Add(TimeRef.REL_DESCENDING); //"At Next DN With Target"
+        Options.Add(TimeRef.REL_HIGHEST_AD); // "at Cheapest AN/DN With Target"
+        Options.Add(TimeRef.REL_NEAREST_AD); // "at Nearest AN/DN With Target"
+        Options.Add(TimeRef.REL_ASCENDING);  // "at Next AN With Target"
+        Options.Add(TimeRef.REL_DESCENDING); // "at Next DN With Target"
 
         ManeuverTypeDesc = "Matching planes";
         break;
       case ManeuverType.hohmannXfer:
-        Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
+        Options.Add(TimeRef.COMPUTED); // "at Optimal Time"
 
         ManeuverTypeDesc = "Performing Hohmann transfer";
         break;
       case ManeuverType.courseCorrection:
-        Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
+        Options.Add(TimeRef.COMPUTED); // "at Optimal Time"
 
         ManeuverTypeDesc = "Performaing course correction";
         break;
       case ManeuverType.interceptTgt:
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
+        Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
 
         ManeuverTypeDesc = "Intercepting";
         break;
       case ManeuverType.matchVelocity:
-        Options.Add(TimeRef.CLOSEST_APPROACH); //"At Closest Approach"
-        Options.Add(TimeRef.X_FROM_NOW); //"After Fixed Time"
+        Options.Add(TimeRef.CLOSEST_APPROACH); // "at Closest Approach"
+        Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
 
         ManeuverTypeDesc = "Matching velocity";
         break;
       case ManeuverType.moonReturn:
-        Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
+        Options.Add(TimeRef.COMPUTED); //"at Optimal Time"
 
         ManeuverTypeDesc = "Performaing moon return";
         break;
       case ManeuverType.planetaryXfer:
-        Options.Add(TimeRef.COMPUTED); //"At Optimal Time"
+        Options.Add(TimeRef.NEXT_WINDOW); // "at the next transfer window"
+        Options.Add(TimeRef.ASAP); // "as soon as possible"
 
         ManeuverTypeDesc = "Performing planetary transfer";
         break;
       case ManeuverType.advancedPlanetaryXfer:
-        Options.Add(TimeRef.PORKCHOP); //"Porkchop Selection"
-        Options.Add(TimeRef.LIMITED_TIME); //"Limited Time"
+        Options.Add(TimeRef.PORKCHOP); // "Porkchop Selection"
+        Options.Add(TimeRef.LIMITED_TIME); // "Limited Time"
 
         ManeuverTypeDesc = "Performing advanced planetary transfer";
         break;
       case ManeuverType.fixAp:
-        Options.Add(TimeRef.PERIAPSIS); //"At Next Periapsis"
+        Options.Add(TimeRef.PERIAPSIS); //"at Next Periapsis"
 
         ManeuverTypeDesc = "Setting new Ap";
         break;
       case ManeuverType.fixPe:
-        Options.Add(TimeRef.APOAPSIS); //"At Next Apoapsis"
+        Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
 
         ManeuverTypeDesc = "Setting new Pe";
         break;

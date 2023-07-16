@@ -21,6 +21,7 @@ using UitkForKsp2;
 using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
 
 
 namespace FlightPlan;
@@ -72,7 +73,9 @@ public enum TimeRef
   REL_NEAREST_AD,
   REL_HIGHEST_AD,
   LIMITED_TIME,
-  PORKCHOP
+  PORKCHOP,
+  NEXT_WINDOW,
+  ASAP
 }
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
@@ -1182,8 +1185,72 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     Logger.LogDebug($"PlanetaryXfer: Transfer to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
     double _burnUTout, _burnUTout2;
-    bool _syncPhaseAngle = true;
 
+    bool _syncPhaseAngle = true;
+    // Check the BurnOptionsDropdown
+    if (FpUiController.BurnOptionsDropdown.value == BurnTimeOption.TextTimeRef[TimeRef.NEXT_WINDOW])
+      _syncPhaseAngle = true;
+    else
+      _syncPhaseAngle = false;
+
+    // Add checks for potential bad things like MJ
+    // Check preconditions
+    //if (!_currentTarget.NormalTargetExists)
+    //  throw new OperationException(
+    //      Localizer.Format("#MechJeb_transfer_Exception1")); //"must select a target for the interplanetary transfer."
+
+    if (_orbit.referenceBody.referenceBody == null)
+      Logger.LogDebug($"PlanetaryXfer: doesn't make sense to plot an interplanetary transfer from an orbit around {_orbit.referenceBody.Name}");
+    //throw new OperationException(Localizer.Format("#MechJeb_transfer_Exception2",
+    //      _orbit.referenceBody.Name
+    //          .LocalizeRemoveGender())); //doesn't make sense to plot an interplanetary transfer from an orbit around <<1>>
+
+    if (_orbit.referenceBody.referenceBody != tgtOrbit.referenceBody)
+    {
+      if (_orbit.referenceBody == tgtOrbit.referenceBody)
+        Logger.LogDebug($"PlanetaryXfer: use regular Hohmann transfer function to intercept another body orbiting {_orbit.referenceBody.Name}");
+        //throw new OperationException(Localizer.Format("#MechJeb_transfer_Exception3",
+        //    _orbit.referenceBody.Name
+        //        .LocalizeRemoveGender())); //use regular Hohmann transfer function to intercept another body orbiting <<1>>
+      Logger.LogDebug($"PlanetaryXfer: an interplanetary transfer from within {_orbit.referenceBody.Name}'s sphere of influence must target a body that orbits {_orbit.referenceBody.Name}'s parent, {_orbit.referenceBody.referenceBody.Name}");
+      //throw new OperationException(Localizer.Format("#MechJeb_transfer_Exception4", _orbit.referenceBody.Name.LocalizeRemoveGender(),
+      //    _orbit.referenceBody.Name.LocalizeRemoveGender(),
+      //    _orbit.referenceBody.referenceBody.Name
+      //        .LocalizeRemoveGender())); //"an interplanetary transfer from within "<<1>>"'s sphere of influence must target a body that orbits "<<2>>"'s parent, "<<3>>.
+    }
+
+    // Simple warnings
+    if (_orbit.referenceBody.Orbit.RelativeInclination(tgtOrbit) > 30)
+    {
+      Logger.LogWarning($"PlanetaryXfer: target's orbital plane is at a {_orbit.RelativeInclination(tgtOrbit).ToString("F0")}º angle to {_orbit.referenceBody.Name}'s orbital plane (recommend at most 30º). Planned interplanetary transfer may not intercept target properly.");
+
+      //ErrorMessage = Localizer.Format("#MechJeb_transfer_errormsg1", _orbit.RelativeInclination(tgtOrbit).ToString("F0"),
+      //    _orbit.referenceBody.Name
+      //        .LocalizeRemoveGender()); //"Warning: target's orbital plane is at a"<<1>>"º angle to "<<2>>"'s orbital plane (recommend at most 30º). Planned interplanetary transfer may not intercept target properly."
+    }
+    else
+    {
+      double relativeInclination = Vector3d.Angle(_orbit.OrbitNormal(), _orbit.referenceBody.Orbit.OrbitNormal());
+      if (relativeInclination > 10)
+      {
+        Logger.LogWarning($"PlanetaryXfer: Recommend starting interplanetary transfers from {_orbit.referenceBody.Name} from an orbit in the same plane as {_orbit.referenceBody.Name}'s orbit around {_orbit.referenceBody.referenceBody.Name}. Starting orbit around {_orbit.referenceBody.Name} is inclined {relativeInclination.ToString("F1")}º with respect to {_orbit.referenceBody.Name}'s orbit around {_orbit.referenceBody.referenceBody.Name} (recommend < 10º). Planned transfer may not intercept target properly.");
+
+        //ErrorMessage = Localizer.Format("#MechJeb_transfer_errormsg2", _orbit.referenceBody.Name.LocalizeRemoveGender(),
+        //    _orbit.referenceBody.Name.LocalizeRemoveGender(), _orbit.referenceBody.referenceBody.Name.LocalizeRemoveGender(),
+        //    _orbit.referenceBody.Name.LocalizeRemoveGender(), relativeInclination.ToString("F1"),
+        //    _orbit.referenceBody.Name.LocalizeRemoveGender(),
+        //    _orbit.referenceBody.referenceBody.Name
+        //        .LocalizeRemoveGender()); //Warning: Recommend starting interplanetary transfers from  <<1>> from an orbit in the same plane as "<<2>>"'s orbit around "<<3>>". Starting orbit around "<<4>>" is inclined "<<5>>"º with respect to "<<6>>"'s orbit around "<<7>> " (recommend < 10º). Planned transfer may not intercept target properly."
+      }
+      else if (_orbit.eccentricity > 0.2)
+      {
+        Logger.LogWarning($"PlanetaryXfer: Recommend starting interplanetary transfers from a near-circular orbit (eccentricity < 0.2). Planned transfer is starting from an orbit with eccentricity {_orbit.eccentricity.ToString("F2")} and so may not intercept target properly.");
+
+        //ErrorMessage = Localizer.Format("#MechJeb_transfer_errormsg3",
+        //    _orbit.eccentricity.ToString(
+        //        "F2")); //Warning: Recommend starting interplanetary transfers from a near-circular orbit (eccentricity < 0.2). Planned transfer is starting from an orbit with eccentricity <<1>> and so may not intercept target properly.
+      }
+    }
     FPStatus.Warning($"Experimental Transfer to {_currentTarget.Name} Ready");
 
     Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryTransferEjection(_orbit, _UT, tgtOrbit, _syncPhaseAngle, out _burnUTout);

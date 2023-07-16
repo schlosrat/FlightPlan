@@ -12,242 +12,262 @@ namespace FPUtilities;
 
 public static class FPUtility
 {
-    public static VesselComponent ActiveVessel;
-    public static ManeuverNodeData CurrentNode;
-    // public static string LayoutPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "MicroLayout.json");
-    private static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("ManeuverNodeController.Utility");
-    public static GameStateConfiguration GameState;
-    public static MessageCenter MessageCenter;
-    // public static VesselDeltaVComponent VesselDeltaVComponentOAB;
-    public static string InputDisableWindowAbbreviation = "WindowAbbreviation";
-    public static string InputDisableWindowName = "WindowName";
+  public static VesselComponent ActiveVessel;
+  public static ManeuverNodeData CurrentNode;
+  // public static string LayoutPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "MicroLayout.json");
+  private static ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("ManeuverNodeController.Utility");
+  public static GameStateConfiguration GameState;
+  public static MessageCenter MessageCenter;
+  // public static VesselDeltaVComponent VesselDeltaVComponentOAB;
+  public static string InputDisableWindowAbbreviation = "WindowAbbreviation";
+  public static string InputDisableWindowName = "WindowName";
 
-    /// <summary>
-    /// Refreshes the ActiveVessel and CurrentNode
-    /// </summary>
-    public static void RefreshActiveVesselAndCurrentManeuver()
+  /// <summary>
+  /// Refreshes the ActiveVessel and CurrentNode
+  /// </summary>
+  public static void RefreshActiveVesselAndCurrentManeuver()
+  {
+    ActiveVessel = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
+    CurrentNode = ActiveVessel != null ? GameManager.Instance?.Game?.SpaceSimulation.Maneuvers.GetNodesForVessel(ActiveVessel.GlobalId).FirstOrDefault() : null;
+  }
+
+  public static void RefreshGameManager()
+  {
+    GameState = GameManager.Instance?.Game?.GlobalGameState?.GetGameState();
+    // MessageCenter = GameManager.Instance?.Game?.Messages;
+  }
+
+  //public static void RefreshStagesOAB()
+  //{
+  //    VesselDeltaVComponentOAB = GameManager.Instance?.Game?.OAB?.Current?.Stats?.MainAssembly?.VesselDeltaV;
+  //}
+
+  //public static string DegreesToDMS(double degreeD)
+  //{
+  //    var ts = TimeSpan.FromHours(Math.Abs(degreeD));
+  //    int degrees = (int)Math.Floor(ts.TotalHours);
+  //    int _minutes = ts.Minutes;
+  //    int seconds = ts.Seconds;
+
+  //    string _result = $"{degrees:N0}<color={Styles.UnitColorHex}>°</color> {_minutes:00}<color={Styles.UnitColorHex}>'</color> {seconds:00}<color={Styles.UnitColorHex}>\"</color>";
+
+  //    return _result;
+  //}
+
+  public static string MetersToDistanceString(double heightInMeters)
+  {
+    return $"{heightInMeters:N0}";
+  }
+
+  public static string MetersToScaledDistanceString(double heightInMeters, int decimalPlaces = 0)
+  {
+    if (heightInMeters < 1e3)
     {
-        ActiveVessel = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
-        CurrentNode = ActiveVessel != null ? GameManager.Instance?.Game?.SpaceSimulation.Maneuvers.GetNodesForVessel(ActiveVessel.GlobalId).FirstOrDefault(): null;
+      return $"{{heightInMeters:N{decimalPlaces}}} m";
+    }
+    else if (heightInMeters < 1e6)
+    {
+      return $"{{heightInMeters / 1e3:N{decimalPlaces}}} km";
+    }
+    else if (heightInMeters < 1e9)
+    {
+      return $"{{heightInMeters / 1e6:N{decimalPlaces}}} Mm";
+    }
+    else
+    {
+      return $"{{heightInMeters / 1e9:N{decimalPlaces}}} Gm";
+    }
+  }
+
+  public static string SecondsToTimeString(double seconds, bool addSpacing = true, bool returnLastUnit = false, bool omitFractionalSeconds = false)
+  {
+    if (seconds == double.PositiveInfinity)
+    {
+      return "∞";
+    }
+    else if (seconds == double.NegativeInfinity)
+    {
+      return "-∞";
     }
 
-    public static void RefreshGameManager()
+    double _cap = Math.Floor(seconds);
+
+    string _result = "";
+    string _spacing = "";
+    if (addSpacing)
     {
-        GameState = GameManager.Instance?.Game?.GlobalGameState?.GetGameState();
-        // MessageCenter = GameManager.Instance?.Game?.Messages;
+      _spacing = " ";
     }
 
-    //public static void RefreshStagesOAB()
-    //{
-    //    VesselDeltaVComponentOAB = GameManager.Instance?.Game?.OAB?.Current?.Stats?.MainAssembly?.VesselDeltaV;
-    //}
-
-    //public static string DegreesToDMS(double degreeD)
-    //{
-    //    var ts = TimeSpan.FromHours(Math.Abs(degreeD));
-    //    int degrees = (int)Math.Floor(ts.TotalHours);
-    //    int _minutes = ts.Minutes;
-    //    int seconds = ts.Seconds;
-
-    //    string _result = $"{degrees:N0}<color={Styles.UnitColorHex}>°</color> {_minutes:00}<color={Styles.UnitColorHex}>'</color> {seconds:00}<color={Styles.UnitColorHex}>\"</color>";
-
-    //    return _result;
-    //}
-
-    public static string MetersToDistanceString(double heightInMeters)
+    if (seconds < 0)
     {
-        return $"{heightInMeters:N0}";
+      _result += "-";
+      seconds = Math.Abs(seconds);
     }
 
-    public static string SecondsToTimeString(double seconds, bool addSpacing = true, bool returnLastUnit = false, bool omitFractionalSeconds = false)
+    int _secPerYear = 21600 * 426 + 32 * 60;
+    int _years = (int)(_cap / _secPerYear);
+    int _days = (int)((_cap - (_years * _secPerYear)) / 21600);
+    int _hours = (int)((_cap - (_days * 21600) - (_years * _secPerYear)) / 3600);
+    int _minutes = (int)((_cap - (_hours * 3600) - (_days * 21600) - (_years * _secPerYear)) / 60);
+    double _secs = (seconds - (_years * _secPerYear) - (_days * 21600) - (_hours * 3600) - (_minutes * 60));
+
+    if (_years > 0)
     {
-        if (seconds == double.PositiveInfinity)
-        {
-            return "∞";
-        }
-        else if (seconds == double.NegativeInfinity)
-        {
-            return "-∞";
-        }
-
-        double _cap = Math.Floor(seconds);
-
-        string _result = "";
-        string _spacing = "";
-        if (addSpacing)
-        {
-            _spacing = " ";
-        }
-
-        if (seconds < 0)
-        {
-            _result += "-";
-            seconds = Math.Abs(seconds);
-        }
-
-        int _secPerYear = 21600 * 426 + 32 * 60;
-        int _years = (int)(_cap / _secPerYear);
-        int _days = (int)((_cap - (_years * _secPerYear)) / 21600);
-        int _hours = (int)((_cap - (_days * 21600) - (_years * _secPerYear)) / 3600);
-        int _minutes = (int)((_cap - (_hours * 3600) - (_days * 21600) - (_years * _secPerYear)) / 60);
-        double _secs = (seconds - (_years * _secPerYear) - (_days * 21600) - (_hours * 3600) - (_minutes * 60));
-
-        if (_years > 0)
-        {
-            _result += $"{_years}{_spacing}y ";
-        }
-
-        if (_days > 0)
-        {
-            _result += $"{_days}{_spacing}d ";
-        }
-
-        if (_hours > 0 || _days > 0)
-        {
-            {
-                _result += $"{_hours}:";
-            }
-        }
-
-        if (_minutes > 0 || _hours > 0 || _days > 0)
-        {
-            if (_hours > 0 || _days > 0)
-            {
-                _result += $"{_minutes:00.}:";
-            }
-            else
-            {
-                _result += $"{_minutes}:";
-            }
-        }
-
-        if (_minutes > 0 || _hours > 0 || _days > 0)
-        {
-            if (omitFractionalSeconds)
-                _result += returnLastUnit ? $"{_secs:00}{_spacing}" : $"{_secs:00}";
-            else
-                _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
-        }
-        else
-        {
-            if (omitFractionalSeconds)
-                _result += returnLastUnit ? $"{_secs:00}{_spacing}" : $"{_secs:00}";
-            else
-                _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
-        }
-
-        return _result;
+      _result += $"{_years}{_spacing}y ";
     }
 
-    //public static string SituationToString(VesselSituations situation)
-    //{
-    //    return situation switch
-    //    {
-    //        VesselSituations.PreLaunch => "Pre-Launch",
-    //        VesselSituations.Landed => "Landed",
-    //        VesselSituations.Splashed => "Splashed down",
-    //        VesselSituations.Flying => "Flying",
-    //        VesselSituations.SubOrbital => "Suborbital",
-    //        VesselSituations.Orbiting => "Orbiting",
-    //        VesselSituations.Escaping => "Escaping",
-    //        _ => "UNKNOWN",
-    //    };
-    //}
-
-    //public static string BiomeToString(BiomeSurfaceData biome)
-    //{
-    //    string _result = biome.type.ToString().ToLower().Replace('_', ' ');
-    //    return _result.Substring(0, 1).ToUpper() + _result.Substring(1);
-    //}
-
-    /// <summary>
-	/// Validates if user entered a 3 character string
-	/// </summary>
-	/// <param name="abbreviation">String that will be shortened to 3 characters</param>
-	/// <returns>Uppercase string shortened to 3 characters. If abbreviation is empty returns "CUS"</returns>
-	// public static string ValidateAbbreviation(string abbreviation)
-    // {
-    //     if (String.IsNullOrEmpty(abbreviation))
-    //         return "CUS";
-    //     return abbreviation.Substring(0, Math.Min(abbreviation.Length, 3)).ToUpperInvariant();
-    // }
-
-    /// <summary>
-    /// Check if current vessel has an active target (celestial body or vessel)
-    /// </summary>
-    /// <returns></returns>
-    public static bool TargetExists()
+    if (_days > 0)
     {
-        try { return (ActiveVessel.TargetObject != null); }
-        catch { return false; }
+      _result += $"{_days}{_spacing}d ";
     }
 
-    /// <summary>
-    /// Checks if current vessel has a maneuver
-    /// </summary>
-    /// <returns></returns>
-    public static bool ManeuverExists()
+    if (_hours > 0 || _days > 0)
     {
-        try { return (GameManager.Instance?.Game?.SpaceSimulation.Maneuvers.GetNodesForVessel(ActiveVessel.GlobalId).FirstOrDefault() != null); }
-        catch { return false; }
+      {
+        _result += $"{_hours}:";
+      }
     }
 
-
-    internal static (int major, int minor, int patch)? GetModVersion(string modId)
+    if (_minutes > 0 || _hours > 0 || _days > 0)
     {
-        BaseSpaceWarpPlugin _plugin = Chainloader.Plugins?.OfType<BaseSpaceWarpPlugin>().ToList().FirstOrDefault(p => p.SpaceWarpMetadata.ModID.ToLowerInvariant() == modId.ToLowerInvariant());
-        string _versionString = _plugin?.SpaceWarpMetadata?.Version;
-
-        string[] _versionNumbers = _versionString?.Split(new char[] { '.' }, 3);
-
-        if (_versionNumbers != null && _versionNumbers.Length >= 1)
-        {
-            int _majorVersion = 0;
-            int _minorVersion = 0;
-            int _patchVersion = 0;
-
-            if (_versionNumbers.Length >= 1)
-                int.TryParse(_versionNumbers[0], out _majorVersion);
-            if (_versionNumbers.Length >= 2)
-                int.TryParse(_versionNumbers[1], out _minorVersion);
-            if (_versionNumbers.Length == 3)
-                int.TryParse(_versionNumbers[2], out _patchVersion);
-
-            Logger.LogInfo($"Space Warp version {_majorVersion}.{_minorVersion}.{_patchVersion} detected.");
-
-            return (_majorVersion, _minorVersion, _patchVersion);
-        }
-        else return null;
+      if (_hours > 0 || _days > 0)
+      {
+        _result += $"{_minutes:00.}:";
+      }
+      else
+      {
+        _result += $"{_minutes}:";
+      }
     }
 
-    /// <summary>
-    /// Check if installed mod is older than the specified version
-    /// </summary>
-    /// <param name="modId">SpaceWarp mod ID</param>
-    /// <param name="major">Specified major version (X.0.0)</param>
-    /// <param name="minor">Specified minor version (0.X.0)</param>
-    /// <param name="patch">Specified patch version (0.0.X)</param>
-    /// <returns>True = installed mod is older. False = installed mod has the same version or it's newer or version isn't declared or version declared is gibberish that cannot be parsed</returns>
-    internal static bool IsModOlderThan (string modId, int major, int minor, int patch)
+    if (_minutes > 0 || _hours > 0 || _days > 0)
     {
-        var _modVersion = GetModVersion(modId);
-
-        if (!_modVersion.HasValue || _modVersion.Value == (0, 0, 0))
-            return false;
-
-        if (_modVersion.Value.Item1 < major)
-            return true;
-        else if (_modVersion.Value.Item1 > major)
-            return false;
-
-        if (_modVersion.Value.Item2 < minor)
-            return true;
-        else if (_modVersion.Value.Item2 > minor)
-            return false;
-
-        if (_modVersion.Value.Item3 < patch)
-            return true;
-        else
-            return false;
+      if (omitFractionalSeconds)
+        _result += returnLastUnit ? $"{_secs:00}{_spacing}" : $"{_secs:00}";
+      else
+        _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
     }
+    else
+    {
+      if (omitFractionalSeconds)
+        _result += returnLastUnit ? $"{_secs:00}{_spacing}" : $"{_secs:00}";
+      else
+        _result += returnLastUnit ? $"{_secs:00.00}{_spacing}" : $"{_secs:00.00}";
+    }
+
+    return _result;
+  }
+
+  //public static string SituationToString(VesselSituations situation)
+  //{
+  //    return situation switch
+  //    {
+  //        VesselSituations.PreLaunch => "Pre-Launch",
+  //        VesselSituations.Landed => "Landed",
+  //        VesselSituations.Splashed => "Splashed down",
+  //        VesselSituations.Flying => "Flying",
+  //        VesselSituations.SubOrbital => "Suborbital",
+  //        VesselSituations.Orbiting => "Orbiting",
+  //        VesselSituations.Escaping => "Escaping",
+  //        _ => "UNKNOWN",
+  //    };
+  //}
+
+  //public static string BiomeToString(BiomeSurfaceData biome)
+  //{
+  //    string _result = biome.type.ToString().ToLower().Replace('_', ' ');
+  //    return _result.Substring(0, 1).ToUpper() + _result.Substring(1);
+  //}
+
+  /// <summary>
+  /// Validates if user entered a 3 character string
+  /// </summary>
+  /// <param name="abbreviation">String that will be shortened to 3 characters</param>
+  /// <returns>Uppercase string shortened to 3 characters. If abbreviation is empty returns "CUS"</returns>
+  // public static string ValidateAbbreviation(string abbreviation)
+  // {
+  //     if (String.IsNullOrEmpty(abbreviation))
+  //         return "CUS";
+  //     return abbreviation.Substring(0, Math.Min(abbreviation.Length, 3)).ToUpperInvariant();
+  // }
+
+  /// <summary>
+  /// Check if current vessel has an active target (celestial body or vessel)
+  /// </summary>
+  /// <returns></returns>
+  public static bool TargetExists()
+  {
+    try { return (ActiveVessel.TargetObject != null); }
+    catch { return false; }
+  }
+
+  /// <summary>
+  /// Checks if current vessel has a maneuver
+  /// </summary>
+  /// <returns></returns>
+  public static bool ManeuverExists()
+  {
+    try { return (GameManager.Instance?.Game?.SpaceSimulation.Maneuvers.GetNodesForVessel(ActiveVessel.GlobalId).FirstOrDefault() != null); }
+    catch { return false; }
+  }
+
+
+  internal static (int major, int minor, int patch)? GetModVersion(string modId)
+  {
+    BaseSpaceWarpPlugin _plugin = Chainloader.Plugins?.OfType<BaseSpaceWarpPlugin>().ToList().FirstOrDefault(p => p.SpaceWarpMetadata.ModID.ToLowerInvariant() == modId.ToLowerInvariant());
+    string _versionString = _plugin?.SpaceWarpMetadata?.Version;
+
+    string[] _versionNumbers = _versionString?.Split(new char[] { '.' }, 3);
+
+    if (_versionNumbers != null && _versionNumbers.Length >= 1)
+    {
+      int _majorVersion = 0;
+      int _minorVersion = 0;
+      int _patchVersion = 0;
+
+      if (_versionNumbers.Length >= 1)
+        int.TryParse(_versionNumbers[0], out _majorVersion);
+      if (_versionNumbers.Length >= 2)
+        int.TryParse(_versionNumbers[1], out _minorVersion);
+      if (_versionNumbers.Length == 3)
+        int.TryParse(_versionNumbers[2], out _patchVersion);
+
+      Logger.LogInfo($"Space Warp version {_majorVersion}.{_minorVersion}.{_patchVersion} detected.");
+
+      return (_majorVersion, _minorVersion, _patchVersion);
+    }
+    else return null;
+  }
+
+  /// <summary>
+  /// Check if installed mod is older than the specified version
+  /// </summary>
+  /// <param name="modId">SpaceWarp mod ID</param>
+  /// <param name="major">Specified major version (X.0.0)</param>
+  /// <param name="minor">Specified minor version (0.X.0)</param>
+  /// <param name="patch">Specified patch version (0.0.X)</param>
+  /// <returns>True = installed mod is older. False = installed mod has the same version or it's newer or version isn't declared or version declared is gibberish that cannot be parsed</returns>
+  internal static bool IsModOlderThan(string modId, int major, int minor, int patch)
+  {
+    var _modVersion = GetModVersion(modId);
+
+    if (!_modVersion.HasValue || _modVersion.Value == (0, 0, 0))
+      return false;
+
+    if (_modVersion.Value.Item1 < major)
+      return true;
+    else if (_modVersion.Value.Item1 > major)
+      return false;
+
+    if (_modVersion.Value.Item2 < minor)
+      return true;
+    else if (_modVersion.Value.Item2 > minor)
+      return false;
+
+    if (_modVersion.Value.Item3 < patch)
+      return true;
+    else
+      return false;
+  }
 }

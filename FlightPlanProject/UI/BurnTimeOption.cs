@@ -25,45 +25,49 @@ internal class BurnTimeOption
   // Time references for BurnTimeOption.selected
   public readonly static Dictionary<TimeRef, string> TextTimeRef = new()
     {
-        { TimeRef.None,              ""                         },
-        { TimeRef.COMPUTED,          "at optimum time"          }, //at the optimum time
-        { TimeRef.APOAPSIS,          "at next apoapsis"         }, //"at the next apoapsis"
-        { TimeRef.PERIAPSIS,         "at next periapsis"        }, //"at the next periapsis"
-        { TimeRef.CLOSEST_APPROACH,  "at closest approach"      }, //"at closest approach to target"
-        { TimeRef.EQ_ASCENDING,      "at equatorial AN"         }, //"at the equatorial AN"
-        { TimeRef.EQ_DESCENDING,     "at equatorial DN"         }, //"at the equatorial DN"
-        { TimeRef.REL_ASCENDING,     "at next AN with target"   }, //"at the next AN with the target."
-        { TimeRef.REL_DESCENDING,    "at next DN with target"   }, //"at the next DN with the target."
-        { TimeRef.X_FROM_NOW,        "after a fixed time"       }, //"after a fixed time"
-        { TimeRef.ALTITUDE,          "at an altitude"           }, //"at an altitude"
-        { TimeRef.EQ_NEAREST_AD,     "at nearest Eq. AN/DN"     }, //"at the nearest equatorial AN/DN"
-        { TimeRef.EQ_HIGHEST_AD,     "at cheapest Eq. AN/DN"    }, //"at the cheapest equatorial AN/DN"
-        { TimeRef.REL_NEAREST_AD,    "at nearest AN/DN w/Target"  }, //"at the nearest AN/DN with the target"
-        { TimeRef.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target" }, //"at the cheapest AN/DN with the target"
-        { TimeRef.LIMITED_TIME,      "Limited Time"             }, //"at the cheapest AN/DN with the target"
-        { TimeRef.PORKCHOP,          "Porkchop Selection"       } //"at the cheapest AN/DN with the target"
+        { TimeRef.None,              ""                            },
+        { TimeRef.COMPUTED,          "at optimum time"             },
+        { TimeRef.APOAPSIS,          "at next apoapsis"            },
+        { TimeRef.PERIAPSIS,         "at next periapsis"           },
+        { TimeRef.CLOSEST_APPROACH,  "at closest approach"         },
+        { TimeRef.EQ_ASCENDING,      "at equatorial AN"            },
+        { TimeRef.EQ_DESCENDING,     "at equatorial DN"            },
+        { TimeRef.REL_ASCENDING,     "at next AN with target"      },
+        { TimeRef.REL_DESCENDING,    "at next DN with target"      },
+        { TimeRef.X_FROM_NOW,        "after a fixed time"          },
+        { TimeRef.ALTITUDE,          "at an altitude"              },
+        { TimeRef.EQ_NEAREST_AD,     "at nearest Eq. AN/DN"        },
+        { TimeRef.EQ_HIGHEST_AD,     "at cheapest Eq. AN/DN"       },
+        { TimeRef.REL_NEAREST_AD,    "at nearest AN/DN w/Target"   },
+        { TimeRef.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target"  },
+        { TimeRef.LIMITED_TIME,      "Limited Time"                },
+        { TimeRef.PORKCHOP,          "Porkchop Selection"          },
+        { TimeRef.NEXT_WINDOW,       "at the next transfer window" }, 
+        { TimeRef.ASAP,              "as soon as possible"         }
     };
 
   // Inverse dictionary for Time references froom BurnTimeOption.selected
   public readonly static Dictionary<string, TimeRef> ValTimeRef = new()
     {
-        { "",                           TimeRef.None              },
-        { "at optimum time",            TimeRef.COMPUTED          }, //at the optimum time
-        { "at next apoapsis",           TimeRef.APOAPSIS          }, //"at the next apoapsis"
-        { "at next periapsis",          TimeRef.PERIAPSIS         }, //"at the next periapsis"
-        { "at closest approach",        TimeRef.CLOSEST_APPROACH  }, //"at closest approach to target"
-        { "at equatorial AN",           TimeRef.EQ_ASCENDING      }, //"at the equatorial AN"
-        { "at equatorial DN",           TimeRef.EQ_DESCENDING     }, //"at the equatorial DN"
-        { "at next AN with target",     TimeRef.REL_ASCENDING     }, //"at the next AN with the target."
-        { "at next DN with target",     TimeRef.REL_DESCENDING    }, //"at the next DN with the target."
-        { "after a fixed time",         TimeRef.X_FROM_NOW        }, //"after a fixed time"
-        { "at an altitude",             TimeRef.ALTITUDE          }, //"at an altitude"
-        { "at nearest Eq. AN/DN",       TimeRef.EQ_NEAREST_AD     }, //"at the nearest equatorial AN/DN"
-        { "at cheapest Eq. AN/DN",      TimeRef.EQ_HIGHEST_AD     }, //"at the cheapest equatorial AN/DN"
-        { "at nearest AN/DN w/Target",  TimeRef.REL_NEAREST_AD    }, //"at the nearest AN/DN with the target"
-        { "at cheapest AN/DN w/Target", TimeRef.REL_HIGHEST_AD    }, //"at the cheapest AN/DN with the target"
-        { "Limited Time",               TimeRef.LIMITED_TIME      }, //"at the cheapest AN/DN with the target"
-        { "Porkchop Selection",         TimeRef.PORKCHOP          } //"at the cheapest AN/DN with the target"
+        { "",                            TimeRef.None              },
+        { "at optimum time",             TimeRef.COMPUTED          },
+        { "at next apoapsis",            TimeRef.APOAPSIS          },
+        { "at next periapsis",           TimeRef.PERIAPSIS         },
+        { "at closest approach",         TimeRef.CLOSEST_APPROACH  },
+        { "at equatorial AN",            TimeRef.EQ_ASCENDING      },
+        { "at equatorial DN",            TimeRef.EQ_DESCENDING     },
+        { "at next AN with target",      TimeRef.REL_ASCENDING     },
+        { "at next DN with target",      TimeRef.REL_DESCENDING    },
+        { "after a fixed time",          TimeRef.X_FROM_NOW        },
+        { "at an altitude",              TimeRef.ALTITUDE          },
+        { "at nearest Eq. AN/DN",        TimeRef.EQ_NEAREST_AD     },
+        { "at cheapest Eq. AN/DN",       TimeRef.EQ_HIGHEST_AD     },
+        { "at nearest AN/DN w/Target",   TimeRef.REL_NEAREST_AD    },
+        { "at cheapest AN/DN w/Target",  TimeRef.REL_HIGHEST_AD    },
+        { "Limited Time",                TimeRef.LIMITED_TIME      },
+        { "Porkchop Selection",          TimeRef.PORKCHOP          },
+        { "at the next transfer window", TimeRef.NEXT_WINDOW       },
+        { "as soon as possible",         TimeRef.ASAP              }
     };
 
   public List<TimeRef> Options = new List<TimeRef>();
@@ -152,7 +156,6 @@ internal class BurnTimeOption
         break;
       case TimeRef.COMPUTED:
         RequestedBurnTime = -1; // for optimal time the burn time is computed and returned from the OrbitalManeuverCalculator method called.
-
         break;
       case TimeRef.APOAPSIS:
         RequestedBurnTime = Orbit.NextApoapsisTime(UT);
