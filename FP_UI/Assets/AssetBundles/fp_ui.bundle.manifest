@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 273890781
+CRC: 3191579830
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c7d45856a1f4ddd06c48ec0c05722fa5
+    Hash: 97b66936d76bf29e84b3d5a98077742a
   TypeTreeHash:
     serializedVersion: 2
     Hash: 572c8ac3a70fc5d90bb727c78bf00d40
@@ -71,28 +71,44 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/UI Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss
 - Assets/Icons/icon_white_50.png
+- Assets/AssetBundles/AssetBundles.manifest
+- Assets/Theme/Fonts/Orbitron Bold SDF.asset
+- Assets/FlightPlanTheme.uss
+- Assets/Icons/Tab_On_Active.png
+- Assets/Icons/OSM_50.png
+- Assets/Theme/Fonts/Orbitron Black SDF.asset
+- Assets/Theme/Fonts/LiberationSans-Regular.ttf
+- Assets/Icons/OTM_50_Planet.png
+- Assets/Theme/Fonts/Orbitron Medium SDF.asset
+- Assets/Theme/Fonts/Orbitron Light SDF.asset
+- Assets/Theme/Fonts/Orbitron Light.ttf
+- Assets/Theme/Fonts/Orbitron Bold.ttf
+- Assets/Theme/Fonts/LiberationSans-Italic SDF.asset
+- Assets/Icons/Cross.png
+- Assets/Icons/Planet2_white_50.png
+- Assets/Theme/Fonts/LiberationSans-Bold.ttf
+- Assets/Theme/Fonts/LiberationSans-Bold SDF.asset
+- Assets/Icons/ROM_50.png
 - Assets/Icons/Station_50.png
 - Assets/FP_UI.uxml
 - Assets/Icons/gear.png
 - Assets/Icons/Tab_On_normal.png
-- Assets/AssetBundles/AssetBundles.manifest
+- Assets/Theme/Fonts/Orbitron Medium.ttf
 - Assets/AssetBundles/kerbalui.manifest
-- Assets/FlightPlanTheme.uss
+- Assets/Theme/Fonts/LiberationSans-Regular SDF.asset
 - Assets/Icons/OrbitIcon.psd
-- Assets/Icons/OSM_50.png
 - Assets/Icons/TRM_50_Ship2Celestial.png
-- Assets/Icons/Tab_On_Active.png
-- Assets/Icons/OTM_50_Planet.png
+- Assets/Theme/Fonts/LiberationSans-Italic.ttf
+- Assets/Theme/Fonts/LiberationSans-BoldItalic SDF.asset
+- Assets/Theme/Fonts/Orbitron Black.ttf
 - Assets/Icons/Orbit.png
+- Assets/Theme/Fonts/LiberationSans-BoldItalic.ttf
 - Assets/Icons/Tab_On_hover.png
 - Assets/Icons/TRM_50_Ship2Ship.png
 - Assets/Icons/k2d2_big_icon.png
 - Assets/Icons/OTM_50_Moon.png
 - Assets/Icons/icon.png
 - Assets/AssetBundles/fp_ui.bundle.manifest
-- Assets/Icons/Cross.png
 - Assets/Theme/KerbalUI.uss
-- Assets/Icons/Planet2_white_50.png
-- Assets/Icons/ROM_50.png
 Dependencies:
 - C:/KSP2Mods/FlightPlan/FP_UI/Assets/AssetBundles/kerbalui
