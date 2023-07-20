@@ -18,20 +18,20 @@
     {
       "id": "UitkForKsp2",
       "version": {
-        "min": "1.2.0",
+        "min": "1.4.0",
         "max": "*"
       }
     },
     {
       "id": "NodeManager",
       "version": {
-        "min": "0.5.5",
+        "min": "0.5.8",
         "max": "*"
       }
     }
   ],
   "ksp2_version": {
-    "min": "0.1.2",
+    "min": "0.1.3",
     "max": "*"
   }
 }
