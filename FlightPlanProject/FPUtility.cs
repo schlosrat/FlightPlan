@@ -61,22 +61,25 @@ public static class FPUtility
 
   public static string MetersToScaledDistanceString(double heightInMeters, int decimalPlaces = 0)
   {
+    string distance;
+    string formatString = string.Concat("{0:N", decimalPlaces, "}");
     if (heightInMeters < 1e3)
     {
-      return $"{{heightInMeters:N{decimalPlaces}}} m";
+      distance = string.Format(formatString, heightInMeters) + " m";
     }
     else if (heightInMeters < 1e6)
     {
-      return $"{{heightInMeters / 1e3:N{decimalPlaces}}} km";
-    }
+      distance = string.Format(formatString, heightInMeters/1e3) + " km";
+     }
     else if (heightInMeters < 1e9)
     {
-      return $"{{heightInMeters / 1e6:N{decimalPlaces}}} Mm";
+      distance = string.Format(formatString, heightInMeters/1e6) + " Mm";
     }
     else
     {
-      return $"{{heightInMeters / 1e9:N{decimalPlaces}}} Gm";
+      distance = string.Format(formatString, heightInMeters/1e9) + " Gm";
     }
+    return distance;
   }
 
   public static string SecondsToTimeString(double seconds, bool addSpacing = true, bool returnLastUnit = false, bool omitFractionalSeconds = false)
