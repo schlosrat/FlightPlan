@@ -4,8 +4,11 @@
     visibility: visible;
     overflow: visible;
     opacity: 1;
-    color: rgb(255, 255, 255);
+    color: rgb(216, 218, 221);
     margin-left: 4px;
+    font-size: 16px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+    -unity-text-align: middle-left;
 }
 
 .row-element-tight {
@@ -16,9 +19,10 @@
     margin-left: 4px;
     margin-right: 4px;
     -unity-text-align: middle-left;
-    font-size: 13px;
+    font-size: 16px;
     margin-top: 0;
     margin-bottom: 0;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
 }
 
 .row-element-lose {
@@ -29,17 +33,20 @@
     -unity-font-style: normal;
     margin-left: 4px;
     margin-right: 4px;
-    font-size: 14px;
+    font-size: 16px;
     height: 25px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
 }
 
 .header-item {
     width: 20px;
     height: 20px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
 }
 
 .value-label {
     color: rgb(153, 178, 255);
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
 }
 
 .unity-button {
@@ -65,6 +72,8 @@
     margin-right: 4px;
     margin-top: 2px;
     margin-bottom: 2px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+    font-size: 16px;
 }
 
 .small-button {
@@ -93,6 +102,7 @@
     margin-right: 4px;
     margin-top: 2px;
     margin-bottom: 2px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
 }
 
 .units-label {
@@ -135,6 +145,7 @@
     flex-grow: 1;
     padding-top: 0;
     padding-bottom: 0;
+    font-size: 14px;
 }
 
 #HorizontalSpace {
@@ -157,7 +168,7 @@
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     color: rgb(255, 255, 255);
-    font-size: 12px;
+    font-size: 14px;
     padding-left: 2px;
     padding-right: 2px;
     padding-top: 2px;
@@ -229,7 +240,7 @@
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     color: rgb(255, 255, 255);
-    font-size: 12px;
+    font-size: 14px;
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
@@ -242,8 +253,6 @@
     width: 100px;
     -unity-text-align: middle-center;
     min-width: 80px;
-    -unity-font: resource('Fonts/RobotoMono/RobotoMono-Regular');
-    -unity-font-definition: resource('Fonts/RobotoMono/RobotoMono-Regular SDF');
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -274,7 +283,6 @@
     -unity-font-style: normal;
     margin-left: 4px;
     margin-right: 4px;
-    font-size: 14px;
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
@@ -302,10 +310,10 @@
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     height: 56px;
-    border-left-color: rgb(105, 109, 255);
-    border-right-color: rgb(105, 109, 255);
-    border-top-color: rgb(105, 109, 255);
-    border-bottom-color: rgb(105, 109, 255);
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -327,7 +335,6 @@
 }
 
 #PanelLabel {
-    -unity-font-definition: url('/Assets/Theme/Fonts/JetBrainsMono-Bold SDF.asset');
 }
 
 .Maneuver-button {
@@ -336,10 +343,10 @@
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     height: 25px;
-    border-left-color: rgb(105, 109, 255);
-    border-right-color: rgb(105, 109, 255);
-    border-top-color: rgb(105, 109, 255);
-    border-bottom-color: rgb(105, 109, 255);
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -370,10 +377,10 @@ Dropdown > .unity-base-field__label {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     height: 56px;
-    border-left-color: rgb(105, 109, 255);
-    border-right-color: rgb(105, 109, 255);
-    border-top-color: rgb(105, 109, 255);
-    border-bottom-color: rgb(105, 109, 255);
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -419,10 +426,10 @@ Dropdown > .unity-base-field__label {
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-left-color: rgb(105, 109, 255);
-    border-right-color: rgb(105, 109, 255);
-    border-top-color: rgb(105, 109, 255);
-    border-bottom-color: rgb(105, 109, 255);
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
     width: 18px;
     background-color: rgb(38, 35, 41);
     justify-content: center;
@@ -505,7 +512,7 @@ Dropdown > .unity-base-field__label {
 }
 
 .unity-base-dropdown__item > .unity-base-dropdown__label {
-    font-size: 12px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
 }
 
 .unity-base-field {
@@ -534,4 +541,8 @@ Dropdown > .unity-base-field__label {
     border-bottom-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
+}
+
+.unity-base-dropdown__arrow {
+    display: none;
 }

@@ -1,11 +1,13 @@
 ﻿// #define DEBUG
 
 using FlightPlan;
+using FPUtilities;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
 using MechJebLib.Core;
 using MechJebLib.Primitives;
+using NodeManager;
 
 namespace MuMech
 {
@@ -239,8 +241,8 @@ namespace MuMech
             {
                 // Dispatcher.InvokeAsync(() =>
                 //{
-                    // FlightPlanPlugin.Logger.LogDebug($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
-                    FlightPlanPlugin.Logger.LogDebug($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
+                // FlightPlanPlugin.Logger.LogDebug($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
+                FlightPlanPlugin.Logger.LogDebug($"[MechJeb TransferCalculator] BUG mu = {initialOrbit.referenceBody.gravParameter} r0 = {r0} v0 = {v0} vinf = {exitVelocity}");
                 //} );
             }
 
@@ -420,7 +422,10 @@ namespace MuMech
             {
                 bool failed = false;
 
+                FlightPlanPlugin.Logger.LogInfo("Calling CalcLambertDVs");
                 CalcLambertDVs(utTransfer, utArrival - utTransfer, out Vector3d exitDV, out Vector3d _);
+
+                FlightPlanPlugin.Logger.LogInfo($"utTransfer = {utTransfer}, exitDV = [{exitDV.x}, {exitDV.y}, {exitDV.z}]");
 
                 PatchedConicsOrbit source = initialOrbit.referenceBody.Orbit; // helicentric orbit of the source planet
 
@@ -428,8 +433,10 @@ namespace MuMech
                 var transferOrbit = new PatchedConicsOrbit(Game.UniverseModel);
                 Position position = new Position(source.referenceBody.SimulationObject.transform.celestialFrame, source.GetRelativePositionAtUT(utTransfer));
                 Velocity velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.GetOrbitalVelocityAtUTZup(utTransfer) + exitDV); // was: exitDV.SwapYAndZ
+                FlightPlanPlugin.Logger.LogInfo($"Calling transferOrbit.UpdateFromStateVectors");
                 transferOrbit.UpdateFromStateVectors(position, velocity, source.referenceBody, utTransfer);
 
+                FlightPlanPlugin.Logger.LogInfo($"Calling SOI_intercept");
                 OrbitalManeuverCalculator.SOI_intercept(transferOrbit, initialOrbit.referenceBody, utTransfer, utArrival, out double utSoiExit);
 
                 // convert from heliocentric to body centered velocity
@@ -446,18 +453,34 @@ namespace MuMech
 
                 // using Vsoi seems to work slightly better here than the Vinf from the heliocentric computation at UT_Transfer
                 //ManeuverParameters maneuver = ComputeEjectionManeuver(Vsoi, initial_orbit, UT_transfer, true);
+                FlightPlanPlugin.Logger.LogInfo($"Calling ComputeEjectionManeuver");
                 ManeuverParameters maneuver = ComputeEjectionManeuver(vinf, initialOrbit, utTransfer);
+
+                FlightPlanPlugin.Logger.LogInfo($"maneuver.UT = {maneuver.UT}, maneuver.dV = [{maneuver.dV.x:N3}, {maneuver.dV.y:N3}, {maneuver.dV.z:N3}] = {maneuver.dV.magnitude} m/s");
 
                 // the arrival time plus a bit extra
                 double extraArrival = maneuver.UT + (utArrival - maneuver.UT) * 1.1;
 
+                // Fuck it. Make a node here and let's see just how good or bad it really is
+                Vector3d burnVec = _initialOrbit.DeltaVToManeuverNodeCoordinates(maneuver.UT, maneuver.dV);
+                FlightPlanPlugin.Logger.LogInfo($"burnVec: [{burnVec.x:N3}, {burnVec.y:N3}, {burnVec.z:N3}] = {burnVec.magnitude}");
+                FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(maneuver.UT - Game.UniverseModel.UniversalTime)} from now");
+                var pass = NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnVec, maneuver.UT, -0.5);
+                if (!pass)
+                {
+                    FlightPlanPlugin.Logger.LogInfo($"Houston, we have a problem...");
+                }
+                nodeList.Add(maneuver);
+                return nodeList;
+
                 // check to see if we're in the SOI
+                FlightPlanPlugin.Logger.LogInfo($"Calling PatchedConicInterceptBody");
                 OrbitalManeuverCalculator.PatchedConicInterceptBody(_initialOrbit, _targetBody, maneuver.dV, maneuver.UT, extraArrival,
                     out PatchedConicsOrbit orbit2);
 
                 if (orbit2.referenceBody != _targetBody)
                 {
-                    FlightPlanPlugin.Logger.LogInfo("Transfer calculator:  analytic solution does not intersect SOI, doing some expensive thinking to move it closer...");
+                    FlightPlanPlugin.Logger.LogInfo("Transfer calculator: Analytic solution does not intersect SOI, doing some expensive thinking to move it closer...");
                     // update the maneuver and arrival times to move into the SOI
                     FindSOI(maneuver, ref utArrival);
                 }

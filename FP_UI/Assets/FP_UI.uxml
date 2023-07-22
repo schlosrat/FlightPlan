@@ -1,18 +1,18 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="FlightPlanTheme.uss" />
-    <ui:VisualElement name="GUIFrame" style="width: 350px; height: auto; background-color: rgb(0, 0, 0); border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; -unity-background-image-tint-color: rgb(0, 0, 0); border-left-color: rgb(105, 109, 255); border-right-color: rgb(105, 109, 255); border-top-color: rgb(105, 109, 255); border-bottom-color: rgb(105, 109, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; max-height: 975px; min-height: 350px; -unity-font-definition: url(&apos;/Assets/Theme/Fonts/JetBrainsMono-Regular SDF.asset&apos;);">
-        <ui:VisualElement name="Title" class="row-element-lose">
-            <ui:VisualElement name="IconBox" style="justify-content: space-around; width: 30px; flex-direction: column; align-items: center;">
+    <ui:VisualElement name="GUIFrame" style="width: 350px; height: auto; background-color: rgb(0, 0, 0); border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; -unity-background-image-tint-color: rgb(0, 0, 0); border-left-color: rgb(76, 79, 188); border-right-color: rgb(76, 79, 188); border-top-color: rgb(76, 79, 188); border-bottom-color: rgb(76, 79, 188); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; max-height: 975px; min-height: 350px; font-size: 16px; -unity-font: url(&apos;/Assets/Theme/Fonts/LiberationSans-Regular.ttf&apos;); -unity-font-definition: resource(&apos;&apos;);">
+        <ui:VisualElement name="Title" class="row-element-lose" style="height: 28px;">
+            <ui:VisualElement name="IconBox" style="justify-content: space-around; width: 27px; flex-direction: column; align-items: center; margin-left: 1px;">
                 <ui:VisualElement name="Icon" class="header-item" style="background-image: url(&apos;/Assets/Icons/icon.png&apos;); -unity-background-scale-mode: scale-and-crop; width: 20px; height: 20px;" />
             </ui:VisualElement>
-            <ui:Label text="FLIGHT PLAN" display-tooltip-when-elided="true" name="Title" style="color: rgb(105, 109, 255); font-size: 22px;" />
+            <ui:Label text="FLIGHT PLAN" display-tooltip-when-elided="true" name="Title" style="margin-left: 0; padding-left: 2px; font-size: 22px; -unity-font: url(&apos;/Assets/Theme/Fonts/Orbitron-Black.ttf&apos;);" />
             <ui:VisualElement name="ButtonBox" style="justify-content: center;">
-                <ui:Button display-tooltip-when-elided="true" name="CloseButton" tooltip="Close Window" class="header-item" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; background-image: none; -unity-background-scale-mode: scale-and-crop; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; border-left-color: rgb(105, 109, 255); border-right-color: rgb(105, 109, 255); border-top-color: rgb(105, 109, 255); border-bottom-color: rgb(105, 109, 255); width: 21px; height: 21px;">
+                <ui:Button display-tooltip-when-elided="true" name="CloseButton" tooltip="Close Window" class="header-item" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; background-image: none; -unity-background-scale-mode: scale-and-crop; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; border-left-color: rgb(76, 79, 188); border-right-color: rgb(76, 79, 188); border-top-color: rgb(76, 79, 188); border-bottom-color: rgb(76, 79, 188); width: 22px; height: 22px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px;">
                     <ui:VisualElement name="CloseButtonIcon" style="background-image: url(&apos;/Assets/Icons/Cross.png&apos;); height: 16px; background-color: rgba(38, 35, 41, 0); border-left-color: rgb(38, 35, 41); border-right-color: rgb(38, 35, 41); border-top-color: rgb(38, 35, 41); border-bottom-color: rgb(38, 35, 41); -unity-background-scale-mode: scale-to-fit;" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="HorizontalLine" style="background-color: rgb(105, 109, 255); height: 1px; padding-left: 4px; padding-right: 4px; margin-left: 4px; margin-right: 4px; margin-top: 1px;" />
+        <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 1px; padding-left: 4px; padding-right: 4px; margin-left: 4px; margin-right: 4px; margin-top: 1px;" />
         <ui:VisualElement name="TopPanel" style="display: flex;">
             <ui:VisualElement name="SituationRow" class="row-element-lose">
                 <ui:Label text="Situation" display-tooltip-when-elided="true" name="Label" style="align-items: center; justify-content: center;" />
@@ -20,7 +20,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="TargetSelectionRow" class="row-element-lose">
                 <ui:Button text="Celestial" display-tooltip-when-elided="true" name="TargetTypeButton" class="Maneuver-button" style="flex-grow: 1; height: 25px; width: 60px;" />
-                <UitkForKsp2.Controls.Dropdown name="TargetSelectionDropdown" choices="&gt;Moho,&gt;Eve, &gt;&gt;Gilly,&gt;Kerbin,&gt;&gt;Mun, &gt;&gt;Minums,&gt;Duna,&gt;&gt;Ike, &gt;Dres, &gt;Jool, &gt;&gt;Lathe, &gt;&gt;Vall, &gt;&gt;Tylo, &gt;&gt;Bop, &gt;&gt;Pol, &gt;Eeloo" index="-1" class="unity-base-dropdown__item" style="flex-grow: 1; color: rgb(0, 85, 255); font-size: 14px; -unity-text-align: middle-left; white-space: nowrap; -unity-font-style: bold;" />
+                <UitkForKsp2.Controls.Dropdown name="TargetSelectionDropdown" choices="&gt;Moho,&gt;Eve, &gt;&gt;Gilly,&gt;Kerbin,&gt;&gt;Mun, &gt;&gt;Minums,&gt;Duna,&gt;&gt;Ike, &gt;Dres, &gt;Jool, &gt;&gt;Lathe, &gt;&gt;Vall, &gt;&gt;Tylo, &gt;&gt;Bop, &gt;&gt;Pol, &gt;Eeloo" index="-1" class="unity-base-dropdown__item" style="flex-grow: 1; font-size: 14px; -unity-text-align: middle-left; white-space: nowrap; -unity-font-style: bold; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />
             </ui:VisualElement>
             <ui:VisualElement name="TabBar" class="row-element-button-bar" style="height: auto; justify-content: space-around; margin-top: 3px; margin-bottom: 3px; width: auto;">
                 <ui:VisualElement name="OSMButtonBox" class="button-box">
@@ -55,11 +55,11 @@
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="HorizontalLine" style="background-color: rgb(105, 109, 255); height: 1px; padding-left: 4px; padding-right: 4px; margin-left: 4px; margin-right: 4px;" />
-        <ui:Label text="Ownship Maneuvers" display-tooltip-when-elided="true" name="PanelLabel" />
+        <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 2px; padding-left: 4px; padding-right: 4px; margin-left: 12px; margin-right: 12px;" />
+        <ui:Label text="Ownship Maneuvers" display-tooltip-when-elided="true" name="PanelLabel" style="-unity-font-style: bold;" />
         <ui:VisualElement name="BurnOptionsRow" class="row-element-lose" style="flex-direction: row; justify-content: space-between;">
             <ui:Label text="Burn Option:" display-tooltip-when-elided="true" style="flex-grow: 1; -unity-text-align: middle-left; width: 80px;" />
-            <UitkForKsp2.Controls.Dropdown index="-1" choices="at cheapest Eq. node,at nearest Eq. node,at equatorial AN,at equatorial DN,after a fixed time" name="BurnOptionsDropdown" class="unity-base-dropdown__item" style="flex-grow: 1; width: 42%;" />
+            <UitkForKsp2.Controls.Dropdown index="-1" choices="at cheapest Eq. node,at nearest Eq. node,at equatorial AN,at equatorial DN,after a fixed time" name="BurnOptionsDropdown" class="unity-base-dropdown__item" style="flex-grow: 1; width: 42%; font-size: 14px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; -unity-text-align: middle-left; white-space: nowrap;" />
         </ui:VisualElement>
         <ui:VisualElement name="HorizontalSpace" />
         <ui:VisualElement name="OSMPanel" style="display: none; width: 100%;">
@@ -519,7 +519,7 @@
                     <ui:Label display-tooltip-when-elided="true" name="Units" text="m/s" class="units-label" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="HorizontalLine" style="background-color: rgb(105, 109, 255); height: 2px; padding-left: 4px; padding-right: 4px; margin-left: 4px; margin-right: 4px;" />
+            <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 2px; padding-left: 4px; padding-right: 4px; margin-left: 12px; margin-right: 12px;" />
             <ui:VisualElement name="HorizontalSpace" />
             <ui:VisualElement name="FixPeGroup" style="flex-direction: column;">
                 <ui:VisualElement name="FixPeRow" class="row-element-lose" style="flex-direction: row;">
@@ -545,7 +545,7 @@
             <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
         </ui:VisualElement>
         <ui:VisualElement name="HorizontalSpace" />
-        <ui:VisualElement name="HorizontalLine" style="background-color: rgb(105, 109, 255); height: 1px; padding-left: 4px; padding-right: 4px; margin-left: 4px; margin-right: 4px;" />
+        <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 2px; padding-left: 4px; padding-right: 4px; margin-left: 12px; margin-right: 12px;" />
         <ui:VisualElement name="BottomPanel">
             <ui:VisualElement name="StatusRow" class="row-element-lose" style="flex-direction: row; height: auto; flex-wrap: nowrap; width: 100%; max-width: 100%;">
                 <ui:Label text="Status:" display-tooltip-when-elided="true" class="row-element-lose" style="height: auto; flex-direction: column;" />

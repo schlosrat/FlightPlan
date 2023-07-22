@@ -11,13 +11,14 @@ using FPUtilities;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.impl;
+using KSP.Sim.Maneuver;
 using KSP.Sim.State;
 using KSP.Utilities;
 using MechJebLib.Core;
 using MechJebLib.Core.TwoBody;
 using MechJebLib.Maneuvers;
 using MechJebLib.Primitives;
-// using NodeManager; // This is only needed if we're using the dummy node apparoch in PatchedConicInterceptBody
+using NodeManager; // This is only needed if we're using the dummy node apparoch in PatchedConicInterceptBody
 using System.Diagnostics;
 using UnityEngine;
 using Random = System.Random;
@@ -59,7 +60,7 @@ namespace MuMech
 
             return longitude; // * UtilMath.Rad2Deg;
         }
-        
+
         //Computes the speed of a circular orbit of a given radius for a given body.
         public static double CircularOrbitSpeed(CelestialBodyComponent body, double radius)
         {
@@ -1614,38 +1615,172 @@ namespace MuMech
         public static void PatchedConicInterceptBody(PatchedConicsOrbit initial, CelestialBodyComponent target, Vector3d dV, double burnUT, double arrivalUT,
             out PatchedConicsOrbit intercept)
         {
+            // PatchedConicsOrbit orbit = FlightPlanPlugin.Instance._activeVessel?.Orbit;
+            OrbiterComponent Orbiter = FlightPlanPlugin.Instance._activeVessel?.Orbiter;
+            ManeuverPlanSolver ManeuverPlanSolver = Orbiter?.ManeuverPlanSolver;
+
+            // **** Dummy Node Approach ****
+            Vector3d burnVec = initial.DeltaVToManeuverNodeCoordinates(burnUT, dV);
+            FlightPlanPlugin.Logger.LogInfo($"burnVec: [{burnVec.x:N3}, {burnVec.y:N3}, {burnVec.z:N3}] = {burnVec.magnitude}");
+            FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(burnUT - Game.UniverseModel.UniversalTime)} from now");
+            // KSP.Sim.Maneuver.ManeuverNodeData nodeData = new KSP.Sim.Maneuver.ManeuverNodeData(FlightPlanPlugin.Instance._activeVessel.SimulationObject.GlobalId, true, burnUT);
+            // nodeData.BurnVector = burnVec;
+            // ManeuverPlanComponent maneuverPlan;
+            // maneuverPlan = FlightPlanPlugin.Instance._activeVessel.SimulationObject.ManeuverPlan;
+            // maneuverPlan.AddNode(nodeData, false);
+            // FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.UpdateManeuverTrajectory();
+            var pass = NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnVec, burnUT, 0);
+            if (!pass)
+            {
+                FlightPlanPlugin.Logger.LogInfo($"Houston, we have a problem...");
+            }
+            var nodes = NodeManagerPlugin.Instance.Nodes;
+            int nodeIndex = 0;
+            // var patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
+            ManeuverPlanSolver.UpdateManeuverTrajectory();
+            List<PatchedConicsOrbit> PatchedConicsList = ManeuverPlanSolver?.PatchedConicsList;
+
+            // Will this have the right node?
+            ManeuverNodeData thisNode = NodeManagerPlugin.Instance.currentNode;
+            for ( int i = 0; i < nodes.Count; i++)
+            {
+                if (nodes[i].NodeID == thisNode.NodeID)
+                {
+                    nodeIndex = i;
+                    break;
+                }
+            }
+            // Get the patch info and index for the patch that contains this node
+            // ManeuverPlanSolver.FindPatchContainingUt(NodeManagerPlugin.Instance.Nodes[SelectedNodeIndex].Time, PatchedConicsList, out var patch, out var patchIndex);
+            var nodeTime = thisNode.Time;
+            PatchedConicsOrbit patch = null;
+            int patchIdx = 0;
+            if (nodeTime < PatchedConicsList[0].StartUT)
+            {
+                patchIdx = (PatchedConicsList[0].PatchEndTransition == PatchTransitionType.Encounter) ? 1 : 0;
+                patch = PatchedConicsList[patchIdx];
+            }
+            else
+            {
+                for (int i = 0; i < PatchedConicsList.Count - 1; i++)
+                {
+                    if (PatchedConicsList[i].StartUT < nodeTime && nodeTime <= PatchedConicsList[i + 1].StartUT)
+                    {
+                        patchIdx = (PatchedConicsList[i + 1].PatchEndTransition == PatchTransitionType.Encounter && i < PatchedConicsList.Count - 2) ? i + 2 : i + 1;
+                        patch = PatchedConicsList[patchIdx];
+                        break;
+                    }
+                }
+            }
+            if (patch == null)
+            {
+                patch = PatchedConicsList.Last();
+                patchIdx = PatchedConicsList.Count - 1;
+            }
+
+            //FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.OnUpdate();
+            //patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
+            //FlightPlanPlugin.Instance._activeVessel.Orbiter.PatchedConicSolver.OnUpdate();
+            //patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
+            // FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.UpdateManeuverTrajectory();
+            // patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
+
+            // Get the patch index for the encounter
+            int selectedpatch = 0;
+            for (int i = 0; i < PatchedConicsList.Count; i++)
+            {
+                if (PatchedConicsList[i].NextPatch == null)
+                    break;
+                FlightPlanPlugin.Logger.LogInfo($"Patch: {i}");
+                // FlightPlanPlugin.Logger.LogInfo($"next_orbit: {PatchedConicsList[i]}");
+                FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {PatchedConicsList[i].referenceBody.Name}");
+                FlightPlanPlugin.Logger.LogInfo($"activePatch:           {PatchedConicsList[i].ActivePatch}");
+                // FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {PatchedConicsList[i].NextPatch}");
+                FlightPlanPlugin.Logger.LogInfo($"closestEncounterLevel: {PatchedConicsList[i].closestEncounterLevel}");
+                if (PatchedConicsList[i].closestEncounterBody != null)
+                {
+                    FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {PatchedConicsList[i].closestEncounterBody.Name}");
+                }
+                else
+                {
+                    FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  Null");
+                }
+                FlightPlanPlugin.Logger.LogInfo($"ClosestApproachDistance: {PatchedConicsList[i].ClosestApproachDistance}");
+
+                FlightPlanPlugin.Logger.LogInfo($"PatchStartTransition: {PatchedConicsList[i].PatchStartTransition}");
+                FlightPlanPlugin.Logger.LogInfo($"PatchEndTransition: {PatchedConicsList[i].PatchEndTransition}");
+
+                if (PatchedConicsList[i].referenceBody == target)
+                {
+                    FlightPlanPlugin.Logger.LogInfo($"Intercept found on patch {i}");
+                    selectedpatch = i;
+                    break;
+                }
+            }
+
+            if (PatchedConicsList[selectedpatch].NextPatch != null)
+                intercept = PatchedConicsList[selectedpatch] as PatchedConicsOrbit; // PatchedConicsOrbitExtended;
+            else
+                intercept = PatchedConicsList[selectedpatch-1] as PatchedConicsOrbit; // PatchedConicsOrbitExtended;
+
+            // Remove the dummy node
+            NodeManagerPlugin.Instance.DeleteNode(nodeIndex);
+            // **** End of Dummy Node Approach ****
+
+            return;
+
             // Imitate the current MJ process, updated for KSP2
 
-            // We need solverParameters to call CalculatePatch, otherwise not
+            // We need solverParameters to call CalculatePatch
             PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
-            // Grab an obit from the ppol and build it for the initial obrit with dV applied at burnUT
+            // Grab an obit from the pool and build it for the initial obrit with dV applied at burnUT
             PatchedConicsOrbit orbit = OrbitPool.FetchInstance(); // .Borrow();
             Position position = new Position(initial.referenceBody.SimulationObject.transform.celestialFrame, initial.GetRelativePositionAtUT(burnUT));
-            Velocity velocity = new Velocity(initial.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, initial.GetOrbitalVelocityAtUTZup(burnUT) + dV.SwapYAndZ); 
+            Velocity velocity = new Velocity(initial.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, initial.GetOrbitalVelocityAtUTZup(burnUT) + dV.SwapYAndZ);
             orbit.UpdateFromStateVectors(position, velocity, initial.referenceBody, burnUT);
             orbit.StartUT = burnUT;
-            orbit.EndUT   = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
-
-            FlightPlanPlugin.Logger.LogInfo($"orbit: {orbit}");
-            FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {orbit.referenceBody.Name}");
-            FlightPlanPlugin.Logger.LogInfo($"activePatch:           {orbit.ActivePatch}");
-            FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {orbit.NextPatch}");
-            FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {orbit.closestEncounterBody}");
-            FlightPlanPlugin.Logger.LogInfo($"closestEncounterLevel: {orbit.closestEncounterLevel}");
-            FlightPlanPlugin.Logger.LogInfo($"closestEncounterPatch: {orbit.closestEncounterPatch}");
+            orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
+            FlightPlanPlugin.Logger.LogInfo($"PatchedConicInterceptBody: orbit: {orbit}");
+            FlightPlanPlugin.Logger.LogInfo($"PatchedConicInterceptBody: referenceBody:         {orbit.referenceBody.Name}");
+            FlightPlanPlugin.Logger.LogInfo($"PatchedConicInterceptBody: activePatch:           {orbit.ActivePatch}");
+            // FlightPlanPlugin.Logger.LogInfo($"PatchedConicInterceptBody: nextPatch:             {orbit.NextPatch}");
+            if (orbit.closestEncounterBody != null)
+            {
+                FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {orbit.closestEncounterBody.Name}");
+            }
+            else
+            {
+                FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  Null");
+            }
+            FlightPlanPlugin.Logger.LogInfo($"PatchedConicInterceptBody: closestEncounterLevel: {orbit.closestEncounterLevel}");
+            // FlightPlanPlugin.Logger.LogInfo($"PatchedConicInterceptBody: closestEncounterPatch: {orbit.closestEncounterPatch}");
 
             // Test approach to see if we can just get a patchlist from KSP2 based on the orbit with dV applied 
-            PatchedConicSolver solver = new PatchedConicSolver(FlightPlanPlugin.Instance._activeVessel.Orbiter, GameManager.Instance.Game.UniverseModel);
-            solver.SetTarget(target);
-            solver.Orbiter.PatchedOrbit = orbit;
-            // solver.CalculatePatchList(); // Calling this here will give NREs
-            var patchList = solver.CurrentTrajectory;
+            //PatchedConicSolver solver = new PatchedConicSolver(FlightPlanPlugin.Instance._activeVessel.Orbiter, GameManager.Instance.Game.UniverseModel);
+            //solver.SetTarget(target);
+            //solver.Orbiter.PatchedOrbit = orbit;
+            //// solver.CalculatePatchList(); // Calling this here will give NREs
+            //var patchList = solver.CurrentTrajectory;
 
             // Resume regularly scheduled MJ programming...
             PatchedConicsOrbit next_orbit = OrbitPool.FetchInstance(); //.Borrow();
 
             // bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null); // passing in null for target doesn't work? Works fine in KSP1...
             bool ok = PatchedConicsExtended.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
+            FlightPlanPlugin.Logger.LogInfo($"next_orbit: {next_orbit}");
+            FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {next_orbit.referenceBody.Name}");
+            FlightPlanPlugin.Logger.LogInfo($"activePatch:           {next_orbit.ActivePatch}");
+            // FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {next_orbit.NextPatch}");
+            if (next_orbit.closestEncounterBody != null)
+            {
+                FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {next_orbit.closestEncounterBody.Name}");
+            }
+            else
+            {
+                FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  Null");
+            }
+            FlightPlanPlugin.Logger.LogInfo($"closestEncounterLevel: {next_orbit.closestEncounterLevel}");
+            // FlightPlanPlugin.Logger.LogInfo($"closestEncounterPatch: {next_orbit.closestEncounterPatch}");
             while (ok && orbit.referenceBody != target && orbit.EndUT < arrivalUT)
             {
                 OrbitPool.ReleaseInstance(orbit);
@@ -1653,13 +1788,6 @@ namespace MuMech
                 next_orbit = OrbitPool.FetchInstance();
 
                 ok = PatchedConicsExtended.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
-                FlightPlanPlugin.Logger.LogInfo($"next_orbit: {next_orbit}");
-                FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {next_orbit.referenceBody}");
-                FlightPlanPlugin.Logger.LogInfo($"activePatch:           {next_orbit.ActivePatch}");
-                FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {next_orbit.NextPatch}");
-                FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {next_orbit.closestEncounterBody}");
-                FlightPlanPlugin.Logger.LogInfo($"closestEncounterLevel: {next_orbit.closestEncounterLevel}");
-                FlightPlanPlugin.Logger.LogInfo($"closestEncounterPatch: {next_orbit.closestEncounterPatch}");
             }
 
             // The orbit should be the patch with the encounter for the target
@@ -1669,47 +1797,6 @@ namespace MuMech
             OrbitPool.ReleaseInstance(next_orbit);
 
             // Various ugly and jumbled attempts to do this without needing CalculatePatch and using KSP2's capabiliites instead
-
-            // **** Dummy Node Approach ****
-            //Vector3d burnVec = initial.DeltaVToManeuverNodeCoordinates(burnUT, dV);
-            //// KSP.Sim.Maneuver.ManeuverNodeData nodeData = new KSP.Sim.Maneuver.ManeuverNodeData(FlightPlanPlugin.Instance._activeVessel.SimulationObject.GlobalId, true, burnUT);
-            //// nodeData.BurnVector = burnVec;
-            //// ManeuverPlanComponent maneuverPlan;
-            //// maneuverPlan = FlightPlanPlugin.Instance._activeVessel.SimulationObject.ManeuverPlan;
-            //// maneuverPlan.AddNode(nodeData, false);
-            //// FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.UpdateManeuverTrajectory();
-            //NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnVec, burnUT, 0);
-            //patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
-            ////FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.OnUpdate();
-            ////patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
-            ////FlightPlanPlugin.Instance._activeVessel.Orbiter.PatchedConicSolver.OnUpdate();
-            ////patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
-            //// FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.UpdateManeuverTrajectory();
-            //// patchList = FlightPlanPlugin.Instance._activeVessel.Orbiter.ManeuverPlanSolver.PatchedConicsList;
-
-            //int selectedpatch = 0;
-            //for (int i = 0; i <  patchList.Count; i++)
-            //{
-            //    FlightPlanPlugin.Logger.LogInfo($"next_orbit: {patchList[i]}");
-            //    FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {patchList[i].referenceBody}");
-            //    FlightPlanPlugin.Logger.LogInfo($"activePatch:           {patchList[i].ActivePatch}");
-            //    FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {patchList[i].NextPatch}");
-            //    FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {patchList[i].closestEncounterBody}");
-            //    FlightPlanPlugin.Logger.LogInfo($"closestEncounterLevel: {patchList[i].closestEncounterLevel}");
-            //    FlightPlanPlugin.Logger.LogInfo($"closestEncounterPatch: {patchList[i].closestEncounterPatch}");
-
-            //    if (patchList[i].referenceBody == target)
-            //    {
-            //        selectedpatch = i;
-            //        break;
-            //    }
-            //}
-            //intercept = patchList[selectedpatch] as PatchedConicsOrbitExtended;
-            //int selectedIdx = 0;
-            //var nodes = NodeManagerPlugin.Instance.Nodes;
-            //for (int i = 1; i < nodes.Count; i++) { if (nodes[i].Time == burnUT) selectedIdx = i; }
-            //NodeManagerPlugin.Instance.DeleteNode(selectedIdx);
-            // **** End of Dummy Node Approach ****
 
             // **** First Attempt Orbiter Approach ****
             //OrbiterComponent orbiter = new()
