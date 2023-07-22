@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1981185438
+CRC: 1648357210
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: d13000907bd8d91dd505f1695f9a86ff
+    Hash: 807e143fb88aefe73bfd8435185f7279
   TypeTreeHash:
     serializedVersion: 2
     Hash: d7784cf808f458e2d32beec2017f1037
@@ -65,13 +65,37 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.StyleValueHandle
 Assets:
-- Assets/Theme/Fonts/JetBrainsMono-Regular SDF.asset
-- Assets/Theme/Fonts/JetBrainsMono-Bold SDF.asset
-- Assets/UI Toolkit/PanelSettings.asset
-- Assets/Theme/Fonts/JetBrainsMono-Medium SDF.asset
-- Assets/Theme/Fonts/JetBrainsMono-Medium.ttf
-- Assets/Theme/Fonts/JetBrainsMono-Bold.ttf
-- Assets/Theme/KerbalUI.tss
-- Assets/Theme/Fonts/JetBrainsMono-Regular.ttf
-Dependencies:
-- C:/KSP2Mods/FlightPlan/FP_UI/Assets/AssetBundles/fp_ui.bundle
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/LEDCounter7/led_counter-7.ttf
+- Packages/uitkforksp2.controls/Assets/Theme/UitkForKsp2.uss
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/JetBrainsMono/JetBrainsMono-Regular
+  SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Icons/icon-back.png
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/JetBrainsMono/JetBrainsMono-Bold
+  SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Icons/icon-last.png
+- Packages/uitkforksp2.controls/Assets/Theme/Icons/icon-forward.png
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/LEDCounter7/led_counter-7_italic
+  SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium.ttf
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium
+  Italic.ttf
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/JetBrainsMono/JetBrainsMono-Medium
+  SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/JetBrainsMono/JetBrainsMono-Medium.ttf
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium
+  SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/JetBrainsMono/JetBrainsMono-Bold.ttf
+- Packages/uitkforksp2.controls/Assets/Theme/KerbalUI.tss
+- Packages/uitkforksp2.controls/Assets/UI Toolkit/KerbalPanelSettings.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium
+  Italic SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/LEDCounter7/led_counter-7_italic.ttf
+- Packages/uitkforksp2.controls/Assets/Theme/Icons/icon-first.png
+- Packages/uitkforksp2.controls/Assets/Theme/KerbalUI.uss
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium
+  Black SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/JetBrainsMono/JetBrainsMono-Regular.ttf
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/LEDCounter7/led_counter-7 SDF.asset
+- Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium
+  Black.ttf
+Dependencies: []
