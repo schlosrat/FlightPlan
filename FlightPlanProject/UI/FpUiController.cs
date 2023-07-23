@@ -7,14 +7,9 @@ using KSP.UI.Binding;
 using Microsoft.CodeAnalysis;
 using MuMech;
 using NodeManager;
-using System.Globalization;
 using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System;
-using System.Globalization;
-using static alglib;
-using static UnityEngine.GraphicsBuffer;
 
 namespace FlightPlan;
 
@@ -610,14 +605,7 @@ public class FpUiController : KerbalMonoBehaviour
         }
         else
             AfterFixedTime.style.display = DisplayStyle.None;
-        if (TimeRef == TimeRef.LIMITED_TIME)
-        {
-            op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
-        }
-        if (TimeRef == TimeRef.PORKCHOP)
-        {
-            op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
-        }
+
         // Draw the GUI Status at the end of this tab
         double _UT = Game.UniverseModel.UniversalTime;
         if (FlightPlanPlugin.Instance._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN && FPStatus.status != FPStatus.Status.ERROR)
@@ -861,27 +849,7 @@ public class FpUiController : KerbalMonoBehaviour
                 phase = Orbit.PhaseAngle(targetOrbit, UT);
                 transfer = Orbit.Transfer(targetOrbit, out double _transferTime);
                 nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360; // transfer - phase
-                                                                                              //string tgtPeArlStr;
-                                                                                              //if (targetOrbit.PeriapsisArl < 1e6)
-                                                                                              //  tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000:N0} km";
-                                                                                              //else
-                                                                                              //  tgtPeArlStr = $"{targetOrbit.PeriapsisArl / 1000000:N0} Mm";
-                                                                                              //string tgtApArlStr;
-                                                                                              //if (targetOrbit.ApoapsisArl < 1e6)
-                                                                                              //  tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000:N0} km";
-                                                                                              //else
-                                                                                              //  tgtApArlStr = $"{targetOrbit.ApoapsisArl / 1000000:N0} Mm";
                 TargetOrbitTRMC.text = $"{FPUtility.MetersToScaledDistanceString(targetOrbit.PeriapsisArl)} x {FPUtility.MetersToScaledDistanceString(targetOrbit.ApoapsisArl)}";
-                //string osPeArlStr;
-                //if (Orbit.PeriapsisArl < 1e6)
-                //  osPeArlStr = $"{Orbit.PeriapsisArl / 1000:N0} km";
-                //else
-                //  osPeArlStr = $"{Orbit.PeriapsisArl / 1000000:N0} Mm";
-                //string osApArlStr;
-                //if (Orbit.ApoapsisArl < 1e6)
-                //  osApArlStr = $"{Orbit.ApoapsisArl / 1000:N0} km";
-                //else
-                //  osApArlStr = $"{Orbit.ApoapsisArl / 1000000:N0} Mm";
                 CurrentOrbitTRMC.text = $"{FPUtility.MetersToScaledDistanceString(Orbit.PeriapsisArl)} x {FPUtility.MetersToScaledDistanceString(Orbit.ApoapsisArl)}";
                 RelativeIncTRMC.text = $"{relativeInc:N2}°";
                 PhaseAngleTRMC.text = $"{phase:N1}°"; // _currentTarget.Name
@@ -906,6 +874,17 @@ public class FpUiController : KerbalMonoBehaviour
                     SetTab(0);
                     break;
                 }
+
+                // If we're on the OTM - Planet tab and we've got a LIMITED_TIME or PORKCHOP as the selected TimeRef...
+                if (TimeRef == TimeRef.LIMITED_TIME)
+                {
+                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
+                }
+                if (TimeRef == TimeRef.PORKCHOP)
+                {
+                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
+                }
+
                 synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
                 relativeInc = Orbit.RelativeInclination(targetOrbit);
                 phase = ReferenceBody.Orbit.PhaseAngle(targetOrbit, UT);
@@ -2339,16 +2318,17 @@ public class FpUiController : KerbalMonoBehaviour
             case ManeuverType.advancedPlanetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
                                                      // _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
                 FPStatus.Error($"Advancved Planetary Transfer Not Implemented Yet. Sorry!");
-                break;
+                //break;
                 var nodes = op.MakeNodes(FlightPlanPlugin.Instance._activeVessel.Orbit, UT, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
                 if (nodes != null)
                 {
+                    _pass = true;
                     foreach (var node in nodes)
                     {
                         Vector3d burnParams = FlightPlanPlugin.Instance._activeVessel.Orbit.DeltaVToManeuverNodeCoordinates(node.UT, node.dV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
-                        NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, node.UT, -0.5);
+                        if (!NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, node.UT, -0.5))
+                            _pass = false;
                     }
-                    _pass = true;
                     _launchMNC = true;
                 }
 
