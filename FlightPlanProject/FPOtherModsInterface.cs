@@ -8,13 +8,12 @@ using BepInEx.Logging;
 // it is not really needed, we can easyly hardcode the mode names
 // during the introduction of K2D2 UI it cause me many trouble in naming
 using K2D2;
-using KSP.Sim.Maneuver;
+using KSP.Game;
 using ManeuverNodeController;
+using NodeManager;
 using SpaceWarp.API.Assets;
 using System.Reflection;
 using UnityEngine;
-using NodeManager;
-using KSP.Game;
 
 namespace FlightPlan;
 

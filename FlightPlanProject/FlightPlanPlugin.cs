@@ -21,7 +21,6 @@ using UitkForKsp2;
 using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
 
 
 namespace FlightPlan;
