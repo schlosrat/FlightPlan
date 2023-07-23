@@ -29,17 +29,17 @@ public class FpUiController : KerbalMonoBehaviour
     public static bool GUIenabled = true;
     GameState _gameState = GameState.Invalid;
 
-    public static double TargetMRPeR_m = 100000;
-    public static double TargetPeR_m = 100000;
-    public static double TargetApR_m = 200000;
-    public static double TargetSMA_m = 200000;
-    public static double TargetAdvXferPe_m = 60000;
-    public static double TargetInc_deg = 0;
-    public static double TargetLAN_deg = 0;
-    public static double TargetNodeLong_deg = 0;
-    public static double TargetInterceptTime_s = 3600;
-    public static double TargetInterceptDistanceCelestial_m = 100;
-    public static double TargetInterceptDistanceVessel_m = 100;
+    public static double TargetMRPeR_m = 100000.0;
+    public static double TargetPeR_m = 100000.0;
+    public static double TargetApR_m = 200000.0;
+    public static double TargetSMA_m = 200000.0;
+    public static double TargetAdvXferPe_m = 60000.0;
+    public static double TargetInc_deg = 0.0;
+    public static double TargetLAN_deg = 0.0;
+    public static double TargetNodeLong_deg = 0.0;
+    public static double TargetInterceptTime_s = 3600.0;
+    public static double TargetInterceptDistanceCelestial_m = 100.0;
+    public static double TargetInterceptDistanceVessel_m = 100.0;
     public static double Altitude_km;
     public static double TimeOffset_s;
 
@@ -59,14 +59,14 @@ public class FpUiController : KerbalMonoBehaviour
     private int NumOrb = 1;
     private double OccModAtm = 0.75;
     private double OccModVac = 0.9;
-    private double ApAltitude_km;
-    private double PeAltitude_km;
+    //private double ApAltitude_km;
+    //private double PeAltitude_km;
     //private double _apoapsis = 600;
     //private double _periapsis = 400;
-    private double _synchronousAlt = 1900;
-    private double _semiSynchronousAlt = 1900;
-    private double _minLOSAlt = 400;
-    private double _target_alt_km = 600;         // planned altitide for deployed satellites (destiantion orbit)
+    private double _synchronousAlt = 1900.0;
+    private double _semiSynchronousAlt = 1900.0;
+    private double _minLOSAlt = 400.0;
+    private double _target_alt_km = 600.0;       // planned altitide for deployed satellites (destiantion orbit)
     private double _satPeriod;                   // The period of the destination orbit
     private double _xferPeriod;                  // The period of the resonant deploy orbit (_xferPeriod = _resonance*_satPeriod)
                                                  // private string _selectedTarget;
@@ -100,6 +100,16 @@ public class FpUiController : KerbalMonoBehaviour
     VisualElement OTMPlanetButtonBox;
     // VisualElement ROMButtonBox;
 
+    enum Tab : int
+    {
+        OSM,
+        TRMShipToShip,
+        TRMShipToCelestial,
+        OTMMoon,
+        OTMPlanet,
+        ROM
+    }
+
     // TabBar buttons (control which panel is displayed)
     Button OSMButton;
     Button TRMShipToShipButton;
@@ -126,7 +136,7 @@ public class FpUiController : KerbalMonoBehaviour
     List<string> panelNames = new();
     // Dictionary<string, VisualElement> tabs = new();
     // string thisTab;
-    int currentTabNum = 0;
+    Tab currentTabNum = Tab.OSM;
 
     List<Button> toggleButtons = new();
 
@@ -501,79 +511,123 @@ public class FpUiController : KerbalMonoBehaviour
         }
 
         // Control which tab buttons are visible
-        if (ReferenceBody.IsStar) // We're orbiting a star
-            OTMMoonButtonBox.style.display = DisplayStyle.None;
-        else if (ReferenceBody.Orbit.referenceBody.IsStar) // We're orbiting a planet
-            OTMMoonButtonBox.style.display = DisplayStyle.None;
-        else // We're orbiting a moon
-            OTMMoonButtonBox.style.display = DisplayStyle.Flex;
-
-        if (_currentTarget == null)
+        if (DisplayTRMShipToShipTab())
         {
-            // Switch off target dependent tabs
+            TRMShipToShipButtonBox.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
             TRMShipToShipButtonBox.style.display = DisplayStyle.None;
-            TRMShipToCelestialButtonBox.style.display = DisplayStyle.None;
-            OTMPlanetButtonBox.style.display = DisplayStyle.None;
+            if (currentTabNum == Tab.TRMShipToShip)
+                SetTab(Tab.OSM);
         }
-        else // there is a target, but what type and where?
+
+        if (DisplayTRMShipToCelestialTab())
         {
-            if (_currentTarget.IsVessel || _currentTarget.IsPart) // target is vessel or part of vessel
-            {
-                TRMShipToCelestialButtonBox.style.display = DisplayStyle.None;
-                OTMPlanetButtonBox.style.display = DisplayStyle.None;
-
-                string referenceBodyName = _currentTarget.IsPart
-                ? _currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit.referenceBody.Name
-                : _currentTarget.Orbit.referenceBody.Name;
-
-                if (referenceBodyName == ReferenceBody.Name)
-                    TRMShipToShipButtonBox.style.display = DisplayStyle.Flex;
-                else
-                    TRMShipToShipButtonBox.style.display = DisplayStyle.None;
-            }
-            else
-            {
-                TRMShipToShipButtonBox.style.display = DisplayStyle.None;
-            }
-
-            if (_currentTarget.IsCelestialBody)
-            {
-                if (_currentTarget.Orbit == null) // Target is a star
-                {
-                    TRMShipToCelestialButtonBox.style.display = DisplayStyle.None;
-                    OTMPlanetButtonBox.style.display = DisplayStyle.None;
-                }
-                else
-                {
-                    bool atPlanet = true;
-                    bool targetIsPlanet = _currentTarget.Orbit.referenceBody.IsStar;
-                    if (ReferenceBody.IsStar)
-                        atPlanet = false;
-                    else if (!ReferenceBody.Orbit.referenceBody.IsStar)
-                        atPlanet = false;
-                    if (_currentTarget.Orbit.referenceBody.Name == ReferenceBody.Name)
-                    {
-                        TRMShipToCelestialButtonBox.style.display = DisplayStyle.Flex;
-                        OTMPlanetButtonBox.style.display = DisplayStyle.None;
-                    }
-                    else if (targetIsPlanet && atPlanet) // target is a planet
-                    {
-                        if (_currentTarget.Name == ReferenceBody.Name) // target is same planet we're orbiting
-                            OTMPlanetButtonBox.style.display = DisplayStyle.None;
-                        else
-                            OTMPlanetButtonBox.style.display = DisplayStyle.Flex;
-                    }
-                    if (!atPlanet) // active vessel is at a moon
-                    {
-                        OTMPlanetButtonBox.style.display = DisplayStyle.None;
-                    }
-                    if (ReferenceBody.IsStar)
-                    {
-                        OTMPlanetButtonBox.style.display = DisplayStyle.None;
-                    }
-                }
-            }
+            TRMShipToCelestialButtonBox.style.display = DisplayStyle.Flex;
         }
+        else
+        {
+            TRMShipToCelestialButtonBox.style.display = DisplayStyle.None;
+            if (currentTabNum == Tab.TRMShipToCelestial)
+                SetTab(Tab.OSM);
+        }
+
+        if (DisplayOTMMoonTab())
+        {
+            OTMMoonButtonBox.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
+            OTMMoonButtonBox.style.display = DisplayStyle.None;
+            if (currentTabNum == Tab.OTMMoon)
+                SetTab(Tab.OSM);
+        }
+
+        if (DisplayOTMPlanetTab())
+        {
+            OTMPlanetButtonBox.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
+            OTMPlanetButtonBox.style.display = DisplayStyle.None;
+            if (currentTabNum == Tab.OTMPlanet)
+                SetTab(Tab.OSM);
+        }
+
+        //if (ReferenceBody.IsStar) // We're orbiting a star
+        //    OTMMoonButtonBox.style.display = DisplayStyle.None;
+        //else if (ReferenceBody.Orbit.referenceBody.IsStar) // We're orbiting a planet
+        //    OTMMoonButtonBox.style.display = DisplayStyle.None;
+        //else // We're orbiting a moon
+        //    OTMMoonButtonBox.style.display = DisplayStyle.Flex;
+
+        //if (_currentTarget == null)
+        //{
+        //    // Switch off target dependent tabs
+        //    TRMShipToShipButtonBox.style.display = DisplayStyle.None;
+        //    TRMShipToCelestialButtonBox.style.display = DisplayStyle.None;
+        //    OTMPlanetButtonBox.style.display = DisplayStyle.None;
+        //}
+        //else // there is a target, but what type and where?
+        //{
+        //    if (_currentTarget.IsVessel || _currentTarget.IsPart) // target is vessel or part of vessel
+        //    {
+        //        TRMShipToCelestialButtonBox.style.display = DisplayStyle.None;
+        //        OTMPlanetButtonBox.style.display = DisplayStyle.None;
+
+        //        string referenceBodyName = _currentTarget.IsPart
+        //        ? _currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit.referenceBody.Name
+        //        : _currentTarget.Orbit.referenceBody.Name;
+
+        //        if (referenceBodyName == ReferenceBody.Name)
+        //            TRMShipToShipButtonBox.style.display = DisplayStyle.Flex;
+        //        else
+        //            TRMShipToShipButtonBox.style.display = DisplayStyle.None;
+        //    }
+        //    else
+        //    {
+        //        TRMShipToShipButtonBox.style.display = DisplayStyle.None;
+        //    }
+
+        //    if (_currentTarget.IsCelestialBody)
+        //    {
+        //        if (_currentTarget.Orbit == null) // Target is a star
+        //        {
+        //            TRMShipToCelestialButtonBox.style.display = DisplayStyle.None;
+        //            OTMPlanetButtonBox.style.display = DisplayStyle.None;
+        //        }
+        //        else
+        //        {
+        //            bool atPlanet = true;
+        //            bool targetIsPlanet = _currentTarget.Orbit.referenceBody.IsStar;
+        //            if (ReferenceBody.IsStar)
+        //                atPlanet = false;
+        //            else if (!ReferenceBody.Orbit.referenceBody.IsStar)
+        //                atPlanet = false;
+        //            if (_currentTarget.Orbit.referenceBody.Name == ReferenceBody.Name)
+        //            {
+        //                TRMShipToCelestialButtonBox.style.display = DisplayStyle.Flex;
+        //                OTMPlanetButtonBox.style.display = DisplayStyle.None;
+        //            }
+        //            else if (targetIsPlanet && atPlanet) // target is a planet
+        //            {
+        //                if (_currentTarget.Name == ReferenceBody.Name) // target is same planet we're orbiting
+        //                    OTMPlanetButtonBox.style.display = DisplayStyle.None;
+        //                else
+        //                    OTMPlanetButtonBox.style.display = DisplayStyle.Flex;
+        //            }
+        //            if (!atPlanet) // active vessel is at a moon
+        //            {
+        //                OTMPlanetButtonBox.style.display = DisplayStyle.None;
+        //            }
+        //            if (ReferenceBody.IsStar)
+        //            {
+        //                OTMPlanetButtonBox.style.display = DisplayStyle.None;
+        //            }
+        //        }
+        //    }
+        //}
 
         // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
         if (TimeRef == TimeRef.ALTITUDE)
@@ -721,11 +775,11 @@ public class FpUiController : KerbalMonoBehaviour
 
         switch (currentTabNum)
         {
-            case 0: // Ownship Maneuvers Tab
+            case Tab.OSM: // Ownship Maneuvers Tab
                     // do stuff
                 break;
 
-            case 1: // Target Relative Maneuvers - Ship to Ship
+            case Tab.TRMShipToShip: // Target Relative Maneuvers - Ship to Ship
                 string recommendedManeuver;
                 const int maxPhasingOrbits = 5;
                 const double closestApproachLimit1 = 3000;
@@ -829,7 +883,7 @@ public class FpUiController : KerbalMonoBehaviour
                 TRMStatus.text = recommendedManeuver;
                 break;
 
-            case 2: // Target Relative Maneuvers - Ship to Celestial
+            case Tab.TRMShipToCelestial: // Target Relative Maneuvers - Ship to Celestial
                 if (_currentTarget == null)
                 {
                     SetTab(0);
@@ -859,11 +913,11 @@ public class FpUiController : KerbalMonoBehaviour
                 NextWindowTRMC.text = FPUtility.SecondsToTimeString(nextWindow, false, false, true);
                 NextClosestApproachTRMC.text = FPUtility.SecondsToTimeString(timeToClosestApproach, false, false, true);
                 break;
-            case 3: // Orbital Transfer Maneuvers - Moon
+            case Tab.OTMMoon: // Orbital Transfer Maneuvers - Moon
                     // do stuff
 
                 break;
-            case 4: // Orbital Transfer Maneuvers - Planet
+            case Tab.OTMPlanet: // Orbital Transfer Maneuvers - Planet
                 if (_currentTarget == null)
                 {
                     SetTab(0);
@@ -903,7 +957,7 @@ public class FpUiController : KerbalMonoBehaviour
                 NextWindowOTM.text = FPUtility.SecondsToTimeString(nextWindow, false, false, true);
                 EjectionDvOTM.text = $"{DeltaV():N1} m/s";
                 break;
-            case 5: // Resonant Orbit Maneuvers
+            case Tab.ROM: // Resonant Orbit Maneuvers
                     // do stuff
                 double _synchronousPeriod = _activeVessel.mainBody.rotationPeriod;
                 double _semiSynchronousPeriod = _activeVessel.mainBody.rotationPeriod / 2;
@@ -1037,6 +1091,41 @@ public class FpUiController : KerbalMonoBehaviour
         }
     }
 
+    bool DisplayTRMShipToShipTab()
+    {
+        if (FlightPlanPlugin.Instance._currentTarget == null) return false;
+        if (!FlightPlanPlugin.Instance._currentTarget.IsVessel && !FlightPlanPlugin.Instance._currentTarget.IsPart) return false;
+        string referenceBodyName = FlightPlanPlugin.Instance._currentTarget.IsPart
+            ? FlightPlanPlugin.Instance._currentTarget.Part.PartOwner.SimulationObject.Vessel.Orbit.referenceBody.Name
+            : FlightPlanPlugin.Instance._currentTarget.Orbit.referenceBody.Name;
+        return referenceBodyName == ReferenceBody.Name;
+    }
+
+    bool DisplayTRMShipToCelestialTab()
+    {
+        if (FlightPlanPlugin.Instance._currentTarget == null) return false;  // If there is no target, then no tab
+        if (!FlightPlanPlugin.Instance._currentTarget.IsCelestialBody) return false; // If the target is not a Celestial, then no tab
+        if (FlightPlanPlugin.Instance._currentTarget.Orbit == null) return false; // And the target is a star, then no tab
+        return FlightPlanPlugin.Instance._currentTarget.Orbit.referenceBody.Name == ReferenceBody.Name; // If the ActiveVessel and the _currentTarget are both orbiting the same body
+    }
+    
+    bool DisplayOTMMoonTab()
+    {
+        if (ReferenceBody.IsStar) return false; // if were orbiting a star, then no tab
+        if (ReferenceBody.Orbit.referenceBody.IsStar) return false; // If we're orbiting a planet, then no tab
+        return Orbit.eccentricity < 1;
+    }
+
+    bool DisplayOTMPlanetTab()
+    {
+        if (FlightPlanPlugin.Instance._currentTarget == null) return false; // If there is no target then no tab
+        if (ReferenceBody.IsStar) return false; // If we're orbiting a star then no tab
+        if (!FlightPlanPlugin.Instance._currentTarget.IsCelestialBody) return false; // the current target is not a celestial object then no tab
+        if (!ReferenceBody.Orbit.referenceBody.IsStar) return false; // If we're not at a planet then no tab
+        if (FlightPlanPlugin.Instance._currentTarget.Orbit == null) return false; // if current target is a star then no tab
+        if (!FlightPlanPlugin.Instance._currentTarget.Orbit.referenceBody.IsStar) return false; // If our target is not a planet then no tab
+        return FlightPlanPlugin.Instance._currentTarget.Name != ReferenceBody.Name;// if we're targeting the same planet we're orbiting then no tab
+    }
 
     double DeltaV()
     {
@@ -1172,6 +1261,15 @@ public class FpUiController : KerbalMonoBehaviour
                     _activeVessel.SetTargetByID(targetBodies[evt.newValue].GlobalId);
                     _currentTarget = _activeVessel.TargetObject;
                 }
+                // If the celestial body selected is incompatible with the maneuver button selected, deselect the maneuver button
+                //if ()
+                //SetTab(1);
+
+                //TRMShipToShipButton.;
+                //TRMShipToCelestialButton;
+                //OTMMoonButton;
+                //OTMPlanetButton;
+                //ROMButton;
             }
             else if (TargetTypeButton.text == "Vessel")
             {
@@ -1297,7 +1395,7 @@ public class FpUiController : KerbalMonoBehaviour
         NewSMAButtonOSM = container.Q<Button>("NewSMAButtonOSM");
         NewSMAValueOSM = container.Q<TextField>("NewSMAValueOSM");
 
-        PeAltitude_km = TargetPeR_m / 1000;
+        // PeAltitude_km = TargetPeR_m / 1000;
         NewPeValueOSM.RegisterValueChangedCallback((evt) =>
         {
             if (float.TryParse(evt.newValue, out float newFloat))
@@ -1318,7 +1416,7 @@ public class FpUiController : KerbalMonoBehaviour
             if (float.TryParse(evt.newValue, out float newFloat))
             {
                 // FpUiController.ApAltitude_km = newFloat;
-                TargetApR_m = newFloat * 1000; // + _activeVessel.Orbit.referenceBody.radius;
+                TargetApR_m = newFloat * 1000.0; // + _activeVessel.Orbit.referenceBody.radius;
                 FlightPlanPlugin.Logger.LogDebug($"NewApValueOSM: {newFloat} -> {TargetApR_m / 1000}"); // FpUiController.ApAltitude_km
             }
             else
@@ -1419,7 +1517,7 @@ public class FpUiController : KerbalMonoBehaviour
             if (float.TryParse(evt.newValue, out float newFloat))
             {
                 // FpUiController.ApAltitude_km = newFloat;
-                TargetApR_m = newFloat * 1000; //  + _activeVessel.Orbit.referenceBody.radius;
+                TargetApR_m = newFloat * 1000.0; //  + _activeVessel.Orbit.referenceBody.radius;
                 FlightPlanPlugin.Logger.LogDebug($"NewApValueTRMS: {TargetApR_m / 1000}"); // FpUiController.ApAltitude_km;
             }
             else
@@ -1720,7 +1818,8 @@ public class FpUiController : KerbalMonoBehaviour
         {
             if (double.TryParse(ResonantOrbitPe.text, out double targetPe))
             {
-                PeAltitude_km = targetPe;
+                // PeAltitude_km = targetPe;
+                TargetPeR_m = targetPe * 1000.0;
                 NewPe();
             }
         };
@@ -1728,7 +1827,8 @@ public class FpUiController : KerbalMonoBehaviour
         {
             if (double.TryParse(ResonantOrbitAp.text, out double targetAp))
             {
-                ApAltitude_km = targetAp;
+                // ApAltitude_km = targetAp;
+                TargetApR_m = targetAp * 1000.0;
                 NewAp();
             }
         };
@@ -1812,12 +1912,12 @@ public class FpUiController : KerbalMonoBehaviour
         // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: CloseButton callback initialized.");
 
         // Setup TabBar buttons
-        OSMButton.clicked += () => SetTab(0);
-        TRMShipToShipButton.clicked += () => SetTab(1);
-        TRMShipToCelestialButton.clicked += () => SetTab(2);
-        OTMMoonButton.clicked += () => SetTab(3);
-        OTMPlanetButton.clicked += () => SetTab(4);
-        ROMButton.clicked += () => SetTab(5);
+        OSMButton.clicked += () => SetTab(Tab.OSM);
+        TRMShipToShipButton.clicked += () => SetTab(Tab.TRMShipToShip);
+        TRMShipToCelestialButton.clicked += () => SetTab(Tab.TRMShipToCelestial);
+        OTMMoonButton.clicked += () => SetTab(Tab.OTMMoon);
+        OTMPlanetButton.clicked += () => SetTab(Tab.OTMPlanet);
+        ROMButton.clicked += () => SetTab(Tab.ROM);
 
         TabButtons.Add(OSMButton);
         TabButtons.Add(TRMShipToShipButton);
@@ -2409,15 +2509,15 @@ public class FpUiController : KerbalMonoBehaviour
         }
     }
 
-    void SetTab(int tabNum)
+    void SetTab(Tab thisTab)
     {
         // If this click is actually chaning the tab
-        if (currentTabNum != tabNum)
+        if (currentTabNum != thisTab)
             UnsetToggles();
-        FlightPlanPlugin.Logger.LogDebug($"SetTab: tabNum = {tabNum}, panel = {panelNames[tabNum]}");
+        FlightPlanPlugin.Logger.LogDebug($"SetTab: thisTab = {thisTab}, panel = {panelNames[(int)thisTab]}");
         for (int i = 0; i < panels.Count; i++)
         {
-            if (i == tabNum)
+            if (i == (int)thisTab)
             {
                 ToggleButtonTextColor(TabButtons[i], true);
                 panels[i].style.display = DisplayStyle.Flex;
@@ -2431,7 +2531,7 @@ public class FpUiController : KerbalMonoBehaviour
                 FlightPlanPlugin.Logger.LogDebug($"SetTab: {panelNames[i]} switchd off");
             }
         }
-        currentTabNum = tabNum;
+        currentTabNum = thisTab;
     }
 
     public List<TimeRef> Options = new List<TimeRef>();
