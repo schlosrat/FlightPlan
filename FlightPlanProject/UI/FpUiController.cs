@@ -2418,7 +2418,9 @@ public class FpUiController : KerbalMonoBehaviour
             case ManeuverType.advancedPlanetaryXfer: // Mostly working, but you'll probably need to tweak the departure and also need a course correction
                                                      // _pass = Plugin.PlanetaryXfer(_requestedBurnTime, -0.5);
                 FPStatus.Error($"Advancved Planetary Transfer Not Implemented Yet. Sorry!");
-                //break;
+#if !DEBUG
+                break;
+#endif
                 var nodes = op.MakeNodes(FlightPlanPlugin.Instance._activeVessel.Orbit, UT, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
                 if (nodes != null)
                 {
