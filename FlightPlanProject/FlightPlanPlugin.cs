@@ -158,7 +158,6 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Load UITK GUI
         var fpUxml = AssetManager.GetAsset<VisualTreeAsset>($"{Info.Metadata.GUID}/fp_ui/fp_ui.uxml");
         var fpWindow = Window.CreateFromUxml(fpUxml, "Flight Plan Main Window", transform, true);
-        UnityEngine.Object.DontDestroyOnLoad(fpWindow);
         fpWindow.hideFlags |= HideFlags.HideAndDontSave;
 
         // Initialze an instance of the UITK GUI controller
@@ -1266,46 +1265,46 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
     }
 
-    private IEnumerator TestPerturbedOrbit(PatchedConicsOrbit o, double burnUT, Vector3d dV)
-    {
-        // This code compares the orbit info returned from a PerturbedOrbit orbit call with the
-        // info for the orbit in the next patch. It should be called after creating a maneuver
-        // node for the active vessel that applies the burn vector associated with the dV to
-        // make sure that PerturbedOrbit is correctly predicting the effect of delta V on the
-        // current orbit.
+    //private IEnumerator TestPerturbedOrbit(PatchedConicsOrbit o, double burnUT, Vector3d dV)
+    //{
+    //    // This code compares the orbit info returned from a PerturbedOrbit orbit call with the
+    //    // info for the orbit in the next patch. It should be called after creating a maneuver
+    //    // node for the active vessel that applies the burn vector associated with the dV to
+    //    // make sure that PerturbedOrbit is correctly predicting the effect of delta V on the
+    //    // current orbit.
 
-        // NodeManagerPlugin.Instance.RefreshNodes();
-        yield return (object)new WaitForFixedUpdate();
+    //    // NodeManagerPlugin.Instance.RefreshNodes();
+    //    yield return (object)new WaitForFixedUpdate();
 
-        //List<ManeuverNodeData> patchList =
-        //    Game.SpaceSimulation.Maneuvers.GetNodesForVessel(ActiveVessel.SimulationObject.GlobalId);
+    //    //List<ManeuverNodeData> patchList =
+    //    //    Game.SpaceSimulation.Maneuvers.GetNodesForVessel(ActiveVessel.SimulationObject.GlobalId);
 
-        Logger.LogDebug($"TestPerturbedOrbit: patchList.Count = {NodeManagerPlugin.Instance.Nodes.Count}");
+    //    Logger.LogDebug($"TestPerturbedOrbit: patchList.Count = {NodeManagerPlugin.Instance.Nodes.Count}");
 
-        if (NodeManagerPlugin.Instance.Nodes.Count == 0)
-        {
-            Logger.LogDebug($"TestPerturbedOrbit: No future patches to compare to.");
-        }
-        else
-        {
-            PatchedConicsOrbit hypotheticalOrbit = o.PerturbedOrbit(burnUT, dV);
-            ManeuverPlanSolver maneuverPlanSolver = _activeVessel.Orbiter?.ManeuverPlanSolver;
-            var PatchedConicsList = maneuverPlanSolver?.PatchedConicsList;
-            PatchedConicsOrbit nextOrbit; // = PatchedConicsList[0];
-            if (NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch != null) { nextOrbit = NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch; }
-            else { nextOrbit = maneuverPlanSolver.ManeuverTrajectory[0] as PatchedConicsOrbit; }
+    //    if (NodeManagerPlugin.Instance.Nodes.Count == 0)
+    //    {
+    //        Logger.LogDebug($"TestPerturbedOrbit: No future patches to compare to.");
+    //    }
+    //    else
+    //    {
+    //        PatchedConicsOrbit hypotheticalOrbit = o.PerturbedOrbit(burnUT, dV);
+    //        ManeuverPlanSolver maneuverPlanSolver = _activeVessel.Orbiter?.ManeuverPlanSolver;
+    //        var PatchedConicsList = maneuverPlanSolver?.PatchedConicsList;
+    //        PatchedConicsOrbit nextOrbit; // = PatchedConicsList[0];
+    //        if (NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch != null) { nextOrbit = NodeManagerPlugin.Instance.Nodes[0].ManeuverTrajectoryPatch; }
+    //        else { nextOrbit = maneuverPlanSolver.ManeuverTrajectory[0] as PatchedConicsOrbit; }
 
-            // IPatchedOrbit orbit = null;
+    //        // IPatchedOrbit orbit = null;
 
-            Logger.LogDebug($"thisOrbit:{o}");
-            Logger.LogDebug($"nextOrbit:{nextOrbit}");
-            Logger.LogDebug($"nextOrbit: inc = {PatchedConicsList[0].inclination.ToString("n3")}");
-            Logger.LogDebug($"nextOrbit: ecc = {PatchedConicsList[0].eccentricity.ToString("n3")}");
-            Logger.LogDebug($"nextOrbit: sma = {PatchedConicsList[0].semiMajorAxis.ToString("n3")}");
-            Logger.LogDebug($"nextOrbit: lan = {PatchedConicsList[0].longitudeOfAscendingNode.ToString("n3")}");
-            Logger.LogDebug($"nextOrbit: ApA = {(PatchedConicsList[0].ApoapsisArl / 1000).ToString("n3")}");
-            Logger.LogDebug($"nextOrbit: PeA = {(PatchedConicsList[0].PeriapsisArl / 1000).ToString("n3")}");
-            Logger.LogDebug($"hypotheticalOrbit:{hypotheticalOrbit}");
-        }
-    }
+    //        Logger.LogDebug($"thisOrbit:{o}");
+    //        Logger.LogDebug($"nextOrbit:{nextOrbit}");
+    //        Logger.LogDebug($"nextOrbit: inc = {PatchedConicsList[0].inclination.ToString("n3")}");
+    //        Logger.LogDebug($"nextOrbit: ecc = {PatchedConicsList[0].eccentricity.ToString("n3")}");
+    //        Logger.LogDebug($"nextOrbit: sma = {PatchedConicsList[0].semiMajorAxis.ToString("n3")}");
+    //        Logger.LogDebug($"nextOrbit: lan = {PatchedConicsList[0].longitudeOfAscendingNode.ToString("n3")}");
+    //        Logger.LogDebug($"nextOrbit: ApA = {(PatchedConicsList[0].ApoapsisArl / 1000).ToString("n3")}");
+    //        Logger.LogDebug($"nextOrbit: PeA = {(PatchedConicsList[0].PeriapsisArl / 1000).ToString("n3")}");
+    //        Logger.LogDebug($"hypotheticalOrbit:{hypotheticalOrbit}");
+    //    }
+    //}
 }
