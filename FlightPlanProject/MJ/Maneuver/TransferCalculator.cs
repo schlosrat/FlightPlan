@@ -465,11 +465,11 @@ namespace MuMech
                 Vector3d burnVec = _initialOrbit.DeltaVToManeuverNodeCoordinates(maneuver.UT, maneuver.dV);
                 FlightPlanPlugin.Logger.LogInfo($"burnVec: [{burnVec.x:N3}, {burnVec.y:N3}, {burnVec.z:N3}] = {burnVec.magnitude}");
                 FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(maneuver.UT - Game.UniverseModel.UniversalTime)} from now");
-                var pass = NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnVec, maneuver.UT, -0.5);
-                if (!pass)
-                {
-                    FlightPlanPlugin.Logger.LogInfo($"Houston, we have a problem...");
-                }
+                //var pass = NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnVec, maneuver.UT, -0.5);
+                //if (!pass)
+                //{
+                //    FlightPlanPlugin.Logger.LogInfo($"Houston, we have a problem...");
+                //}
                 nodeList.Add(maneuver);
                 return nodeList;
 
