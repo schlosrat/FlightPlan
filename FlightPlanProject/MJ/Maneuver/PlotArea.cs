@@ -80,7 +80,7 @@ namespace MuMech
         {
             // old IMGUI way - don't do this!
             // GUILayout.Box(_texture, GUIStyle.none, GUILayout.Width(_texture.width), GUILayout.Height(_texture.height));
-            // do stuff to convert texture2d to background image
+
             // assign background image to visual element
             FpUiController.PorkchopDisplay.style.backgroundImage = Background.FromTexture2D(_texture);
             if (Event.current.type == EventType.Repaint)
