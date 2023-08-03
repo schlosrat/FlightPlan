@@ -332,7 +332,7 @@ namespace MuMech
 
             if (orbit.referenceBody == _targetBody)
             {
-                double err = (orbit.Periapsis - _targetPeR) / 1e6;
+                double err = (orbit.PeriapsisArl - _targetPeR) / 1e6;
                 fi[0] = dv.sqrMagnitude / _impulseScale / _impulseScale;
                 fi[1] = err * err;
             }
