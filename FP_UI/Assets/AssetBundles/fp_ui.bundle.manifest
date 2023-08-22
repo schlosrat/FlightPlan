@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 2597869126
+CRC: 719426874
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 770c4f1c59f918c911881e68f60f3059
+    Hash: 09454a4333b211523df81eeec341ead2
   TypeTreeHash:
     serializedVersion: 2
-    Hash: f0561acde1b74a8a1d113e7ee19b0708
+    Hash: 8942a65878ffee03f8807e5e7737544e
 HashAppended: 0
 ClassTypes:
 - Class: 21
@@ -19,6 +19,8 @@ ClassTypes:
   Script: {fileID: 11995, guid: 0000000000000000e000000000000000, type: 0}
 - Class: 114
   Script: {fileID: 11998, guid: 0000000000000000e000000000000000, type: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 9a8fdda5b4c5f6544bbac8a17c59089c, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 128
@@ -26,6 +28,22 @@ ClassTypes:
 - Class: 213
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
+- AssemblyName: UnityEngine.TextCoreModule
+  ClassName: UnityEngine.TextCore.FaceInfo
+- AssemblyName: UnityEngine.TextCoreModule
+  ClassName: UnityEngine.TextCore.Glyph
+- AssemblyName: UnityEngine.TextCoreModule
+  ClassName: UnityEngine.TextCore.GlyphMetrics
+- AssemblyName: UnityEngine.TextCoreModule
+  ClassName: UnityEngine.TextCore.GlyphRect
+- AssemblyName: UnityEngine.TextCoreTextEngineModule
+  ClassName: UnityEngine.TextCore.Text.Character
+- AssemblyName: UnityEngine.TextCoreTextEngineModule
+  ClassName: UnityEngine.TextCore.Text.FontAssetCreationEditorSettings
+- AssemblyName: UnityEngine.TextCoreTextEngineModule
+  ClassName: UnityEngine.TextCore.Text.FontFeatureTable
+- AssemblyName: UnityEngine.TextCoreTextEngineModule
+  ClassName: UnityEngine.TextCore.Text.FontWeightPair
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.StyleComplexSelector
 - AssemblyName: UnityEngine.UIElementsModule
@@ -43,14 +61,18 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.VisualElementAsset
 Assets:
+- Assets/Theme/Fonts/Orbitron-Black SDF.asset
 - Assets/Icons/icon_white_50.png
 - Assets/Icons/Station_50.png
 - Assets/FP_UI.uxml
 - Assets/Icons/gear.png
+- Assets/Theme/Fonts/LiberationSans-Regular.ttf
 - Assets/FlightPlanTheme.uss
 - Assets/Icons/OSM_50.png
 - Assets/Icons/TRM_50_Ship2Celestial.png
 - Assets/Icons/OTM_50_Planet.png
+- Assets/Theme/Fonts/LiberationSans-Regular SDF.asset
+- Assets/Theme/Fonts/Orbitron-Black.ttf
 - Assets/Icons/TRM_50_Ship2Ship.png
 - Assets/Icons/k2d2_big_icon.png
 - Assets/Icons/OTM_50_Moon.png

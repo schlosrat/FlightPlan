@@ -65,13 +65,13 @@
         <ui:VisualElement name="OSMPanel" style="display: none; width: 100%;">
             <ui:VisualElement name="CircularizeGroup" style="flex-direction: column;">
                 <ui:VisualElement name="CircularizeRow" class="row-element-lose">
-                    <ui:Button text="Circularize" display-tooltip-when-elided="true" name="CircularizeButtonOSM" class="big-button Maneuver-button" />
+                    <ui:Button text="Circularize" display-tooltip-when-elided="true" name="CircularizeButtonOSM" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="NewPeGroup" style="flex-direction: column;">
                 <ui:VisualElement name="NewPeRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="New Pe" display-tooltip-when-elided="true" name="NewPeButtonOSM" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="New Pe" display-tooltip-when-elided="true" name="NewPeButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="100" name="NewPeValueOSM" tooltip="New periapsis altitude" />
                         <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" style="white-space: normal; -unity-text-align: middle-left;" />
@@ -81,7 +81,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="NewApGroup" style="flex-direction: column;">
                 <ui:VisualElement name="NewApRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="New Ap" display-tooltip-when-elided="true" name="NewApButtonOSM" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="New Ap" display-tooltip-when-elided="true" name="NewApButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="100" name="NewApValueOSM" tooltip="New apoapsis altitude" />
                         <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -91,13 +91,13 @@
             </ui:VisualElement>
             <ui:VisualElement name="NewPeApGroup" style="flex-direction: column;">
                 <ui:VisualElement name="NewPeApRow" class="row-element-lose">
-                    <ui:Button text="New Pe &amp; Ap" display-tooltip-when-elided="true" name="NewPeApButtonOSM" class="big-button Maneuver-button" />
+                    <ui:Button text="New Pe &amp; Ap" display-tooltip-when-elided="true" name="NewPeApButtonOSM" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="NewIncGroup" style="flex-direction: column;">
                 <ui:VisualElement name="NewIncRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="New Inclination" display-tooltip-when-elided="true" name="NewIncButtonOSM" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="New Inclination" display-tooltip-when-elided="true" name="NewIncButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="0" name="NewIncValueOSM" tooltip="New orbital inclination" />
                         <ui:Label text="°" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -107,7 +107,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="NewLANGroup" style="flex-direction: column;">
                 <ui:VisualElement name="NewLANRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="New LAN" display-tooltip-when-elided="true" name="NewLANButtonOSM" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="New LAN" display-tooltip-when-elided="true" name="NewLANButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="0" name="NewLANValueOSM" tooltip="New longitude of ascending node" />
                         <ui:Label text="°" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -117,7 +117,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="NewSMAGroup" style="flex-direction: column;">
                 <ui:VisualElement name="NewSMARow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="New SMA" display-tooltip-when-elided="true" name="NewSMAButtonOSM" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="New SMA" display-tooltip-when-elided="true" name="NewSMAButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="0" name="NewSMAValueOSM" tooltip="New semi-major axis" />
                         <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -162,13 +162,13 @@
             </ui:VisualElement>
             <ui:VisualElement name="MatchPlanesGroup" style="flex-direction: column;">
                 <ui:VisualElement name="MatchPlanesRow" class="row-element-lose">
-                    <ui:Button text="Match Planes" display-tooltip-when-elided="true" name="MatchPlanesButtonTRMS" class="big-button Maneuver-button" />
+                    <ui:Button text="Match Planes" display-tooltip-when-elided="true" name="MatchPlanesButtonTRMS" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="NewApGroup" style="flex-direction: column;">
                 <ui:VisualElement name="NewApRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="New Ap" display-tooltip-when-elided="true" name="NewApButtonTRMS" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="New Ap" display-tooltip-when-elided="true" name="NewApButtonTRMS" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="100" name="NewApValueTRMS" tooltip="New apoapsis altitude for phasing orbit" />
                         <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -178,19 +178,19 @@
             </ui:VisualElement>
             <ui:VisualElement name="CircularizeGroup" style="flex-direction: column;">
                 <ui:VisualElement name="CircularizeRow" class="row-element-lose">
-                    <ui:Button text="Circularize" display-tooltip-when-elided="true" name="CircularizeButtonTRMS" class="big-button Maneuver-button" />
+                    <ui:Button text="Circularize" display-tooltip-when-elided="true" name="CircularizeButtonTRMS" class="Maneuver-button" style="height: 27px;" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="HohmannTransferGroup" style="flex-direction: column;">
                 <ui:VisualElement name="HohmannTransferRow" class="row-element-lose">
-                    <ui:Button text="Hohmann Transfer" display-tooltip-when-elided="true" name="HohmannTransferButtonTRMS" class="big-button Maneuver-button" />
+                    <ui:Button text="Hohmann Transfer" display-tooltip-when-elided="true" name="HohmannTransferButtonTRMS" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="CourseCorrectionGroup" style="flex-direction: column;">
                 <ui:VisualElement name="CourseCorrectionRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="Course Correction" display-tooltip-when-elided="true" name="CourseCorrectionButtonTRMS" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="Course Correction" display-tooltip-when-elided="true" name="CourseCorrectionButtonTRMS" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="100" name="CourseCorrectionValueTRMS" tooltip="Closest approach goal" />
                         <ui:Label text="m" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -200,13 +200,13 @@
             </ui:VisualElement>
             <ui:VisualElement name="MatchVelocityGroup" style="flex-direction: column;">
                 <ui:VisualElement name="MatchVelocityRow" class="row-element-lose">
-                    <ui:Button text="Match Velocity" display-tooltip-when-elided="true" name="MatchVelocityButtonTRMS" class="big-button Maneuver-button" />
+                    <ui:Button text="Match Velocity" display-tooltip-when-elided="true" name="MatchVelocityButtonTRMS" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="InterceptGroup" style="flex-direction: column;">
                 <ui:VisualElement name="InterceptRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="Intercept" display-tooltip-when-elided="true" name="InterceptButtonTRMS" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="Intercept" display-tooltip-when-elided="true" name="InterceptButtonTRMS" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="1:00:00" name="InterceptValueTRMS" tooltip="Time in hh:mm:ss format" />
                         <ui:Label text="hms" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -255,19 +255,19 @@
             </ui:VisualElement>
             <ui:VisualElement name="MatchPlanesGroup" style="flex-direction: column;">
                 <ui:VisualElement name="MatchPlanesRow" class="row-element-lose">
-                    <ui:Button text="Match Planes" display-tooltip-when-elided="true" name="MatchPlanesButtonTRMC" class="big-button Maneuver-button" />
+                    <ui:Button text="Match Planes" display-tooltip-when-elided="true" name="MatchPlanesButtonTRMC" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="HohmannTransferGroup" style="flex-direction: column;">
                 <ui:VisualElement name="HohmannTransferRow" class="row-element-lose">
-                    <ui:Button text="Hohmann Transfer" display-tooltip-when-elided="true" name="HohmannTransferButtonTRMC" class="big-button Maneuver-button" />
+                    <ui:Button text="Hohmann Transfer" display-tooltip-when-elided="true" name="HohmannTransferButtonTRMC" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="CourseCorrectionGroup" style="flex-direction: column;">
                 <ui:VisualElement name="CourseCorrectionRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="Course Correction" display-tooltip-when-elided="true" name="CourseCorrectionButtonTRMC" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="Course Correction" display-tooltip-when-elided="true" name="CourseCorrectionButtonTRMC" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="100" name="CourseCorrectionValueTRMC" tooltip="Closest approach goal (altitude)" />
                         <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -277,7 +277,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="InterceptGroup" style="flex-direction: column;">
                 <ui:VisualElement name="InterceptRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="Intercept" display-tooltip-when-elided="true" name="InterceptButtonTRMC" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="Intercept" display-tooltip-when-elided="true" name="InterceptButtonTRMC" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="1:00:00" name="InterceptValueTRMC" tooltip="Time in hh:mm:ss format" />
                         <ui:Label text="hms" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -287,7 +287,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="MatchVelocityGroup" style="flex-direction: column;">
                 <ui:VisualElement name="MatchVelocityRow" class="row-element-lose">
-                    <ui:Button text="Match Velocity" display-tooltip-when-elided="true" name="MatchVelocityButtonTRMC" class="big-button Maneuver-button" />
+                    <ui:Button text="Match Velocity" display-tooltip-when-elided="true" name="MatchVelocityButtonTRMC" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
@@ -295,7 +295,7 @@
         <ui:VisualElement name="OTMMoonPanel" style="display: none;">
             <ui:VisualElement name="MoonReturnGroup" style="flex-direction: column;">
                 <ui:VisualElement name="MoonReturnRow" class="row-element-lose" style="flex-direction: row;">
-                    <ui:Button text="Return From Moon" display-tooltip-when-elided="true" name="ReturnFromMoonButtonOTM" class="big-button Maneuver-button" style="width: 50%; flex-grow: 0;" />
+                    <ui:Button text="Return From Moon" display-tooltip-when-elided="true" name="ReturnFromMoonButtonOTM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
                     <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
                         <ui:TextField picking-mode="Ignore" text="100" name="MoonReturnPeValue" tooltip="Target periapsis altitude for return orbit" />
                         <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" style="white-space: normal; -unity-text-align: middle-left;" />
@@ -337,48 +337,57 @@
             </ui:VisualElement>
             <ui:VisualElement name="InterplanetaryXferGroup" style="flex-direction: column;">
                 <ui:VisualElement name="InterplanetaryXferRow" class="row-element-lose">
-                    <ui:Button text="Interplanetary Transfer" display-tooltip-when-elided="true" name="InterplanetaryXferButton" class="big-button Maneuver-button" />
+                    <ui:Button text="Interplanetary Transfer" display-tooltip-when-elided="true" name="InterplanetaryXferButton" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="AdvInterplanetaryXferGroup" style="flex-direction: column;">
                 <ui:VisualElement name="AdvInterplanetaryXferRow" class="row-element-lose">
-                    <ui:Button text="Advanced Interplanetary Transfer" display-tooltip-when-elided="true" name="AdvInterplanetaryXferButton" class="big-button Maneuver-button" />
+                    <ui:Button text="Advanced Interplanetary Transfer" display-tooltip-when-elided="true" name="AdvInterplanetaryXferButton" class="Maneuver-button" />
                 </ui:VisualElement>
                 <ui:VisualElement name="HorizontalSpace" />
             </ui:VisualElement>
             <ui:VisualElement name="AdvXferGroup" style="display: flex;">
-                <ui:Label text="Max Arrival Time: " display-tooltip-when-elided="true" name="MaxArrivalTime" />
+                <ui:VisualElement name="CaptureBurnRow" class="row-element-tight">
+                    <ui:Toggle label="Include Capture Burn" name="CaptureBurnToggle" value="false" class="toggle row-element-tight" style="flex-direction: row-reverse;" />
+                </ui:VisualElement>
                 <ui:Label text="Computing: 0%" display-tooltip-when-elided="true" name="Computing" />
-                <ui:VisualElement name="PorkchopRow" style="flex-direction: row; justify-content: space-around;">
-                    <ui:VisualElement name="PorkchopDisplay" style="height: 200px; width: 330px;" />
-                </ui:VisualElement>
-                <ui:VisualElement name="DeltaVRow" class="row-element-tight" style="flex-direction: row; justify-content: space-between;">
-                    <ui:VisualElement name="DeltaVGroup" style="flex-direction: row;">
-                        <ui:Label text="ΔV:" display-tooltip-when-elided="true" />
-                        <ui:Label text="4.379 Mm/s" display-tooltip-when-elided="true" name="XferDeltaVLabel" />
-                    </ui:VisualElement>
-                    <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetButton" class="Maneuver-button" />
-                </ui:VisualElement>
-                <ui:Toggle label="Include Capture Burn" name="CaptureBurnToggle" value="false" class="toggle row-element-tight" style="flex-direction: row-reverse;" />
-                <ui:VisualElement name="PeriapsisRow" class="row-element-tight">
-                    <ui:TextField picking-mode="Ignore" label="Periapsis" value="60" text="60" name="AdvXferPeriapsisInput" class="text-input" />
-                    <ui:Label text="km" display-tooltip-when-elided="true" class="units-label" />
-                </ui:VisualElement>
-                <ui:VisualElement name="SelectRow" class="row-element-tight" style="flex-direction: row; justify-content: space-between;">
-                    <ui:Label text="Select:" display-tooltip-when-elided="true" />
-                    <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
-                        <ui:Button text="Lowest Dv" display-tooltip-when-elided="true" name="LowestDvButton" class="Maneuver-button" />
-                        <ui:Button text="ASAP" display-tooltip-when-elided="true" name="ASAPButton" class="Maneuver-button" />
+                <ui:VisualElement name="LimitedTimeGroup" style="width: 100%;">
+                    <ui:VisualElement name="MaxArrivalTimeRow" class="row-element-tight" style="justify-content: flex-start; width: 97%;">
+                        <ui:TextField picking-mode="Ignore" label="Max Arrival Time:" value="0" text="2y 362d 01h 14m 38s" name="MaxArrivalTimeInput" tooltip="Time in hh:mm:ss format" class="text-input" style="width: 290px;" />
+                        <ui:Label text="hms" display-tooltip-when-elided="true" class="units-label" style="width: 30px;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement name="DepartureRow" class="row-element-tight" style="flex-direction: row;">
-                    <ui:Label text="Departure in" display-tooltip-when-elided="true" />
-                    <ui:Label text="2y 362d 01h 14m 38s" display-tooltip-when-elided="true" name="DepartureTimeLabel" style="height: 24px;" />
-                </ui:VisualElement>
-                <ui:VisualElement name="TransitDurationRow" class="row-element-tight" style="flex-direction: row;">
-                    <ui:Label text="Transit duration" display-tooltip-when-elided="true" />
-                    <ui:Label text="56m 42s" display-tooltip-when-elided="true" name="TransitDurationTimeLabel" />
+                <ui:VisualElement name="PorkchopGroup">
+                    <ui:VisualElement name="PorkchopRow" style="flex-direction: row; justify-content: space-around;">
+                        <ui:VisualElement name="PorkchopDisplay" style="height: 200px; width: 330px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="DeltaVRow" class="row-element-tight" style="flex-direction: row; justify-content: space-between;">
+                        <ui:VisualElement name="DeltaVGroup" style="flex-direction: row;">
+                            <ui:Label text="ΔV:" display-tooltip-when-elided="true" />
+                            <ui:Label text="4.379 Mm/s" display-tooltip-when-elided="true" name="XferDeltaVLabel" />
+                        </ui:VisualElement>
+                        <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetButton" class="Maneuver-button Control-button" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="PeriapsisRow" class="row-element-tight">
+                        <ui:TextField picking-mode="Ignore" label="Periapsis" value="60" text="60" name="AdvXferPeriapsisInput" class="text-input" />
+                        <ui:Label text="km" display-tooltip-when-elided="true" class="units-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="SelectRow" class="row-element-tight" style="flex-direction: row; justify-content: space-between;">
+                        <ui:Label text="Select:" display-tooltip-when-elided="true" />
+                        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+                            <ui:Button text="Lowest Dv" display-tooltip-when-elided="true" name="LowestDvButton" class="Maneuver-button Control-button" />
+                            <ui:Button text="ASAP" display-tooltip-when-elided="true" name="ASAPButton" class="Maneuver-button Control-button" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="DepartureRow" class="row-element-tight" style="flex-direction: row;">
+                        <ui:Label text="Departure in" display-tooltip-when-elided="true" />
+                        <ui:Label text="2y 362d 01h 14m 38s" display-tooltip-when-elided="true" name="DepartureTimeLabel" style="height: 24px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="TransitDurationRow" class="row-element-tight" style="flex-direction: row;">
+                        <ui:Label text="Transit duration" display-tooltip-when-elided="true" />
+                        <ui:Label text="56m 42s" display-tooltip-when-elided="true" name="TransitDurationTimeLabel" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
