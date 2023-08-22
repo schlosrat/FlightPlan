@@ -185,7 +185,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         StateChanges.Map3DViewEntered += message =>
         {
             FpUiController.GUIenabled = true;
-            Logger.LogInfo($"Map3DViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+            Logger.LogDebug($"Map3DViewEntered message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
         };
 
         //StateChanges.GameStateChanged += (message, previousState, newState) => {
@@ -203,7 +203,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         StateChanges.Map3DViewLeft += message =>
         {
             FpUiController.GUIenabled = false;
-            Logger.LogInfo($"Map3DViewLeft message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+            Logger.LogDebug($"Map3DViewLeft message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
         };
         //StateChanges.VehicleAssemblyBuilderEntered += message =>
         //{
@@ -341,7 +341,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         LastGameState = (GameState)(GameManager.Instance?.Game?.GlobalGameState?.GetLastState());
         MessageCenter = GameManager.Instance?.Game?.Messages;
         ThisCurtainContext = (CurtainContext)(GameManager.Instance?.Game?.UI.Curtain.CurtainContextData.CurtainContext);
-        Logger.LogInfo($"RefreshGameManager ThisCurtainContext = {ThisCurtainContext}");
+        Logger.LogDebug($"RefreshGameManager ThisCurtainContext = {ThisCurtainContext}");
 
         // Log out every type of message in the game...
         //foreach (var type in typeof(GameManager).Assembly.GetTypes())
@@ -356,7 +356,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void GameStateChanged(MessageCenterMessage message)
     {
         RefreshGameManager();
-        Logger.LogInfo($"GameStateChanged Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+        Logger.LogDebug($"GameStateChanged Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
         if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
         {
             FpUiController.GUIenabled = true;
@@ -366,13 +366,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             FpUiController.GUIenabled = false;
             FpUiController.container.style.display = DisplayStyle.None;
         }
-        Logger.LogInfo($"GameStateChanged FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+        Logger.LogDebug($"GameStateChanged FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     }
 
     private void GameStateEntered(MessageCenterMessage message)
     {
         RefreshGameManager();
-        Logger.LogInfo($"GameStateEntered Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+        Logger.LogDebug($"GameStateEntered Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
         if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
         {
             FpUiController.GUIenabled = true;
@@ -382,43 +382,43 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             FpUiController.GUIenabled = false;
             FpUiController.container.style.display = DisplayStyle.None;
         }
-        Logger.LogInfo($"GameStateEntered FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+        Logger.LogDebug($"GameStateEntered FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     }
 
     private void GameStateLeft(MessageCenterMessage message)
     {
         RefreshGameManager();
-        Logger.LogInfo($"GameStateLeft Message Recived. GameState: {ThisGameState.GameState}");
+        Logger.LogDebug($"GameStateLeft Message Recived. GameState: {ThisGameState.GameState}");
 
         // if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
         FpUiController.GUIenabled = false;
         FpUiController.container.style.display = DisplayStyle.None;
 
-        Logger.LogInfo($"GameStateLeft FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+        Logger.LogDebug($"GameStateLeft FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     }
 
     private void TrackingStationLoaded(MessageCenterMessage message)
     {
         RefreshGameManager();
-        Logger.LogInfo($"TrackingStationLoadedAudioCue Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+        Logger.LogDebug($"TrackingStationLoadedAudioCue Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
 
         // if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
         FpUiController.GUIenabled = false;
         FpUiController.container.style.display = DisplayStyle.None;
 
-        Logger.LogInfo($"TrackingStationLoadedAudioCue FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+        Logger.LogDebug($"TrackingStationLoadedAudioCue FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     }
 
     private void TrainingCenterLoaded(MessageCenterMessage message)
     {
         RefreshGameManager();
-        Logger.LogInfo($"TrainingCenterLoaded Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
+        Logger.LogDebug($"TrainingCenterLoaded Message Recived. GameState: {LastGameState}  ->  {ThisGameState.GameState}");
 
         // if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
         FpUiController.GUIenabled = false;
         FpUiController.container.style.display = DisplayStyle.None;
 
-        Logger.LogInfo($"TrainingCenterLoaded FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+        Logger.LogDebug($"TrainingCenterLoaded FpUiController.GUIenabled = {FpUiController.GUIenabled}");
     }
 
 
@@ -548,10 +548,25 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // UI_Fields.GameInputState = true;
     }
 
-    private void CreateManeuverNodeCaller(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
+    private bool CreateManeuverNodeCaller(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5)
     {
-        StartCoroutine(CreateManeuverNode(deltaV, burnUT, burnOffsetFactor));
-        ///CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+        bool makeNode = true;
+        if (NodeManagerPlugin.Instance.Nodes.Count > 0)
+        { 
+            for (int i = 0; i <  NodeManagerPlugin.Instance.Nodes.Count; i++)
+            {
+                double deltaT = NodeManagerPlugin.Instance.Nodes[i].Time - burnUT;
+                if (Math.Abs(deltaT) < 30)
+                {
+                    makeNode = false;
+                    FPStatus.Error($"Requested node {deltaT:N3}s from Node {i+1}. Aborting node creation.");
+                }
+            }
+        }
+        if (makeNode)
+            StartCoroutine(CreateManeuverNode(deltaV, burnUT, burnOffsetFactor));
+        //CreateManeuverNode(deltaV, burnUT, burnOffsetFactor);
+        return makeNode;
     }
     private IEnumerator CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5) // IEnumerator
     {
@@ -675,8 +690,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -707,8 +721,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangePeriapsis(_orbit, burnUT, newPe);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -733,8 +746,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToChangeApoapsis(_orbit, burnUT, newAp);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -764,8 +776,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToEllipticize(_orbit, burnUT, newPe, newAp);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -788,8 +799,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         _deltaV = OrbitalManeuverCalculator.DeltaVToChangeInclination(_orbit, burnUT, inclination);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -817,8 +827,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToShiftLAN(_orbit, burnUT, newLANvalue);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -843,8 +852,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToShiftNodeLongitude(_orbit, burnUT, newNodeLongValue);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -869,8 +877,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVForSemiMajorAxis(_orbit, burnUT, newSMA);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -923,8 +930,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUTout, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUTout, burnOffsetFactor);
         }
         else
         {
@@ -991,8 +997,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
         }
         else
         {
@@ -1036,8 +1041,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         (_deltaV, _) = OrbitalManeuverCalculator.DeltaVToInterceptAtTime(_orbit, burnUT, tgtOrbit, _interceptUT, _offsetDistance);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -1087,8 +1091,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
         }
         else
         {
@@ -1121,8 +1124,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             (_deltaV, _burnUTout) = OrbitalManeuverCalculator.DeltaVAndTimeForMoonReturnEjection(_orbit, _UT, targetMRPeR);
             if (_deltaV != Vector3d.zero)
             {
-                CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
-                return true;
+                return CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
             }
             else
             {
@@ -1156,8 +1158,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Vector3d _deltaV = OrbitalManeuverCalculator.DeltaVToMatchVelocities(_orbit, burnUT, tgtOrbit);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, burnUT, burnOffsetFactor);
         }
         else
         {
@@ -1255,8 +1256,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Vector3d _deltaV2 = OrbitalManeuverCalculator.DeltaVAndTimeForInterplanetaryLambertTransferEjection(_orbit, _UT, tgtOrbit, out _burnUTout2);
         if (_deltaV != Vector3d.zero)
         {
-            CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
-            return true;
+            return CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
         }
         else
         {
