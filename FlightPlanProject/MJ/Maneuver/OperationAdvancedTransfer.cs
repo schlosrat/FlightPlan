@@ -1,11 +1,8 @@
 ﻿using FlightPlan;
-// using FlightPlan.KTools.UI;
 using FPUtilities;
 using JetBrains.Annotations;
 using KSP.Game;
 using KSP.Sim.impl;
-using RTG;
-using SpaceWarp.API.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static MechJebLib.Utils.Statics;
@@ -18,18 +15,21 @@ namespace MuMech
     {
         public enum Mode
         {
+            None,
             LimitedTime,
             Porkchop
         }
 
         private static readonly GameInstance Game = GameManager.Instance.Game;
 
-        private static readonly string[] modeNames =
-        {
-      "Limited time", "Porkchop selection"
-      // Localizer.Format("#MechJeb_adv_modeName1"), Localizer.Format("#MechJeb_adv_modeName2")
-    };
-        //"Limited time","Porkchop selection"
+        private static readonly string[]
+            modeNames =
+            {
+                "None",
+                "Limited time",
+                "Porkchop selection"
+                // Localizer.Format("#MechJeb_adv_modeName1"), Localizer.Format("#MechJeb_adv_modeName2")
+            }; //"Limited time","Porkchop selection"
 
         public override string GetName() { return "advanced transfer to another planet"; } // Localizer.Format("#MechJeb_AdvancedTransfer_title"); } //"advanced transfer to another planet"
 
@@ -38,7 +38,7 @@ namespace MuMech
         private double maxDepartureTime;
         private double maxTransferTime;
 
-        public EditableTime maxArrivalTime = new EditableTime();
+        // public EditableTime maxArrivalTime = new EditableTime();
 
         // private bool includeCaptureBurn;
 
@@ -52,22 +52,24 @@ namespace MuMech
         private const double minSamplingStep = 12 * 3600;
 
         private Mode selectionMode = Mode.Porkchop;
+        private Mode previousSelectiionMode = Mode.None;
+        private CelestialBodyComponent previousTarget = null;
         private int windowWidth = 330;
         // int minWindowWidth = 330;
 
         private CelestialBodyComponent lastTargetCelestial;
 
         public TransferCalculator worker;
-        public PlotArea           plot;
+        public PlotArea plot;
 
         private static Texture2D texture;
 
-        private         bool _draggable = true;
+        private bool _draggable = true;
         public override bool Draggable => _draggable;
 
         private const int porkchop_Height = 200;
 
-        private static GUIStyle progressStyle;
+        // private static GUIStyle progressStyle;
 
         private string CheckPreconditions(PatchedConicsOrbit o, CelestialBodyComponent target)  // was: MechJebModuleTargetController target
         {
@@ -124,9 +126,11 @@ namespace MuMech
             switch (selectionMode)
             {
                 case Mode.LimitedTime:
-                    worker = new TransferCalculator(o, target.Orbit, universalTime, maxArrivalTime, minSamplingStep, FpUiController.CaptureBurnToggle.value);
+                    FlightPlanPlugin.Logger.LogDebug($"ComputeStuff: UT: {universalTime:N0}, MaxArrivalTime_s: {FpUiController.MaxArrivalTime_s}, minSamplingStep: {minSamplingStep}, Include Capture Burn: {FpUiController.CaptureBurnToggle.value}");
+                    worker = new TransferCalculator(o, target.Orbit, universalTime, FpUiController.MaxArrivalTime_s, minSamplingStep, FpUiController.CaptureBurnToggle.value);
                     break;
                 case Mode.Porkchop:
+                    FlightPlanPlugin.Logger.LogDebug($"ComputeStuff: minDepartureTime: {minDepartureTime:N0}, maxDepartureTime: {maxDepartureTime:N0}, minTransferTime: {minTransferTime:N0}, maxTransferTime: {maxTransferTime:N0}, windowWidth: {windowWidth}, porkchop_Height: {porkchop_Height}, Include Capture Burn: {FpUiController.CaptureBurnToggle.value}");
                     worker = new AllGraphTransferCalculator(o, target.Orbit, minDepartureTime, maxDepartureTime, minTransferTime,
                         maxTransferTime, windowWidth, porkchop_Height, FpUiController.CaptureBurnToggle.value);
                     break;
@@ -147,11 +151,11 @@ namespace MuMech
                 synodic_period = o.referenceBody.Orbit.period;
 
             minDepartureTime = universalTime;
-            minTransferTime  = 3600;
+            minTransferTime = 3600;
 
-            maxDepartureTime   = minDepartureTime + synodic_period * 1.5;
-            maxTransferTime    = hohmann_transfer_time * 2.0;
-            maxArrivalTime.val = synodic_period * 1.5 + hohmann_transfer_time * 2.0;
+            maxDepartureTime = minDepartureTime + synodic_period * 1.5;
+            maxTransferTime = hohmann_transfer_time * 2.0;
+            FpUiController.MaxArrivalTimeInput.value = FPUtility.SecondsToTimeString(synodic_period * 1.5 + hohmann_transfer_time * 2.0);
         }
 
         // private bool layoutSkipped;
@@ -160,14 +164,14 @@ namespace MuMech
         {
             var targetCelestial = target as CelestialBodyComponent;
 
-            FpUiController.MaxArrivalTime.style.display = DisplayStyle.None;
+            // FpUiController.LimitedTimeGroup.style.display = DisplayStyle.None;
             FpUiController.Computing.style.display = DisplayStyle.None;
-            FpUiController.PorkchopDisplay.style.display = DisplayStyle.Flex;
+            // FpUiController.PorkchopGroup.style.display = DisplayStyle.Flex;
 
             // If the Reset Button has been pressed
             if (doReset) // Localizer.Format("#MechJeb_adv_reset_button")
             {
-                FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doReset = {doReset}");
+                FlightPlanPlugin.Logger.LogDebug($"DoPorkchopGui: doReset = {doReset}");
                 ComputeTimes(o, target.Orbit, universalTime);
                 doReset = false;
                 worker = null;
@@ -176,7 +180,7 @@ namespace MuMech
             // If the Lowest Dv Button has been pressed
             if (doSetLowestDv) // Localizer.Format("#MechJeb_adv_button1")
             {
-                FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doSetLowestDv = {doSetLowestDv}");
+                FlightPlanPlugin.Logger.LogDebug($"DoPorkchopGui: doSetLowestDv = {doSetLowestDv}");
                 if (plot != null)
                 {
                     plot.SelectedPoint = new[] { worker.BestDate, worker.BestDuration };
@@ -252,10 +256,10 @@ namespace MuMech
                         {
                             minDepartureTime = Math.Max(xmin, universalTime);
                             maxDepartureTime = xmax;
-                            minTransferTime  = Math.Max(ymin, 3600);
-                            maxTransferTime  = ymax;
-                            GUI.changed      = true;
-                            guiChanged       = true;
+                            minTransferTime = Math.Max(ymin, 3600);
+                            maxTransferTime = ymax;
+                            GUI.changed = true;
+                            guiChanged = true;
                         });
                     plot.SelectedPoint = new[] { worker.BestDate, worker.BestDuration };
                 }
@@ -268,12 +272,11 @@ namespace MuMech
                 if (plot.HoveredPoint != null)
                     point = plot.HoveredPoint;
 
-                double p = 0;
-                try { p = worker.Computed[point[0], point[1]]; }
-                catch (Exception ex) { FlightPlanPlugin.Logger.LogError($"Suppressed {ex}: point = [{point[0]},{point[1]}], worker.Computed is [{worker.Computed.GetLength(0)},{worker.Computed.GetLength(1)}]"); }
-
+                double p = worker.Computed[point[0], point[1]];
                 if (p > 0)
                 {
+                    // Display the DeltaV of the hovered/selected point
+ 
                     dv = p.ToSI() + "m/s";
                     if (worker.DateFromIndex(point[0]) < Game.UniverseModel.UniversalTime) // Planetarium.GetUniversalTime())
                         departure = "any time now"; // Localizer.Format("#MechJeb_adv_label1")
@@ -297,19 +300,12 @@ namespace MuMech
             // Display the DeltaV of the hovered/selected point
             FpUiController.XferDeltaVLabel.text = dv;
 
-            //// If the Reset Button has been pressed
-            //if (doReset) // Localizer.Format("#MechJeb_adv_reset_button")
-            //{
-            //  FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doReset = {doReset}");
-            //  ComputeTimes(o, target.Orbit, universalTime);
-            //  doReset = false;
-            //}
-
             // includeCaptureBurn = GUILayout.Toggle(includeCaptureBurn, "Include Capture Burn"); // Localizer.Format("#MechJeb_adv_captureburn")
 
             // fixup the default value of the periapsis if the target changes
             if (targetCelestial != null && lastTargetCelestial != targetCelestial)
             {
+                // UITK periapsisHeight is now FpUiController.TargetAdvXferPe_m 
                 if (targetCelestial.hasAtmosphere)
                 {
                     FpUiController.TargetAdvXferPe_m = Math.Max(targetCelestial.atmosphereDepth + 10000, FpUiController.TargetAdvXferPe_m);
@@ -322,51 +318,20 @@ namespace MuMech
                 }
             }
 
-            // UITK periapsisHeight is now FpUiController.TargetAdvXferPe_m 
-
-            //// If the Lowest Dv Button has been pressed
-            //if (doSetLowestDv) // Localizer.Format("#MechJeb_adv_button1")
-            //{
-            //  FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doSetLowestDv = {doSetLowestDv}");
-            //  plot.SelectedPoint = new[] { worker.BestDate, worker.BestDuration };
-            //  guiChanged = false;
-            //  doSetLowestDv = false;
-            //}
-
-            //// If the ASAP Button has been pressed
-            //if (doSetASAP) // Localizer.Format("#MechJeb_adv_button2")
-            //{
-            //  FlightPlanPlugin.Logger.LogInfo($"DoPorkchopGui: doSetASAP = {doSetASAP}");
-
-            //  int bestDuration = 0;
-            //  for (int i = 1; i < worker.Computed.GetLength(1); i++)
-            //  {
-            //    if (worker.Computed[0, bestDuration] > worker.Computed[0, i])
-            //      bestDuration = i;
-            //  }
-
-            //  guiChanged = false;
-            //  doSetASAP = false;
-            //}
-
-            // Display the DeltaV of the hovered/selected point
-            // FpUiController.DepartureTimeLabel.text = departure;
-            // FpUiController.TransitDurationTimeLabel.text = duration;
-
             lastTargetCelestial = targetCelestial;
         }
 
-        public override void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target, Mode selectionMode) // was: MechJebModuleTargetController target
+        public override void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target, Mode thisSelectionMode) // was: MechJebModuleTargetController target
         {
             _draggable = true;
-
-            // What's this for?
-            if (worker != null && target == null && Event.current.type == EventType.Layout) // was: !target.NormalTargetExists
+            selectionMode = thisSelectionMode;
+            // If there is a worker running without a target selected (and event type is Layout) then stop the worker and clear the plot
+            if (worker != null && (target == null || target != previousTarget || selectionMode != previousSelectiionMode)) // was: !target.NormalTargetExists && Event.current.type == EventType.Layout
             {
-                FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Stopping/Clearing worker and plot. Target = {target}, Event = {Event.current.type}");
+                FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Stopping/Clearing worker and plot. Target = {target.Name}, thisSelectionMode = {modeNames[(int)thisSelectionMode]}");
                 worker.Stop = true;
-                worker      = null;
-                plot        = null;
+                worker = null;
+                plot = null;
             }
 
             // selectionMode = (Mode)GuiUtils.ComboBox.Box((int)selectionMode, modeNames, this);
@@ -379,9 +344,9 @@ namespace MuMech
             switch (selectionMode)
             {
                 case Mode.LimitedTime:
-                    // Display Max Arrival Time
-                    FpUiController.MaxArrivalTime.style.display = DisplayStyle.Flex;
-                    FpUiController.MaxArrivalTime.text = $"Max Arrival Time: {maxArrivalTime.text}";
+                    FpUiController.PorkchopGroup.style.display = DisplayStyle.None;
+                    FpUiController.LimitedTimeGroup.style.display = DisplayStyle.Flex;
+                    // FpUiController.MaxArrivalTimeInput.value = FPUtility.SecondsToTimeString(maxArrivalTime.val);
                     // Display Computing if needed
                     if (worker != null && !worker.Finished)
                     {
@@ -392,37 +357,24 @@ namespace MuMech
                     else
                         FpUiController.Computing.style.display = DisplayStyle.None;
                     // Switch off the PorkchopDisplay
-                    FpUiController.PorkchopDisplay.style.display = DisplayStyle.None;
                     break;
                 case Mode.Porkchop:
-                    // windowWidth = minWindowWidth;
+                    FpUiController.LimitedTimeGroup.style.display = DisplayStyle.None;
+                    FpUiController.PorkchopGroup.style.display = DisplayStyle.Flex;
                     DoPorkchopGui(o, universalTime, target);
                     break;
             }
 
             if (worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
-            {
-                bool test1 = worker == null;
-                if (test1)
-                    FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeTimes. worker == null {worker == null}");
-                else
-                {
-                    FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeTimes. worker == null {worker == null}, DestinationOrbit != target.Orbit = {worker.DestinationOrbit != target.Orbit}, worker.OriginOrbit != o = {worker.OriginOrbit != o}");
-                }
                 ComputeTimes(o, target.Orbit, universalTime);
-            }
 
             // if (GUI.changed || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
             if (GUI.changed || guiChanged || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
-            {
-                bool test1 = worker == null;
-                if (test1)
-                    FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeStuff. guiChanged = {guiChanged}, worker == null {worker == null}");
-                else
-                    FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Calling ComputeStuff. guiChanged = {guiChanged}, worker == null {worker == null}, DestinationOrbit != target.Orbit = {worker.DestinationOrbit != target.Orbit}, worker.OriginOrbit != o = {worker.OriginOrbit != o}");
-
                 ComputeStuff(o, universalTime, target);
-            }
+
+            previousSelectiionMode = thisSelectionMode;
+            previousTarget = target;
+
         }
 
         protected override List<ManeuverParameters> MakeNodesImpl(PatchedConicsOrbit o, double UT, CelestialBodyComponent target) // was: MechJebModuleTargetController target
@@ -448,10 +400,14 @@ namespace MuMech
 
             double target_PeR = lastTargetCelestial.radius + FpUiController.TargetAdvXferPe_m;
 
+            double departure, arrival;
             if (selectionMode == Mode.Porkchop)
             {
                 if (plot == null || plot.SelectedPoint == null)
                     throw new OperationException("Invalid point selected"); // Localizer.Format("#MechJeb_adv_Exception4")
+                departure = worker.DateFromIndex(plot.SelectedPoint[0]);
+                arrival = worker.DateFromIndex(plot.SelectedPoint[0]) + worker.DurationFromIndex(plot.SelectedPoint[1]);
+                FlightPlanPlugin.Logger.LogInfo($"MakeNodesImpl: Departure {FPUtility.SecondsToTimeString(departure)}, Duratiopn {FPUtility.SecondsToTimeString(arrival - departure)}, Arrival {FPUtility.SecondsToTimeString(arrival)}, UT {FPUtility.SecondsToTimeString(UT)}, target_PeR {target_PeR}, Include Capture Burn {FpUiController.CaptureBurnToggle.value}");
                 return worker.OptimizeEjection(
                     worker.DateFromIndex(plot.SelectedPoint[0]),
                     o, target as CelestialBodyComponent,
@@ -459,6 +415,9 @@ namespace MuMech
                     UT, target_PeR, FpUiController.CaptureBurnToggle.value);
             }
 
+            departure = worker.DateFromIndex(worker.BestDate);
+            arrival = worker.DateFromIndex(worker.BestDate) + worker.DurationFromIndex(worker.BestDuration);
+            FlightPlanPlugin.Logger.LogInfo($"MakeNodesImpl: Departure {FPUtility.SecondsToTimeString(departure)}, Duratiopn {FPUtility.SecondsToTimeString(arrival - departure)}, Arrival {FPUtility.SecondsToTimeString(arrival)}, UT {FPUtility.SecondsToTimeString(UT)}, target_PeR {target_PeR}, Include Capture Burn {FpUiController.CaptureBurnToggle.value}");
             return worker.OptimizeEjection(
                 worker.DateFromIndex(worker.BestDate),
                 o, target as CelestialBodyComponent,

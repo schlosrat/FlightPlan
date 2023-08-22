@@ -1,5 +1,4 @@
 .unity-label {
-    flex-direction: column;
     display: flex;
     visibility: visible;
     overflow: visible;
@@ -107,7 +106,6 @@
 
 .units-label {
     width: 30px;
-    flex-direction: column;
     align-items: flex-start;
     -unity-text-align: middle-left;
     height: auto;
@@ -191,6 +189,7 @@
 
 .unity-base-field__label {
     flex-grow: 1;
+    min-width: auto;
 }
 
 .unity-button:hover {
@@ -227,10 +226,8 @@
     border-right-color: rgb(125, 125, 125);
     border-top-color: rgb(125, 125, 125);
     border-bottom-color: rgb(125, 125, 125);
-    height: 100%;
-    min-width: 100px;
-    min-height: 100%;
-    width: 100px;
+    flex-grow: 1;
+    max-width: 160px;
 }
 
 .text-field__input {
@@ -365,6 +362,7 @@
     padding-top: 2px;
     padding-bottom: 2px;
     flex-shrink: 1;
+    width: 100%;
 }
 
 Dropdown > .unity-base-field__label {
@@ -545,4 +543,42 @@ Dropdown > .unity-base-field__label {
 
 .unity-base-dropdown__arrow {
     display: none;
+}
+
+.text-input {
+}
+
+.Control-button {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 22px;
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    background-color: rgb(38, 35, 41);
+    justify-content: center;
+    align-items: stretch;
+    flex-grow: 0;
+    flex-direction: row;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    flex-shrink: 1;
+    width: 100px;
+}
+
+.unity-text-field__label {
+    flex-grow: 0;
 }

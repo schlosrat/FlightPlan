@@ -42,6 +42,7 @@ public class FpUiController : KerbalMonoBehaviour
     public static double TargetInterceptDistanceVessel_m = 100.0;
     public static double Altitude_km;
     public static double TimeOffset_s;
+    public static double MaxArrivalTime_s = 0.0;
 
     //private double _newPeValue = 100;
     //private double _newApValue = 200;
@@ -212,9 +213,11 @@ public class FpUiController : KerbalMonoBehaviour
     VisualElement AdvInterplanetaryXferGroup;
     Button AdvInterplanetaryXferButton;
     VisualElement AdvXferGroup;
+    public static VisualElement LimitedTimeGroup;
+    public static VisualElement PorkchopGroup;
     Toggle PorkchopToggle;
     public static VisualElement PorkchopDisplay;
-    public static Label MaxArrivalTime;
+    public static TextField MaxArrivalTimeInput;
     public static Label Computing;
     public static Label XferDeltaVLabel;
     Button ResetButton;
@@ -495,7 +498,7 @@ public class FpUiController : KerbalMonoBehaviour
         //  FlightPlanPlugin.Logger.LogInfo($"GameState Transitioned?: {_gameState} -> {_newGameState2}");
         if (_gameStateUpdated)
         {
-            FlightPlanPlugin.Logger.LogInfo($"GameState Transitioned: {_gameState} -> {_newGameState}");
+            FlightPlanPlugin.Logger.LogDebug($"GameState Transitioned: {_gameState} -> {_newGameState}");
             _gameState = (GameState)_newGameState;
         }
 
@@ -1254,46 +1257,70 @@ public class FpUiController : KerbalMonoBehaviour
 
             if (TargetTypeButton.text == "Celestial")
             {
-                FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Body: '{evt.newValue}'");
+                FlightPlanPlugin.Logger.LogDebug($"RegisterValueChangedCallback Selected Body: '{evt.newValue}'");
                 if (targetBodies.Keys.Contains(evt.newValue))
                 {
-                    FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Body GlobalId: {targetBodies[evt.newValue].GlobalId}");
+                    FlightPlanPlugin.Logger.LogDebug($"RegisterValueChangedCallback Selected Body GlobalId: {targetBodies[evt.newValue].GlobalId}");
                     _activeVessel.SetTargetByID(targetBodies[evt.newValue].GlobalId);
                     _currentTarget = _activeVessel.TargetObject;
+#if DEBUG
+                    PatchedConicsOrbit o = _currentTarget.Orbit as PatchedConicsOrbit;
+                    double _synchronousPeriod = _currentTarget.CelestialBody.rotationPeriod;
+                    double _semiSynchronousPeriod = _synchronousPeriod / 2;
+                    double _synchronousAlt = SMACalc(_synchronousPeriod);
+                    double _semiSynchronousAlt = SMACalc(_semiSynchronousPeriod);
+                    FlightPlanPlugin.Logger.LogInfo($"{_currentTarget.Name}:");
+                    FlightPlanPlugin.Logger.LogInfo($"SMA:                    {o.semiMajorAxis} m");
+                    FlightPlanPlugin.Logger.LogInfo($"Apoapsis:               {o.Apoapsis} m");
+                    FlightPlanPlugin.Logger.LogInfo($"Apoapsis ARL:           {o.ApoapsisArl} m");
+                    FlightPlanPlugin.Logger.LogInfo($"Periapsis:              {o.Periapsis} m");
+                    FlightPlanPlugin.Logger.LogInfo($"Periapsis ARL:          {o.PeriapsisArl} m");
+                    FlightPlanPlugin.Logger.LogInfo($"eccentricity:           {o.eccentricity}");
+                    FlightPlanPlugin.Logger.LogInfo($"inclination:            {o.inclination}°");
+                    FlightPlanPlugin.Logger.LogInfo($"Argument of Periapsis:  {o.argumentOfPeriapsis}°");
+                    FlightPlanPlugin.Logger.LogInfo($"LAN:                    {o.longitudeOfAscendingNode}°");
+                    FlightPlanPlugin.Logger.LogInfo($"Period:                 {o.period} s = {FPUtility.SecondsToTimeString(o.period)}");
+                    FlightPlanPlugin.Logger.LogInfo($"MeanAnomaly:            {o.MeanAnomaly}°");
+                    FlightPlanPlugin.Logger.LogInfo($"Mean Orbital Velocity:  {2*Math.PI*o.semiMajorAxis/o.period} m/s");
+                    FlightPlanPlugin.Logger.LogInfo($"Apoapsis Velocity:      {o.WorldOrbitalVelocityAtUT(o.TimeToAp).magnitude} m/s");
+                    FlightPlanPlugin.Logger.LogInfo($"Periapsis Velocity:     {o.WorldOrbitalVelocityAtUT(o.TimeToPe).magnitude} m/s");
+                    FlightPlanPlugin.Logger.LogInfo($"Sphere of Influence:    {_currentTarget.CelestialBody.sphereOfInfluence} m");
+                    if (_synchronousAlt < _currentTarget.CelestialBody.sphereOfInfluence)
+                        FlightPlanPlugin.Logger.LogInfo($"Synchronous Orbit:      {_synchronousAlt} m");
+                    else
+                        FlightPlanPlugin.Logger.LogInfo($"Synchronous Orbit:      {_synchronousAlt} m (Outside of SOI)");
+                    if (_synchronousAlt < _currentTarget.CelestialBody.sphereOfInfluence)
+                        FlightPlanPlugin.Logger.LogInfo($"Semi-Synchronous Orbit: {_semiSynchronousAlt} m");
+                    else
+                        FlightPlanPlugin.Logger.LogInfo($"Semi-Synchronous Orbit: {_semiSynchronousAlt} m (Outside of SOI)");
+#endif
                 }
-                // If the celestial body selected is incompatible with the maneuver button selected, deselect the maneuver button
-                //if ()
-                //SetTab(1);
-
-                //TRMShipToShipButton.;
-                //TRMShipToCelestialButton;
-                //OTMMoonButton;
-                //OTMPlanetButton;
-                //ROMButton;
             }
             else if (TargetTypeButton.text == "Vessel")
             {
-                FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Vessel: '{evt.newValue}'");
+                FlightPlanPlugin.Logger.LogDebug($"RegisterValueChangedCallback Selected Vessel: '{evt.newValue}'");
                 if (targetVessels.Keys.Contains(evt.newValue))
                 {
-                    FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Vessle GlobalId: {targetVessels[evt.newValue].GlobalId}");
+                    FlightPlanPlugin.Logger.LogDebug($"RegisterValueChangedCallback Selected Vessle GlobalId: {targetVessels[evt.newValue].GlobalId}");
                     _activeVessel.SetTargetByID(targetVessels[evt.newValue].GlobalId);
                     _currentTarget = _activeVessel.TargetObject;
                 }
             }
             else if (TargetTypeButton.text == "Port")
             {
-                FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Port: '{evt.newValue}'");
+                FlightPlanPlugin.Logger.LogDebug($"RegisterValueChangedCallback Selected Port: '{evt.newValue}'");
                 if (targetPorts.Keys.Contains(evt.newValue))
                 {
-                    FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Port GlobalId: {targetPorts[evt.newValue].GlobalId}");
+                    FlightPlanPlugin.Logger.LogDebug($"RegisterValueChangedCallback Selected Port GlobalId: {targetPorts[evt.newValue].GlobalId}");
                     _activeVessel.SetTargetByID(targetPorts[evt.newValue].GlobalId);
                     _currentTarget = _activeVessel.TargetObject;
                 }
             }
 
             if (_currentTarget != null)
+            {
                 FlightPlanPlugin.Logger.LogInfo($"RegisterValueChangedCallback Selected Target: {_currentTarget.Name}");
+            }
 
         });
         // FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}");
@@ -1674,8 +1701,10 @@ public class FpUiController : KerbalMonoBehaviour
         AdvInterplanetaryXferButton = container.Q<Button>("AdvInterplanetaryXferButton");
         AdvInterplanetaryXferGroup = container.Q<VisualElement>("AdvInterplanetaryXferGroup");
         AdvXferGroup = container.Q<VisualElement>("AdvXferGroup");
+        LimitedTimeGroup = container.Q<VisualElement>("LimitedTimeGroup");
+        PorkchopGroup = container.Q<VisualElement>("PorkchopGroup");
         PorkchopToggle = container.Q<Toggle>("PorkchopToggle");
-        MaxArrivalTime = container.Q<Label>("MaxArrivalTime");
+        MaxArrivalTimeInput = container.Q<TextField>("MaxArrivalTimeInput");
         Computing = container.Q<Label>("Computing");
         PorkchopDisplay = container.Q<VisualElement>("PorkchopDisplay");
         XferDeltaVLabel = container.Q<Label>("XferDeltaVLabel");
@@ -1686,6 +1715,19 @@ public class FpUiController : KerbalMonoBehaviour
         ASAPButton = container.Q<Button>("ASAPButton");
         DepartureTimeLabel = container.Q<Label>("DepartureTimeLabel");
         TransitDurationTimeLabel = container.Q<Label>("TransitDurationTimeLabel");
+
+        MaxArrivalTimeInput.RegisterValueChangedCallback((evt) =>
+        {
+            if (MyTryParse(evt.newValue, out double newValue))
+            {
+                // FpUiController.MaxArrivalTime_s = newValue;
+                MaxArrivalTime_s = newValue;
+                FlightPlanPlugin.Logger.LogDebug($"MaxArrivalTimeInput: {evt.newValue} -> {newValue}");
+            }
+            else
+                FlightPlanPlugin.Logger.LogDebug($"MaxArrivalTimeInput: unable to parse '{evt.newValue}'");
+        });
+        MaxArrivalTimeInput.value = FPUtility.SecondsToTimeString(0);
 
         InterplanetaryXferButton.clicked += InterplanetaryXfer;
         AdvInterplanetaryXferButton.clicked += AdvInterplanetaryXfer;
