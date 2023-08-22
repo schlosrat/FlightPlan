@@ -485,6 +485,7 @@ namespace MuMech
             Vector3d deltaHorizontalVelocity;
             double UT = Game.UniverseModel.UniversalTime;
             Vector3d up = vessel.Orbit.Position.localPosition.normalized; // (from VesselState.cs) was orbitalPosition.normalized
+            // CHANGE GetOrbitalVelocityAtUTZup to WorldOrbitalVelocityAtUT? It's changed everywhere else but here. What about GetFrameVelAtUTZup though?
             Vector3d surfaceVelocity = vessel.Orbit.GetOrbitalVelocityAtUTZup(UT) - vessel.mainBody.GetFrameVelAtUTZup(UT); // (from VesselState.cs) was orbitalVelocity - vessel.mainBody.getRFrmVel(CoM)
             if (Vector3d.Exclude(up, surfaceVelocity).magnitude < 200) // was vesselState.speedSurfaceHorizontal
             {
@@ -1735,8 +1736,8 @@ namespace MuMech
             PatchedConicSolver.SolverParameters solverParameters = new PatchedConicSolver.SolverParameters();
             // Grab an obit from the pool and build it for the initial obrit with dV applied at burnUT
             PatchedConicsOrbit orbit = OrbitPool.FetchInstance(); // .Borrow();
-            Position position = new Position(initial.referenceBody.SimulationObject.transform.celestialFrame, initial.GetRelativePositionAtUT(burnUT));
-            Velocity velocity = new Velocity(initial.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, initial.GetOrbitalVelocityAtUTZup(burnUT) + dV.SwapYAndZ);
+            Position position = new Position(initial.referenceBody.SimulationObject.transform.celestialFrame, initial.WorldBCIPositionAtUT(burnUT)); // GetRelativePositionAtUT
+            Velocity velocity = new Velocity(initial.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, initial.WorldOrbitalVelocityAtUT(burnUT) + dV.SwapYAndZ); // GetOrbitalVelocityAtUTZup
             orbit.UpdateFromStateVectors(position, velocity, initial.referenceBody, burnUT);
             orbit.StartUT = burnUT;
             orbit.EndUT = orbit.eccentricity >= 1.0 ? orbit.period : burnUT + orbit.period;
@@ -1888,7 +1889,7 @@ namespace MuMech
                 throw new ArgumentException("[MechJeb] SOI_intercept: transfer orbit must be in the same SOI as the target celestial");
             Func<double, object, double> f = delegate(double UT, object ign)
             {
-                return (transfer.GetRelativePositionAtUT(UT) - target.Orbit.GetRelativePositionAtUT(UT)).magnitude - target.sphereOfInfluence;
+                return (transfer.WorldBCIPositionAtUT(UT) - target.Orbit.WorldBCIPositionAtUT(UT)).magnitude - target.sphereOfInfluence; // GetRelativePositionAtUT
             };
             UT = 0;
             try { UT = BrentRoot.Solve(f, UT1, UT2, null); }
