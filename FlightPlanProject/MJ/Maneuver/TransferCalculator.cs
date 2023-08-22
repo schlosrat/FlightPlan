@@ -68,15 +68,13 @@ namespace MuMech
         {
             OriginOrbit      = o;
             DestinationOrbit = target;
-            int minHeight = 200; //  1000; // 200;
-            int minWidth = 330; //  1000; // 290;
 
             _origin = new PatchedConicsOrbit(Game.UniverseModel);
             _origin.UpdateFromOrbitAtUT(o, minDepartureTime, o.referenceBody);
             _destination = new PatchedConicsOrbit(Game.UniverseModel);
             _destination.UpdateFromOrbitAtUT(target, minDepartureTime, target.referenceBody);
-            MaxDurationSamples  = Math.Max(minHeight,height);
-            DateSamples         = Math.Max(minWidth, width);
+            MaxDurationSamples  = height;
+            DateSamples         = width;
             NextDateIndex       = DateSamples;
             MinDepartureTime    = minDepartureTime;
             MaxDepartureTime    = maxDepartureTime;
@@ -109,17 +107,54 @@ namespace MuMech
             return Computed[dateIndex1, durationIndex1] > Computed[dateIndex2, durationIndex2];
         }
 
+        static int thisWay = 0;
+
         private void CalcLambertDVs(double t0, double dt, out Vector3d exitDV, out Vector3d captureDV)
         {
             double t1 = t0 + dt;
             CelestialBodyComponent originPlanet = _origin.referenceBody;
 
-            var v10 = originPlanet.Orbit.GetOrbitalVelocityAtUTZup(t0).ToV3();
-            var r1 = originPlanet.Orbit.GetRelativePositionAtUT(t0).ToV3();
+            // MechJeb Version
+            // var v10 = originPlanet.orbit.getOrbitalVelocityAtUT(t0).ToV3();
+            // var r1 = originPlanet.orbit.getRelativePositionAtUT(t0).ToV3();
+            // var r2 = _destination.getRelativePositionAtUT(t1).ToV3();
+            // var v21 = _destination.getOrbitalVelocityAtUT(t1).ToV3();
 
-            var r2 = _destination.GetRelativePositionAtUT(t1).ToV3();
-            var v21 = _destination.GetOrbitalVelocityAtUTZup(t1).ToV3();
+            V3 v10, r1, r2, v21;
 
+            if (thisWay == 0)
+            {
+                // Try Get*AtUTZup(t)
+                v10 = originPlanet.Orbit.GetOrbitalVelocityAtUTZup(t0).ToV3();
+                r1  = originPlanet.Orbit.GetRelativePositionAtUTZup(t0).ToV3();
+                r2  = _destination.GetRelativePositionAtUTZup(t1).ToV3();
+                v21 = _destination.GetOrbitalVelocityAtUTZup(t1).ToV3();
+            }
+            else if (thisWay == 1)
+            {
+                // Try Get*AtUTZup(t).SwapYAndZ
+                v10 = originPlanet.Orbit.GetOrbitalVelocityAtUTZup(t0).SwapYAndZ.ToV3();
+                r1  = originPlanet.Orbit.GetRelativePositionAtUTZup(t0).SwapYAndZ.ToV3();
+                r2  = _destination.GetRelativePositionAtUTZup(t1).SwapYAndZ.ToV3();
+                v21 = _destination.GetOrbitalVelocityAtUTZup(t1).SwapYAndZ.ToV3();
+            }
+            //else if (thisWay == 2) // This does not work at all
+            //{
+            //    // Try World*AtUT(t)
+            //    v10 = originPlanet.Orbit.WorldOrbitalVelocityAtUT(t0).ToV3(); // .SwapYAndZ.ToV3();
+            //    r1 = originPlanet.Orbit.WorldPositionAtUT(t0).ToV3(); // .SwapYAndZ.ToV3();
+            //    r2 = _destination.WorldPositionAtUT(t1).ToV3(); // .SwapYAndZ.ToV3();
+            //    v21 = _destination.WorldOrbitalVelocityAtUT(t1).ToV3(); // .SwapYAndZ.ToV3();
+            //}
+            else
+            {
+                // Try World*AtUT(t)
+                v10 = originPlanet.Orbit.WorldOrbitalVelocityAtUT(t0).ToV3(); // .SwapYAndZ.ToV3();
+                r1  = originPlanet.Orbit.WorldBCIPositionAtUT(t0).ToV3(); // .SwapYAndZ.ToV3();
+                r2  = _destination.WorldBCIPositionAtUT(t1).ToV3(); // .SwapYAndZ.ToV3();
+                v21 = _destination.WorldOrbitalVelocityAtUT(t1).ToV3(); // .SwapYAndZ.ToV3();
+            }
+            
             V3 v1;
             V3 v2;
             try
@@ -133,34 +168,55 @@ namespace MuMech
                 // ignored
             }
 
-            exitDV    = (v1 - v10).ToVector3d();
+            //Vector3d foo, bar;
+            //foo = (v1 - v10).ToVector3d();
+            //bar = (v21 - v2).ToVector3d();
+            //exitDV.x = -foo.z; // = (v1 - v10).ToVector3d();
+            //exitDV.y = foo.x; // = (v1 - v10).ToVector3d();
+            //exitDV.z = foo.y; // = (v1 - v10).ToVector3d();
+            //captureDV.x = -bar.z; // = (v21 - v2).ToVector3d();
+            //captureDV.y = bar.x; // = (v21 - v2).ToVector3d();
+            //captureDV.z = bar.y; // = (v21 - v2).ToVector3d();
+
+            exitDV = (v1 - v10).ToVector3d();
             captureDV = (v21 - v2).ToVector3d();
         }
 
+        // Populate this worker's Computed map (forms a portion of the porkchop plot)
         private void ComputeDeltaV(object args)
         {
+            // Loop through some date indicies. TakeDateIndex returns NExtDateIndex decrementing the index
             for (int dateIndex = TakeDateIndex();
                  dateIndex >= 0;
                  dateIndex = TakeDateIndex())
             {
+                // Get the initial time for this dateIndex: = MinDepartureTime + index * (MaxDepartureTime - MinDepartureTime) / DateSamples;
                 double t0 = DateFromIndex(dateIndex);
 
                 if (double.IsInfinity(t0)) continue;
 
+                // Get the number of durationSamples: = (int)(MaxDurationSamples * (MaxDepartureTime - DateFromIndex(dateIndex)) / MaxTransferTime);
                 int durationSamples = DurationSamplesForDate(dateIndex);
+
+                // Cycle through each of the duration indicies
                 for (int durationIndex = 0; durationIndex < durationSamples; durationIndex++)
                 {
                     if (Stop)
                         break;
 
+                    // Get this duration: = MinTransferTime + index * (MaxTransferTime - MinTransferTime) / MaxDurationSamples;
                     double dt = DurationFromIndex(durationIndex);
 
+                    // Calculate the exitDV and captureDV for this point on the plot
                     CalcLambertDVs(t0, dt, out Vector3d exitDV, out Vector3d captureDV);
+
+                    // Calculate the resulting ejection maneuver
                     ManeuverParameters maneuver = ComputeEjectionManeuver(exitDV, _origin, t0);
 
+                    // Populate this point in the porkchop plot with the resulting maneuver deltaV magnitude
                     Computed[dateIndex, durationIndex] = maneuver.dV.magnitude;
                     if (_includeCaptureBurn)
-                        Computed[dateIndex, durationIndex] += captureDV.magnitude;
+                        Computed[dateIndex, durationIndex] += captureDV.magnitude; // Add the capture deltaV to this point on the plot
 #if DEBUG
                     _log[dateIndex, durationIndex] += "," + Computed[dateIndex, durationIndex];
 #endif
@@ -230,8 +286,35 @@ namespace MuMech
         private static ManeuverParameters ComputeEjectionManeuver(Vector3d exitVelocity, PatchedConicsOrbit initialOrbit, double ut0, bool debug = false)
         {
             // get our reference position on the orbit
-            Vector3d r0 = initialOrbit.GetRelativePositionAtUT(ut0);
-            Vector3d v0 = initialOrbit.GetOrbitalVelocityAtUTZup(ut0);
+
+            // MechJeb Version
+            // Vector3d r0 = initialOrbit.getRelativePositionAtUT(ut0);
+            // Vector3d v0 = initialOrbit.getOrbitalVelocityAtUT(ut0);
+
+            // get our reference position on the orbit
+            Vector3d r0;
+            Vector3d v0;
+
+            if (thisWay == 0)
+            {
+                r0 = initialOrbit.GetRelativePositionAtUTZup(ut0);
+                v0 = initialOrbit.GetOrbitalVelocityAtUTZup(ut0);
+            }
+            else if (thisWay == 1)
+            {
+                r0 = initialOrbit.GetRelativePositionAtUTZup(ut0).SwapYAndZ;
+                v0 = initialOrbit.GetOrbitalVelocityAtUTZup(ut0).SwapYAndZ;
+            }
+            //else if (thisWay == 2) // This does not work at all
+            //{
+            //    r0 = initialOrbit.WorldPositionAtUT(ut0);
+            //    v0 = initialOrbit.WorldOrbitalVelocityAtUT(ut0);
+            //}
+            else
+            {
+                r0 = initialOrbit.WorldBCIPositionAtUT(ut0);
+                v0 = initialOrbit.WorldOrbitalVelocityAtUT(ut0);
+            }
 
             // analytic solution for paring orbit ejection to hyperbolic v-infinity
             (V3 vneg, V3 vpos, V3 r, double dt) = Maths.SingleImpulseHyperbolicBurn(initialOrbit.referenceBody.gravParameter, r0.ToV3(), v0.ToV3(),
@@ -246,7 +329,11 @@ namespace MuMech
                 //} );
             }
 
-            return new ManeuverParameters((vpos - vneg).V3ToWorld(), ut0 + dt);
+            // V3ToWorld: return vector.ToVector3d().SwapYAndZ;
+            if (thisWay <= 1)
+                return new ManeuverParameters((vpos - vneg).V3ToWorld(), ut0 + dt);
+            else
+                return new ManeuverParameters((vpos - vneg).ToVector3d(), ut0 + dt);
         }
 
         private double        _impulseScale;
@@ -362,15 +449,15 @@ namespace MuMech
             FlightPlanPlugin.Logger.LogInfo("source mu: " + _initialOrbit.referenceBody.gravParameter);
             FlightPlanPlugin.Logger.LogInfo("target mu: " + _targetBody.gravParameter);
             FlightPlanPlugin.Logger.LogInfo("sun mu: " + _initialOrbit.referenceBody.referenceBody.gravParameter);
-            FlightPlanPlugin.Logger.LogInfo("maneuver guess dV: " + maneuver.dV);
-            FlightPlanPlugin.Logger.LogInfo("maneuver guess UT: " + maneuver.UT);
-            FlightPlanPlugin.Logger.LogInfo("arrival guess UT: " + utArrival);
+            FlightPlanPlugin.Logger.LogInfo($"maneuver guess dV: [{maneuver.dV.x:N3}, {maneuver.dV.y:N3}, {maneuver.dV.z:N3}] m/s");
+            FlightPlanPlugin.Logger.LogInfo("maneuver guess UT: " + FPUtility.SecondsToTimeString(maneuver.UT));
+            FlightPlanPlugin.Logger.LogInfo("arrival guess UT: " + FPUtility.SecondsToTimeString(utArrival));
             _initialOrbit.GetOrbitalStateVectorsAtUT(maneuver.UT, out Vector3d r1, out Vector3d v1);
-            FlightPlanPlugin.Logger.LogInfo($"initial orbit at {maneuver.UT} x = {r1}; v = {v1}");
+            FlightPlanPlugin.Logger.LogInfo($"initial orbit at {FPUtility.SecondsToTimeString(maneuver.UT)} x = {r1}; v = {v1}");
             _initialOrbit.referenceBody.Orbit.GetOrbitalStateVectorsAtUT(maneuver.UT, out Vector3d r2, out Vector3d v2);
-            FlightPlanPlugin.Logger.LogInfo($"source at {maneuver.UT} x = {r2}; v = {v2}");
+            FlightPlanPlugin.Logger.LogInfo($"source at {FPUtility.SecondsToTimeString(maneuver.UT)} x = {r2}; v = {v2}");
             _targetBody.Orbit.GetOrbitalStateVectorsAtUT(utArrival, out Vector3d r3, out Vector3d v3);
-            FlightPlanPlugin.Logger.LogInfo($"source at {utArrival} x = {r3}; v = {v3}");
+            FlightPlanPlugin.Logger.LogInfo($"source at {FPUtility.SecondsToTimeString(utArrival)} x = {r3}; v = {v3}");
 
             _impulseScale = maneuver.dV.magnitude;
             _timeScale    = _initialOrbit.period;
@@ -422,26 +509,65 @@ namespace MuMech
             {
                 bool failed = false;
 
-                FlightPlanPlugin.Logger.LogInfo("Calling CalcLambertDVs");
+                // FlightPlanPlugin.Logger.LogInfo("Calling CalcLambertDVs");
                 CalcLambertDVs(utTransfer, utArrival - utTransfer, out Vector3d exitDV, out Vector3d _);
 
-                FlightPlanPlugin.Logger.LogInfo($"utTransfer = {utTransfer}, exitDV = [{exitDV.x}, {exitDV.y}, {exitDV.z}]");
+                FlightPlanPlugin.Logger.LogInfo($"CalcLambertDVs: detarture at UT {FPUtility.SecondsToTimeString(utTransfer)}, exitDV = [{exitDV.x:N3}, {exitDV.y:N3}, {exitDV.z:N3}] = {exitDV.magnitude:N3} m/s");
 
                 PatchedConicsOrbit source = initialOrbit.referenceBody.Orbit; // helicentric orbit of the source planet
 
                 // helicentric transfer orbit
                 var transferOrbit = new PatchedConicsOrbit(Game.UniverseModel);
-                Position position = new Position(source.referenceBody.SimulationObject.transform.celestialFrame, source.GetRelativePositionAtUT(utTransfer));
-                Velocity velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.GetOrbitalVelocityAtUTZup(utTransfer) + exitDV); // was: exitDV.SwapYAndZ
-                FlightPlanPlugin.Logger.LogInfo($"Calling transferOrbit.UpdateFromStateVectors");
+
+                // MechJeb Version
+                //var position = source.getRelativePositionAtUT(utTransfer);
+                //var velocity = source.getOrbitalVelocityAtUT(utTransfer) + exitDV;
+
+                Position position;
+                Velocity velocity;
+
+                int thatWay = 2;
+
+                if (thatWay == 0)
+                {
+                    position = new Position(source.referenceBody.SimulationObject.transform.celestialFrame, source.GetRelativePositionAtUTZup(utTransfer));
+                    velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.GetOrbitalVelocityAtUTZup(utTransfer) + exitDV);
+                }
+                else if (thatWay == 1)
+                {
+                    // This is funtionally how we do it in o.CreateOrbit which is called by o.PerturbedOrbit
+                    position = new Position(source.referenceBody.SimulationObject.transform.celestialFrame, source.GetRelativePositionAtUTZup(utTransfer).SwapYAndZ);
+                    velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.GetOrbitalVelocityAtUTZup(utTransfer).SwapYAndZ + exitDV.SwapYAndZ);
+                }
+                else
+                {
+                    // This is funtionally how we do it in o.CreateOrbit which is called by o.PerturbedOrbit
+                    position = new Position(source.referenceBody.SimulationObject.transform.celestialFrame, source.WorldBCIPositionAtUT(utTransfer));
+                    velocity = new Velocity(source.referenceBody.SimulationObject.transform.celestialFrame.motionFrame, source.WorldOrbitalVelocityAtUT(utTransfer) + exitDV.SwapYAndZ);
+                }
                 transferOrbit.UpdateFromStateVectors(position, velocity, source.referenceBody, utTransfer);
 
-                FlightPlanPlugin.Logger.LogInfo($"Calling SOI_intercept");
+                FlightPlanPlugin.Logger.LogInfo($"CalcLambertDVs: position = [{position.localPosition.x:N3}, {position.localPosition.y:N3}, {position.localPosition.z:N3}] = {position.localPosition.magnitude:N3} m/s");
+                FlightPlanPlugin.Logger.LogInfo($"CalcLambertDVs: velocity = [{velocity.relativeVelocity.vector.x:N3}, {velocity.relativeVelocity.vector.y:N3}, {velocity.relativeVelocity.vector.z:N3}] = {velocity.relativeVelocity.vector.magnitude:N3} m/s");
+
+                // Find when we exit the SOI of the origin planet on the transferOrbit
                 OrbitalManeuverCalculator.SOI_intercept(transferOrbit, initialOrbit.referenceBody, utTransfer, utArrival, out double utSoiExit);
+                FlightPlanPlugin.Logger.LogInfo($"SOI_intercept: Exit {initialOrbit.referenceBody.Name}'s SOI at UT {FPUtility.SecondsToTimeString(utSoiExit)} = {utSoiExit:N3} s");
 
                 // convert from heliocentric to body centered velocity
-                Vector3d vsoi = transferOrbit.GetOrbitalVelocityAtUTZup(utSoiExit) -
-                                initialOrbit.referenceBody.Orbit.GetOrbitalVelocityAtUTZup(utSoiExit);
+                // MechJeb Version
+                //Vector3d vsoi = transferOrbit.getOrbitalVelocityAtUT(utSoiExit) -
+                //                initialOrbit.referenceBody.orbit.getOrbitalVelocityAtUT(utSoiExit);
+
+                thatWay = thisWay; // Work out the SOI exit velocity in the same way as CalcLambertDVs and ComputeEjectionManeuver
+                Vector3d vsoi;
+                if (thatWay == 0)
+                    vsoi = transferOrbit.GetOrbitalVelocityAtUTZup(utSoiExit) - initialOrbit.referenceBody.Orbit.GetOrbitalVelocityAtUTZup(utSoiExit);
+                else if (thatWay == 1)
+                    vsoi = transferOrbit.GetOrbitalVelocityAtUTZup(utSoiExit).SwapYAndZ - initialOrbit.referenceBody.Orbit.GetOrbitalVelocityAtUTZup(utSoiExit).SwapYAndZ;
+                else
+                    vsoi = transferOrbit.WorldOrbitalVelocityAtUT(utSoiExit) - initialOrbit.referenceBody.Orbit.WorldOrbitalVelocityAtUT(utSoiExit);
+                FlightPlanPlugin.Logger.LogInfo($"CalcLambertDVs: vsoi = [{vsoi.x:N3}, {vsoi.y:N3}, {vsoi.z:N3}] = {vsoi.magnitude:N3} m/s");
 
                 // find the magnitude of Vinf from energy
                 double vsoiMag = vsoi.magnitude;
@@ -453,23 +579,20 @@ namespace MuMech
 
                 // using Vsoi seems to work slightly better here than the Vinf from the heliocentric computation at UT_Transfer
                 //ManeuverParameters maneuver = ComputeEjectionManeuver(Vsoi, initial_orbit, UT_transfer, true);
-                FlightPlanPlugin.Logger.LogInfo($"Calling ComputeEjectionManeuver");
-                ManeuverParameters maneuver = ComputeEjectionManeuver(vinf, initialOrbit, utTransfer);
+                ManeuverParameters maneuver = ComputeEjectionManeuver(vinf, initialOrbit, utTransfer, true);
 
-                FlightPlanPlugin.Logger.LogInfo($"maneuver.UT = {maneuver.UT}, maneuver.dV = [{maneuver.dV.x:N3}, {maneuver.dV.y:N3}, {maneuver.dV.z:N3}] = {maneuver.dV.magnitude} m/s");
+                FlightPlanPlugin.Logger.LogInfo($"ComputeEjectionManeuver: maneuver.UT = {FPUtility.SecondsToTimeString(maneuver.UT)} = {maneuver.UT:N3} s");
+                FlightPlanPlugin.Logger.LogInfo($"ComputeEjectionManeuver: maneuver.dV = [{maneuver.dV.x:N3}, {maneuver.dV.y:N3}, {maneuver.dV.z:N3}] = {maneuver.dV.magnitude:N3} m/s");
 
                 // the arrival time plus a bit extra
                 double extraArrival = maneuver.UT + (utArrival - maneuver.UT) * 1.1;
 
                 // Fuck it. Make a node here and let's see just how good or bad it really is
                 Vector3d burnVec = _initialOrbit.DeltaVToManeuverNodeCoordinates(maneuver.UT, maneuver.dV);
-                FlightPlanPlugin.Logger.LogInfo($"burnVec: [{burnVec.x:N3}, {burnVec.y:N3}, {burnVec.z:N3}] = {burnVec.magnitude}");
+                FlightPlanPlugin.Logger.LogInfo($"burnVec: [{burnVec.x:N3}, {burnVec.y:N3}, {burnVec.z:N3}] = {burnVec.magnitude:N3}");
                 FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(maneuver.UT - Game.UniverseModel.UniversalTime)} from now");
-                //var pass = NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnVec, maneuver.UT, -0.5);
-                //if (!pass)
-                //{
-                //    FlightPlanPlugin.Logger.LogInfo($"Houston, we have a problem...");
-                //}
+                maneuver.dV = burnVec;
+                FlightPlanPlugin.Logger.LogInfo($"Updated maneuver.UT = {FPUtility.SecondsToTimeString(maneuver.UT)}, maneuver.dV = [{maneuver.dV.x:N3}, {maneuver.dV.y:N3}, {maneuver.dV.z:N3}] = {maneuver.dV.magnitude:N3} m/s");
                 nodeList.Add(maneuver);
                 return nodeList;
 
