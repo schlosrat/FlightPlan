@@ -31,7 +31,7 @@ public class FPStatus
     public static void K2D2Status(string txt, double duration)
     {
         StatusText = txt;
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         StatusTime = _UT + duration;
     }
 
@@ -60,7 +60,7 @@ public class FPStatus
     {
         FPStatus.status = status;
         StatusText = txt;
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         StatusTime = _UT + StatusPersistence.Value;
     }
 

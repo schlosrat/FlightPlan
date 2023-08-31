@@ -664,7 +664,7 @@ public class FpUiController : KerbalMonoBehaviour
             AfterFixedTime.style.display = DisplayStyle.None;
 
         // Draw the GUI Status at the end of this tab
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         if (FlightPlanPlugin.Instance._currentNode == null && FPStatus.status != FPStatus.Status.VIRGIN && FPStatus.status != FPStatus.Status.ERROR)
         {
             FPStatus.Ok("");
@@ -729,7 +729,7 @@ public class FpUiController : KerbalMonoBehaviour
         // PatchedConicsOrbit Orbit = _activeVessel.Orbit;
         PatchedConicsOrbit targetOrbit = _currentTarget?.Orbit as PatchedConicsOrbit;
 
-        double UT = Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniverseTime;
         double nextWindow;
         double synodicPeriod;
         double timeToClosestApproach;
@@ -935,11 +935,11 @@ public class FpUiController : KerbalMonoBehaviour
                 // If we're on the OTM - Planet tab and we've got a LIMITED_TIME or PORKCHOP as the selected TimeRef...
                 if (TimeRef == TimeRef.LIMITED_TIME)
                 {
-                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
+                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
                 }
                 if (TimeRef == TimeRef.PORKCHOP)
                 {
-                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
+                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
                 }
 
                 synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
@@ -1361,11 +1361,11 @@ public class FpUiController : KerbalMonoBehaviour
 
             //if (TimeRef == TimeRef.LIMITED_TIME)
             //{
-            //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
+            //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
             //}
             //if (TimeRef == TimeRef.PORKCHOP)
             //{
-            //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
+            //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
             //}
 
             FlightPlanPlugin.Logger.LogInfo($"Burn Time Option: {_burnTimeOption}");
@@ -2297,11 +2297,11 @@ public class FpUiController : KerbalMonoBehaviour
         AdvXferGroup.style.display = DisplayStyle.Flex;
         //if (TimeRef == TimeRef.LIMITED_TIME)
         //{
-        //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
+        //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
         //}
         //if (TimeRef == TimeRef.PORKCHOP)
         //{
-        //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniversalTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
+        //  op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
         //}
         FlightPlanPlugin.Logger.LogInfo($"AdvInterplanetaryXfer: selectedManeuver = {selectedManeuver} {_burnTimeOption}");
     }
@@ -2309,7 +2309,7 @@ public class FpUiController : KerbalMonoBehaviour
     void ResetPorkchop()
     {
         op.doReset = true;
-        // op.ComputeTimes(_activeVessel.Orbit, _currentTarget.Orbit as PatchedConicsOrbit, Game.UniverseModel.UniversalTime);
+        // op.ComputeTimes(_activeVessel.Orbit, _currentTarget.Orbit as PatchedConicsOrbit, Game.UniverseModel.UniverseTime);
     }
 
     void LowestDv()
@@ -2387,7 +2387,7 @@ public class FpUiController : KerbalMonoBehaviour
         bool _pass = false;
         bool _launchMNC = false;
         var target = _currentTarget;
-        double UT = Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniverseTime;
 
         switch (selectedManeuver)
         {
@@ -2954,7 +2954,7 @@ public class FpUiController : KerbalMonoBehaviour
         Vector3d tgtVel, thisVel, nextVel;
         PatchedConicsOrbit vesselOrbit = FlightPlanPlugin.Instance._activeVessel.Orbit;
         var target = FlightPlanPlugin.Instance._currentTarget;
-        double UT = Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit targetOrbit = null;
         if (target != null)
             targetOrbit = target.Orbit as PatchedConicsOrbit;

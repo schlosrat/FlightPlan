@@ -442,7 +442,7 @@ namespace MuMech
 
             double[] x = new double[VARS];
 
-            FlightPlanPlugin.Logger.LogInfo("epoch: " + Game.UniverseModel.UniversalTime);
+            FlightPlanPlugin.Logger.LogInfo("epoch: " + Game.UniverseModel.UniverseTime);
             FlightPlanPlugin.Logger.LogInfo("initial orbit around source: " + _initialOrbit.MuString());
             FlightPlanPlugin.Logger.LogInfo("source: " + _initialOrbit.referenceBody.Orbit.MuString());
             FlightPlanPlugin.Logger.LogInfo("target: " + _targetBody.Orbit.MuString());
@@ -590,7 +590,7 @@ namespace MuMech
                 // Fuck it. Make a node here and let's see just how good or bad it really is
                 Vector3d burnVec = _initialOrbit.DeltaVToManeuverNodeCoordinates(maneuver.UT, maneuver.dV);
                 FlightPlanPlugin.Logger.LogInfo($"burnVec: [{burnVec.x:N3}, {burnVec.y:N3}, {burnVec.z:N3}] = {burnVec.magnitude:N3}");
-                FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(maneuver.UT - Game.UniverseModel.UniversalTime)} from now");
+                FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(maneuver.UT - Game.UniverseModel.UniverseTime)} from now");
                 maneuver.dV = burnVec;
                 FlightPlanPlugin.Logger.LogInfo($"Updated maneuver.UT = {FPUtility.SecondsToTimeString(maneuver.UT)}, maneuver.dV = [{maneuver.dV.x:N3}, {maneuver.dV.y:N3}, {maneuver.dV.z:N3}] = {maneuver.dV.magnitude:N3} m/s");
                 nodeList.Add(maneuver);

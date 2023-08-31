@@ -468,7 +468,7 @@ namespace MuMech
             double orbVel = CircularOrbitSpeed(body, alt + body.radius); // was: vesselState.altitudeASL 
             double headingOne = HeadingForInclination(inclinationDegrees, latitudeDegrees) * UtilMath.Deg2Rad;
             double headingTwo = HeadingForInclination(-inclinationDegrees, latitudeDegrees) * UtilMath.Deg2Rad;
-            double now = Game.UniverseModel.UniversalTime;
+            double now = Game.UniverseModel.UniverseTime;
             PatchedConicsOrbit o = vessel.Orbit;
 
             Vector3d north = vessel._telemetryComponent.HorizonNorth.vector; // vesselState.north; // (from VesselState.cs) north = vessel.north; // IFlightTelemetry has a North Vector, can we use that?
@@ -483,7 +483,7 @@ namespace MuMech
 
             Vector3d desiredHorizontalVelocity;
             Vector3d deltaHorizontalVelocity;
-            double UT = Game.UniverseModel.UniversalTime;
+            double UT = Game.UniverseModel.UniverseTime;
             Vector3d up = vessel.Orbit.Position.localPosition.normalized; // (from VesselState.cs) was orbitalPosition.normalized
             // CHANGE GetOrbitalVelocityAtUTZup to WorldOrbitalVelocityAtUT? It's changed everywhere else but here. What about GetFrameVelAtUTZup though?
             Vector3d surfaceVelocity = vessel.Orbit.GetOrbitalVelocityAtUTZup(UT) - vessel.mainBody.GetFrameVelAtUTZup(UT); // (from VesselState.cs) was orbitalVelocity - vessel.mainBody.getRFrmVel(CoM)
@@ -812,7 +812,7 @@ namespace MuMech
         public static Vector3d DeltaVAndTimeForCheapestCourseCorrection(PatchedConicsOrbit o, double UT, PatchedConicsOrbit target, CelestialBodyComponent targetBody, double finalPeR,
             out double burnUT)
         {
-            double now = Game.UniverseModel.UniversalTime;
+            double now = Game.UniverseModel.UniverseTime;
             Vector3d collisionDV = DeltaVAndTimeForCheapestCourseCorrection(o, UT, target, out burnUT);
             PatchedConicsOrbit collisionOrbit = o.PerturbedOrbit(burnUT, collisionDV);
             double collisionUT = collisionOrbit.NextClosestApproachTime(target, burnUT);
@@ -1563,7 +1563,7 @@ namespace MuMech
             double oppositeRadius = 0;
 
             // Back out the rotation of the body to calculate the longitude of the apoapsis when the vessel reaches the node
-            double degreeRotationToNode = (UT - Game.UniverseModel.UniversalTime) * 360 / o.referenceBody.rotationPeriod;
+            double degreeRotationToNode = (UT - Game.UniverseModel.UniverseTime) * 360 / o.referenceBody.rotationPeriod;
             double NodeLongitude = GetLongitude(o, UT) - degreeRotationToNode;
 
             double LongitudeOffset = NodeLongitude - newNodeLong; // Amount we need to shift the Ap's longitude
@@ -1623,7 +1623,7 @@ namespace MuMech
             // **** Dummy Node Approach ****
             Vector3d burnVec = initial.DeltaVToManeuverNodeCoordinates(burnUT, dV);
             FlightPlanPlugin.Logger.LogInfo($"burnVec: [{burnVec.x:N3}, {burnVec.y:N3}, {burnVec.z:N3}] = {burnVec.magnitude}");
-            FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(burnUT - Game.UniverseModel.UniversalTime)} from now");
+            FlightPlanPlugin.Logger.LogInfo($"burnUT: {FPUtility.SecondsToTimeString(burnUT - Game.UniverseModel.UniverseTime)} from now");
             // KSP.Sim.Maneuver.ManeuverNodeData nodeData = new KSP.Sim.Maneuver.ManeuverNodeData(FlightPlanPlugin.Instance._activeVessel.SimulationObject.GlobalId, true, burnUT);
             // nodeData.BurnVector = burnVec;
             // ManeuverPlanComponent maneuverPlan;

@@ -571,7 +571,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private IEnumerator CreateManeuverNode(Vector3d deltaV, double burnUT, double burnOffsetFactor = -0.5) // IEnumerator
     {
         Vector3d burnParams;
-        double UT = Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniverseTime;
         var orbit = _activeVessel.Orbit;
         var Orbiter = _activeVessel.Orbiter;
         var ManeuverPlanSolver = Orbiter?.ManeuverPlanSolver;
@@ -678,7 +678,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // Flight Plan API Methods
     public bool Circularize(double burnUT, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"Circularize {BurnTimeOption.TimeRefDesc}");
@@ -701,7 +701,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNewPe(double burnUT, double newPe, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewPe {BurnTimeOption.TimeRefDesc}");
@@ -732,7 +732,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNewAp(double burnUT, double newAp, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewAp {BurnTimeOption.TimeRefDesc}");
@@ -757,7 +757,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool Ellipticize(double burnUT, double newAp, double newPe, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"Ellipticize: Set New Pe and Ap {BurnTimeOption.TimeRefDesc}");
@@ -787,7 +787,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetInclination(double burnUT, double inclination, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetInclination: Set New Inclination {inclination}° {BurnTimeOption.TimeRefDesc}");
@@ -810,7 +810,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNewLAN(double burnUT, double newLANvalue, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewLAN: Set New LAN {newLANvalue}° {BurnTimeOption.TimeRefDesc}");
@@ -838,7 +838,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNodeLongitude(double burnUT, double newNodeLongValue, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNodeLongitude: Set Node Longitude {newNodeLongValue}° {BurnTimeOption.TimeRefDesc}");
@@ -863,7 +863,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool SetNewSMA(double burnUT, double newSMA, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         Logger.LogDebug($"SetNewSMA {BurnTimeOption.TimeRefDesc}");
@@ -889,7 +889,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     // No longer takes double burnUT. Need to sort out how this can be called as an API method
     public bool MatchPlanes(TimeRef time_ref, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         PatchedConicsOrbit tgtOrbit = null;
@@ -941,7 +941,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool HohmannTransfer(double burnUT, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         PatchedConicsOrbit tgtOrbit = null;
@@ -1012,7 +1012,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         // Adapted from call found in MechJebModuleScriptActionRendezvous.cs for "Get Closer"
         // Similar to code in MechJebModuleRendezvousGuidance.cs for "Get Closer" Button code.
 
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         PatchedConicsOrbit tgtOrbit = null;
@@ -1052,7 +1052,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool CourseCorrection(double burnUT, double interceptDistance, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         PatchedConicsOrbit tgtOrbit = null;
@@ -1102,7 +1102,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool MoonReturn(double burnUT, double targetMRPeR, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
         Vector3d _deltaV;
 
@@ -1136,7 +1136,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool MatchVelocity(double burnUT, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         PatchedConicsOrbit tgtOrbit = null;
@@ -1169,7 +1169,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public bool PlanetaryXfer(double burnUT, double burnOffsetFactor = -0.5)
     {
-        double _UT = Game.UniverseModel.UniversalTime;
+        double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
 
         PatchedConicsOrbit tgtOrbit = null;

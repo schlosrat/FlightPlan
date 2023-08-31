@@ -130,7 +130,7 @@ internal class BurnTimeOption
     public void SetBurnTime()
     {
         // Set the requested burn time based on the selected timing _option
-        double UT = Game.UniverseModel.UniversalTime;
+        double UT = Game.UniverseModel.UniverseTime;
         FlightPlanPlugin Plugin = FlightPlanPlugin.Instance;
         PatchedConicsOrbit Orbit = Plugin._activeVessel.Orbit;
 

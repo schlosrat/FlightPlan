@@ -111,7 +111,7 @@ namespace MuMech
             return null;
         }
 
-        private void ComputeStuff(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target) // was MechJebModuleTargetController target
+        private void ComputeStuff(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target) // was MechJebModuleTargetController target
         {
             ErrorMessage = CheckPreconditions(o, target);
             if (ErrorMessage == null)
@@ -126,8 +126,8 @@ namespace MuMech
             switch (selectionMode)
             {
                 case Mode.LimitedTime:
-                    FlightPlanPlugin.Logger.LogDebug($"ComputeStuff: UT: {universalTime:N0}, MaxArrivalTime_s: {FpUiController.MaxArrivalTime_s}, minSamplingStep: {minSamplingStep}, Include Capture Burn: {FpUiController.CaptureBurnToggle.value}");
-                    worker = new TransferCalculator(o, target.Orbit, universalTime, FpUiController.MaxArrivalTime_s, minSamplingStep, FpUiController.CaptureBurnToggle.value);
+                    FlightPlanPlugin.Logger.LogDebug($"ComputeStuff: UT: {UniverseTime:N0}, MaxArrivalTime_s: {FpUiController.MaxArrivalTime_s}, minSamplingStep: {minSamplingStep}, Include Capture Burn: {FpUiController.CaptureBurnToggle.value}");
+                    worker = new TransferCalculator(o, target.Orbit, UniverseTime, FpUiController.MaxArrivalTime_s, minSamplingStep, FpUiController.CaptureBurnToggle.value);
                     break;
                 case Mode.Porkchop:
                     FlightPlanPlugin.Logger.LogDebug($"ComputeStuff: minDepartureTime: {minDepartureTime:N0}, maxDepartureTime: {maxDepartureTime:N0}, minTransferTime: {minTransferTime:N0}, maxTransferTime: {maxTransferTime:N0}, windowWidth: {windowWidth}, porkchop_Height: {porkchop_Height}, Include Capture Burn: {FpUiController.CaptureBurnToggle.value}");
@@ -137,7 +137,7 @@ namespace MuMech
             }
         }
 
-        public void ComputeTimes(PatchedConicsOrbit o, PatchedConicsOrbit destination, double universalTime)
+        public void ComputeTimes(PatchedConicsOrbit o, PatchedConicsOrbit destination, double UniverseTime)
         {
             if (destination == null || o == null || o.referenceBody.Orbit == null)
                 return;
@@ -150,7 +150,7 @@ namespace MuMech
             if (double.IsInfinity(synodic_period))
                 synodic_period = o.referenceBody.Orbit.period;
 
-            minDepartureTime = universalTime;
+            minDepartureTime = UniverseTime;
             minTransferTime = 3600;
 
             maxDepartureTime = minDepartureTime + synodic_period * 1.5;
@@ -160,7 +160,7 @@ namespace MuMech
 
         // private bool layoutSkipped;
 
-        public void DoPorkchopGui(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target) // was: MechJebModuleTargetController target
+        public void DoPorkchopGui(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target) // was: MechJebModuleTargetController target
         {
             var targetCelestial = target as CelestialBodyComponent;
 
@@ -172,7 +172,7 @@ namespace MuMech
             if (doReset) // Localizer.Format("#MechJeb_adv_reset_button")
             {
                 FlightPlanPlugin.Logger.LogDebug($"DoPorkchopGui: doReset = {doReset}");
-                ComputeTimes(o, target.Orbit, universalTime);
+                ComputeTimes(o, target.Orbit, UniverseTime);
                 doReset = false;
                 worker = null;
             }
@@ -254,7 +254,7 @@ namespace MuMech
                         texture,
                         (xmin, xmax, ymin, ymax) =>
                         {
-                            minDepartureTime = Math.Max(xmin, universalTime);
+                            minDepartureTime = Math.Max(xmin, UniverseTime);
                             maxDepartureTime = xmax;
                             minTransferTime = Math.Max(ymin, 3600);
                             maxTransferTime = ymax;
@@ -278,10 +278,10 @@ namespace MuMech
                     // Display the DeltaV of the hovered/selected point
  
                     dv = p.ToSI() + "m/s";
-                    if (worker.DateFromIndex(point[0]) < Game.UniverseModel.UniversalTime) // Planetarium.GetUniversalTime())
+                    if (worker.DateFromIndex(point[0]) < Game.UniverseModel.UniverseTime) // Planetarium.GetUniverseTime())
                         departure = "any time now"; // Localizer.Format("#MechJeb_adv_label1")
                     else
-                        departure = FPUtility.SecondsToTimeString(worker.DateFromIndex(point[0]) - Game.UniverseModel.UniversalTime, false, false, true); // was: GuiUtils.TimeToDHMS()
+                        departure = FPUtility.SecondsToTimeString(worker.DateFromIndex(point[0]) - Game.UniverseModel.UniverseTime, false, false, true); // was: GuiUtils.TimeToDHMS()
                     duration = FPUtility.SecondsToTimeString(worker.DurationFromIndex(point[1]), false, false, true); // was: GuiUtils.TimeToDHMS()
                     FpUiController.DepartureTimeLabel.text = departure;
                     FpUiController.TransitDurationTimeLabel.text = duration;
@@ -321,7 +321,7 @@ namespace MuMech
             lastTargetCelestial = targetCelestial;
         }
 
-        public override void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target, Mode thisSelectionMode) // was: MechJebModuleTargetController target
+        public override void DoParametersGUI(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target, Mode thisSelectionMode) // was: MechJebModuleTargetController target
         {
             _draggable = true;
             selectionMode = thisSelectionMode;
@@ -361,16 +361,16 @@ namespace MuMech
                 case Mode.Porkchop:
                     FpUiController.LimitedTimeGroup.style.display = DisplayStyle.None;
                     FpUiController.PorkchopGroup.style.display = DisplayStyle.Flex;
-                    DoPorkchopGui(o, universalTime, target);
+                    DoPorkchopGui(o, UniverseTime, target);
                     break;
             }
 
             if (worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
-                ComputeTimes(o, target.Orbit, universalTime);
+                ComputeTimes(o, target.Orbit, UniverseTime);
 
             // if (GUI.changed || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
             if (GUI.changed || guiChanged || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
-                ComputeStuff(o, universalTime, target);
+                ComputeStuff(o, UniverseTime, target);
 
             previousSelectiionMode = thisSelectionMode;
             previousTarget = target;
