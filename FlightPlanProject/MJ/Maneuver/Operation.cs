@@ -40,19 +40,19 @@ namespace MuMech
 
         // Draw the parameter part of the Operation (ask for time, altitudes etc)
         // Input parameters are orbit and time parameters after the last maneuver and current target
-        public abstract void DoParametersGUI(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target, OperationAdvancedTransfer.Mode selectionMode); // was: MechJebModuleTargetController
+        public abstract void DoParametersGUI(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target, OperationAdvancedTransfer.Mode selectionMode); // was: MechJebModuleTargetController
 
         // Function called when create node is pressed; input parameters are orbit and time parameters after the last maneuver and current target
         // ManeuverParameters contain a single time and dV describing the node that should be executed
         // In case of error you can throw an OperationException, the message will be displayed and no node will be created.
-        protected abstract List<ManeuverParameters>? MakeNodesImpl(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target); // was: MechJebModuleTargetController
+        protected abstract List<ManeuverParameters>? MakeNodesImpl(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target); // was: MechJebModuleTargetController
 
-        public List<ManeuverParameters>? MakeNodes(PatchedConicsOrbit o, double universalTime, CelestialBodyComponent target) // was: MechJebModuleTargetController
+        public List<ManeuverParameters>? MakeNodes(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target) // was: MechJebModuleTargetController
         {
             ErrorMessage = "";
             try
             {
-                return MakeNodesImpl(o, universalTime, target);
+                return MakeNodesImpl(o, UniverseTime, target);
             }
             catch (OperationException e)
             {

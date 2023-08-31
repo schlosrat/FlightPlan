@@ -138,7 +138,7 @@ public class FPOtherModsInterface
 
                 if (k2d2Status == "Done")
                 {
-                    if (FlightPlanPlugin.Instance._currentNode.Time < Game.UniverseModel.UniversalTime)
+                    if (FlightPlanPlugin.Instance._currentNode.Time < Game.UniverseModel.UniverseTime)
                     {
                         // NodeManagerPlugin.Instance.DeleteNodes(0);
                         // NodeManagerPlugin.Instance.DeleteNode(0);
