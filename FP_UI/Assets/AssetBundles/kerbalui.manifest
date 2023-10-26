@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 1648357210
+CRC: 2431620162
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 807e143fb88aefe73bfd8435185f7279
+    Hash: adcff83a7ec54d584ce33f9e4afdcc09
   TypeTreeHash:
     serializedVersion: 2
-    Hash: d7784cf808f458e2d32beec2017f1037
+    Hash: e40a925f632da7f7b68abc1acd9b6cc3
 HashAppended: 0
 ClassTypes:
 - Class: 21
@@ -28,24 +28,6 @@ ClassTypes:
 - Class: 128
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.FaceInfo
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.Glyph
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.GlyphMetrics
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.GlyphRect
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.Character
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.FontAssetCreationEditorSettings
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.FontFeatureTable
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.FontWeightPair
-- AssemblyName: UnityEngine.UIElementsModule
-  ClassName: UnityEngine.UIElements.DynamicAtlasSettings
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.StyleComplexSelector
 - AssemblyName: UnityEngine.UIElementsModule
@@ -60,8 +42,6 @@ SerializeReferenceClassIdentifiers:
   ClassName: UnityEngine.UIElements.StyleSheet/ImportStruct
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.StyleSheets.Dimension
-- AssemblyName: UnityEngine.UIElementsModule
-  ClassName: UnityEngine.UIElements.StyleSheets.ScalableImage
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.StyleValueHandle
 Assets:

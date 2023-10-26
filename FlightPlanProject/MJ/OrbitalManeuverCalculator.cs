@@ -1763,39 +1763,39 @@ namespace MuMech
             //// solver.CalculatePatchList(); // Calling this here will give NREs
             //var patchList = solver.CurrentTrajectory;
 
-            // Resume regularly scheduled MJ programming...
-            PatchedConicsOrbit next_orbit = OrbitPool.FetchInstance(); //.Borrow();
+            //// Resume regularly scheduled MJ programming...
+            //PatchedConicsOrbit next_orbit = OrbitPool.FetchInstance(); //.Borrow();
 
-            // bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null); // passing in null for target doesn't work? Works fine in KSP1...
-            bool ok = PatchedConicsExtended.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
-            FlightPlanPlugin.Logger.LogInfo($"next_orbit: {next_orbit}");
-            FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {next_orbit.referenceBody.Name}");
-            FlightPlanPlugin.Logger.LogInfo($"activePatch:           {next_orbit.ActivePatch}");
-            // FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {next_orbit.NextPatch}");
-            if (next_orbit.closestEncounterBody != null)
-            {
-                FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {next_orbit.closestEncounterBody.Name}");
-            }
-            else
-            {
-                FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  Null");
-            }
-            FlightPlanPlugin.Logger.LogInfo($"closestEncounterLevel: {next_orbit.closestEncounterLevel}");
-            // FlightPlanPlugin.Logger.LogInfo($"closestEncounterPatch: {next_orbit.closestEncounterPatch}");
-            while (ok && orbit.referenceBody != target && orbit.EndUT < arrivalUT)
-            {
-                OrbitPool.ReleaseInstance(orbit);
-                orbit = next_orbit;
-                next_orbit = OrbitPool.FetchInstance();
+            //// bool ok = PatchedConics.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, null); // passing in null for target doesn't work? Works fine in KSP1...
+            //bool ok = PatchedConicsExtended.CalculatePatch(orbit, next_orbit, burnUT, solverParameters, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
+            //FlightPlanPlugin.Logger.LogInfo($"next_orbit: {next_orbit}");
+            //FlightPlanPlugin.Logger.LogInfo($"referenceBody:         {next_orbit.referenceBody.Name}");
+            //FlightPlanPlugin.Logger.LogInfo($"activePatch:           {next_orbit.ActivePatch}");
+            //// FlightPlanPlugin.Logger.LogInfo($"nextPatch:             {next_orbit.NextPatch}");
+            //if (next_orbit.closestEncounterBody != null)
+            //{
+            //    FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  {next_orbit.closestEncounterBody.Name}");
+            //}
+            //else
+            //{
+            //    FlightPlanPlugin.Logger.LogInfo($"closestEncounterBody:  Null");
+            //}
+            //FlightPlanPlugin.Logger.LogInfo($"closestEncounterLevel: {next_orbit.closestEncounterLevel}");
+            //// FlightPlanPlugin.Logger.LogInfo($"closestEncounterPatch: {next_orbit.closestEncounterPatch}");
+            //while (ok && orbit.referenceBody != target && orbit.EndUT < arrivalUT)
+            //{
+            //    OrbitPool.ReleaseInstance(orbit);
+            //    orbit = next_orbit;
+            //    next_orbit = OrbitPool.FetchInstance();
 
-                ok = PatchedConicsExtended.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
-            }
+            //    ok = PatchedConicsExtended.CalculatePatch(orbit, next_orbit, orbit.StartUT, solverParameters, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
+            //}
 
             // The orbit should be the patch with the encounter for the target
             intercept = orbit;
             intercept.UpdateFromOrbitAtUT(orbit, arrivalUT, orbit.referenceBody);
             OrbitPool.ReleaseInstance(orbit);
-            OrbitPool.ReleaseInstance(next_orbit);
+            //OrbitPool.ReleaseInstance(next_orbit);
 
             // Various ugly and jumbled attempts to do this without needing CalculatePatch and using KSP2's capabiliites instead
 
