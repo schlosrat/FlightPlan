@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>true</ImplicitUsings>
 		<AssemblyName>com.github.schlosrat.flight_plan</AssemblyName>
 		<Product>Flight Plan</Product>
 		<Description>Plan your (Space) Flight! Fly your Plan! Set up useful maneuver nodes to get you where you want to go</Description>
-		<Version Label="Version of the mod">0.8.12</Version>
+		<Version Label="Version of the mod">0.9.0</Version>
 		<RestoreAdditionalProjectSources>
 			https://nuget.spacewarp.org/v3/index.json
 		</RestoreAdditionalProjectSources>
@@ -34,18 +34,13 @@
 		<PackageReference Include="BepInEx.Core" Version="5.*" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
 		<PackageReference Include="HarmonyX" Version="2.10.1" />
-		<PackageReference Include="SpaceWarp" Version="1.3.0" />
+		<PackageReference Include="SpaceWarp" Version="1.5.2" />
 		<PackageReference Include="NodeManager" Version="0.5.5" />
-		<PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1"/>
-		<PackageReference Include="UitkForKsp2" Version="1.3.0" />
-		<PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" IncludeAssets="compile" />
+		<PackageReference Include="UitkForKsp2" Version="2.0.0" />
+		<PackageReference Include="UnityEngine.Modules" Version="2022.3.5" IncludeAssets="compile" />
+		<PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.5" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
-		<Reference Include="Assembly-CSharp">
-			<HintPath>..\external_dlls\Assembly-CSharp.dll</HintPath>
-			<Publicize>true</Publicize>
-			<Private>false</Private>
-		</Reference>
 		<Reference Include="maneuver_node_controller">
 			<HintPath>..\external_dlls\maneuver_node_controller.dll</HintPath>
 			<Private>false</Private>

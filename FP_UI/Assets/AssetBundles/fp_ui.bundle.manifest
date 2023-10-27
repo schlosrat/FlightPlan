@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 719426874
+CRC: 4110376812
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 09454a4333b211523df81eeec341ead2
+    Hash: 7d8dc6dd1b2c776483128d1484f5db91
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 8942a65878ffee03f8807e5e7737544e
+    Hash: 6b67e31bffa1de92ebebf0ae5bbae176
 HashAppended: 0
 ClassTypes:
 - Class: 21
@@ -28,22 +28,10 @@ ClassTypes:
 - Class: 213
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.FaceInfo
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.Glyph
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.GlyphMetrics
-- AssemblyName: UnityEngine.TextCoreModule
-  ClassName: UnityEngine.TextCore.GlyphRect
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.Character
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.FontAssetCreationEditorSettings
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.FontFeatureTable
-- AssemblyName: UnityEngine.TextCoreTextEngineModule
-  ClassName: UnityEngine.TextCore.Text.FontWeightPair
+- AssemblyName: UnityEngine.UIElementsModule
+  ClassName: UnityEngine.UIElements.Button/UxmlFactory
+- AssemblyName: UnityEngine.UIElementsModule
+  ClassName: UnityEngine.UIElements.Label/UxmlFactory
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.StyleComplexSelector
 - AssemblyName: UnityEngine.UIElementsModule
@@ -59,7 +47,17 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.StyleValueHandle
 - AssemblyName: UnityEngine.UIElementsModule
+  ClassName: UnityEngine.UIElements.TextField/UxmlFactory
+- AssemblyName: UnityEngine.UIElementsModule
+  ClassName: UnityEngine.UIElements.Toggle/UxmlFactory
+- AssemblyName: UnityEngine.UIElementsModule
+  ClassName: UnityEngine.UIElements.UxmlRootElementFactory
+- AssemblyName: UnityEngine.UIElementsModule
+  ClassName: UnityEngine.UIElements.VisualElement/UxmlFactory
+- AssemblyName: UnityEngine.UIElementsModule
   ClassName: UnityEngine.UIElements.VisualElementAsset
+- AssemblyName: uitkforksp2.controls.Runtime
+  ClassName: UitkForKsp2.Controls.Dropdown/UxmlFactory
 Assets:
 - Assets/Theme/Fonts/Orbitron-Black SDF.asset
 - Assets/Icons/icon_white_50.png
@@ -67,7 +65,6 @@ Assets:
 - Assets/FP_UI.uxml
 - Assets/Icons/gear.png
 - Assets/Theme/Fonts/LiberationSans-Regular.ttf
-- Assets/FlightPlanTheme.uss
 - Assets/Icons/OSM_50.png
 - Assets/Icons/TRM_50_Ship2Celestial.png
 - Assets/Icons/OTM_50_Planet.png
