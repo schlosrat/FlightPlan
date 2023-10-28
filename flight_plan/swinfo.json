@@ -4,7 +4,7 @@
   "name": "Flight Plan",
   "description": "Plan your (Space) Flight! Set up useful maneuver nodes to get you where you want to be",
   "source": "https://github.com/schlosrat/FlightPlan",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "spec": "1.3",
   "version_check": "https://raw.githubusercontent.com/schlosrat/FlightPlan/master/flight_plan/swinfo.json",
   "dependencies": [
@@ -18,7 +18,7 @@
     {
       "id": "UitkForKsp2",
       "version": {
-        "min": "2.0.0",
+        "min": "2.1.0",
         "max": "*"
       }
     },
