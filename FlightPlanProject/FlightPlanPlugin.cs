@@ -368,7 +368,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     private void VesselChanged(MessageCenterMessage message)
     {
         // Do the right thing here!
-        Logger.LogInfo($"VesselChanged message recieved. Resetting StatusTime to 0");
+        Logger.LogDebug($"VesselChanged message recieved. Resetting StatusTime to 0");
         FPStatus.StatusTime = 0;
     }
     private void GameStateChanged(MessageCenterMessage message)
