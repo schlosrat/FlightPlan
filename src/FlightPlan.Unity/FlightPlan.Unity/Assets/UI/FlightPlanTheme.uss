@@ -1,0 +1,584 @@
+.unity-label {
+    display: flex;
+    visibility: visible;
+    overflow: visible;
+    opacity: 1;
+    color: rgb(216, 218, 221);
+    margin-left: 4px;
+    font-size: 16px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+    -unity-text-align: middle-left;
+}
+
+.row-element-tight {
+    height: 25px;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    margin-left: 4px;
+    margin-right: 4px;
+    -unity-text-align: middle-left;
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+}
+
+.row-element-lose {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    -unity-text-align: middle-center;
+    -unity-font-style: normal;
+    margin-left: 4px;
+    margin-right: 4px;
+    font-size: 16px;
+    height: 25px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+}
+
+.header-item {
+    width: 20px;
+    height: 20px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+}
+
+.value-label {
+    color: rgb(153, 178, 255);
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+}
+
+.unity-button {
+    height: 20px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    background-color: rgb(38, 35, 41);
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+    font-size: 16px;
+}
+
+.small-button {
+    height: 18px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    width: 35px;
+    background-color: rgb(38, 35, 41);
+    justify-content: center;
+    -unity-text-align: middle-center;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+}
+
+.units-label {
+    width: 30px;
+    align-items: flex-start;
+    -unity-text-align: middle-left;
+    height: auto;
+    margin-left: 1px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 1px;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.orbit-label {
+    width: 35px;
+    align-items: flex-end;
+    flex-direction: column;
+    margin-left: 4px;
+    -unity-text-align: middle-right;
+}
+
+.orbit-value {
+    width: 100px;
+    align-items: flex-start;
+}
+
+.unity-text-field {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 290px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    flex-grow: 1;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 14px;
+}
+
+#HorizontalSpace {
+    height: 0;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0);
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.unity-base-text-field__input {
+    background-color: rgba(0, 0, 0, 0);
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    -unity-text-align: middle-center;
+    border-left-color: rgb(125, 125, 125);
+    border-right-color: rgb(125, 125, 125);
+    border-top-color: rgb(125, 125, 125);
+    border-bottom-color: rgb(125, 125, 125);
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    border-top-left-radius: 5px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.unity-base-field__label {
+    flex-grow: 1;
+    min-width: auto;
+}
+
+.unity-button:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.25);
+    border-left-color: rgba(255, 255, 255, 0.25);
+    border-right-color: rgba(255, 255, 255, 0.25);
+    border-top-color: rgba(255, 255, 255, 0.25);
+    border-bottom-color: rgba(255, 255, 255, 0.25);
+}
+
+.unity-button:active {
+    background-color: rgba(0, 255, 0, 0.5);
+}
+
+.unity-text-field > .unity-base-text-field__input {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-left-color: rgb(125, 125, 125);
+    border-right-color: rgb(125, 125, 125);
+    border-top-color: rgb(125, 125, 125);
+    border-bottom-color: rgb(125, 125, 125);
+    flex-grow: 1;
+    max-width: 160px;
+}
+
+.text-field__input {
+    background-color: rgba(0, 0, 0, 0);
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 100%;
+    width: 100px;
+    -unity-text-align: middle-center;
+    min-width: 80px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+#LargeIcon {
+    -unity-background-scale-mode: scale-and-crop;
+    width: 50px;
+    height: 50px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-element-button-bar {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    -unity-text-align: middle-center;
+    -unity-font-style: normal;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    height: 100%;
+    width: 100%;
+}
+
+.button-box {
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    flex-grow: 1;
+}
+
+.big-button {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 56px;
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    background-color: rgb(38, 35, 41);
+    justify-content: center;
+    align-items: stretch;
+    flex-grow: 1;
+    flex-direction: row;
+    width: 100%;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#PanelLabel {
+}
+
+.Maneuver-button {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 25px;
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    background-color: rgb(38, 35, 41);
+    justify-content: center;
+    align-items: stretch;
+    flex-grow: 0;
+    flex-direction: row;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    flex-shrink: 1;
+    width: 100%;
+}
+
+Dropdown > .unity-base-field__label {
+    color: rgb(0, 85, 255);
+}
+
+.big-button-ltd {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 56px;
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    background-color: rgb(38, 35, 41);
+    justify-content: center;
+    align-items: stretch;
+    flex-grow: 1;
+    flex-direction: row;
+    width: 56px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.button-box-ltd {
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    flex-grow: 0;
+}
+
+.tiny-button {
+    height: 18px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
+    width: 18px;
+    background-color: rgb(38, 35, 41);
+    justify-content: center;
+    -unity-text-align: middle-center;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.unity-base-field--no-label {
+    width: 125px;
+    height: 25px;
+    margin-left: 2px;
+    margin-right: 0;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.unity-base-popup-field__input {
+    width: 125px;
+    height: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: rgb(0, 0, 0);
+}
+
+.unity-base-popup-field__text {
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: rgb(255, 255, 255);
+}
+
+.unity-text-field-invalid > .unity-base-text-field__input {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-left-color: rgb(255, 0, 0);
+    border-right-color: rgb(255, 0, 0);
+    border-top-color: rgb(255, 0, 0);
+    border-bottom-color: rgb(255, 0, 0);
+    height: 100%;
+    min-width: 100px;
+    min-height: 100%;
+    width: 100px;
+    color: rgb(255, 0, 0);
+}
+
+.unity-base-dropdown__item > .unity-base-dropdown__label {
+    -unity-font: url('/Assets/Theme/Fonts/LiberationSans-Regular.ttf');
+}
+
+.unity-base-field {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.unity-base-popup-field {
+}
+
+.unity-popup-field {
+}
+
+.unity-text-field-invalid {
+}
+
+.unity-base-dropdown__item:hover {
+    background-color: rgba(255, 255, 0, 0.2);
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.unity-base-dropdown__arrow {
+    display: none;
+}
+
+.text-input {
+}
+
+.Control-button {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 22px;
+    border-left-color: rgb(76, 79, 188);
+    border-right-color: rgb(76, 79, 188);
+    border-top-color: rgb(76, 79, 188);
+    border-bottom-color: rgb(76, 79, 188);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    background-color: rgb(38, 35, 41);
+    justify-content: center;
+    align-items: stretch;
+    flex-grow: 0;
+    flex-direction: row;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    flex-shrink: 1;
+    width: 100px;
+}
+
+.unity-text-field__label {
+    flex-grow: 0;
+}
