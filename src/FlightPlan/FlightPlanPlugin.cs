@@ -156,7 +156,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Logger = base.Logger;
 
         // Load UITK GUI
-        var fpUxml = AssetManager.GetAsset<VisualTreeAsset>($"{Info.Metadata.GUID}/fp_ui/fp_ui.uxml");
+        var fpUxml = AssetManager.GetAsset<VisualTreeAsset>($"{Info.Metadata.GUID}/fp_ui/ui/fp_ui.uxml");
         var fpWindow = Window.CreateFromUxml(fpUxml, "Flight Plan Main Window", transform, true);
         fpWindow.hideFlags |= HideFlags.HideAndDontSave;
 

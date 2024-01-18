@@ -1,3 +1,7 @@
+:root {
+    -unity-font-definition: url('project://database/Assets/Fonts/LiberationSans-Regular%20SDF.asset?fileID=11400000&guid=c65fbd69da0e2a9418ddab348c0cbe4a&type=2#LiberationSans-Regular SDF');
+}
+
 .unity-label {
     display: flex;
     visibility: visible;
@@ -6,7 +10,6 @@
     color: rgb(216, 218, 221);
     margin-left: 4px;
     font-size: 16px;
-    -unity-font: url('/Assets/Fonts/LiberationSans-Regular.ttf');
     -unity-text-align: middle-left;
 }
 
@@ -21,7 +24,6 @@
     font-size: 16px;
     margin-top: 0;
     margin-bottom: 0;
-    -unity-font: url('/Assets/Fonts/LiberationSans-Regular.ttf');
 }
 
 .row-element-lose {
@@ -34,18 +36,15 @@
     margin-right: 4px;
     font-size: 16px;
     height: 25px;
-    -unity-font: url('/Assets/Fonts/LiberationSans-Regular.ttf');
 }
 
 .header-item {
     width: 20px;
     height: 20px;
-    -unity-font: url('/Assets/Fonts/LiberationSans-Regular.ttf');
 }
 
 .value-label {
     color: rgb(153, 178, 255);
-    -unity-font: url('/Assets/Fonts/LiberationSans-Regular.ttf');
 }
 
 .unity-button {
@@ -71,7 +70,6 @@
     margin-right: 4px;
     margin-top: 2px;
     margin-bottom: 2px;
-    -unity-font: url('/Assets/Fonts/LiberationSans-Regular.ttf');
     font-size: 16px;
 }
 
@@ -101,7 +99,6 @@
     margin-right: 4px;
     margin-top: 2px;
     margin-bottom: 2px;
-    -unity-font: url('/Assets/Fonts/LiberationSans-Regular.ttf');
 }
 
 .units-label {
@@ -507,10 +504,6 @@ Dropdown > .unity-base-field__label {
     min-height: 100%;
     width: 100px;
     color: rgb(255, 0, 0);
-}
-
-.unity-base-dropdown__item > .unity-base-dropdown__label {
-    -unity-font-definition: url('/Assets/Fonts/LiberationSans-Regular SDF.asset');
 }
 
 .unity-base-field {
