@@ -1,6 +1,6 @@
 {
   "spec": "2.0",
-  "mod_id": "FlightPlan",
+  "mod_id": "com.github.schlosrat.flight_plan",
   "author": "schlosrat",
   "name": "Flight Plan",
   "description": "Plan your (Space) Flight! Set up useful maneuver nodes to get you where you want to be",
@@ -23,6 +23,13 @@
       "id": "UitkForKsp2",
       "version": {
         "min": "2.4.2",
+        "max": "*"
+      }
+    },
+    {
+      "id": "com.github.schlosrat.node_manager",
+      "version": {
+        "min": "0.7.1",
         "max": "*"
       }
     }

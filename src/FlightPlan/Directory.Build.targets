@@ -5,13 +5,13 @@
         <PowerShellExecutable Condition="'$(OS)' == 'Windows_NT'">powershell</PowerShellExecutable>
         <PowerShellExecutable Condition="'$(OS)' != 'Windows_NT'">pwsh</PowerShellExecutable>
     </PropertyGroup>
-    
+
     <!-- Post-build events target -->
     <Target Label="Post build events" Name="PostBuild" AfterTargets="PostBuildEvent">
         <!-- Cleanup of older builds -->
         <Message Text="Cleaning up previous build directory"/>
         <RemoveDir Directories="$(SolutionDir)/dist/$(ConfigurationName)"/>
-        <MakeDir Directories="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
+        <MakeDir Directories="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan"/>
 
         <!-- Copying general files to build directory -->
         <ItemGroup Label="Plugin template folder to be copied">
@@ -19,15 +19,15 @@
         </ItemGroup>
         <Message Text="Copying plugin folder to build directory"/>
         <Copy SourceFiles="@(PluginTemplate)"
-              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/%(RecursiveDir)"/>
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/%(RecursiveDir)"/>
 
         <Message Text="Copying LICENSE and README to build directory"/>
         <Copy Condition="Exists('$(SolutionDir)/LICENSE')"
               SourceFiles="$(SolutionDir)/LICENSE"
-              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan"/>
         <Copy Condition="Exists('$(SolutionDir)/README.md')"
               SourceFiles="$(SolutionDir)/README.md"
-              DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/README.txt"/>
+              DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/README.txt"/>
 
         <!-- Copying compiled plugin to build directory -->
         <Message Text="Copying mod DLL to build directory"/>
@@ -35,7 +35,7 @@
             <PluginDLLs Include="$(PluginBinPath)/**/*.dll"/>
         </ItemGroup>
         <Copy SourceFiles="@(PluginDLLs)"
-              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan"/>
 
         <Message Text="Copying mod PDB to build directory"
                  Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
@@ -44,21 +44,21 @@
         </ItemGroup>
         <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
               SourceFiles="@(PluginPDBs)"
-              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan"/>
 
         <!-- Compressing build directory for release -->
         <Message Text="Compressing built plugin folder" Condition="$(ConfigurationName) == Release"/>
         <Delete Condition="$(ConfigurationName) == Release"
-                Files="$(SolutionDir)/dist/$(SolutionName)-$(Version).zip"/>
+                Files="$(SolutionDir)/dist/flight_plan-$(Version).zip"/>
         <Exec Condition="$(ConfigurationName) == Release"
-              Command="$(PowerShellExecutable) -Command &quot;&amp; {Push-Location '$(SolutionDir)/dist/$(ConfigurationName)'; Compress-Archive -Path './*' -DestinationPath '$(SolutionDir)/dist/$(SolutionName)-$(Version).zip'; Pop-Location}&quot;"/>
+              Command="$(PowerShellExecutable) -Command &quot;&amp; {Push-Location '$(SolutionDir)/dist/$(ConfigurationName)'; Compress-Archive -Path './*' -DestinationPath '$(SolutionDir)/dist/flight_plan-$(Version).zip'; Pop-Location}&quot;"/>
 
         <!-- Deploying plugin to game folder -->
         <Message Text="Clean up the game's plugin folder" Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <RemoveDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
-                   Directories="$(KSP2DIR)/BepInEx/plugins/$(ProjectName)"/>
+                   Directories="$(KSP2DIR)/BepInEx/plugins/flight_plan"/>
         <MakeDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
-                 Directories="$(KSP2DIR)/BepInEx/plugins/$(ProjectName)"/>
+                 Directories="$(KSP2DIR)/BepInEx/plugins/flight_plan"/>
 
         <ItemGroup Label="Dist folder to be copied">
             <DistFolder Include="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/**/*.*"/>
