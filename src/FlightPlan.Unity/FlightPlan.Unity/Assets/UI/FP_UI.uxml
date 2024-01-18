@@ -1,14 +1,14 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="FlightPlanTheme.uss" />
-    <ui:VisualElement name="GUIFrame" style="width: 350px; height: auto; background-color: rgb(0, 0, 0); border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; -unity-background-image-tint-color: rgb(0, 0, 0); border-left-color: rgb(76, 79, 188); border-right-color: rgb(76, 79, 188); border-top-color: rgb(76, 79, 188); border-bottom-color: rgb(76, 79, 188); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; max-height: 975px; min-height: 350px; font-size: 16px; -unity-font: url(&apos;/Assets/Theme/Fonts/LiberationSans-Regular.ttf&apos;); -unity-font-definition: resource(&apos;&apos;);">
+    <ui:VisualElement name="GUIFrame" style="width: 350px; height: auto; background-color: rgb(0, 0, 0); border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; -unity-background-image-tint-color: rgb(0, 0, 0); border-left-color: rgb(76, 79, 188); border-right-color: rgb(76, 79, 188); border-top-color: rgb(76, 79, 188); border-bottom-color: rgb(76, 79, 188); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; max-height: 975px; min-height: 350px; font-size: 16px; -unity-font: url(&apos;/Assets/Fonts/LiberationSans-Regular.ttf&apos;);">
         <ui:VisualElement name="Title" class="row-element-lose" style="height: 28px;">
             <ui:VisualElement name="IconBox" style="justify-content: space-around; width: 27px; flex-direction: column; align-items: center; margin-left: 1px;">
-                <ui:VisualElement name="Icon" class="header-item" style="background-image: url(&apos;/Assets/Icons/icon.png&apos;); -unity-background-scale-mode: scale-and-crop; width: 20px; height: 20px;" />
+                <ui:VisualElement name="Icon" class="header-item" style="background-image: url(&apos;/Assets/Images/icon.png&apos;); -unity-background-scale-mode: scale-and-crop; width: 20px; height: 20px;" />
             </ui:VisualElement>
-            <ui:Label text="FLIGHT PLAN" display-tooltip-when-elided="true" name="Title" style="margin-left: 0; padding-left: 2px; font-size: 22px; -unity-font: url(&apos;/Assets/Theme/Fonts/Orbitron-Black.ttf&apos;);" />
+            <ui:Label text="FLIGHT PLAN" display-tooltip-when-elided="true" name="Title" style="margin-left: 0; padding-left: 2px; font-size: 22px; -unity-font: url(&apos;/Assets/Fonts/Orbitron-Black.ttf&apos;);" />
             <ui:VisualElement name="ButtonBox" style="justify-content: center;">
                 <ui:Button display-tooltip-when-elided="true" name="CloseButton" tooltip="Close Window" class="header-item" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; background-image: none; -unity-background-scale-mode: scale-and-crop; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; border-left-color: rgb(76, 79, 188); border-right-color: rgb(76, 79, 188); border-top-color: rgb(76, 79, 188); border-bottom-color: rgb(76, 79, 188); width: 22px; height: 22px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px;">
-                    <ui:VisualElement name="CloseButtonIcon" style="background-image: url(&apos;/Assets/Icons/Cross.png&apos;); height: 16px; background-color: rgba(38, 35, 41, 0); border-left-color: rgb(38, 35, 41); border-right-color: rgb(38, 35, 41); border-top-color: rgb(38, 35, 41); border-bottom-color: rgb(38, 35, 41); -unity-background-scale-mode: scale-to-fit;" />
+                    <ui:VisualElement name="CloseButtonIcon" style="background-image: url(&apos;/Assets/Images/Cross.png&apos;); height: 16px; background-color: rgba(38, 35, 41, 0); border-left-color: rgb(38, 35, 41); border-right-color: rgb(38, 35, 41); border-top-color: rgb(38, 35, 41); border-bottom-color: rgb(38, 35, 41); -unity-background-scale-mode: scale-to-fit;" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -25,32 +25,32 @@
             <ui:VisualElement name="TabBar" class="row-element-button-bar" style="height: auto; justify-content: space-around; margin-top: 3px; margin-bottom: 3px; width: auto;">
                 <ui:VisualElement name="OSMButtonBox" class="button-box">
                     <ui:Button display-tooltip-when-elided="true" name="OSMButton" class="big-button">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/OSM_50.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/OSM_50.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement name="TRMShipToShipButtonBox" class="button-box" style="flex-grow: 1; display: flex;">
                     <ui:Button display-tooltip-when-elided="true" name="TRMShipToShipButton" class="big-button">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/TRM_50_Ship2Ship.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/TRM_50_Ship2Ship.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement name="TRMShipToCelestialButtonBox" class="button-box" style="flex-grow: 1; display: none;">
                     <ui:Button display-tooltip-when-elided="true" name="TRMShipToCelestialButton" class="big-button">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/TRM_50_Ship2Celestial.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/TRM_50_Ship2Celestial.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement name="OTMMoonButtonBox" class="button-box" style="flex-grow: 1; display: none;">
                     <ui:Button display-tooltip-when-elided="true" name="OTMMoonButton" class="big-button">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/OTM_50_Moon.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/OTM_50_Moon.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement name="OTMPlanetButtonBox" class="button-box" style="flex-grow: 1;">
                     <ui:Button display-tooltip-when-elided="true" name="OTMPlanetButton" class="big-button">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/OTM_50_Planet.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/OTM_50_Planet.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement name="ROMButtonBox" class="button-box" style="flex-grow: 1;">
                     <ui:Button display-tooltip-when-elided="true" name="ROMButton" class="big-button">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/ROM_50.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/ROM_50.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -430,7 +430,7 @@
                 <ui:Label text="Current Apoapsis" display-tooltip-when-elided="true" />
                 <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
                     <ui:VisualElement name="SetApoapsisButtonBox" class="button-box">
-                        <ui:Button name="SetApoapsisButton" class="tiny-button" style="background-image: url(&apos;/Assets/Icons/Orbit.png&apos;); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 16px; height: 16px;" />
+                        <ui:Button name="SetApoapsisButton" class="tiny-button" style="background-image: url(&apos;/Assets/Images/Orbit.png&apos;); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 16px; height: 16px;" />
                     </ui:VisualElement>
                     <ui:Label text="500" display-tooltip-when-elided="true" name="CurrentApoapsis" />
                     <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -440,7 +440,7 @@
                 <ui:Label text="Current Periapsis" display-tooltip-when-elided="true" />
                 <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
                     <ui:VisualElement name="SetPeriapsisButtonBox" class="button-box">
-                        <ui:Button name="SetPeriapsisButton" class="tiny-button" style="background-image: url(&apos;/Assets/Icons/Orbit.png&apos;); width: 16px; height: 16px;" />
+                        <ui:Button name="SetPeriapsisButton" class="tiny-button" style="background-image: url(&apos;/Assets/Images/Orbit.png&apos;); width: 16px; height: 16px;" />
                     </ui:VisualElement>
                     <ui:Label text="500" display-tooltip-when-elided="true" name="CurrentPeriapsis" />
                     <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -450,7 +450,7 @@
                 <ui:Label text="Syncronous Alt" display-tooltip-when-elided="true" />
                 <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
                     <ui:VisualElement name="SetSynchronousAltButtonBox" class="button-box">
-                        <ui:Button name="SetSynchronousAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url(&apos;/Assets/Icons/Orbit.png&apos;);" />
+                        <ui:Button name="SetSynchronousAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url(&apos;/Assets/Images/Orbit.png&apos;);" />
                     </ui:VisualElement>
                     <ui:Label text="Outside SOI" display-tooltip-when-elided="true" name="SynchronousAlt" />
                     <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -460,7 +460,7 @@
                 <ui:Label text="Semi Syncronous Alt" display-tooltip-when-elided="true" />
                 <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
                     <ui:VisualElement name="SetSemiSynchronousAltButtonBox" class="button-box">
-                        <ui:Button name="SetSemiSynchronousAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url(&apos;/Assets/Icons/Orbit.png&apos;);" />
+                        <ui:Button name="SetSemiSynchronousAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url(&apos;/Assets/Images/Orbit.png&apos;);" />
                     </ui:VisualElement>
                     <ui:Label text="1,997" display-tooltip-when-elided="true" name="SemiSynchronousAlt" />
                     <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -477,7 +477,7 @@
                 <ui:Label text="Min LOS Alt" display-tooltip-when-elided="true" />
                 <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
                     <ui:VisualElement name="SetMinLOSAltButtonBox" class="button-box">
-                        <ui:Button name="SetMinLOSAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url(&apos;/Assets/Icons/Orbit.png&apos;);" />
+                        <ui:Button name="SetMinLOSAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url(&apos;/Assets/Images/Orbit.png&apos;);" />
                     </ui:VisualElement>
                     <ui:Label text="1,997" display-tooltip-when-elided="true" name="MinLOSAlt" />
                     <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
@@ -566,12 +566,12 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="MNCButtonBox" class="button-box-ltd">
                     <ui:Button display-tooltip-when-elided="true" name="MNCButton" class="big-button-ltd">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/icon_white_50.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/icon_white_50.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement name="K2D2ButtonBox" class="button-box-ltd">
                     <ui:Button display-tooltip-when-elided="true" name="K2D2Button" class="big-button-ltd">
-                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Icons/k2d2_big_icon.png&apos;);" />
+                        <ui:VisualElement name="LargeIcon" style="background-image: url(&apos;/Assets/Images/k2d2_big_icon.png&apos;);" />
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>
