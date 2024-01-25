@@ -176,6 +176,13 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         new ConfigDescription("Keybind to open mod window")
         );
 
+        // Subscribe to messages that indicate we need to reset the status
+        //StateChanges.VesselChangedMessage += message =>
+        //{
+        //    FpUiController.GUIenabled = true;
+        //    Logger.LogDebug($"VesselChangedMessage message received, FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+        //};
+
         // Subscribe to messages that indicate it's OK to raise the GUI
         //StateChanges.FlightViewEntered += message =>
         //{
@@ -304,6 +311,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         RefreshGameManager();
 
+        // Subscribe to the VesselChangedMessage so we can reset the status any time the player changes the vessel
+        MessageCenter.Subscribe<VesselChangedMessage>(new Action<MessageCenterMessage>(this.VesselChanged));
+
+        Logger.LogInfo("VesselChangedMessage message subscribed");
+
         // Subscribe to the GameStateEnteredMessage so we can control if the GUI should be displaid upon entering this state
         MessageCenter.Subscribe<GameStateEnteredMessage>(new Action<MessageCenterMessage>(this.GameStateEntered));
 
@@ -353,6 +365,12 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //}
     }
 
+    private void VesselChanged(MessageCenterMessage message)
+    {
+        // Do the right thing here!
+        Logger.LogDebug($"VesselChanged message recieved. Resetting StatusTime to 0");
+        FPStatus.StatusTime = 0;
+    }
     private void GameStateChanged(MessageCenterMessage message)
     {
         RefreshGameManager();
