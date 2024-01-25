@@ -22,8 +22,8 @@
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/%(RecursiveDir)"/>
 
         <Message Text="Copying LICENSE and README to build directory"/>
-        <Copy Condition="Exists('$(SolutionDir)/LICENSE')"
-              SourceFiles="$(SolutionDir)/LICENSE"
+        <Copy Condition="Exists('$(SolutionDir)/license.md')"
+              SourceFiles="$(SolutionDir)/license.md"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan"/>
         <Copy Condition="Exists('$(SolutionDir)/README.md')"
               SourceFiles="$(SolutionDir)/README.md"
@@ -45,6 +45,14 @@
         <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
               SourceFiles="@(PluginPDBs)"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan"/>
+
+        <!-- Rename DLL and PDB files -->
+        <Move Condition="Exists('$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/com.github.schlosrat.flight_plan.dll')"
+              SourceFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/com.github.schlosrat.flight_plan.dll"
+              DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/flight_plan.dll"/>
+        <Move Condition="Exists('$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/com.github.schlosrat.flight_plan.pdb')"
+              SourceFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/com.github.schlosrat.flight_plan.pdb"
+              DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/flight_plan/flight_plan.pdb"/>
 
         <!-- Compressing build directory for release -->
         <Message Text="Compressing built plugin folder" Condition="$(ConfigurationName) == Release"/>
@@ -75,4 +83,3 @@
               Command="$(PowerShellExecutable) &quot;start-process &quot;&quot;$(KSP2DIR)\KSP2_x64.exe&quot;&quot;&quot;"/>
     </Target>
 </Project>
-
