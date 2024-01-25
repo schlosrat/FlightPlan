@@ -9,7 +9,7 @@
  * and was further modified as needed for compatibility with KSP2 and/or for incorporation into the
  * FlightPlan project (https://github.com/schlosrat/FlightPlan)
  * 
- * This work is relaesed under the same licenses noted above from the originating version.
+ * This work is released under the same licenses noted above from the originating version.
  */
 
 using System;
