@@ -112,7 +112,8 @@ MonoBehaviour:
     m_GlyphPairAdjustmentRecords: []
     m_MarkToBaseAdjustmentRecords: []
     m_MarkToMarkAdjustmentRecords: []
-  m_FallbackFontAssetTable: []
+  m_FallbackFontAssetTable:
+  - {fileID: 11400000, guid: 5d23620e1b8bb5e49ab80186ee3fed9b, type: 2}
   m_fontAssetCreationEditorSettings:
     sourceFontFileGUID: 489c0deb4ff86294096c1b3c1b73244f
     faceIndex: 0
