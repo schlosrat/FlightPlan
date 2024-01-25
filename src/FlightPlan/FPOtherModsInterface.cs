@@ -1,23 +1,15 @@
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
-// ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Global
-
-// CF : this direct dependency cause the dll to be needed during build
-// it is not really needed, we can easyly hardcode the mode names
-// during the introduction of K2D2 UI it cause me many trouble in naming
 using KSP.Game;
 using NodeManager;
-using SpaceWarp.API.Assets;
 using System.Reflection;
-using UnityEngine;
 
 namespace FlightPlan;
 
 public class FPOtherModsInterface
 {
-    private const string K2D2ModGuid = "K2D2";
+    private const string K2D2ModGuid = "com.github.cfloutier.k2d2";
     private const string MNCModGuid = "com.github.xyz3211.maneuver_node_controller";
 
     public static FPOtherModsInterface instance;
@@ -36,8 +28,6 @@ public class FPOtherModsInterface
     private PropertyInfo K2D2PropertyInfo, MNCPropertyInfo;
     private MethodInfo K2D2GetStatusMethodInfo, K2D2FlyNodeMethodInfo, K2D2ToggleMethodInfo, MNCLaunchMNCMethodInfo;
     private object K2D2Instance, MNCInstance;
-    private Texture2D mncButtonTex, k2d2ButtonTex;
-    private GUIContent MNCButtonTexCon, K2D2ButtonTexCon;
 
     private bool _launchMNC, _executeNode;
 
@@ -53,10 +43,6 @@ public class FPOtherModsInterface
             _mncMinVersion = new Version(0, 8, 3);
             _mncVerCheck = _mncInfo.Metadata.Version.CompareTo(_mncMinVersion);
             Logger.LogInfo($"_mncVerCheck = {_mncVerCheck}");
-
-            // Get _mncInfo buton Icon
-            mncButtonTex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SWMetadata.Guid}/images/mnc_icon_white_50.png");
-            MNCButtonTexCon = new GUIContent(mncButtonTex, "Launch Maneuver Node Controller");
 
             // Reflections method to attempt the same thing more cleanly
             MNCType = Type.GetType($"ManeuverNodeController.ManeuverNodeControllerMod, {MNCModGuid}");
@@ -81,11 +67,6 @@ public class FPOtherModsInterface
             string _toolTip;
             if (_k2d2VerCheck >= 0) _toolTip = "Have K2-D2 Execute this node";
             else _toolTip = "Launch K2-D2";
-
-            // Get K2-D2 buton Icon
-            // k2d2ButtonTex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.SpaceWarpMetadata.ModID}/images/k2d2_icon.png");
-            k2d2ButtonTex = AssetManager.GetAsset<Texture2D>($"{FlightPlanPlugin.Instance.Info.Metadata.GUID}/images/k2d2_icon.png");
-            K2D2ButtonTexCon = new GUIContent(k2d2ButtonTex, _toolTip);
 
             K2D2Type = Type.GetType($"K2D2.K2D2_Plugin, {K2D2ModGuid}");
             K2D2PropertyInfo = K2D2Type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
