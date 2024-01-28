@@ -22,7 +22,7 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 * [Must Have Mods Video](https://youtu.be/zaXk8t07KW4)
 
 ## Installation
-**PREFERRED:** Please use **CKAN** and that makes things far easier and will ensure you've got all the necessary dependencies. If you would like to perform a manual install here are the instructions
+**PREFERRED:** Please use **[CKAN](https://github.com/KSP-CKAN/CKAN/releases)** and that makes things far easier and will ensure you've got all the necessary dependencies. If you would like to perform a manual install here are the instructions
 1. Download and extract **BepInEx mod loader with SpaceWarp** (see link above) into your game folder and run the game, then close it. If you've done this before, you can skip this step. If you've installed the game via Steam, then this is probably here: `C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2`. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
 2. Install **Node Manager** (see link above). From the NodeManager-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\node_manager`.
 3. Download and extract this mod into the game folder. From the FlightPlan-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\flight_plan`.
