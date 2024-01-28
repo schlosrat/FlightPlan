@@ -423,7 +423,7 @@
         <ui:Label text="2/3" display-tooltip-when-elided="true" name="OrbitalResonance" />
       </ui:VisualElement>
       <ui:VisualElement name="TargetAltitudeRow" class="row-element-tight row-element-lose" style="display: flex;">
-        <ui:TextField picking-mode="Ignore" label="Target Altitude" value="filler text" text="600" name="TargetAltitudeInput" tooltip="payload deployment orbital altitude" class="text-input unity-text-field" />
+        <ui:TextField picking-mode="Ignore" label="Target Altitude" value="600" text="600" name="TargetAltitudeInput" tooltip="payload deployment orbital altitude" class="text-input unity-text-field" />
         <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
       </ui:VisualElement>
       <ui:VisualElement name="CurrentApoapsisRow" class="row-element-tight">
@@ -485,11 +485,11 @@
       </ui:VisualElement>
       <ui:Toggle label="Occlusion" name="Occlusion" class="toggle" style="flex-direction: row-reverse; margin-left: 4px;" />
       <ui:VisualElement name="AtmOccRow" class="row-element-tight row-element-lose">
-        <ui:TextField picking-mode="Ignore" label="Atm" value="filler text" text="0.75" name="AtmOccInput" tooltip="Atmospheric occlusion factor" class="text-input" />
+        <ui:TextField picking-mode="Ignore" label="Atm" value="0.75" text="0.75" name="AtmOccInput" tooltip="Atmospheric occlusion factor" class="text-input" />
         <ui:Label display-tooltip-when-elided="true" name="Units" class="units-label" />
       </ui:VisualElement>
       <ui:VisualElement name="VacOccRow" class="row-element-tight row-element-lose">
-        <ui:TextField picking-mode="Ignore" label="Vac" value="filler text" text="0.9" name="VacOccInput" tooltip="Vacuum occlusion factor" class="text-input" />
+        <ui:TextField picking-mode="Ignore" label="Vac" value="0.9" text="0.9" name="VacOccInput" tooltip="Vacuum occlusion factor" class="text-input" />
         <ui:Label display-tooltip-when-elided="true" name="Units" class="units-label" />
       </ui:VisualElement>
       <ui:Toggle label="Dive" name="Dive" class="toggle" style="flex-direction: row-reverse; margin-left: 4px;" />
@@ -550,7 +550,7 @@
       <ui:Label text="hms" display-tooltip-when-elided="true" name="Units" class="units-label" />
     </ui:VisualElement>
     <ui:VisualElement name="AtAnAltitude" class="row-element-tight row-element-lose" style="display: none;">
-      <ui:TextField picking-mode="Ignore" label="Maneuver Altitude" value="filler text" text="100" name="ManeuverAltitudeInput" class="text-input" />
+      <ui:TextField picking-mode="Ignore" label="Maneuver Altitude" value="100" text="100" name="ManeuverAltitudeInput" class="text-input" />
       <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
     </ui:VisualElement>
     <ui:VisualElement name="HorizontalSpace" />
