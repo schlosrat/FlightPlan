@@ -740,6 +740,7 @@ public class FpUiController : KerbalMonoBehaviour
         double relativeInc;
         double phase;
         double transfer;
+        double transferTime;
 
         if (TargetTypeButton.text == "Celestial")
         {
@@ -821,16 +822,8 @@ public class FpUiController : KerbalMonoBehaviour
                     break;
                 }
 
-                synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
-                timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
-                closestApproach = Orbit.RelativeDistance(targetOrbit, timeToClosestApproach);
-                relVelocityNow = Orbit.RelativeSpeed(targetOrbit, UT);
-                relVelocityCA = Orbit.RelativeSpeed(targetOrbit, timeToClosestApproach);
-                relVelocityNow = Vector3d.Dot(Orbit.WorldOrbitalVelocityAtUT(UT) - targetOrbit.WorldOrbitalVelocityAtUT(UT), Orbit.WorldBCIPositionAtUT(UT) - targetOrbit.WorldBCIPositionAtUT(UT)) / (Orbit.WorldBCIPositionAtUT(UT) - targetOrbit.WorldBCIPositionAtUT(UT)).magnitude;
-                relativeInc = Orbit.RelativeInclination(targetOrbit);
-                phase = Orbit.PhaseAngle(targetOrbit, UT);
-                transfer = Orbit.Transfer(targetOrbit, out _);
-                nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360;
+                nextWindow = TransferCalc(targetOrbit, UT, out synodicPeriod, out timeToClosestApproach, out closestApproach, out relVelocityNow, out relVelocityCA, out relativeInc, out _, out _, out _);
+
                 TargetOrbitTRMS.text = $"{targetOrbit.PeriapsisArl / 1000:N0} km x {targetOrbit.ApoapsisArl / 1000:N0} km";
                 CurrentOrbitTRMS.text = $"{Orbit.PeriapsisArl / 1000:N0} km x {Orbit.ApoapsisArl / 1000:N0} km";
                 RelativeIncTRMS.text = $"{Orbit.RelativeInclination(targetOrbit):N2}°";
@@ -898,21 +891,15 @@ public class FpUiController : KerbalMonoBehaviour
                     SetTab(0);
                     break;
                 }
-                synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
-                timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
-                closestApproach = Orbit.RelativeDistance(targetOrbit, timeToClosestApproach);
-                // double relVelocityNow = Orbit.RelativeSpeed(targetOrbit, UT);
-                // double relVelocityCA = Orbit.RelativeSpeed(targetOrbit, timeToClosestApproach);
-                relativeInc = Orbit.RelativeInclination(targetOrbit);
-                phase = Orbit.PhaseAngle(targetOrbit, UT);
-                transfer = Orbit.Transfer(targetOrbit, out double _transferTime);
-                nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360; // transfer - phase
+
+                nextWindow = TransferCalc(targetOrbit, UT, out synodicPeriod, out timeToClosestApproach, out _, out _, out _, out relativeInc, out phase, out transfer, out transferTime);
+
                 TargetOrbitTRMC.text = $"{FPUtility.MetersToScaledDistanceString(targetOrbit.PeriapsisArl)} x {FPUtility.MetersToScaledDistanceString(targetOrbit.ApoapsisArl)}";
                 CurrentOrbitTRMC.text = $"{FPUtility.MetersToScaledDistanceString(Orbit.PeriapsisArl)} x {FPUtility.MetersToScaledDistanceString(Orbit.ApoapsisArl)}";
                 RelativeIncTRMC.text = $"{relativeInc:N2}°";
-                PhaseAngleTRMC.text = $"{phase:N1}°"; // _currentTarget.Name
-                XferPhaseAngleTRMC.text = $"{transfer:N1}°";
-                XferTimeTRMC.text = FPUtility.SecondsToTimeString(_transferTime, false, false, true);
+                PhaseAngleTRMC.text = $"{phase:N3}°"; // _currentTarget.Name
+                XferPhaseAngleTRMC.text = $"{transfer:N3}°";
+                XferTimeTRMC.text = FPUtility.SecondsToTimeString(transferTime, false, false, true);
                 SynodicPeriodTRMC.text = FPUtility.SecondsToTimeString(synodicPeriod, false, false, true);
                 NextWindowTRMC.text = FPUtility.SecondsToTimeString(nextWindow, false, false, true);
                 NextClosestApproachTRMC.text = FPUtility.SecondsToTimeString(timeToClosestApproach, false, false, true);
@@ -943,20 +930,12 @@ public class FpUiController : KerbalMonoBehaviour
                     op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
                 }
 
-                synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
-                relativeInc = Orbit.RelativeInclination(targetOrbit);
-                phase = ReferenceBody.Orbit.PhaseAngle(targetOrbit, UT);
-                // double phase2 = Phase();
-                transfer = ReferenceBody.Orbit.Transfer(targetOrbit, out _transferTime);
-                // double transfer2 = Transfer(out _);
-                nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360; // transfer - phase
-                                                                                              // double nextWindow2 = synodicPeriod * MuUtils.ClampDegrees360(phase2 - transfer) / 360; // transfer - phase
-
+                nextWindow = TransferCalc(targetOrbit, UT, out synodicPeriod, out _, out _, out _, out _, out relativeInc, out phase, out transfer, out transferTime);
                 // Display Transfer Info
                 RelativeIncOTM.text = $"{relativeInc:N2}°";
-                PhaseAngleOTM.text = $"{phase:N1}°"; // _currentTarget.Name
-                XferPhaseAngleOTM.text = $"{transfer:N1}°";
-                XferTimeOTM.text = FPUtility.SecondsToTimeString(_transferTime, false, false, true);
+                PhaseAngleOTM.text = $"{phase:N3}°"; // _currentTarget.Name
+                XferPhaseAngleOTM.text = $"{transfer:N3}°";
+                XferTimeOTM.text = FPUtility.SecondsToTimeString(transferTime, false, false, true);
                 SynodicPeriodOTM.text = FPUtility.SecondsToTimeString(synodicPeriod, false, false, true);
                 NextWindowOTM.text = FPUtility.SecondsToTimeString(nextWindow, false, false, true);
                 EjectionDvOTM.text = $"{DeltaV():N1} m/s";
@@ -1093,6 +1072,27 @@ public class FpUiController : KerbalMonoBehaviour
                 break;
             default: break;
         }
+    }
+
+    private double TransferCalc(PatchedConicsOrbit targetOrbit, double UT, out double synodicPeriod, out double timeToClosestApproach,
+        out double closestApproach, out double relVelocityNow, out double relVelocityCA, out double relativeInc, out double phase,
+        out double transfer, out double _transferTime)
+    {
+        double nextWindow;
+        synodicPeriod = Orbit.SynodicPeriod(targetOrbit);
+        timeToClosestApproach = Orbit.NextClosestApproachTime(targetOrbit, UT + 1);
+        closestApproach = Orbit.RelativeDistance(targetOrbit, timeToClosestApproach);
+        // relVelocityNow = Orbit.RelativeSpeed(targetOrbit, UT);
+        relVelocityCA = Orbit.RelativeSpeed(targetOrbit, timeToClosestApproach);
+        relVelocityNow = Vector3d.Dot(Orbit.WorldOrbitalVelocityAtUT(UT) - targetOrbit.WorldOrbitalVelocityAtUT(UT), Orbit.WorldBCIPositionAtUT(UT) - targetOrbit.WorldBCIPositionAtUT(UT)) / (Orbit.WorldBCIPositionAtUT(UT) - targetOrbit.WorldBCIPositionAtUT(UT)).magnitude;
+        relativeInc = Orbit.RelativeInclination(targetOrbit);
+        phase = Orbit.PhaseAngle(targetOrbit, UT);
+        transfer = Orbit.Transfer(targetOrbit, out _transferTime);
+        if (transfer < phase)
+            nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360;
+        else
+            nextWindow = synodicPeriod * MuUtils.ClampDegrees360(transfer - phase) / 360;
+        return nextWindow;
     }
 
     private bool DisplayTRMShipToShipTab()
@@ -2344,7 +2344,7 @@ public class FpUiController : KerbalMonoBehaviour
     private void IncrementOrbits(int increment)
     {
         if (NumOrb + increment > 0) NumOrb += increment;
-        NumOrbits.text = NumOrbits.ToString();
+        NumOrbits.text = NumOrb.ToString();
 
         updateResonance();
         FlightPlanPlugin.Logger.LogInfo($"IncrementOrbits: {NumOrb}");
