@@ -301,8 +301,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         FPStatus.Init(this);
 
-        _experimental = Config.Bind<bool>("Experimental Section", "Experimental Features", false, "Enable/Disable _experimental.Value features for testing - Warrantee Void if Enabled!");
-        _autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when _experimental.Value nodes are created");
+        _experimental = Config.Bind<bool>("Experimental Section", "Experimental Features", false, "Enable/Disable experimental features for testing - Warrantee Void if Enabled!");
+        _autoLaunchMNC = Config.Bind<bool>("Experimental Section", "Launch Maneuver Node Controller", false, "Enable/Disable automatically launching the Maneuver Node Controller GUI (if installed) when experimental nodes are created");
         _smallError = Config.Bind<double>("Status Reporting Section", "Small % Error Threashold", 1, "Percent error threshold used to assess quality of maneuver node goal for warning (yellow) status");
         _largeError = Config.Bind<double>("Status Reporting Section", "Large % Error Threashold", 2, "Percent error threshold used to assess quality of maneuver node goal for error (red) status");
 
