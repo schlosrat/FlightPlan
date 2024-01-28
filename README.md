@@ -167,16 +167,16 @@ Using the configuration parameters you can change a variety of things such as ho
 ### Ownship Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/media/OSM_50.png) **Always Available**
 * **New Node Longitude** (user-specified value - degrees)
-### Target Relative Maneuvers - Ship to Ship
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/media/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
-* **Intercept** Target (user specified intercept time - seconds)
-### Target Relative Maneuvers - Ship to Celestial
-![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/media/TRM_50_Ship2Ship.png) **Available If Selected Target is Vessel**
-* **Intercept** Target (user specified intercept time - seconds)
+### Target Relative Maneuvers - Vessel
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/media/TRM_50_Ship2Ship.png) **Available If Selected Target is a Vessel**
+* **Intercept** Target (user specified intercept time - hms)
+### Target Relative Maneuvers - Celestial
+![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/media/TRM_50_Ship2Ship.png) **Available If Selected Target is a Celestial Body**
+* **Intercept** Target (user specified intercept time - hms)
 ### Orbital Transfer Maneuvers
 ![Flight Plan Main GUI](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/media/OTM_50_Planet.png) **Available If Active Vessel is Orbiting a Planet and Another Planet is the Selected Target**
 * **Interplanetary Transfer** (only available if a planet is the selected target)
-* **Advanced Interplanetary Transfer** (only available if a planet is the selected target)
+* **Advanced Interplanetary Transfer** (not implemented yet, but dang aren't the porkchop plots pretty!)
 
 ## Example: Take a Trip to Minmus
 ### Step 1: Match Planes
