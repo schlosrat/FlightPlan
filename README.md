@@ -23,10 +23,10 @@ Making spaceflight planning easier for Kerbal Space Program 2 one mission at a t
 
 ## Installation
 1. Download and extract the **BepInEx mod loader with SpaceWarp** 1.0.1 or later (see link above) into your game folder and run the game, then close it. If you've done this before, you can skip this step. If you've installed the game via Steam, then this is probably here: `C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2`. If you complete this step correctly you'll have a **BepInEx** subfolder in that directory along with the following files (in addition to what was there before): **changelog.txt, doorstop_config.ini, winhttp.dll**
-1. Install **Node Manager** 0.5.4 or later (see link above). From the NodeManager-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\node_manager`.
-1. Download and extract this mod into the game folder. From the FlightPlan-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\flight_plan`.
-1. *Optional*: Download and install **K2-D2**, your friendly KSP Astromech ready to perform precision node execution for you! (see link above). From the K2D2_vx.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\K2D2`.
-1. *Optional*: Download and install **Maneuver Node Controller** to assist you with fine tuning your maneuver nodes! (see link above). From the ManeuverNodeController-x.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\maneuver_node_controller`.
+2. Install **Node Manager** 0.5.4 or later (see link above). From the NodeManager-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\node_manager`.
+3. Download and extract this mod into the game folder. From the FlightPlan-x.x.x.zip file copy the `BepInEx` folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\flight_plan`.
+4. *Optional*: Download and install **K2-D2**, your friendly KSP Astromech ready to perform precision node execution for you! (see link above). From the K2D2_vx.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\K2D2`.
+5. *Optional*: Download and install **Maneuver Node Controller** to assist you with fine tuning your maneuver nodes! (see link above). From the ManeuverNodeController-x.x.x.zip file copy the BepInEx folder on top of your game's install folder. If done correctly, you should have the following folder structure within your KSP2 game folder: `...\Kerbal Space Program 2\BepInEx\plugins\maneuver_node_controller`.
 
 ## How to Use Flight Plan
 Flight Plan employs a tabbed interface to help organize its features. The list of available tabs updates dynamically based on your current situation. Some tabs will always be available (e.g., **Ownship Maneuvers** and **Resonant Orbit Maneuvers**), while others will be offered to you based on the orbit you're in and the type/location of your currently selected target. For example, if your current target is another vessel, and that vessel is in orbit about the same body as your active vessel, then the **Target Relative Maneuvers** tab will be available to you and it will have the sorts of maneuvers that are configured relative to a target (e.g., **Match Planes** with the target, etc.).
@@ -38,7 +38,7 @@ The basic workflow you'll want to follow when using Flight Plan is this.
 4. *Optional:* Set the **Input Field(s)** for the maneuver type selected. Some maneuver types have input fields to the right of their toggle button and some don't. These fields are pre-populated with a default value or the last value you've used. Also, some Burn Time Options have additional input fields that are displayed when needed, e.g., "after a fixed time" and "at an altitude".
 5. Press the **Make Node** button. Pressing this button will either cause the maneuver node you've configured to be created with an appropriate status message confirming this, or you'll get an error message in the Status field.
 6. *Optional:* Click the **Maneuver Node Controller** icon button to the right of the Make Node button if you'd like to fine-tune your maneuver node. This button is only available if you also have Maneuver Node Controller installed.
-6. *Optional:* press the **K2-D2** icon button to automatically execute the node! This button is only available if you also have K2-D2 installed.
+7. *Optional:* press the **K2-D2** icon button to automatically execute the node! This button is only available if you also have K2-D2 installed.
 
 ## Features
 ### Easy Celestial Target Selection
@@ -205,7 +205,7 @@ Here we can see K2-D2 executing the transfer burn.
 ![Flight Plan: Match Planes with Minmus 8](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-8.png)
 
 ### Step 3: Course Correction
-Sometimes in the game, as in life, things don't go quite as planned. What if you overshot the planned burn slightly as shown below? This can easily happen when executing a burn manually, and may also happen in some isolated cases when executing an automated burn. 
+Sometimes in the game, as in life, things don't go quite as planned. What if you overshot the planned burn slightly as shown below? This can easily happen when executing a burn manually, and may also happen in some isolated cases when executing an automated burn.
 ![Flight Plan: Match Planes with Minmus 8a](https://raw.githubusercontent.com/schlosrat/FlightPlan/master/Images/FP-Action-8a%20-%20overshoot.png)
 
 Here we can see a Course Correction burn has been planned. Like the Hohmann Transfer option, this option will also bring up the Maneuver Node Controller mod so you can fine-tune things to make sure you've got the exact node you want. In this case, very small prograde adjustments were made to get a good Pe at the Minmus flyby encounter.
@@ -264,7 +264,7 @@ The following images show more details illustrating Flight Plans features and ca
 ![Flight Plan: Hohmann Transfer Example](https://i.imgur.com/iliH2bY.png)
 
 # Flight Plan as a Library
-Flight Plan's orbital maneuver node creation methods are public, and so may be called from other mods. In this sense, Flight Plan can be accessed like a library whether the Flight Plan GUI is visible or not. 
+Flight Plan's orbital maneuver node creation methods are public, and so may be called from other mods. In this sense, Flight Plan can be accessed like a library whether the Flight Plan GUI is visible or not.
 
 This mod is primarily meant as a direct aid to the player but can also be used as a service provider to other mods which can call functions in this one without needing to recreate all these functions in the base mod. Creating maneuver nodes from a KSP2 mod is not necessarily an intuitive thing to code, so having this as a resource you can call may save you time developing those capabilities internally for your mod.
 
@@ -312,7 +312,7 @@ If core capabilities in your mod will rely on calling Flight Plan methods, then 
 * The **disadvantage** to this way is you've got a *hard dependency* and your mod will not even start up unless both Flight Plan and its hard dependency of Node Manager are installed. You may want to ship a copy of Flight Plan and Node Manager with your mod (put both the flight_plan and node_manager plugin folders with your mod's plugin folder into the BepInEx/plugins folder before zipping it up). There may be a way to do this with CKAN in some automated fashion. This guide will be updated with those details, or a link to them, at some point.
 
 ### Step 1: Update your csproj file
-In your csproj file, you may already have an ItemGroup where BepInEx, HarmonyX, and SpaceWarp are added as PackageReferene includes. If so, all you need to do is add PackageReferences for FlightPlan and NodeManager as sown below.
+In your csproj file, you may already have an ItemGroup where BepInEx, HarmonyX, and SpaceWarp are added as PackageReference includes. If so, all you need to do is add PackageReferences for FlightPlan and NodeManager as sown below.
 
 ```xml
     <ItemGroup>

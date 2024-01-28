@@ -1,0 +1,584 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <Style src="project://database/Assets/UI/FlightPlanTheme.uss?fileID=7433441132597879392&amp;guid=d45a0c5ece1f9a946a0bb51451bf3da8&amp;type=3#FlightPlanTheme" />
+  <ui:VisualElement name="GUIFrame" style="width: 350px; height: auto; background-color: rgb(0, 0, 0); border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; -unity-background-image-tint-color: rgb(0, 0, 0); border-left-color: rgb(76, 79, 188); border-right-color: rgb(76, 79, 188); border-top-color: rgb(76, 79, 188); border-bottom-color: rgb(76, 79, 188); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; max-height: 975px; min-height: 350px; font-size: 16px; -unity-font-definition: url('project://database/Assets/Fonts/LiberationSans-Regular%20SDF.asset?fileID=11400000&amp;guid=c65fbd69da0e2a9418ddab348c0cbe4a&amp;type=2#LiberationSans-Regular SDF');">
+    <ui:VisualElement name="Title" class="row-element-lose" style="height: 28px;">
+      <ui:VisualElement name="IconBox" style="justify-content: space-around; width: 27px; flex-direction: column; align-items: center; margin-left: 1px;">
+        <ui:VisualElement name="Icon" class="header-item" style="background-image: url('project://database/Assets/Images/icon.png?fileID=2800000&amp;guid=b18a5f6145a593841babcf68e8b9c54d&amp;type=3#icon'); -unity-background-scale-mode: scale-and-crop; width: 20px; height: 20px;" />
+      </ui:VisualElement>
+      <ui:Label text="FLIGHT PLAN" display-tooltip-when-elided="true" name="Title" style="margin-left: 0; padding-left: 2px; font-size: 22px; -unity-font-definition: url('project://database/Assets/Fonts/Orbitron-Black%20SDF.asset?fileID=11400000&amp;guid=504d6b61166a7e8438780ff66288fef4&amp;type=2#Orbitron-Black SDF');" />
+      <ui:VisualElement name="ButtonBox" style="justify-content: center;">
+        <ui:Button display-tooltip-when-elided="true" name="CloseButton" tooltip="Close Window" class="header-item" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; background-image: none; -unity-background-scale-mode: scale-and-crop; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; border-left-color: rgb(76, 79, 188); border-right-color: rgb(76, 79, 188); border-top-color: rgb(76, 79, 188); border-bottom-color: rgb(76, 79, 188); width: 22px; height: 22px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px;">
+          <ui:VisualElement name="CloseButtonIcon" style="background-image: url('project://database/Assets/Images/Cross.png?fileID=2800000&amp;guid=37b8c756542672049a5f823b81e4ce0c&amp;type=3#Cross'); height: 16px; background-color: rgba(38, 35, 41, 0); border-left-color: rgb(38, 35, 41); border-right-color: rgb(38, 35, 41); border-top-color: rgb(38, 35, 41); border-bottom-color: rgb(38, 35, 41); -unity-background-scale-mode: scale-to-fit;" />
+        </ui:Button>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 1px; padding-left: 4px; padding-right: 4px; margin-left: 4px; margin-right: 4px; margin-top: 1px;" />
+    <ui:VisualElement name="TopPanel" style="display: flex;">
+      <ui:VisualElement name="SituationRow" class="row-element-lose">
+        <ui:Label text="Situation" display-tooltip-when-elided="true" name="Label" style="align-items: center; justify-content: center;" />
+        <ui:Label text="Vessel Situation" display-tooltip-when-elided="true" name="VesselSituation" />
+      </ui:VisualElement>
+      <ui:VisualElement name="TargetSelectionRow" class="row-element-lose">
+        <ui:Button text="Celestial" display-tooltip-when-elided="true" name="TargetTypeButton" class="Maneuver-button" style="flex-grow: 1; height: 25px; width: 60px;" />
+        <UitkForKsp2.Controls.Dropdown name="TargetSelectionDropdown" choices="&gt;Moho,&gt;Eve, &gt;&gt;Gilly,&gt;Kerbin,&gt;&gt;Mun, &gt;&gt;Minums,&gt;Duna,&gt;&gt;Ike, &gt;Dres, &gt;Jool, &gt;&gt;Lathe, &gt;&gt;Vall, &gt;&gt;Tylo, &gt;&gt;Bop, &gt;&gt;Pol, &gt;Eeloo" index="-1" class="unity-base-dropdown__item" style="flex-grow: 1; font-size: 14px; -unity-text-align: middle-left; white-space: nowrap; -unity-font-style: bold; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />
+      </ui:VisualElement>
+      <ui:VisualElement name="TabBar" class="row-element-button-bar" style="height: auto; justify-content: space-around; margin-top: 3px; margin-bottom: 3px; width: auto;">
+        <ui:VisualElement name="OSMButtonBox" class="button-box">
+          <ui:Button display-tooltip-when-elided="true" name="OSMButton" class="big-button">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/OSM_50.png?fileID=2800000&amp;guid=9502320f10e48c042902fdf4bac5f6c3&amp;type=3#OSM_50');" />
+          </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="TRMShipToShipButtonBox" class="button-box" style="flex-grow: 1; display: flex;">
+          <ui:Button display-tooltip-when-elided="true" name="TRMShipToShipButton" class="big-button">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/TRM_50_Ship2Ship.png?fileID=2800000&amp;guid=9c270626629dbb34fa3d8266968c18d9&amp;type=3#TRM_50_Ship2Ship');" />
+          </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="TRMShipToCelestialButtonBox" class="button-box" style="flex-grow: 1; display: none;">
+          <ui:Button display-tooltip-when-elided="true" name="TRMShipToCelestialButton" class="big-button">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/TRM_50_Ship2Celestial.png?fileID=2800000&amp;guid=e5c3b1e40709d5f45b4e6cd3b5b5b85a&amp;type=3#TRM_50_Ship2Celestial');" />
+          </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="OTMMoonButtonBox" class="button-box" style="flex-grow: 1; display: none;">
+          <ui:Button display-tooltip-when-elided="true" name="OTMMoonButton" class="big-button">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/OTM_50_Moon.png?fileID=2800000&amp;guid=11cfc8584553ed24a9a69ea5358f192c&amp;type=3#OTM_50_Moon');" />
+          </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="OTMPlanetButtonBox" class="button-box" style="flex-grow: 1;">
+          <ui:Button display-tooltip-when-elided="true" name="OTMPlanetButton" class="big-button">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/OTM_50_Planet.png?fileID=2800000&amp;guid=4e26f1da5be2b7843a6350accb4b4dde&amp;type=3#OTM_50_Planet');" />
+          </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="ROMButtonBox" class="button-box" style="flex-grow: 1;">
+          <ui:Button display-tooltip-when-elided="true" name="ROMButton" class="big-button">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/ROM_50.png?fileID=2800000&amp;guid=3f4ebfc5182edf048be3c2b8089f5b9a&amp;type=3#ROM_50');" />
+          </ui:Button>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 2px; padding-left: 4px; padding-right: 4px; margin-left: 12px; margin-right: 12px;" />
+    <ui:Label text="Ownship Maneuvers" display-tooltip-when-elided="true" name="PanelLabel" style="-unity-font-style: bold;" />
+    <ui:VisualElement name="BurnOptionsRow" class="row-element-lose" style="flex-direction: row; justify-content: space-between;">
+      <ui:Label text="Burn Option:" display-tooltip-when-elided="true" style="flex-grow: 1; -unity-text-align: middle-left; width: 80px;" />
+      <UitkForKsp2.Controls.Dropdown index="-1" choices="at cheapest Eq. node,at nearest Eq. node,at equatorial AN,at equatorial DN,after a fixed time" name="BurnOptionsDropdown" class="unity-base-dropdown__item" style="flex-grow: 1; width: 42%; font-size: 14px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; -unity-text-align: middle-left; white-space: nowrap;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="HorizontalSpace" />
+    <ui:VisualElement name="OSMPanel" style="display: none; width: 100%;">
+      <ui:VisualElement name="CircularizeGroup" style="flex-direction: column;">
+        <ui:VisualElement name="CircularizeRow" class="row-element-lose">
+          <ui:Button text="Circularize" display-tooltip-when-elided="true" name="CircularizeButtonOSM" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NewPeGroup" style="flex-direction: column;">
+        <ui:VisualElement name="NewPeRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="New Pe" display-tooltip-when-elided="true" name="NewPeButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="100" name="NewPeValueOSM" tooltip="New periapsis altitude" />
+            <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" style="white-space: normal; -unity-text-align: middle-left;" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NewApGroup" style="flex-direction: column;">
+        <ui:VisualElement name="NewApRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="New Ap" display-tooltip-when-elided="true" name="NewApButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="100" name="NewApValueOSM" tooltip="New apoapsis altitude" />
+            <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NewPeApGroup" style="flex-direction: column;">
+        <ui:VisualElement name="NewPeApRow" class="row-element-lose">
+          <ui:Button text="New Pe &amp; Ap" display-tooltip-when-elided="true" name="NewPeApButtonOSM" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NewIncGroup" style="flex-direction: column;">
+        <ui:VisualElement name="NewIncRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="New Inclination" display-tooltip-when-elided="true" name="NewIncButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="0" name="NewIncValueOSM" tooltip="New orbital inclination" />
+            <ui:Label text="°" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NewLANGroup" style="flex-direction: column;">
+        <ui:VisualElement name="NewLANRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="New LAN" display-tooltip-when-elided="true" name="NewLANButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="0" name="NewLANValueOSM" tooltip="New longitude of ascending node" />
+            <ui:Label text="°" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NewSMAGroup" style="flex-direction: column;">
+        <ui:VisualElement name="NewSMARow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="New SMA" display-tooltip-when-elided="true" name="NewSMAButtonOSM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="0" name="NewSMAValueOSM" tooltip="New semi-major axis" />
+            <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="TRMShipToShipPanel" style="display: none;">
+      <ui:Toggle label="Select Docking Port" name="SelectPortToggle" class="toggle" style="flex-direction: row-reverse; margin-left: 4px;" />
+      <ui:VisualElement name="TargetOrbitRow" class="row-element-tight">
+        <ui:Label text="Target Orbit:" display-tooltip-when-elided="true" />
+        <ui:Label text="98 km x 106 km" display-tooltip-when-elided="true" name="TargetOrbitTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="CurrentOrbitRow" class="row-element-tight">
+        <ui:Label text="Current Orbit:" display-tooltip-when-elided="true" />
+        <ui:Label text="97 km x 106 km" display-tooltip-when-elided="true" name="CurrentOrbitTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="RelativeIncRow" class="row-element-tight">
+        <ui:Label text="Relative Inclination:" display-tooltip-when-elided="true" />
+        <ui:Label text="0.00°" display-tooltip-when-elided="true" name="RelativeIncTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="SynodicPeriodRow" class="row-element-tight">
+        <ui:Label text="Synodic Period:" display-tooltip-when-elided="true" />
+        <ui:Label text="2 y 243 d 1:33:57.48" display-tooltip-when-elided="true" name="SynodicPeriodTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NextWindowRow" class="row-element-tight">
+        <ui:Label text="Next Window:" display-tooltip-when-elided="true" />
+        <ui:Label text="2 y 243 d 0:53:41.14" display-tooltip-when-elided="true" name="NextWindowTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NextClosestApproachRow" class="row-element-tight">
+        <ui:Label text="Next Closest Approach:" display-tooltip-when-elided="true" />
+        <ui:Label text="99 d 0:32:50.83" display-tooltip-when-elided="true" name="NextClosestApproachTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="SeparationAtCaRow" class="row-element-tight">
+        <ui:Label text="Separation at Closest Approach:" display-tooltip-when-elided="true" />
+        <ui:Label text="465.3 m" display-tooltip-when-elided="true" name="SeparationAtCaTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="RelativeVelocityRowTRMS" class="row-element-tight">
+        <ui:Label text="Relative Velocity:" display-tooltip-when-elided="true" />
+        <ui:Label text="2.1 m/s" display-tooltip-when-elided="true" name="RelativeVelocityTRMS" />
+      </ui:VisualElement>
+      <ui:VisualElement name="MatchPlanesGroup" style="flex-direction: column;">
+        <ui:VisualElement name="MatchPlanesRow" class="row-element-lose">
+          <ui:Button text="Match Planes" display-tooltip-when-elided="true" name="MatchPlanesButtonTRMS" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NewApGroup" style="flex-direction: column;">
+        <ui:VisualElement name="NewApRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="New Ap" display-tooltip-when-elided="true" name="NewApButtonTRMS" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="100" name="NewApValueTRMS" tooltip="New apoapsis altitude for phasing orbit" />
+            <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="CircularizeGroup" style="flex-direction: column;">
+        <ui:VisualElement name="CircularizeRow" class="row-element-lose">
+          <ui:Button text="Circularize" display-tooltip-when-elided="true" name="CircularizeButtonTRMS" class="Maneuver-button" style="height: 27px;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="HohmannTransferGroup" style="flex-direction: column;">
+        <ui:VisualElement name="HohmannTransferRow" class="row-element-lose">
+          <ui:Button text="Hohmann Transfer" display-tooltip-when-elided="true" name="HohmannTransferButtonTRMS" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="CourseCorrectionGroup" style="flex-direction: column;">
+        <ui:VisualElement name="CourseCorrectionRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="Course Correction" display-tooltip-when-elided="true" name="CourseCorrectionButtonTRMS" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="100" name="CourseCorrectionValueTRMS" tooltip="Closest approach goal" />
+            <ui:Label text="m" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="MatchVelocityGroup" style="flex-direction: column;">
+        <ui:VisualElement name="MatchVelocityRow" class="row-element-lose">
+          <ui:Button text="Match Velocity" display-tooltip-when-elided="true" name="MatchVelocityButtonTRMS" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="InterceptGroup" style="flex-direction: column;">
+        <ui:VisualElement name="InterceptRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="Intercept" display-tooltip-when-elided="true" name="InterceptButtonTRMS" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="1:00:00" name="InterceptValueTRMS" tooltip="Time in hh:mm:ss format" />
+            <ui:Label text="hms" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:Label text="Next intercept window would be 12,041.0 orbits away, which is more than the maximum of 5 phasing orbits. Increase phasing rate by establishing a new phasing orbit at 203.136 km." display-tooltip-when-elided="true" name="TRMStatus" style="white-space: normal;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="TRMShipToCelestialPanel" style="display: none;">
+      <ui:VisualElement name="TargetOrbitRow" class="row-element-tight">
+        <ui:Label text="Target Orbit:" display-tooltip-when-elided="true" />
+        <ui:Label text="98 km x 106 km" display-tooltip-when-elided="true" name="TargetOrbitTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="CurrentOrbitRow" class="row-element-tight">
+        <ui:Label text="Current Orbit:" display-tooltip-when-elided="true" />
+        <ui:Label text="97 km x 106 km" display-tooltip-when-elided="true" name="CurrentOrbitTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="RelativeIncRow" class="row-element-tight">
+        <ui:Label text="Relative Inclination:" display-tooltip-when-elided="true" />
+        <ui:Label text="0.00°" display-tooltip-when-elided="true" name="RelativeIncTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="PhaseAngleRow" class="row-element-tight">
+        <ui:Label text="Phase Angle to Target:" display-tooltip-when-elided="true" />
+        <ui:Label text="93.4°" display-tooltip-when-elided="true" name="PhaseAngleTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="XferPhaseAngleRow" class="row-element-tight">
+        <ui:Label text="Transfer Window Phase Angle:" display-tooltip-when-elided="true" />
+        <ui:Label text="44.4°" display-tooltip-when-elided="true" name="XferPhaseAngleTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="XferTimeRow" class="row-element-tight">
+        <ui:Label text="Transfer Time:" display-tooltip-when-elided="true" />
+        <ui:Label text="302 d 0:13:23.10" display-tooltip-when-elided="true" name="XferTimeTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="SynodicPeriodRow" class="row-element-tight">
+        <ui:Label text="Synodic Period:" display-tooltip-when-elided="true" />
+        <ui:Label text="2 y 243 d 1:33:57.48" display-tooltip-when-elided="true" name="SynodicPeriodTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NextWindowRow" class="row-element-tight">
+        <ui:Label text="Next Window:" display-tooltip-when-elided="true" />
+        <ui:Label text="1 y 359 d 3:49:39.57" display-tooltip-when-elided="true" name="NextWindowTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="NextClosestApproachRow" class="row-element-tight">
+        <ui:Label text="Next Closest Approach:" display-tooltip-when-elided="true" />
+        <ui:Label text="99 d 0:32:50.83" display-tooltip-when-elided="true" name="NextClosestApproachTRMC" />
+      </ui:VisualElement>
+      <ui:VisualElement name="MatchPlanesGroup" style="flex-direction: column;">
+        <ui:VisualElement name="MatchPlanesRow" class="row-element-lose">
+          <ui:Button text="Match Planes" display-tooltip-when-elided="true" name="MatchPlanesButtonTRMC" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="HohmannTransferGroup" style="flex-direction: column;">
+        <ui:VisualElement name="HohmannTransferRow" class="row-element-lose">
+          <ui:Button text="Hohmann Transfer" display-tooltip-when-elided="true" name="HohmannTransferButtonTRMC" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="CourseCorrectionGroup" style="flex-direction: column;">
+        <ui:VisualElement name="CourseCorrectionRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="Course Correction" display-tooltip-when-elided="true" name="CourseCorrectionButtonTRMC" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="100" name="CourseCorrectionValueTRMC" tooltip="Closest approach goal (altitude)" />
+            <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="InterceptGroup" style="flex-direction: column;">
+        <ui:VisualElement name="InterceptRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="Intercept" display-tooltip-when-elided="true" name="InterceptButtonTRMC" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="1:00:00" name="InterceptValueTRMC" tooltip="Time in hh:mm:ss format" />
+            <ui:Label text="hms" display-tooltip-when-elided="true" name="Units" class="units-label" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="MatchVelocityGroup" style="flex-direction: column;">
+        <ui:VisualElement name="MatchVelocityRow" class="row-element-lose">
+          <ui:Button text="Match Velocity" display-tooltip-when-elided="true" name="MatchVelocityButtonTRMC" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="OTMMoonPanel" style="display: none;">
+      <ui:VisualElement name="MoonReturnGroup" style="flex-direction: column;">
+        <ui:VisualElement name="MoonReturnRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="Return From Moon" display-tooltip-when-elided="true" name="ReturnFromMoonButtonOTM" class="Maneuver-button" style="width: 50%; flex-grow: 0;" />
+          <ui:VisualElement name="ValueAndUnits" style="flex-direction: row; flex-grow: 1;">
+            <ui:TextField picking-mode="Ignore" text="100" name="MoonReturnPeValue" tooltip="Target periapsis altitude for return orbit" />
+            <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" style="white-space: normal; -unity-text-align: middle-left;" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="OTMPlanetPanel" style="display: flex;">
+      <ui:VisualElement name="DataDisplayGroup">
+        <ui:VisualElement name="RelativeIncRow" class="row-element-tight">
+          <ui:Label text="Relative Inclination:" display-tooltip-when-elided="true" />
+          <ui:Label text="0.00°" display-tooltip-when-elided="true" name="RelativeIncOTM" />
+        </ui:VisualElement>
+        <ui:VisualElement name="PhaseAngleRow" class="row-element-tight">
+          <ui:Label text="Phase Angle to Target:" display-tooltip-when-elided="true" />
+          <ui:Label text="93.4°" display-tooltip-when-elided="true" name="PhaseAngleOTM" />
+        </ui:VisualElement>
+        <ui:VisualElement name="XferPhaseAngleRow" class="row-element-tight">
+          <ui:Label text="Transfer Window Phase Angle:" display-tooltip-when-elided="true" />
+          <ui:Label text="44.4°" display-tooltip-when-elided="true" name="XferPhaseAngleOTM" />
+        </ui:VisualElement>
+        <ui:VisualElement name="XferTimeRow" class="row-element-tight">
+          <ui:Label text="Transfer Time:" display-tooltip-when-elided="true" />
+          <ui:Label text="302 d 0:13:23.10" display-tooltip-when-elided="true" name="XferTimeOTM" />
+        </ui:VisualElement>
+        <ui:VisualElement name="SynodicPeriodRow" class="row-element-tight">
+          <ui:Label text="Synodic Period:" display-tooltip-when-elided="true" />
+          <ui:Label text="2 y 57 d 2:04:17.25" display-tooltip-when-elided="true" name="SynodicPeriodOTM" />
+        </ui:VisualElement>
+        <ui:VisualElement name="NextWindowRow" class="row-element-tight">
+          <ui:Label text="Next Window:" display-tooltip-when-elided="true" />
+          <ui:Label text="1 y 359 d 3:49:39.57" display-tooltip-when-elided="true" name="NextWindowOTM" />
+        </ui:VisualElement>
+        <ui:VisualElement name="EjectionDvRow" class="row-element-tight">
+          <ui:Label text="Approximate Eject Δv:" display-tooltip-when-elided="true" />
+          <ui:Label text="1046.8 m/s" display-tooltip-when-elided="true" name="EjectionDvOTM" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="InterplanetaryXferGroup" style="flex-direction: column;">
+        <ui:VisualElement name="InterplanetaryXferRow" class="row-element-lose">
+          <ui:Button text="Interplanetary Transfer" display-tooltip-when-elided="true" name="InterplanetaryXferButton" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="AdvInterplanetaryXferGroup" style="flex-direction: column;">
+        <ui:VisualElement name="AdvInterplanetaryXferRow" class="row-element-lose">
+          <ui:Button text="Advanced Interplanetary Transfer" display-tooltip-when-elided="true" name="AdvInterplanetaryXferButton" class="Maneuver-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="AdvXferGroup" style="display: flex;">
+        <ui:VisualElement name="CaptureBurnRow" class="row-element-tight">
+          <ui:Toggle label="Include Capture Burn" name="CaptureBurnToggle" value="false" class="toggle row-element-tight" style="flex-direction: row-reverse;" />
+        </ui:VisualElement>
+        <ui:Label text="Computing: 0%" display-tooltip-when-elided="true" name="Computing" />
+        <ui:VisualElement name="LimitedTimeGroup" style="width: 100%;">
+          <ui:VisualElement name="MaxArrivalTimeRow" class="row-element-tight" style="justify-content: flex-start; width: 97%;">
+            <ui:TextField picking-mode="Ignore" label="Max Arrival Time:" value="0" text="2y 362d 01h 14m 38s" name="MaxArrivalTimeInput" tooltip="Time in hh:mm:ss format" class="text-input" style="width: 290px;" />
+            <ui:Label text="hms" display-tooltip-when-elided="true" class="units-label" style="width: 30px;" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="PorkchopGroup">
+          <ui:VisualElement name="PorkchopRow" style="flex-direction: row; justify-content: space-around;">
+            <ui:VisualElement name="PorkchopDisplay" style="height: 200px; width: 330px;" />
+          </ui:VisualElement>
+          <ui:VisualElement name="DeltaVRow" class="row-element-tight" style="flex-direction: row; justify-content: space-between;">
+            <ui:VisualElement name="DeltaVGroup" style="flex-direction: row;">
+              <ui:Label text="ΔV:" display-tooltip-when-elided="true" />
+              <ui:Label text="4.379 Mm/s" display-tooltip-when-elided="true" name="XferDeltaVLabel" />
+            </ui:VisualElement>
+            <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetButton" class="Maneuver-button Control-button" />
+          </ui:VisualElement>
+          <ui:VisualElement name="PeriapsisRow" class="row-element-tight">
+            <ui:TextField picking-mode="Ignore" label="Periapsis" value="60" text="60" name="AdvXferPeriapsisInput" class="text-input" />
+            <ui:Label text="km" display-tooltip-when-elided="true" class="units-label" />
+          </ui:VisualElement>
+          <ui:VisualElement name="SelectRow" class="row-element-tight" style="flex-direction: row; justify-content: space-between;">
+            <ui:Label text="Select:" display-tooltip-when-elided="true" />
+            <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+              <ui:Button text="Lowest Dv" display-tooltip-when-elided="true" name="LowestDvButton" class="Maneuver-button Control-button" />
+              <ui:Button text="ASAP" display-tooltip-when-elided="true" name="ASAPButton" class="Maneuver-button Control-button" />
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement name="DepartureRow" class="row-element-tight" style="flex-direction: row;">
+            <ui:Label text="Departure in" display-tooltip-when-elided="true" />
+            <ui:Label text="2y 362d 01h 14m 38s" display-tooltip-when-elided="true" name="DepartureTimeLabel" style="height: 24px;" />
+          </ui:VisualElement>
+          <ui:VisualElement name="TransitDurationRow" class="row-element-tight" style="flex-direction: row;">
+            <ui:Label text="Transit duration" display-tooltip-when-elided="true" />
+            <ui:Label text="56m 42s" display-tooltip-when-elided="true" name="TransitDurationTimeLabel" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="ROMPanel" style="display: none;">
+      <ui:VisualElement name="PayloadsRow" class="row-element-tight">
+        <ui:Label text="Payloads:" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+          <ui:VisualElement name="IncreasePayloadsButtonBox" class="button-box">
+            <ui:Button text="+" display-tooltip-when-elided="true" name="IncreasePayloadsButton" class="tiny-button" style="width: 14px;" />
+          </ui:VisualElement>
+          <ui:Label text="/" display-tooltip-when-elided="true" style="margin-left: 0; padding-left: 0; padding-right: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />
+          <ui:VisualElement name="DecreasePayloadsButtonBox" class="button-box">
+            <ui:Button text="-" display-tooltip-when-elided="true" name="DecreasePayloadsButton" class="tiny-button" style="width: 14px;" />
+          </ui:VisualElement>
+          <ui:Label text="3" display-tooltip-when-elided="true" name="NumPayloads" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="DeployOrbitsRow" class="row-element-tight">
+        <ui:Label text="Deploy Orbits:" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+          <ui:VisualElement name="IncreaseOrbitsButtonBox" class="button-box">
+            <ui:Button text="+" display-tooltip-when-elided="true" name="IncreaseOrbitsButton" class="tiny-button" style="width: 14px;" />
+          </ui:VisualElement>
+          <ui:Label text="/" display-tooltip-when-elided="true" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0;" />
+          <ui:VisualElement name="DecreaseOrbitsButtonBox" class="button-box">
+            <ui:Button text="-" display-tooltip-when-elided="true" name="DecreaseOrbitsButton" class="tiny-button" style="width: 14px;" />
+          </ui:VisualElement>
+          <ui:Label text="1" display-tooltip-when-elided="true" name="NumOrbits" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="OrbitalResonanceRow" class="row-element-tight">
+        <ui:Label text="Orbital Resonance:" name="OrbitalResonanceLabel" display-tooltip-when-elided="true" />
+        <ui:Label text="2/3" display-tooltip-when-elided="true" name="OrbitalResonance" />
+      </ui:VisualElement>
+      <ui:VisualElement name="TargetAltitudeRow" class="row-element-tight row-element-lose" style="display: flex;">
+        <ui:TextField picking-mode="Ignore" label="Target Altitude" value="600" text="600" name="TargetAltitudeInput" tooltip="payload deployment orbital altitude" class="text-input unity-text-field" />
+        <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+      </ui:VisualElement>
+      <ui:VisualElement name="CurrentApoapsisRow" class="row-element-tight">
+        <ui:Label text="Current Apoapsis" name="CurrentApoapsisLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+          <ui:VisualElement name="SetApoapsisButtonBox" class="button-box">
+            <ui:Button name="SetApoapsisButton" class="tiny-button" style="background-image: url('project://database/Assets/Images/Orbit.png?fileID=2800000&amp;guid=601e88f8516fd25499b0a056260846a4&amp;type=3#Orbit'); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 16px; height: 16px;" />
+          </ui:VisualElement>
+          <ui:Label text="500" display-tooltip-when-elided="true" name="CurrentApoapsis" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="CurrentPeriapsisRow" class="row-element-tight">
+        <ui:Label text="Current Periapsis" name="CurrentPeriapsisLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+          <ui:VisualElement name="SetPeriapsisButtonBox" class="button-box">
+            <ui:Button name="SetPeriapsisButton" class="tiny-button" style="background-image: url('project://database/Assets/Images/Orbit.png?fileID=2800000&amp;guid=601e88f8516fd25499b0a056260846a4&amp;type=3#Orbit'); width: 16px; height: 16px;" />
+          </ui:VisualElement>
+          <ui:Label text="500" display-tooltip-when-elided="true" name="CurrentPeriapsis" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="SyncronousAltRow" class="row-element-tight">
+        <ui:Label text="Synchronous Alt" name="SynchronousAltLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+          <ui:VisualElement name="SetSynchronousAltButtonBox" class="button-box">
+            <ui:Button name="SetSynchronousAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url('project://database/Assets/Images/Orbit.png?fileID=2800000&amp;guid=601e88f8516fd25499b0a056260846a4&amp;type=3#Orbit');" />
+          </ui:VisualElement>
+          <ui:Label text="Outside SOI" display-tooltip-when-elided="true" name="SynchronousAlt" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="SemiSyncronousAltRow" class="row-element-tight">
+        <ui:Label text="Semi Synchronous Alt" name="SemiSynchronousAltLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+          <ui:VisualElement name="SetSemiSynchronousAltButtonBox" class="button-box">
+            <ui:Button name="SetSemiSynchronousAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url('project://database/Assets/Images/Orbit.png?fileID=2800000&amp;guid=601e88f8516fd25499b0a056260846a4&amp;type=3#Orbit');" />
+          </ui:VisualElement>
+          <ui:Label text="1,997" display-tooltip-when-elided="true" name="SemiSynchronousAlt" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="SOIAltRow" class="row-element-tight">
+        <ui:Label text="SOI Alt" name="SOIAltLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ValueAndUnits" style="flex-direction: row;">
+          <ui:Label text="2,430" display-tooltip-when-elided="true" name="SOIAlt" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="MinLOSAltRow" class="row-element-tight">
+        <ui:Label text="Min LOS Alt" name="MinLOSAltLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ButtonGroup" style="flex-direction: row;">
+          <ui:VisualElement name="SetMinLOSAltButtonBox" class="button-box">
+            <ui:Button name="SetMinLOSAltButton" class="tiny-button" style="width: 16px; height: 16px; background-image: url('project://database/Assets/Images/Orbit.png?fileID=2800000&amp;guid=601e88f8516fd25499b0a056260846a4&amp;type=3#Orbit');" />
+          </ui:VisualElement>
+          <ui:Label text="1,997" display-tooltip-when-elided="true" name="MinLOSAlt" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:Toggle label="Occlusion" name="Occlusion" class="toggle" style="flex-direction: row-reverse; margin-left: 4px;" />
+      <ui:VisualElement name="AtmOccRow" class="row-element-tight row-element-lose">
+        <ui:TextField picking-mode="Ignore" label="Atm" value="0.75" text="0.75" name="AtmOccInput" tooltip="Atmospheric occlusion factor" class="text-input" />
+        <ui:Label display-tooltip-when-elided="true" name="Units" class="units-label" />
+      </ui:VisualElement>
+      <ui:VisualElement name="VacOccRow" class="row-element-tight row-element-lose">
+        <ui:TextField picking-mode="Ignore" label="Vac" value="0.9" text="0.9" name="VacOccInput" tooltip="Vacuum occlusion factor" class="text-input" />
+        <ui:Label display-tooltip-when-elided="true" name="Units" class="units-label" />
+      </ui:VisualElement>
+      <ui:Toggle label="Dive" name="Dive" class="toggle" style="flex-direction: row-reverse; margin-left: 4px;" />
+      <ui:VisualElement name="ResonantOrbitPeriodRow" class="row-element-tight">
+        <ui:Label text="Period" name="PeriodLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ValueAndUnits" style="flex-direction: row;">
+          <ui:Label text="3:15:43.70" display-tooltip-when-elided="true" name="ResonantOrbitPeriod" />
+          <ui:Label text="hms" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="ResonantOrbitApRow" class="row-element-tight">
+        <ui:Label text="Apoapsis" name="ApoapsisLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ValueAndUnits" style="flex-direction: row;">
+          <ui:Label text="600" display-tooltip-when-elided="true" name="ResonantOrbitAp" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="ResonantOrbitPeRow" class="row-element-tight">
+        <ui:Label text="Periapsis" name="PeriapsisLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ValueAndUnits" style="flex-direction: row;">
+          <ui:Label text="221" display-tooltip-when-elided="true" name="ResonantOrbitPe" />
+          <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="ResonantOrbitEccRow" class="row-element-tight">
+        <ui:Label text="Eccentricity" name="EccentricityLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ValueAndUnits" style="flex-direction: row;">
+          <ui:Label text="0.310" display-tooltip-when-elided="true" name="ResonantOrbitEcc" />
+          <ui:Label display-tooltip-when-elided="true" name="Units" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="ResonantOrbitInjectionRow" class="row-element-tight">
+        <ui:Label text="Injection dv" name="InjectiondvLabel" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="ValueAndUnits" style="flex-direction: row;">
+          <ui:Label text="48.380" display-tooltip-when-elided="true" name="ResonantOrbitInjection" />
+          <ui:Label display-tooltip-when-elided="true" name="Units" text="m/s" class="units-label" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 2px; padding-left: 4px; padding-right: 4px; margin-left: 12px; margin-right: 12px;" />
+      <ui:VisualElement name="HorizontalSpace" />
+      <ui:VisualElement name="FixPeGroup" style="flex-direction: column;">
+        <ui:VisualElement name="FixPeRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="Fix Pe" display-tooltip-when-elided="true" name="FixPeButton" class="big-button Maneuver-button" style="width: 80px; flex-grow: 0; height: 25px;" />
+          <ui:Label text="Lower to 221.03 km" display-tooltip-when-elided="true" name="FixPeStatus" style="flex-grow: 1; -unity-text-align: middle-left; height: 25px;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+      <ui:VisualElement name="FixApGroup" style="flex-direction: column;">
+        <ui:VisualElement name="FixApRow" class="row-element-lose" style="flex-direction: row;">
+          <ui:Button text="Fix Ap" display-tooltip-when-elided="true" name="FixApButton" class="big-button Maneuver-button" style="width: 80px; flex-grow: 0; height: 25px;" />
+          <ui:Label text="Raise to 600.0 km" display-tooltip-when-elided="true" name="FixApStatus" style="flex-grow: 1; -unity-text-align: middle-left; margin-right: 4px; margin-top: 2px; margin-bottom: 2px; padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; height: 25px;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HorizontalSpace" />
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="AfterFixedTime" class="row-element-tight row-element-lose">
+      <ui:TextField picking-mode="Ignore" label="Time From Now" text="1:00:00" name="AfterFixedTimeInput" tooltip="Time in hh:mm:ss format" class="text-input" />
+      <ui:Label text="hms" display-tooltip-when-elided="true" name="Units" class="units-label" />
+    </ui:VisualElement>
+    <ui:VisualElement name="AtAnAltitude" class="row-element-tight row-element-lose" style="display: none;">
+      <ui:TextField picking-mode="Ignore" label="Maneuver Altitude" value="100" text="100" name="ManeuverAltitudeInput" class="text-input" />
+      <ui:Label text="km" display-tooltip-when-elided="true" name="Units" class="units-label" />
+    </ui:VisualElement>
+    <ui:VisualElement name="HorizontalSpace" />
+    <ui:VisualElement name="HorizontalLine" style="background-color: rgb(76, 79, 188); height: 2px; padding-left: 4px; padding-right: 4px; margin-left: 12px; margin-right: 12px;" />
+    <ui:VisualElement name="BottomPanel">
+      <ui:VisualElement name="StatusRow" class="row-element-lose" style="flex-direction: row; height: auto; flex-wrap: nowrap; width: 100%; max-width: 100%;">
+        <ui:Label text="Status:" name="StatusLabel" display-tooltip-when-elided="true" class="row-element-lose" style="height: auto; flex-direction: column;" />
+        <ui:Label text="This is a long status line illustrating line wrap" display-tooltip-when-elided="true" name="Status" style="white-space: normal; width: 100%; height: auto; -unity-text-align: middle-right; margin-right: 4px; flex-grow: 1; flex-shrink: 1;" />
+      </ui:VisualElement>
+      <ui:VisualElement name="ButtonBar" class="row-element-button-bar" style="height: auto; justify-content: space-between; margin-top: 3px; margin-bottom: 3px; width: auto;">
+        <ui:VisualElement name="MakeNodeButtonBox" class="button-box-ltd">
+          <ui:Button display-tooltip-when-elided="true" name="MakeNodeButton" text="Make Node" class="big-button-ltd" style="height: 56%; width: 56px; white-space: normal;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="MNCButtonBox" class="button-box-ltd">
+          <ui:Button display-tooltip-when-elided="true" name="MNCButton" class="big-button-ltd">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/icon_white_50.png?fileID=2800000&amp;guid=711089896a5ddc84a9311e918bdc495e&amp;type=3#icon_white_50');" />
+          </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="K2D2ButtonBox" class="button-box-ltd">
+          <ui:Button display-tooltip-when-elided="true" name="K2D2Button" class="big-button-ltd">
+            <ui:VisualElement name="LargeIcon" style="background-image: url('project://database/Assets/Images/k2d2_big_icon.png?fileID=2800000&amp;guid=808fd8692b39fcc4ca8a0aed3ca3bc44&amp;type=3#k2d2_big_icon');" />
+          </ui:Button>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="K2D2StatusRow">
+      <ui:Label text="K2D2: this is a test of an absurdly long row with way too much information on it!" display-tooltip-when-elided="true" name="K2D2Status" style="white-space: normal;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="HorizontalSpace" style="flex-grow: 1;" />
+  </ui:VisualElement>
+</ui:UXML>

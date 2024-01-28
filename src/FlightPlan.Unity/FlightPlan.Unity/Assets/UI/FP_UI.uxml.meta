@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: efc2066a761f59d419e62a6a23fc0aab
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: fp_ui.bundle
+  assetBundleVariant: 
+  script: {fileID: 13804, guid: 0000000000000000e000000000000000, type: 0}
