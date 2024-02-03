@@ -1,7 +1,7 @@
 name: Upload release
 
 env:
-  SPACEDOCK_MOD_ID: fill_in_your_mod_id_here
+  SPACEDOCK_MOD_ID: 3359
 
 on:
   release:
@@ -48,16 +48,16 @@ jobs:
           asset_name: ${{ env.release_filename }}
           asset_content_type: application/zip
 
-#      - name: Add Mask
-#        run: echo "::add-mask::${{ secrets.SPACEDOCK_PASSWORD }}"
-#
-#      - name: Update mod on SpaceDock
-#        uses: KSP2Community/spacedock-upload@v1.0.0
-#        with:
-#          username: ${{ secrets.SPACEDOCK_USER }}
-#          password: ${{ secrets.SPACEDOCK_PASSWORD }}
-#          game_id: 22407
-#          mod_id: ${{ env.SPACEDOCK_MOD_ID }}
-#          version: ${{ env.version }}
-#          zipball: ${{ env.zip }}
-#          changelog: ./changelog.md
+      - name: Add Mask
+        run: echo "::add-mask::${{ secrets.SPACEDOCK_PASSWORD }}"
+
+      - name: Update mod on SpaceDock
+        uses: KSP2Community/spacedock-upload@v1.0.0
+        with:
+          username: ${{ secrets.SPACEDOCK_USER }}
+          password: ${{ secrets.SPACEDOCK_PASSWORD }}
+          game_id: 22407
+          mod_id: ${{ env.SPACEDOCK_MOD_ID }}
+          version: ${{ env.version }}
+          zipball: ${{ env.zip }}
+          changelog: ./changelog.md
