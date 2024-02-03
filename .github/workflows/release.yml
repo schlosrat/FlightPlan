@@ -1,7 +1,7 @@
 name: Upload release
 
 env:
-  SPACEDOCK_MOD_ID: 3359
+  SPACEDOCK_MOD_ID: 3359 # Flight Plan
 
 on:
   release:
@@ -23,6 +23,16 @@ jobs:
 
       - name: Install jq
         uses: dcarbone/install-jq-action@v2.1.0
+
+      - name: Check version
+        run: |
+          version=$(jq -r '.version' plugin_template/swinfo.json)
+          echo "Tag is ${{ github.ref_name }}"
+          if [[ "${{ github.ref_name }}" != "v$version" ]];
+          then
+            echo "Invalid version tag: ${{ github.ref_name }}. Expected v$version."
+            exit 1
+          fi
 
       - name: Build the solution
         run: dotnet build "FlightPlan.sln" -c Release
@@ -60,4 +70,15 @@ jobs:
           mod_id: ${{ env.SPACEDOCK_MOD_ID }}
           version: ${{ env.version }}
           zipball: ${{ env.zip }}
+          changelog: ./changelog.md
+          
+      - name: Update mod topic
+        uses: Kerbalight/ksp2-forum-post-action@latest
+        with:
+          username: ${{ secrets.KSP_FORUM_USERNAME }}
+          password: ${{ secrets.KSP_FORUM_PASSWORD }}
+          forum_topic_url: https://forum.kerbalspaceprogram.com/topic/216393-flight-plan-0100/
+          forum_topic_title: "Flight Plan [{version} for KSP2 v{ksp2_version}]"
+          spacedock_url: "https://spacedock.info/mod/3359/Flight%20Plan#changelog"
+          version: ${{ env.version }}
           changelog: ./changelog.md
