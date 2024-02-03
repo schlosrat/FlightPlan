@@ -1,4 +1,5 @@
-﻿using FPUtilities;
+﻿using FlightPlan.API.Extensions;
+using FPUtilities;
 using KSP.Game;
 using KSP.Sim;
 using KSP.Sim.DeltaV;
@@ -341,6 +342,7 @@ public class FpUiController : KerbalMonoBehaviour
         // document.rootVisualElement.transform.position.z = 42;
 
         container = document.rootVisualElement;
+        container.StopMouseEventsPropagation();
         container[0].transform.position = new Vector2(500, 50);
         container[0].CenterByDefault();
         container.style.display = DisplayStyle.None;
