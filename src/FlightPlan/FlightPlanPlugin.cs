@@ -199,7 +199,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //  FpUiController._GUIenabled = newState == GameState.FlightView || newState == GameState.Map3DView;
         //};
 
-
+        Game.Messages.Subscribe<GameLoadFinishedMessage>(msg =>
+        {
+            MessageCenterMessage message = (GameLoadFinishedMessage)msg;
+            GameLoadFinished(message);
+        });
 
         // Subscribe to messages that indicate it's not OK to raise the GUI
         //StateChanges.FlightViewLeft += message =>
@@ -312,34 +316,39 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         RefreshGameManager();
 
         // Subscribe to the VesselChangedMessage so we can reset the status any time the player changes the vessel
-        MessageCenter.Subscribe<VesselChangedMessage>(new Action<MessageCenterMessage>(this.VesselChanged));
+        MessageCenter.Subscribe<VesselChangedMessage>(VesselChanged);
 
         Logger.LogInfo("VesselChangedMessage message subscribed");
 
         // Subscribe to the GameStateEnteredMessage so we can control if the GUI should be displaid upon entering this state
-        MessageCenter.Subscribe<GameStateEnteredMessage>(new Action<MessageCenterMessage>(this.GameStateEntered));
+        MessageCenter.Subscribe<GameStateEnteredMessage>(GameStateEntered);
 
         Logger.LogInfo("GameStateEnteredMessage message subscribed");
 
         // Subscribe to the GameStateLeftMessage so we can control if the GUI should be disabled upon leaving this state
-        MessageCenter.Subscribe<GameStateLeftMessage>(new Action<MessageCenterMessage>(this.GameStateLeft));
+        MessageCenter.Subscribe<GameStateLeftMessage>(GameStateLeft);
 
         Logger.LogInfo("GameStateLeftMessage message subscribed");
 
         // Subscribe to the GameStateChangedMessage so we can control if the GUI should be disabled given this state change
-        MessageCenter.Subscribe<GameStateChangedMessage>(new Action<MessageCenterMessage>(this.GameStateChanged));
+        MessageCenter.Subscribe<GameStateChangedMessage>(GameStateChanged);
 
         Logger.LogInfo("GameStateChangedMessage message subscribed");
 
         // Subscribe to the TrainingCenterLoadedMessage so we can control if the GUI should be disabled given this state change
-        MessageCenter.Subscribe<TrainingCenterLoadedMessage>(new Action<MessageCenterMessage>(this.TrainingCenterLoaded));
+        MessageCenter.Subscribe<TrainingCenterLoadedMessage>(TrainingCenterLoaded);
 
         Logger.LogInfo("TrainingCenterLoadedMessage message subscribed");
 
         // Subscribe to the TrackingStationLoadedMessage so we can control if the GUI should be disabled given this state change
-        MessageCenter.Subscribe<TrackingStationLoadedAudioCueMessage>(new Action<MessageCenterMessage>(this.TrackingStationLoaded));
+        MessageCenter.Subscribe<TrackingStationLoadedAudioCueMessage>(TrackingStationLoaded);
 
         Logger.LogInfo("TrackingStationLoadedAudioCueMessage message subscribed");
+
+        // Subscribe to the GameLoadFinshedMessage so we can control if the GUI should be cleaned up given this state change
+        MessageCenter.Subscribe<GameLoadFinishedMessage>(GameLoadFinished);
+
+        Logger.LogInfo("GameLoadFinishedMessage message subscribed");
 
     }
 
@@ -347,6 +356,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     public static GameState LastGameState;
     public static CurtainContext ThisCurtainContext;
 
+    public static bool needToCleanUp;
     public static void RefreshGameManager()
     {
         ThisGameState = GameManager.Instance?.Game?.GlobalGameState?.GetGameState();
@@ -355,14 +365,42 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         ThisCurtainContext = (CurtainContext)(GameManager.Instance?.Game?.UI.Curtain.CurtainContextData.CurtainContext);
         Logger.LogDebug($"RefreshGameManager ThisCurtainContext = {ThisCurtainContext}");
 
-        // Log out every type of message in the game...
-        //foreach (var type in typeof(GameManager).Assembly.GetTypes())
-        //{
-        //  if (typeof(MessageCenterMessage).IsAssignableFrom(type) && !type.IsAbstract)
-        //  {
-        //    Logger.LogInfo(type.Name);
-        //  }
-        //}
+        if (ThisGameState.GameState == GameState.MainMenu)
+        {
+            needToCleanUp = true;
+            Instance.CleanUp();
+
+        }
+        else if (ThisGameState.GameState == GameState.FlightView || ThisGameState.GameState == GameState.Map3DView)
+        {
+            if (needToCleanUp && FpUiController.Instance is not null)
+            {
+                Logger.LogInfo($"RefreshGameManager calling CleanUp() while GameState = {ThisGameState.GameState}");
+                Instance.CleanUp();
+            }
+        }
+        else
+            Logger.LogInfo($"RefreshGameManager ThisGameState.GameState = {ThisGameState.GameState}");
+
+    }
+
+    private void CleanUp()
+    {
+        ThisGameState = GameManager.Instance?.Game?.GlobalGameState?.GetGameState();
+
+        if (FpUiController.Instance is not null)
+        {
+            Logger.LogInfo($"CleanUp calling FpUiController.Instance.CleanUp() from {ThisGameState.GameState}");
+            FpUiController.Instance.CleanUp();
+            needToCleanUp = false;
+        }
+
+        // Lower the GUI
+        if (InterfaceEnabled)
+        {
+            Logger.LogInfo($"CleanUp calling Instance.ToggleButton(false) from {ThisGameState.GameState} with needToCleanUp = {needToCleanUp}");
+            Instance.ToggleButton(false);
+        }
     }
 
     private void VesselChanged(MessageCenterMessage message)
@@ -371,6 +409,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         Logger.LogDebug($"VesselChanged message recieved. Resetting StatusTime to 0");
         FPStatus.StatusTime = 0;
     }
+
     private void GameStateChanged(MessageCenterMessage message)
     {
         RefreshGameManager();
@@ -385,6 +424,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             FpUiController.container.style.display = DisplayStyle.None;
         }
         Logger.LogDebug($"GameStateChanged FpUiController.GUIenabled = {FpUiController.GUIenabled}");
+    }
+
+    private void GameLoadFinished(MessageCenterMessage message)
+    {
+        Instance.CleanUp();
     }
 
     private void GameStateEntered(MessageCenterMessage message)
