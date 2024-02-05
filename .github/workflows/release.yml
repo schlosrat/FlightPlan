@@ -30,7 +30,7 @@ jobs:
           echo "Tag is ${{ github.ref_name }}"
           if [[ "${{ github.ref_name }}" != "$version" ]];
           then
-            echo "Invalid version tag: ${{ github.ref_name }}. Expected v$version."
+            echo "Invalid version tag: ${{ github.ref_name }}. Expected $version."
             exit 1
           fi
 
