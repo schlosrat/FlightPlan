@@ -29,7 +29,7 @@
     {
       "id": "com.github.schlosrat.node_manager",
       "version": {
-        "min": "0.7.2",
+        "min": "0.7.3",
         "max": "*"
       }
     }
