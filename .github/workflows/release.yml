@@ -28,7 +28,7 @@ jobs:
         run: |
           version=$(jq -r '.version' plugin_template/swinfo.json)
           echo "Tag is ${{ github.ref_name }}"
-          if [[ "${{ github.ref_name }}" != "v$version" ]];
+          if [[ "${{ github.ref_name }}" != "$version" ]];
           then
             echo "Invalid version tag: ${{ github.ref_name }}. Expected v$version."
             exit 1
