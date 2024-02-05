@@ -1,0 +1,49 @@
+name: Update Discord Topic
+
+env:
+  MOD_DISCORD_THREAD_ID: "1203146131266207794" # It should be quoted to prevent YAML from interpreting it as an integer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  post_to_discord:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install jq
+        uses: dcarbone/install-jq-action@v2.1.0
+
+      - name: Extract current version
+        id: get-version
+        run: |
+          version=$(jq -r '.version' plugin_template/swinfo.json)
+          echo "Version is $version"
+          echo "version=$version" >> $GITHUB_ENV
+          wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq -r '.[0].body' > ./changelog.md
+      
+      - name: Prepare content
+        shell: bash
+        run: |
+          echo -e "## Release v${version}\n" > ./content.md
+          cat ./changelog.md >> ./content.md
+          {
+            echo 'discord_message<<EOF'
+            cat ./content.md
+            echo EOF
+          } >> "$GITHUB_ENV"
+      
+      - name: Update mod topic
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_KMS_WEBHOOK_URL }}
+          content: ${{ env.discord_message }}
+          thread-id: ${{ env.MOD_DISCORD_THREAD_ID }}
+          username: "Wayfarer's Wings"
+          avatar-url: "https://avatars.githubusercontent.com/u/98559431?s=200&v=4"
+          

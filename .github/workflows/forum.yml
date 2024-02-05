@@ -1,0 +1,60 @@
+name: Update forum topic
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          
+      - name: Install jq
+        uses: dcarbone/install-jq-action@v2.1.0
+
+      - name: Extract current version
+        id: get-version
+        run: |
+          version=$(jq -r '.version' plugin_template/swinfo.json)
+          echo "Version is $version"
+          echo "version=$version" >> $GITHUB_ENV
+          wget -qO- https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq -r '.[0].body' > ./changelog.md
+
+#      - name: Upload zip to release
+#        uses: shogo82148/actions-upload-release-asset@v1.7.2
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ env.upload_url }}
+#          asset_path: ${{ env.zip }}
+#          asset_name: ${{ env.release_filename }}
+#          asset_content_type: application/zip
+
+#      - name: Add Mask
+#        run: echo "::add-mask::${{ secrets.SPACEDOCK_PASSWORD }}"
+#
+#      - name: Update mod on SpaceDock
+#        uses: KSP2Community/spacedock-upload@v1.0.0
+#        with:
+#          username: ${{ secrets.SPACEDOCK_USER }}
+#          password: ${{ secrets.SPACEDOCK_PASSWORD }}
+#          game_id: 22407
+#          mod_id: ${{ env.SPACEDOCK_MOD_ID }}
+#          version: ${{ env.version }}
+#          zipball: ${{ env.zip }}
+#          changelog: ./changelog.md
+
+      - name: Update mod topic
+        uses: Kerbalight/ksp2-forum-post-action@latest
+        with:
+          username: ${{ secrets.KSP_FORUM_USERNAME }}
+          password: ${{ secrets.KSP_FORUM_PASSWORD }}
+          forum_topic_url: https://forum.kerbalspaceprogram.com/topic/223457-wayfarers-wings-rank-ribbons-v030-for-ksp2-v021/
+          forum_topic_title: "Wayfarer's Wings (Rank Ribbons) [v{version} for KSP2 v{ksp2_version}]"
+          spacedock_url: "https://spacedock.info/mod/3554/Wayfarer's%20Wings%20(Rank%20Ribbons)#changelog"
+          version: ${{ env.version }}
+          changelog: ./changelog.md
