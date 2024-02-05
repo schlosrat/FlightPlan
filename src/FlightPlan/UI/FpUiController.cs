@@ -354,25 +354,25 @@ public class FpUiController : KerbalMonoBehaviour
             // textField.RegisterCallback<FocusOutEvent>(_ => GameManager.Instance?.Game?.Input.Enable());
 
             textField.RegisterValueChangedCallback((evt) =>
-        {
-              bool pass = false;
-              FlightPlanPlugin.Logger.LogDebug($"TryParse attempt for {textField.name}. Tooltip = {textField.tooltip}");
-              if (textField.tooltip != "Time in hh:mm:ss format")
-                  pass = float.TryParse(evt.newValue, out _);
-              else
-                  pass = MyTryParse(evt.newValue, out _);
-              if (pass)
-              {
-                  textField.RemoveFromClassList("unity-text-field-invalid");
-                  FlightPlanPlugin.Logger.LogDebug($"TryParse success for {textField.name}, nValue = '{evt.newValue}': Removed unity-text-field-invalid from class list");
-              }
-              else
-              {
-                  textField.AddToClassList("unity-text-field-invalid");
-                  FlightPlanPlugin.Logger.LogDebug($"TryParse failure for {textField.name}, nValue = '{evt.newValue}': Added unity-text-field-invalid to class list");
-                  FlightPlanPlugin.Logger.LogDebug($"document.rootVisualElement.transform.position.z = {document.rootVisualElement.transform.position.z}");
-              }
-          });
+            {
+                bool pass = false;
+                FlightPlanPlugin.Logger.LogDebug($"TryParse attempt for {textField.name}. Tooltip = {textField.tooltip}");
+                if (textField.tooltip != "Time in hh:mm:ss format")
+                    pass = float.TryParse(evt.newValue, out _);
+                else
+                    pass = MyTryParse(evt.newValue, out _);
+                if (pass)
+                {
+                    textField.RemoveFromClassList("unity-text-field-invalid");
+                    FlightPlanPlugin.Logger.LogDebug($"TryParse success for {textField.name}, nValue = '{evt.newValue}': Removed unity-text-field-invalid from class list");
+                }
+                else
+                {
+                    textField.AddToClassList("unity-text-field-invalid");
+                    FlightPlanPlugin.Logger.LogDebug($"TryParse failure for {textField.name}, nValue = '{evt.newValue}': Added unity-text-field-invalid to class list");
+                    FlightPlanPlugin.Logger.LogDebug($"document.rootVisualElement.transform.position.z = {document.rootVisualElement.transform.position.z}");
+                }
+            });
 
             textField.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
             textField.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
@@ -465,6 +465,9 @@ public class FpUiController : KerbalMonoBehaviour
     private void Update()
     {
         // CelestialBodyComponent ReferenceBody = null;
+
+        if (FlightPlanPlugin.needToCleanUp)
+            CleanUp();
 
         if (initialized)
         {
@@ -2119,6 +2122,14 @@ public class FpUiController : KerbalMonoBehaviour
             //  // FlightPlanPlugin.Logger.LogInfo($"Keys: {string.Join(",", targetPorts.Keys)}");
             //}
         }
+    }
+
+    public void CleanUp()
+    {
+        UnsetToggles();
+        selectedManeuver = ManeuverType.None;
+        ManeuverTypeDesc = "";
+        FlightPlanPlugin.needToCleanUp = false;
     }
 
     // System.Drawing.Color col = System.Drawing.Color ColorTranslator.FromHtml("#262329");
