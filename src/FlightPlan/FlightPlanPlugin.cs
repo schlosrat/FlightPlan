@@ -199,11 +199,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         //  FpUiController._GUIenabled = newState == GameState.FlightView || newState == GameState.Map3DView;
         //};
 
-        Game.Messages.Subscribe<GameLoadFinishedMessage>(msg =>
-        {
-            MessageCenterMessage message = (GameLoadFinishedMessage)msg;
-            GameLoadFinished(message);
-        });
+        //Game.Messages.Subscribe<GameLoadFinishedMessage>(msg =>
+        //{
+        //    MessageCenterMessage message = (GameLoadFinishedMessage)msg;
+        //    GameLoadFinished(message);
+        //});
 
         // Subscribe to messages that indicate it's not OK to raise the GUI
         //StateChanges.FlightViewLeft += message =>
