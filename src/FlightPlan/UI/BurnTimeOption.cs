@@ -191,7 +191,7 @@ internal class BurnTimeOption
                 RequestedBurnTime = UT + FpUiController.TimeOffset_s; // FPSettings.TimeOffset
                 break;
             case TimeRef.ALTITUDE:
-                RequestedBurnTime = Orbit.NextTimeOfRadius(UT, FpUiController.Altitude_km * 1000); // FPSettings.Altitude_km.
+                RequestedBurnTime = Orbit.NextTimeOfRadius(UT, FpUiController.Altitude_km * 1000 + Orbit.referenceBody.radius); // FPSettings.Altitude_km.
                 break;
             case TimeRef.EQ_NEAREST_AD:
                 RequestedBurnTime = Math.Min(Orbit.TimeOfAscendingNodeEquatorial(UT), Orbit.TimeOfDescendingNodeEquatorial(UT));
