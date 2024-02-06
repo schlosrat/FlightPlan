@@ -77,8 +77,9 @@ jobs:
         with:
           username: ${{ secrets.KSP_FORUM_USERNAME }}
           password: ${{ secrets.KSP_FORUM_PASSWORD }}
+          post_title: "## Release {version}" # (without the v)
           forum_topic_url: https://forum.kerbalspaceprogram.com/topic/216393-flight-plan-0100/
-          forum_topic_title: "Flight Plan [{version} for KSP2 v{ksp2_version}]"
+          forum_topic_title: "Flight Plan [{version} for KSP2 v{ksp2_version}+]"
           spacedock_url: "https://spacedock.info/mod/3359/Flight%20Plan#changelog"
           version: ${{ env.version }}
           changelog: ./changelog.md
