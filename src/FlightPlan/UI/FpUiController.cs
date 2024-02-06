@@ -644,15 +644,15 @@ public class FpUiController : KerbalMonoBehaviour
             // FpUiController.Altitude_km = DrawLabelWithTextField("Maneuver Altitude", FpUiController.Altitude_km, "km");
             // Enable the Maneuver Altitude input
             AtAnAltitude.style.display = DisplayStyle.Flex;
-            if (FpUiController.Altitude_km * 1000 < Orbit.Periapsis)
+            if (FpUiController.Altitude_km * 1000 < Orbit.PeriapsisArl)
             {
-                FpUiController.Altitude_km = Math.Ceiling(Orbit.Periapsis) / 1000;
+                FpUiController.Altitude_km = Math.Ceiling(Orbit.PeriapsisArl) / 1000;
                 //if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
                 //  UI_Fields.TempDict["Maneuver Altitude"] = FpUiController.Altitude_km.ToString();
             }
-            if (Orbit.eccentricity < 1 && FpUiController.Altitude_km * 1000 > Orbit.Apoapsis)
+            if (Orbit.eccentricity < 1 && FpUiController.Altitude_km * 1000 > Orbit.ApoapsisArl)
             {
-                FpUiController.Altitude_km = Math.Floor(Orbit.Apoapsis) / 1000;
+                FpUiController.Altitude_km = Math.Floor(Orbit.ApoapsisArl) / 1000;
                 //if (GUI.GetNameOfFocusedControl() != "Maneuver Altitude")
                 //  UI_Fields.TempDict["Maneuver Altitude"] = FpUiController.Altitude_km.ToString();
             }

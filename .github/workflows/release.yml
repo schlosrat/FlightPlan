@@ -24,15 +24,15 @@ jobs:
       - name: Install jq
         uses: dcarbone/install-jq-action@v2.1.0
 
-#      - name: Check version
-#        run: |
-#          version=$(jq -r '.version' plugin_template/swinfo.json)
-#          echo "Tag is ${{ github.ref_name }}"
-#          if [[ "${{ github.ref_name }}" != "$version" ]];
-#          then
-#            echo "Invalid version tag: ${{ github.ref_name }}. Expected $version."
-#            exit 1
-#          fi
+      - name: Check version
+        run: |
+          version=$(jq -r '.version' plugin_template/swinfo.json)
+          echo "Tag is ${{ github.ref_name }}"
+          if [[ "${{ github.ref_name }}" != "$version" ]];
+          then
+            echo "Invalid version tag: ${{ github.ref_name }}. Expected $version."
+            exit 1
+          fi
 
       - name: Build the solution
         run: dotnet build "FlightPlan.sln" -c Release
