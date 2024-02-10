@@ -293,7 +293,7 @@ public partial class alglib
         return ((ulong)global_threading_flags)<<FLG_THREADING_SHIFT;
     }
 
-    private static ulong ae_get_effective_threading(xparams p)
+    static ulong ae_get_effective_threading(xparams p)
     {
         if( p==null || (p.flags&FLG_THREADING_MASK)==FLG_THREADING_USE_GLOBAL )
             return ((ulong)global_threading_flags)<<FLG_THREADING_SHIFT;
@@ -805,7 +805,7 @@ public partial class alglib
         /********************************************************************
         Tracing and logging
         ********************************************************************/
-        private enum TRACE_MODE { NONE, FILE };
+        enum TRACE_MODE { NONE, FILE };
         private static TRACE_MODE trace_mode = TRACE_MODE.NONE;
         private static string trace_tags = "";
         private static string trace_filename = "";
@@ -1104,7 +1104,7 @@ public partial class alglib
     ********************************************************************/
     public class serializer
     {
-        private enum SMODE { DEFAULT, ALLOC, TO_STRING, FROM_STRING, TO_STREAM, FROM_STREAM };
+        enum SMODE { DEFAULT, ALLOC, TO_STRING, FROM_STRING, TO_STREAM, FROM_STREAM };
         private const int SER_ENTRIES_PER_ROW = 5;
         private const int SER_ENTRY_LENGTH    = 11;
         
