@@ -54,7 +54,7 @@ public enum ManeuverType
 /// <summary>
 ///  The selected time Reference
 /// </summary>
-public enum TimeRef
+public enum TimeReference
 {
     None,
     COMPUTED,
@@ -949,7 +949,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
     }
 
     // No longer takes double burnUT. Need to sort out how this can be called as an API method
-    public bool MatchPlanes(TimeRef time_ref, double burnOffsetFactor = -0.5)
+    public bool MatchPlanes(TimeReference time_ref, double burnOffsetFactor = -0.5)
     {
         double _UT = Game.UniverseModel.UniverseTime;
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
@@ -970,18 +970,18 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         FPStatus.Ok($"Ready to Match Planes with {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
 
         Vector3d _deltaV = Vector3d.zero;
-        if (time_ref == TimeRef.REL_ASCENDING)
+        if (time_ref == TimeReference.REL_ASCENDING)
             _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(_orbit, tgtOrbit, _UT, out burnUTout);
-        else if (time_ref == TimeRef.REL_DESCENDING)
+        else if (time_ref == TimeReference.REL_DESCENDING)
             _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(_orbit, tgtOrbit, _UT, out burnUTout);
-        else if (time_ref == TimeRef.REL_NEAREST_AD)
+        else if (time_ref == TimeReference.REL_NEAREST_AD)
         {
             if (_orbit.TimeOfAscendingNode(tgtOrbit, _UT) < _orbit.TimeOfDescendingNode(tgtOrbit, _UT))
                 _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesAscending(_orbit, tgtOrbit, _UT, out burnUTout);
             else
                 _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeToMatchPlanesDescending(_orbit, tgtOrbit, _UT, out burnUTout);
         }
-        else if (time_ref == TimeRef.REL_HIGHEST_AD)
+        else if (time_ref == TimeReference.REL_HIGHEST_AD)
         {
             var anTime = _orbit.TimeOfAscendingNode(tgtOrbit, _UT);
             var dnTime = _orbit.TimeOfDescendingNode(tgtOrbit, _UT);
@@ -1168,7 +1168,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         PatchedConicsOrbit _orbit = _activeVessel.Orbit;
         Vector3d _deltaV;
 
-        Logger.LogDebug($"MoonReturn: Return from {_orbit.referenceBody.Name} {BurnTimeOption.TimeRefDesc}");
+        Logger.LogDebug($"MoonReturn: Return from {_orbit.referenceBody.Name} {BurnTimeOption.TimeRefDesc} seeking Pe {targetMRPeR/1000:N3} km");
         var _e = _orbit.eccentricity;
 
         FPStatus.Warning($"Ready to Return from {_orbit.referenceBody.Name}?");
@@ -1249,7 +1249,7 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         bool _syncPhaseAngle = true;
         // Check the BurnOptionsDropdown
-        if (FpUiController.BurnOptionsDropdown.value == BurnTimeOption.TextTimeRef[TimeRef.NEXT_WINDOW])
+        if (FpUiController.BurnOptionsDropdown.value == BurnTimeOption.TextTimeRef[TimeReference.NEXT_WINDOW])
             _syncPhaseAngle = true;
         else
             _syncPhaseAngle = false;
