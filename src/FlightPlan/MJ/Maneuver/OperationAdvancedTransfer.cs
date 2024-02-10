@@ -83,7 +83,7 @@ namespace MuMech
                 return "Must select a target for the interplanetary transfer."; // Localizer.Format("#MechJeb_adv_Preconditions3");
 
             if (o.referenceBody.referenceBody == null)
-                return $"Doesn't make sense to plot an interplanetary transfer from an orbit around {o.referenceBody.Name}..LocalizeRemoveGender()";
+                return $"Doesn't make sense to plot an interplanetary transfer from an orbit around {o.referenceBody.Name.LocalizeRemoveGender()}.";
             // Localizer.Format("#MechJeb_adv_Preconditions4"); //"doesn't make sense to plot an interplanetary transfer from an orbit around <<1>>."
 
             if (o.referenceBody.referenceBody != target.Orbit.referenceBody)
@@ -321,14 +321,14 @@ namespace MuMech
             lastTargetCelestial = targetCelestial;
         }
 
-        public override void DoParametersGUI(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target, Mode thisSelectionMode) // was: MechJebModuleTargetController target
+        public override void DoParametersGUI(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target) // was: MechJebModuleTargetController target
         {
             _draggable = true;
-            selectionMode = thisSelectionMode;
+            selectionMode = FpUiController.thisSelectionMode;
             // If there is a worker running without a target selected (and event type is Layout) then stop the worker and clear the plot
             if (worker != null && (target == null || target != previousTarget || selectionMode != previousSelectiionMode)) // was: !target.NormalTargetExists && Event.current.type == EventType.Layout
             {
-                FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Stopping/Clearing worker and plot. Target = {target.Name}, thisSelectionMode = {modeNames[(int)thisSelectionMode]}");
+                FlightPlanPlugin.Logger.LogInfo($"DoParametersGUI: Stopping/Clearing worker and plot. Target = {target.Name}, thisSelectionMode = {modeNames[(int)selectionMode]}");
                 worker.Stop = true;
                 worker = null;
                 plot = null;
@@ -372,7 +372,7 @@ namespace MuMech
             if (GUI.changed || guiChanged || worker == null || worker.DestinationOrbit != target.Orbit || worker.OriginOrbit != o)
                 ComputeStuff(o, UniverseTime, target);
 
-            previousSelectiionMode = thisSelectionMode;
+            previousSelectiionMode = selectionMode;
             previousTarget = target;
 
         }

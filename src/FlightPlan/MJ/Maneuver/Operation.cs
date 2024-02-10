@@ -40,7 +40,7 @@ namespace MuMech
 
         // Draw the parameter part of the Operation (ask for time, altitudes etc)
         // Input parameters are orbit and time parameters after the last maneuver and current target
-        public abstract void DoParametersGUI(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target, OperationAdvancedTransfer.Mode selectionMode); // was: MechJebModuleTargetController
+        public abstract void DoParametersGUI(PatchedConicsOrbit o, double UniverseTime, CelestialBodyComponent target); // was: MechJebModuleTargetController
 
         // Function called when create node is pressed; input parameters are orbit and time parameters after the last maneuver and current target
         // ManeuverParameters contain a single time and dV describing the node that should be executed

@@ -22,54 +22,54 @@ internal class BurnTimeOption
     private Vector2 scrollPositionOptions;
 
     // Time references for BurnTimeOption.selected
-    public readonly static Dictionary<TimeRef, string> TextTimeRef = new()
+    public readonly static Dictionary<TimeReference, string> TextTimeRef = new()
     {
-        { TimeRef.None,              ""                            },
-        { TimeRef.COMPUTED,          "at optimum time"             },
-        { TimeRef.APOAPSIS,          "at next apoapsis"            },
-        { TimeRef.PERIAPSIS,         "at next periapsis"           },
-        { TimeRef.CLOSEST_APPROACH,  "at closest approach"         },
-        { TimeRef.EQ_ASCENDING,      "at equatorial AN"            },
-        { TimeRef.EQ_DESCENDING,     "at equatorial DN"            },
-        { TimeRef.REL_ASCENDING,     "at next AN with target"      },
-        { TimeRef.REL_DESCENDING,    "at next DN with target"      },
-        { TimeRef.X_FROM_NOW,        "after a fixed time"          },
-        { TimeRef.ALTITUDE,          "at an altitude"              },
-        { TimeRef.EQ_NEAREST_AD,     "at nearest Eq. AN/DN"        },
-        { TimeRef.EQ_HIGHEST_AD,     "at cheapest Eq. AN/DN"       },
-        { TimeRef.REL_NEAREST_AD,    "at nearest AN/DN w/Target"   },
-        { TimeRef.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target"  },
-        { TimeRef.LIMITED_TIME,      "Limited Time"                },
-        { TimeRef.PORKCHOP,          "Porkchop Selection"          },
-        { TimeRef.NEXT_WINDOW,       "at the next transfer window" },
-        { TimeRef.ASAP,              "as soon as possible"         }
+        { TimeReference.None,              ""                            },
+        { TimeReference.COMPUTED,          "at optimum time"             },
+        { TimeReference.APOAPSIS,          "at next apoapsis"            },
+        { TimeReference.PERIAPSIS,         "at next periapsis"           },
+        { TimeReference.CLOSEST_APPROACH,  "at closest approach"         },
+        { TimeReference.EQ_ASCENDING,      "at equatorial AN"            },
+        { TimeReference.EQ_DESCENDING,     "at equatorial DN"            },
+        { TimeReference.REL_ASCENDING,     "at next AN with target"      },
+        { TimeReference.REL_DESCENDING,    "at next DN with target"      },
+        { TimeReference.X_FROM_NOW,        "after a fixed time"          },
+        { TimeReference.ALTITUDE,          "at an altitude"              },
+        { TimeReference.EQ_NEAREST_AD,     "at nearest Eq. AN/DN"        },
+        { TimeReference.EQ_HIGHEST_AD,     "at cheapest Eq. AN/DN"       },
+        { TimeReference.REL_NEAREST_AD,    "at nearest AN/DN w/Target"   },
+        { TimeReference.REL_HIGHEST_AD,    "at cheapest AN/DN w/Target"  },
+        { TimeReference.LIMITED_TIME,      "Limited Time"                },
+        { TimeReference.PORKCHOP,          "Porkchop Selection"          },
+        { TimeReference.NEXT_WINDOW,       "at the next transfer window" },
+        { TimeReference.ASAP,              "as soon as possible"         }
     };
 
     // Inverse dictionary for Time references froom BurnTimeOption.selected
-    public readonly static Dictionary<string, TimeRef> ValTimeRef = new()
+    public readonly static Dictionary<string, TimeReference> ValTimeRef = new()
     {
-        { "",                            TimeRef.None              },
-        { "at optimum time",             TimeRef.COMPUTED          },
-        { "at next apoapsis",            TimeRef.APOAPSIS          },
-        { "at next periapsis",           TimeRef.PERIAPSIS         },
-        { "at closest approach",         TimeRef.CLOSEST_APPROACH  },
-        { "at equatorial AN",            TimeRef.EQ_ASCENDING      },
-        { "at equatorial DN",            TimeRef.EQ_DESCENDING     },
-        { "at next AN with target",      TimeRef.REL_ASCENDING     },
-        { "at next DN with target",      TimeRef.REL_DESCENDING    },
-        { "after a fixed time",          TimeRef.X_FROM_NOW        },
-        { "at an altitude",              TimeRef.ALTITUDE          },
-        { "at nearest Eq. AN/DN",        TimeRef.EQ_NEAREST_AD     },
-        { "at cheapest Eq. AN/DN",       TimeRef.EQ_HIGHEST_AD     },
-        { "at nearest AN/DN w/Target",   TimeRef.REL_NEAREST_AD    },
-        { "at cheapest AN/DN w/Target",  TimeRef.REL_HIGHEST_AD    },
-        { "Limited Time",                TimeRef.LIMITED_TIME      },
-        { "Porkchop Selection",          TimeRef.PORKCHOP          },
-        { "at the next transfer window", TimeRef.NEXT_WINDOW       },
-        { "as soon as possible",         TimeRef.ASAP              }
+        { "",                            TimeReference.None              },
+        { "at optimum time",             TimeReference.COMPUTED          },
+        { "at next apoapsis",            TimeReference.APOAPSIS          },
+        { "at next periapsis",           TimeReference.PERIAPSIS         },
+        { "at closest approach",         TimeReference.CLOSEST_APPROACH  },
+        { "at equatorial AN",            TimeReference.EQ_ASCENDING      },
+        { "at equatorial DN",            TimeReference.EQ_DESCENDING     },
+        { "at next AN with target",      TimeReference.REL_ASCENDING     },
+        { "at next DN with target",      TimeReference.REL_DESCENDING    },
+        { "after a fixed time",          TimeReference.X_FROM_NOW        },
+        { "at an altitude",              TimeReference.ALTITUDE          },
+        { "at nearest Eq. AN/DN",        TimeReference.EQ_NEAREST_AD     },
+        { "at cheapest Eq. AN/DN",       TimeReference.EQ_HIGHEST_AD     },
+        { "at nearest AN/DN w/Target",   TimeReference.REL_NEAREST_AD    },
+        { "at cheapest AN/DN w/Target",  TimeReference.REL_HIGHEST_AD    },
+        { "Limited Time",                TimeReference.LIMITED_TIME      },
+        { "Porkchop Selection",          TimeReference.PORKCHOP          },
+        { "at the next transfer window", TimeReference.NEXT_WINDOW       },
+        { "as soon as possible",         TimeReference.ASAP              }
     };
 
-    public List<TimeRef> Options = new List<TimeRef>();
+    public List<TimeReference> Options = new List<TimeReference>();
     public static double RequestedBurnTime = 0;
 
     // Allow the user to pick an _option for the selected activity
@@ -150,53 +150,53 @@ internal class BurnTimeOption
 
         switch (FpUiController.TimeRef)
         {
-            case TimeRef.None:
+            case TimeReference.None:
 
                 break;
-            case TimeRef.COMPUTED:
+            case TimeReference.COMPUTED:
                 RequestedBurnTime = -1; // for optimal time the burn time is computed and returned from the OrbitalManeuverCalculator method called.
                 break;
-            case TimeRef.APOAPSIS:
+            case TimeReference.APOAPSIS:
                 RequestedBurnTime = Orbit.NextApoapsisTime(UT);
                 break;
 
-            case TimeRef.PERIAPSIS:
+            case TimeReference.PERIAPSIS:
                 RequestedBurnTime = Orbit.NextPeriapsisTime(UT);
                 break;
-            case TimeRef.CLOSEST_APPROACH:
+            case TimeReference.CLOSEST_APPROACH:
                 if (tgtOrbit != null)
                     RequestedBurnTime = Orbit.NextClosestApproachTime(tgtOrbit, UT + 2); // +2 so that closestApproachTime is definitely > _UT
                 else
-                    FpUiController.TimeRef = TimeRef.None;
+                    FpUiController.TimeRef = TimeReference.None;
                 break;
-            case TimeRef.EQ_ASCENDING:
+            case TimeReference.EQ_ASCENDING:
                 RequestedBurnTime = Orbit.TimeOfAscendingNodeEquatorial(UT);
                 break;
-            case TimeRef.EQ_DESCENDING:
+            case TimeReference.EQ_DESCENDING:
                 RequestedBurnTime = Orbit.TimeOfDescendingNodeEquatorial(UT);
                 break;
-            case TimeRef.REL_ASCENDING:
+            case TimeReference.REL_ASCENDING:
                 if (Plugin._currentTarget != null)
                     RequestedBurnTime = Orbit.TimeOfAscendingNode(tgtOrbit, UT); // like built in TimeOfAN(_currentTarget.Orbit, _UT), but with check to prevent time in the past
                 else
-                    FpUiController.TimeRef = TimeRef.None;
+                    FpUiController.TimeRef = TimeReference.None;
                 break;
-            case TimeRef.REL_DESCENDING:
+            case TimeReference.REL_DESCENDING:
                 if (tgtOrbit != null)
                     RequestedBurnTime = Orbit.TimeOfDescendingNode(tgtOrbit, UT); // like built in TimeOfDN(_currentTarget.Orbit, _UT), but with check to prevent time in the past
                 else
-                    FpUiController.TimeRef = TimeRef.None;
+                    FpUiController.TimeRef = TimeReference.None;
                 break;
-            case TimeRef.X_FROM_NOW:
+            case TimeReference.X_FROM_NOW:
                 RequestedBurnTime = UT + FpUiController.TimeOffset_s; // FPSettings.TimeOffset
                 break;
-            case TimeRef.ALTITUDE:
+            case TimeReference.ALTITUDE:
                 RequestedBurnTime = Orbit.NextTimeOfRadius(UT, FpUiController.Altitude_km * 1000 + Orbit.referenceBody.radius); // FPSettings.Altitude_km.
                 break;
-            case TimeRef.EQ_NEAREST_AD:
+            case TimeReference.EQ_NEAREST_AD:
                 RequestedBurnTime = Math.Min(Orbit.TimeOfAscendingNodeEquatorial(UT), Orbit.TimeOfDescendingNodeEquatorial(UT));
                 break;
-            case TimeRef.EQ_HIGHEST_AD:
+            case TimeReference.EQ_HIGHEST_AD:
                 {
                     double _timeAN = Orbit.TimeOfAscendingNodeEquatorial(UT);
                     double _timeDN = Orbit.TimeOfDescendingNodeEquatorial(UT);
@@ -208,13 +208,13 @@ internal class BurnTimeOption
                         RequestedBurnTime = _timeDN;
                 }
                 break;
-            case TimeRef.REL_NEAREST_AD:
+            case TimeReference.REL_NEAREST_AD:
                 if (tgtOrbit != null)
                     RequestedBurnTime = Math.Min(Orbit.TimeOfAscendingNode(tgtOrbit, UT), Orbit.TimeOfDescendingNode(tgtOrbit, UT));
                 else
-                    FpUiController.TimeRef = TimeRef.None;
+                    FpUiController.TimeRef = TimeReference.None;
                 break;
-            case TimeRef.REL_HIGHEST_AD:
+            case TimeReference.REL_HIGHEST_AD:
                 {
                     if (tgtOrbit != null)
                     {
@@ -228,7 +228,7 @@ internal class BurnTimeOption
                             RequestedBurnTime = _timeDN;
                     }
                     else
-                        FpUiController.TimeRef = TimeRef.None;
+                        FpUiController.TimeRef = TimeReference.None;
                 }
                 break;
             default:

@@ -43,6 +43,9 @@ public class FpUiController : KerbalMonoBehaviour
     public static double Altitude_km;
     public static double TimeOffset_s;
     public static double MaxArrivalTime_s = 0.0;
+    public static double TargetEcc = 0.0;
+    public static OperationAdvancedTransfer.Mode thisSelectionMode = OperationAdvancedTransfer.Mode.None;
+
 
     //private double _newPeValue = 100;
     //private double _newApValue = 200;
@@ -639,7 +642,7 @@ public class FpUiController : KerbalMonoBehaviour
         //}
 
         // If the selected option is to do an activity "at an altitude", then present an input field for the altitude to use
-        if (TimeRef == TimeRef.ALTITUDE)
+        if (TimeRef == TimeReference.ALTITUDE)
         {
             // FpUiController.Altitude_km = DrawLabelWithTextField("Maneuver Altitude", FpUiController.Altitude_km, "km");
             // Enable the Maneuver Altitude input
@@ -660,7 +663,7 @@ public class FpUiController : KerbalMonoBehaviour
         else
             AtAnAltitude.style.display = DisplayStyle.None;
 
-        if (TimeRef == TimeRef.X_FROM_NOW)
+        if (TimeRef == TimeReference.X_FROM_NOW)
         {
             // FpUiController.TimeOffset = DrawLabelWithTextField("Time From Now", FpUiController.TimeOffset, "s");
             // Enable the Time From Now input
@@ -948,13 +951,15 @@ public class FpUiController : KerbalMonoBehaviour
                 }
 
                 // If we're on the OTM - Planet tab and we've got a LIMITED_TIME or PORKCHOP as the selected TimeRef...
-                if (TimeRef == TimeRef.LIMITED_TIME)
+                if (TimeRef == TimeReference.LIMITED_TIME)
                 {
-                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.LimitedTime);
+                    thisSelectionMode = OperationAdvancedTransfer.Mode.LimitedTime;
+                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
                 }
-                if (TimeRef == TimeRef.PORKCHOP)
+                if (TimeRef == TimeReference.PORKCHOP)
                 {
-                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody, OperationAdvancedTransfer.Mode.Porkchop);
+                    thisSelectionMode = OperationAdvancedTransfer.Mode.Porkchop;
+                    op.DoParametersGUI(FlightPlanPlugin.Instance._activeVessel.Orbit, Game.UniverseModel.UniverseTime, FlightPlanPlugin.Instance._currentTarget.CelestialBody);
                 }
 
                 synodicPeriod = ReferenceBody.Orbit.SynodicPeriod(targetOrbit);
@@ -1015,20 +1020,20 @@ public class FpUiController : KerbalMonoBehaviour
 
                 if (_synchronousAlt > 0)
                 {
-                    SynchronousAlt.text = $"{FPUtility.MetersToDistanceString(_synchronousAlt / 1000):N0}";
-                    SemiSynchronousAlt.text = $"{FPUtility.MetersToDistanceString(_semiSynchronousAlt / 1000):N0}";
+                    SynchronousAlt.text = $"{FPUtility.MetersToDistanceString((_synchronousAlt - _activeVessel.mainBody.radius) / 1000):N0}";
+                    SemiSynchronousAlt.text = $"{FPUtility.MetersToDistanceString((_semiSynchronousAlt - _activeVessel.mainBody.radius) / 1000):N0}";
                 }
                 else if (_semiSynchronousAlt > 0)
                 {
                     SynchronousAlt.text = "Outside SOI";
-                    SemiSynchronousAlt.text = $"{FPUtility.MetersToDistanceString(_semiSynchronousAlt / 1000):N0}";
+                    SemiSynchronousAlt.text = $"{FPUtility.MetersToDistanceString((_semiSynchronousAlt - _activeVessel.mainBody.radius) / 1000):N0}";
                 }
                 else
                 {
                     SynchronousAlt.text = "Outside SOI";
                     SemiSynchronousAlt.text = "Outside SOI";
                 }
-                SOIAlt.text = $"{FPUtility.MetersToDistanceString(_activeVessel.mainBody.sphereOfInfluence / 1000)}";
+                SOIAlt.text = $"{FPUtility.MetersToDistanceString((_activeVessel.mainBody.sphereOfInfluence - _activeVessel.mainBody.radius) / 1000)}";
                 if (_minLOSAlt > 0)
                 {
                     MinLOSAlt.text = $"{FPUtility.MetersToDistanceString(_minLOSAlt / 1000):N0}";
@@ -1044,7 +1049,7 @@ public class FpUiController : KerbalMonoBehaviour
                 double _SMA2 = SMACalc(_xferPeriod);
                 double _sSMA = _target_alt_km * 1000 + _activeVessel.mainBody.radius;
                 double _divePe = 2.0 * _SMA2 - _sSMA;
-                if (_divePe < _activeVessel.mainBody.radius) // No diving in the shallow end of the pool!
+                if (_divePe < _activeVessel.mainBody.radius + _activeVessel.mainBody.atmosphereDepth) // No diving in the shallow end of the pool!
                 {
                     // FpUiController.DiveOrbit = false;
                     Dive.value = false;
@@ -1534,13 +1539,13 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: NewSMAValue.RegisterValueChangedCallback event initialized.");
 
         // Setup OSMPanel buttons
-        CircularizeButtonOSM.clicked += Circularize;
-        NewPeButtonOSM.clicked += NewPe;
-        NewApButtonOSM.clicked += NewAp;
-        NewPeApButtonOSM.clicked += NewPeAp;
-        NewIncButtonOSM.clicked += NewInc;
-        NewLANButtonOSM.clicked += NewLAN;
-        NewSMAButtonOSM.clicked += NewSMA;
+        CircularizeButtonOSM.clicked += () => Circularize(ManeuverType.circularize);
+        NewPeButtonOSM.clicked += () => NewPe(ManeuverType.newPe);
+        NewApButtonOSM.clicked += () => NewAp(ManeuverType.newAp);
+        NewPeApButtonOSM.clicked += () => NewPeAp(ManeuverType.newPeAp);
+        NewIncButtonOSM.clicked += () => NewInc(ManeuverType.newInc);
+        NewLANButtonOSM.clicked += () => NewLAN(ManeuverType.newLAN);
+        NewSMAButtonOSM.clicked += () => NewSMA(ManeuverType.newSMA);
 
         //Add the OSMPanel buttons to the list of toggle buttons
         toggleButtons.Add(CircularizeButtonOSM);
@@ -1623,13 +1628,13 @@ public class FpUiController : KerbalMonoBehaviour
         // InterceptValueTRMS.value = TargetInterceptTime_s.ToString();
         FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: InterceptValueTRMS.RegisterValueChangedCallback event initialized.");
 
-        MatchPlanesButtonTRMS.clicked += MatchPlanes;
-        NewApButtonTRMS.clicked += NewAp;
-        CircularizeButtonTRMS.clicked += Circularize;
-        HohmannTransferButtonTRMS.clicked += HohmannTransfer;
-        MatchVelocityButtonTRMS.clicked += MatchVelocity;
-        CourseCorrectionButtonTRMS.clicked += () => CourseCorrection(TargetInterceptDistanceVessel_m); // FpUiController.InterceptDistanceVessel
-        InterceptButtonTRMS.clicked += Intercept;
+        MatchPlanesButtonTRMS.clicked += () => MatchPlanes(ManeuverType.matchPlane);
+        NewApButtonTRMS.clicked += () => NewAp(ManeuverType.newAp);
+        CircularizeButtonTRMS.clicked += () => Circularize(ManeuverType.circularize);
+        HohmannTransferButtonTRMS.clicked += () => HohmannTransfer(ManeuverType.hohmannXfer);
+        MatchVelocityButtonTRMS.clicked += () => MatchVelocity(ManeuverType.matchVelocity);
+        CourseCorrectionButtonTRMS.clicked += () => CourseCorrection(ManeuverType.courseCorrection, TargetInterceptDistanceVessel_m); // FpUiController.InterceptDistanceVessel
+        InterceptButtonTRMS.clicked += () => Intercept(ManeuverType.interceptTgt);
 
         //Add the TRMSPanel buttons to the list of toggle buttons
         toggleButtons.Add(MatchPlanesButtonTRMS);
@@ -1688,11 +1693,11 @@ public class FpUiController : KerbalMonoBehaviour
         // InterceptValueTRMC.value = TargetInterceptTime_s.ToString();
         FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: InterceptValueTRMC.RegisterValueChangedCallback event initialized.");
 
-        MatchPlanesButtonTRMC.clicked += MatchPlanes;
-        HohmannTransferButtonTRMC.clicked += HohmannTransfer;
-        CourseCorrectionButtonTRMC.clicked += () => CourseCorrection(TargetInterceptDistanceCelestial_m); // FpUiController.InterceptDistanceCelestial*1000
-        InterceptButtonTRMC.clicked += Intercept;
-        MatchVelocityButtonTRMC.clicked += MatchVelocity;
+        MatchPlanesButtonTRMC.clicked += () => MatchPlanes(ManeuverType.matchPlane);
+        HohmannTransferButtonTRMC.clicked += () => HohmannTransfer(ManeuverType.hohmannXfer);
+        CourseCorrectionButtonTRMC.clicked += () => CourseCorrection(ManeuverType.courseCorrection, TargetInterceptDistanceCelestial_m); // FpUiController.InterceptDistanceCelestial*1000
+        InterceptButtonTRMC.clicked += () => Intercept(ManeuverType.interceptTgt);
+        MatchVelocityButtonTRMC.clicked += () => MatchVelocity(ManeuverType.matchVelocity);
 
         //Add the TRMCPanel buttons to the list of toggle buttons
         toggleButtons.Add(MatchPlanesButtonTRMC);
@@ -1720,7 +1725,7 @@ public class FpUiController : KerbalMonoBehaviour
         MoonReturnPeValue.value = (TargetMRPeR_m / 1000).ToString();
         FlightPlanPlugin.Logger.LogInfo($"InitializeElements: {testLog++}: MoonReturnPeValue.RegisterValueChangedCallback event initialized.");
 
-        ReturnFromMoonButtonOTM.clicked += ReturnFromMoon;
+        ReturnFromMoonButtonOTM.clicked += () => ReturnFromMoon(ManeuverType.moonReturn);
 
         //Add the OTMMoonPanel buttons to the list of toggle buttons
         toggleButtons.Add(ReturnFromMoonButtonOTM);
@@ -1768,8 +1773,8 @@ public class FpUiController : KerbalMonoBehaviour
         });
         MaxArrivalTimeInput.value = FPUtility.SecondsToTimeString(0);
 
-        InterplanetaryXferButton.clicked += InterplanetaryXfer;
-        AdvInterplanetaryXferButton.clicked += AdvInterplanetaryXfer;
+        InterplanetaryXferButton.clicked += () => InterplanetaryXfer(ManeuverType.planetaryXfer);
+        AdvInterplanetaryXferButton.clicked += () => AdvInterplanetaryXfer(ManeuverType.advancedPlanetaryXfer);
         ResetButton.clicked += ResetPorkchop;
         LowestDvButton.clicked += LowestDv;
         ASAPButton.clicked += ASAPTransfer;
@@ -1887,13 +1892,13 @@ public class FpUiController : KerbalMonoBehaviour
         DecreaseOrbitsButton.clicked += () => IncrementOrbits(-1);
         SetApoapsisButton.clicked += () => SetTargetAlt(_activeVessel.Orbit.ApoapsisArl / 1000.0);
         SetPeriapsisButton.clicked += () => SetTargetAlt(_activeVessel.Orbit.PeriapsisArl / 1000.0);
-        SetSynchronousAltButton.clicked += () => SetTargetAlt(_synchronousAlt / 1000);
-        SetSemiSynchronousAltButton.clicked += () => SetTargetAlt(_semiSynchronousAlt / 1000);
+        SetSynchronousAltButton.clicked += () => SetTargetAlt((_synchronousAlt - _activeVessel.mainBody.radius) / 1000);
+        SetSemiSynchronousAltButton.clicked += () => SetTargetAlt((_semiSynchronousAlt - _activeVessel.mainBody.radius) / 1000);
         SetMinLOSAltButton.clicked += () => SetTargetAlt(_minLOSAlt / 1000);
         Dive.RegisterValueChangedCallback((evt) =>
         {
             // FpUiController.DiveOrbit = evt.newValue;
-            updateResonance();
+            UpdateResonance();
         });
         FixPeButton.clicked += () =>
         {
@@ -1901,7 +1906,7 @@ public class FpUiController : KerbalMonoBehaviour
             {
                 // PeAltitude_km = targetPe;
                 TargetPeR_m = targetPe * 1000.0;
-                NewPe();
+                NewPe(ManeuverType.fixPe);
             }
         };
         FixApButton.clicked += () =>
@@ -1910,7 +1915,7 @@ public class FpUiController : KerbalMonoBehaviour
             {
                 // ApAltitude_km = targetAp;
                 TargetApR_m = targetAp * 1000.0;
-                NewAp();
+                NewAp(ManeuverType.fixAp);
             }
         };
 
@@ -2143,11 +2148,10 @@ public class FpUiController : KerbalMonoBehaviour
         AdvXferGroup.style.display = DisplayStyle.None;
     }
 
-
-    private void Circularize()
+    private void Circularize(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.circularize;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.circularize
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2157,11 +2161,11 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"Circularize: selectedManeuver = {selectedManeuver} {_burnTimeOption}");
     }
 
-    private void NewPe()
+    private void NewPe(ManeuverType thisSelectedManeuver)
     {
         //_targetPeR = FpUiController.PeAltitude_km * 1000 + _activeVessel.Orbit.referenceBody.radius;
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.newPe;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.newPe;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2171,11 +2175,11 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"NewPe: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking {TargetPeR_m / 1000}"); // FpUiController.PeAltitude_km
     }
 
-    private void NewAp()
+    private void NewAp(ManeuverType thisSelectedManeuver)
     {
         // _targetApR = FpUiController.ApAltitude_km * 1000 + _activeVessel.Orbit.referenceBody.radius;
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.newAp;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.newAp;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2186,12 +2190,12 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"NewAp: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking {TargetApR_m / 1000}"); // FpUiController.ApAltitude_km
     }
 
-    private void NewPeAp()
+    private void NewPeAp(ManeuverType thisSelectedManeuver)
     {
         // _targetPeR = FpUiController.PeAltitude_km * 1000 + _activeVessel.Orbit.referenceBody.radius;
         // _targetApR = FpUiController.ApAltitude_km * 1000 + _activeVessel.Orbit.referenceBody.radius;
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.newPeAp;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.newPeAp;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2200,11 +2204,11 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"NewPeAp: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking {TargetApR_m / 1000} x {TargetPeR_m / 1000}"); // FpUiController.ApAltitude_km x FpUiController.PeAltitude_km
     }
 
-    private void NewInc()
+    private void NewInc(ManeuverType thisSelectedManeuver)
     {
         double.TryParse(NewIncValueOSM.value, out TargetInc_deg);
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.newInc;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.newInc;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2213,10 +2217,10 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"NewInc: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking {TargetInc_deg}"); // FpUiController.TargetInc_deg
     }
 
-    private void NewLAN()
+    private void NewLAN(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.newLAN;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.newLAN;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2225,11 +2229,11 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"NewLAN: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking {TargetLAN_deg}"); // FpUiController.TargetLAN_deg
     }
 
-    private void NewSMA()
+    private void NewSMA(ManeuverType thisSelectedManeuver)
     {
         // _targetSMA = FpUiController.TargetSMA_km * 1000 + _activeVessel.Orbit.referenceBody.radius;
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.newSMA;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.newSMA;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2238,10 +2242,10 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"NewSMA: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking {TargetSMA_m / 1000}"); // FpUiController.TargetSMA_km
     }
 
-    private void MatchPlanes()
+    private void MatchPlanes(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.matchPlane;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.matchPlane;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2251,10 +2255,10 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"MatchPlanes: selectedManeuver = {selectedManeuver} {_burnTimeOption}");
     }
 
-    private void HohmannTransfer()
+    private void HohmannTransfer(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.hohmannXfer;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.hohmannXfer;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         UnsetToggles();
         // Set this one
@@ -2263,10 +2267,10 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"HohmannTransfer: selectedManeuver = {selectedManeuver} {_burnTimeOption}");
     }
 
-    private void MatchVelocity()
+    private void MatchVelocity(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.matchVelocity;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.matchVelocity;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2275,10 +2279,10 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"MatchVelocity: selectedManeuver = {selectedManeuver} {_burnTimeOption}");
     }
 
-    private void Intercept()
+    private void Intercept(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.interceptTgt;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.interceptTgt;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2287,11 +2291,11 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"Intercept: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking {TargetInterceptTime_s}"); // FpUiController.InterceptTime
     }
 
-    private void CourseCorrection(double _thisCourseCorrectionValue)
+    private void CourseCorrection(ManeuverType thisSelectedManeuver, double _thisCourseCorrectionValue)
     {
         _courseCorrectionValue = _thisCourseCorrectionValue;
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.courseCorrection;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.courseCorrection;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2301,26 +2305,26 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"NewPe: CourseCorrection = {selectedManeuver} {_burnTimeOption}: Seeking {_courseCorrectionValue}");
     }
 
-    private void ReturnFromMoon()
+    private void ReturnFromMoon(ManeuverType thisSelectedManeuver)
     {
         var parentPlanet = _activeVessel.Orbit.referenceBody.Orbit.referenceBody;
         // FpUiController.MoonReturnAltitude_km = MainUI.DrawToggleButtonWithTextField("Moon Return", ManeuverType.moonReturn, FpUiController.MoonReturnAltitude_km, "km");
         // _targetMRPeR = FpUiController.MoonReturnAltitude_km * 1000 + parentPlanet.radius;
 
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.moonReturn;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.moonReturn;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
         // Set this one
         ToggleButtonTextColor(ReturnFromMoonButtonOTM, true);
-        FlightPlanPlugin.Logger.LogInfo($"ReturnFromMoon: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking Pe at {parentPlanet.Name} of {(TargetMRPeR_m - parentPlanet.radius) / 1000} km"); // FpUiController.MoonReturnAltitude_km
+        FlightPlanPlugin.Logger.LogInfo($"ReturnFromMoon: selectedManeuver = {selectedManeuver} {_burnTimeOption}: Seeking Pe at {parentPlanet.Name} of {(TargetMRPeR_m) / 1000} km"); // FpUiController.MoonReturnAltitude_km
     }
 
-    private void InterplanetaryXfer()
+    private void InterplanetaryXfer(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.planetaryXfer;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.planetaryXfer;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2331,10 +2335,10 @@ public class FpUiController : KerbalMonoBehaviour
         FlightPlanPlugin.Logger.LogInfo($"InterplanetaryXfer: selectedManeuver = {selectedManeuver} {_burnTimeOption}");
     }
 
-    private void AdvInterplanetaryXfer()
+    private void AdvInterplanetaryXfer(ManeuverType thisSelectedManeuver)
     {
         // Set the BurnTimeOptions
-        selectedManeuver = ManeuverType.advancedPlanetaryXfer;
+        selectedManeuver = thisSelectedManeuver; // ManeuverType.advancedPlanetaryXfer;
         ManeuverTypeDesc = SetOptionsList(selectedManeuver);
         // Unset all button toggles
         UnsetToggles();
@@ -2383,7 +2387,7 @@ public class FpUiController : KerbalMonoBehaviour
         if (NumSats + increment > 1) NumSats += increment;
         NumPayloads.text = NumSats.ToString();
 
-        updateResonance();
+        UpdateResonance();
         FlightPlanPlugin.Logger.LogInfo($"IncrementPayloads: {NumSats}");
     }
 
@@ -2392,11 +2396,11 @@ public class FpUiController : KerbalMonoBehaviour
         if (NumOrb + increment > 0) NumOrb += increment;
         NumOrbits.text = NumOrb.ToString();
 
-        updateResonance();
+        UpdateResonance();
         FlightPlanPlugin.Logger.LogInfo($"IncrementOrbits: {NumOrb}");
     }
 
-    private void updateResonance()
+    private void UpdateResonance()
     {
         // Set the _resonance factors based on diving or not
         int _m = NumSats * NumOrb;
@@ -2625,7 +2629,7 @@ public class FpUiController : KerbalMonoBehaviour
         currentTabNum = thisTab;
     }
 
-    public List<TimeRef> Options = new List<TimeRef>();
+    public List<TimeReference> Options = new List<TimeReference>();
 
     public string SetOptionsList(ManeuverType type)
     {
@@ -2642,130 +2646,134 @@ public class FpUiController : KerbalMonoBehaviour
                 break;
             case ManeuverType.circularize:
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
-                Options.Add(TimeRef.PERIAPSIS);  //"at Next Periapsis"
-                Options.Add(TimeRef.ALTITUDE);   //"at An Altittude"
-                Options.Add(TimeRef.X_FROM_NOW); //"after Fixed Time"
+                    Options.Add(TimeReference.APOAPSIS); // "at Next Apoapsis"
+                Options.Add(TimeReference.PERIAPSIS);    // "at Next Periapsis"
+                Options.Add(TimeReference.ALTITUDE);     // "at An Altittude"
+                Options.Add(TimeReference.X_FROM_NOW);   // "after Fixed Time"
 
                 ManeuverTypeDesc = "Circularizing";
                 break;
             case ManeuverType.newPe:
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
-                Options.Add(TimeRef.PERIAPSIS);  //"at Next Periapsis"
-                Options.Add(TimeRef.X_FROM_NOW); //"after Fixed Time"
-                Options.Add(TimeRef.ALTITUDE);   //"at An Altittude"
+                    Options.Add(TimeReference.APOAPSIS); // "at Next Apoapsis"
+                Options.Add(TimeReference.PERIAPSIS);    // "at Next Periapsis"
+                Options.Add(TimeReference.X_FROM_NOW);   // "after Fixed Time"
+                Options.Add(TimeReference.ALTITUDE);     // "at An Altittude"
 
                 ManeuverTypeDesc = "Setting new Pe";
                 break;
             case ManeuverType.newAp:
-                Options.Add(TimeRef.PERIAPSIS);  //"at Next Periapsis"
+                Options.Add(TimeReference.PERIAPSIS);    // "at Next Periapsis"
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
-                Options.Add(TimeRef.X_FROM_NOW); //"after Fixed Time"
-                Options.Add(TimeRef.ALTITUDE);   //"at An Altittude"
+                    Options.Add(TimeReference.APOAPSIS); // "at Next Apoapsis"
+                Options.Add(TimeReference.X_FROM_NOW);   // "after Fixed Time"
+                Options.Add(TimeReference.ALTITUDE);     // "at An Altittude"
 
                 ManeuverTypeDesc = "Setting new Ap";
                 break;
             case ManeuverType.newPeAp:
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS);    // "at Next Apoapsis"
-                Options.Add(TimeRef.PERIAPSIS);     // "at Next Periapsis"
-                Options.Add(TimeRef.X_FROM_NOW);    // "after Fixed Time"
-                Options.Add(TimeRef.ALTITUDE);      // "at An Altittude"
-                Options.Add(TimeRef.EQ_ASCENDING);  // "at Equatorial AN"
-                Options.Add(TimeRef.EQ_DESCENDING); // "at Equatorial DN"
+                    Options.Add(TimeReference.APOAPSIS);    // "at Next Apoapsis"
+                Options.Add(TimeReference.PERIAPSIS);       // "at Next Periapsis"
+                Options.Add(TimeReference.X_FROM_NOW);      // "after Fixed Time"
+                Options.Add(TimeReference.ALTITUDE);        // "at An Altittude"
+                Options.Add(TimeReference.EQ_ASCENDING);    // "at Equatorial AN"
+                Options.Add(TimeReference.EQ_DESCENDING);   // "at Equatorial DN"
 
                 ManeuverTypeDesc = "Elipticizing";
                 break;
             case ManeuverType.newInc:
-                Options.Add(TimeRef.EQ_HIGHEST_AD); // "at Cheapest eq AN/DN"
-                Options.Add(TimeRef.EQ_NEAREST_AD); // "at Nearest eq AN/DN"
-                Options.Add(TimeRef.EQ_ASCENDING);  // "at Equatorial AN"
-                Options.Add(TimeRef.EQ_DESCENDING); // "at Equatorial DN"
-                Options.Add(TimeRef.X_FROM_NOW);    // "after Fixed Time"
+                Options.Add(TimeReference.EQ_HIGHEST_AD); // "at Cheapest eq AN/DN"
+                Options.Add(TimeReference.EQ_NEAREST_AD); // "at Nearest eq AN/DN"
+                Options.Add(TimeReference.EQ_ASCENDING);  // "at Equatorial AN"
+                Options.Add(TimeReference.EQ_DESCENDING); // "at Equatorial DN"
+                Options.Add(TimeReference.X_FROM_NOW);    // "after Fixed Time"
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS);  // "at Next Apoapsis"
+                    Options.Add(TimeReference.APOAPSIS);  // "at Next Apoapsis"
 
                 ManeuverTypeDesc = "Setting new inclination";
                 break;
             case ManeuverType.newLAN:
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS); // "at Next Apoapsis"
-                Options.Add(TimeRef.PERIAPSIS);  // "at Next Periapsis"
-                Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
+                    Options.Add(TimeReference.APOAPSIS); // "at Next Apoapsis"
+                Options.Add(TimeReference.PERIAPSIS);    // "at Next Periapsis"
+                Options.Add(TimeReference.X_FROM_NOW);   // "after Fixed Time"
 
                 ManeuverTypeDesc = "Setting new LAN";
                 break;
             case ManeuverType.newNodeLon:
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS); // "at Next Apoapsis"
-                Options.Add(TimeRef.PERIAPSIS);  // "at Next Periapsis"
-                Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
+                    Options.Add(TimeReference.APOAPSIS); // "at Next Apoapsis"
+                Options.Add(TimeReference.PERIAPSIS);    // "at Next Periapsis"
+                Options.Add(TimeReference.X_FROM_NOW);   // "after Fixed Time"
 
                 ManeuverTypeDesc = "Shifting Node LongitudeN";
                 break;
             case ManeuverType.newSMA:
                 if (ActiveVessel.Orbit.eccentricity < 1)
-                    Options.Add(TimeRef.APOAPSIS); // "at Next Apoapsis"
-                Options.Add(TimeRef.PERIAPSIS);  // "at Next Periapsis"
-                Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
+                    Options.Add(TimeReference.APOAPSIS); // "at Next Apoapsis"
+                Options.Add(TimeReference.PERIAPSIS);    // "at Next Periapsis"
+                Options.Add(TimeReference.X_FROM_NOW);   // "after Fixed Time"
 
                 ManeuverTypeDesc = "Setting new SMA";
                 break;
             case ManeuverType.matchPlane:
-                Options.Add(TimeRef.REL_HIGHEST_AD); // "at Cheapest AN/DN With Target"
-                Options.Add(TimeRef.REL_NEAREST_AD); // "at Nearest AN/DN With Target"
-                Options.Add(TimeRef.REL_ASCENDING);  // "at Next AN With Target"
-                Options.Add(TimeRef.REL_DESCENDING); // "at Next DN With Target"
+                Options.Add(TimeReference.REL_HIGHEST_AD); // "at Cheapest AN/DN With Target"
+                Options.Add(TimeReference.REL_NEAREST_AD); // "at Nearest AN/DN With Target"
+                Options.Add(TimeReference.REL_ASCENDING);  // "at Next AN With Target"
+                Options.Add(TimeReference.REL_DESCENDING); // "at Next DN With Target"
 
                 ManeuverTypeDesc = "Matching planes";
                 break;
             case ManeuverType.hohmannXfer:
-                Options.Add(TimeRef.COMPUTED); // "at Optimal Time"
+                Options.Add(TimeReference.COMPUTED); // "at Optimal Time"
 
                 ManeuverTypeDesc = "Performing Hohmann transfer";
                 break;
             case ManeuverType.courseCorrection:
-                Options.Add(TimeRef.COMPUTED); // "at Optimal Time"
+                Options.Add(TimeReference.COMPUTED); // "at Optimal Time"
 
                 ManeuverTypeDesc = "Performaing course correction";
                 break;
             case ManeuverType.interceptTgt:
-                Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
+                Options.Add(TimeReference.X_FROM_NOW); // "after Fixed Time"
 
                 ManeuverTypeDesc = "Intercepting";
                 break;
             case ManeuverType.matchVelocity:
-                Options.Add(TimeRef.CLOSEST_APPROACH); // "at Closest Approach"
-                Options.Add(TimeRef.X_FROM_NOW); // "after Fixed Time"
+                Options.Add(TimeReference.CLOSEST_APPROACH); // "at Closest Approach"
+                Options.Add(TimeReference.X_FROM_NOW);       // "after Fixed Time"
 
                 ManeuverTypeDesc = "Matching velocity";
                 break;
             case ManeuverType.moonReturn:
-                Options.Add(TimeRef.COMPUTED); //"at Optimal Time"
+                Options.Add(TimeReference.COMPUTED); // "at Optimal Time"
 
                 ManeuverTypeDesc = "Performaing moon return";
                 break;
             case ManeuverType.planetaryXfer:
-                Options.Add(TimeRef.NEXT_WINDOW); // "at the next transfer window"
-                Options.Add(TimeRef.ASAP); // "as soon as possible"
+                Options.Add(TimeReference.NEXT_WINDOW); // "at the next transfer window"
+                Options.Add(TimeReference.ASAP);        // "as soon as possible"
 
                 ManeuverTypeDesc = "Performing planetary transfer";
                 break;
             case ManeuverType.advancedPlanetaryXfer:
-                Options.Add(TimeRef.PORKCHOP); // "Porkchop Selection"
-                Options.Add(TimeRef.LIMITED_TIME); // "Limited Time"
+                Options.Add(TimeReference.PORKCHOP);     // "Porkchop Selection"
+                Options.Add(TimeReference.LIMITED_TIME); // "Limited Time"
 
                 ManeuverTypeDesc = "Performing advanced planetary transfer";
                 break;
             case ManeuverType.fixAp:
-                Options.Add(TimeRef.PERIAPSIS); //"at Next Periapsis"
+                Options.Add(TimeReference.PERIAPSIS);  // "at Next Periapsis"
+                Options.Add(TimeReference.X_FROM_NOW); // "after Fixed Time"
+                TimeRef = TimeReference.PERIAPSIS;     // Set the default
 
                 ManeuverTypeDesc = "Setting new Ap";
                 break;
             case ManeuverType.fixPe:
-                Options.Add(TimeRef.APOAPSIS); //"at Next Apoapsis"
+                Options.Add(TimeReference.APOAPSIS);   // "at Next Apoapsis"
+                Options.Add(TimeReference.X_FROM_NOW); // "after Fixed Time"
+                TimeRef = TimeReference.APOAPSIS;      // Set the default
 
                 ManeuverTypeDesc = "Setting new Pe";
                 break;
@@ -2774,7 +2782,7 @@ public class FpUiController : KerbalMonoBehaviour
         }
 
         if (Options.Count < 1)
-            Options.Add(TimeRef.None);
+            Options.Add(TimeReference.None);
 
         if (!Options.Contains(TimeRef))
         {
@@ -2967,7 +2975,7 @@ public class FpUiController : KerbalMonoBehaviour
 
     public ManeuverType ManeuverType = ManeuverType.None;
 
-    public static TimeRef TimeRef = TimeRef.None;
+    public static TimeReference TimeRef = TimeReference.None;
 
     //public static string ManeuverTypeDesc;
     public static string ManeuverDescription;
