@@ -839,7 +839,7 @@ public class FpUiController : KerbalMonoBehaviour
                 relativeInc = Orbit.RelativeInclination(targetOrbit);
                 phase = Orbit.PhaseAngle(targetOrbit, UT);
                 transfer = Orbit.Transfer(targetOrbit, out _);
-                if (transfer < phase)
+                if (targetOrbit.semiMajorAxis > Orbit.semiMajorAxis)
                     nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360;
                 else
                     nextWindow = synodicPeriod * MuUtils.ClampDegrees360(transfer - phase) / 360;
@@ -919,7 +919,7 @@ public class FpUiController : KerbalMonoBehaviour
                 relativeInc = Orbit.RelativeInclination(targetOrbit);
                 phase = Orbit.PhaseAngle(targetOrbit, UT);
                 transfer = Orbit.Transfer(targetOrbit, out double _transferTime);
-                if (transfer < phase)
+                if (targetOrbit.semiMajorAxis > Orbit.semiMajorAxis)
                     nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360;
                 else
                     nextWindow = synodicPeriod * MuUtils.ClampDegrees360(transfer - phase) / 360;
@@ -968,7 +968,7 @@ public class FpUiController : KerbalMonoBehaviour
                 // double phase2 = Phase();
                 transfer = ReferenceBody.Orbit.Transfer(targetOrbit, out _transferTime);
                 // double transfer2 = Transfer(out _);
-                if (transfer < phase)
+                if (targetOrbit.semiMajorAxis > ReferenceBody.Orbit.semiMajorAxis)
                     nextWindow = synodicPeriod * MuUtils.ClampDegrees360(phase - transfer) / 360;
                 else
                     nextWindow = synodicPeriod * MuUtils.ClampDegrees360(transfer - phase) / 360;
@@ -2812,6 +2812,7 @@ public class FpUiController : KerbalMonoBehaviour
     private static SimulationObjectModel tgtVessel = null;
     public static bool SelectTarget, doNewList;
     public static bool SelectDockingPort = false;
+    public static CelestialBodyComponent Kerbol;
 
     private void ListBodies()
     {
@@ -2820,6 +2821,7 @@ public class FpUiController : KerbalMonoBehaviour
         {
             _rootBody = _rootBody.referenceBody;
         }
+        Kerbol = _rootBody;
         // allBodies.Clear();
         if (targetBodies != null)
             targetBodies.Clear();
