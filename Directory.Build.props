@@ -25,10 +25,9 @@
         <NoWarn>$(NoWarn);CS0436</NoWarn>
     </PropertyGroup>
 
-    <PropertyGroup Label="Package source configuration">
-        <RestoreAdditionalProjectSources>
-            https://nuget.spacewarp.org/v3/index.json
-        </RestoreAdditionalProjectSources>
+    <PropertyGroup Label="Flight Plan-specific configuration">
+        <PluginFolderName>flight_plan</PluginFolderName>
+        <PluginAssemblyFileName>flight_plan</PluginAssemblyFileName>
     </PropertyGroup>
 
     <ItemGroup Label="Dependencies for build targets">

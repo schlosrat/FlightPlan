@@ -65,14 +65,15 @@ public class FPOtherModsInterface
             _k2d2VerCheck = _k2d2Info.Metadata.Version.CompareTo(_k2d2MinVersion);
             Logger.LogInfo($"_k2d2VerCheck = {_k2d2VerCheck}");
             string _toolTip;
-            if (_k2d2VerCheck >= 0) 
+
+            if (_k2d2VerCheck >= 0)
                 _toolTip = "Have K2-D2 Execute this node";
-            else 
+            else
                 _toolTip = "Launch K2-D2";
 
             var assembly_name = K2D2ModGuid;
             var is_new_version = _k2d2Info.Metadata.Version.CompareTo(new Version(1, 0, 0));
-            if (is_new_version >= 0) 
+            if (is_new_version >= 0)
                 assembly_name = "K2D2";
 
             K2D2Type = Type.GetType($"K2D2.K2D2_Plugin, {assembly_name}");
