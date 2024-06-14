@@ -486,6 +486,11 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
     public void ToggleButton(bool toggle)
     {
+        if (Game.UI.ViewController.CurrentView == UIStateViews.UIHiddenView)
+        {
+            Logger.LogDebug($"ToggleButton: Activated while UI is hidden to set interfaceEnabled = {toggle}. Aborting without changing interfaceEnabled.");
+            return;
+        }
         InterfaceEnabled = toggle;
         GameObject.Find(_ToolbarFlightButtonID)?.GetComponent<UIValue_WriteBool_Toggle>()?.SetValue(InterfaceEnabled);
         controller.SetEnabled(toggle);
@@ -640,8 +645,8 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
         // Get the local coordinate burnParams based on the burnUT and deltaV
         burnParams = orbit.DeltaVToManeuverNodeCoordinates(burnUT, deltaV); // OrbitalManeuverCalculator.DvToBurnVec(ActiveVessel.orbit, _deltaV, burnUT);
-        Logger.LogInfo($"CreateManeuverNode: Solution Found: _deltaV      [{deltaV.x:F3}, {deltaV.y:F3}, {deltaV.z:F3}] m/s = {deltaV.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
-        Logger.LogInfo($"CreateManeuverNode: Solution Found: burnParams  [{burnParams.x:F3}, {burnParams.y:F3}, {burnParams.z:F3}] m/s  = {burnParams.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
+        Logger.LogInfo($"CreateManeuverNode: Solution Found: _deltaV1      {deltaV:F3} m/s = {deltaV.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
+        Logger.LogInfo($"CreateManeuverNode: Solution Found: burnParams  {burnParams:F3} m/s  = {burnParams.magnitude:F3} m/s {FPUtility.SecondsToTimeString(burnUT - UT)} from now");
 
         // Create a node with the burnParams at burnUT - No burnOffsetFactor applied... yet.
         NodeManagerPlugin.Instance.CreateManeuverNodeAtUT(burnParams, burnUT, 0); // burnOffsetFactor
@@ -666,15 +671,15 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
 
             // Convert the new burnVector to deltaV (at this point _currentNode.Time should have been updated to be at the new time, right?)
             Vector3d newDeltaV = orbit.BurnVecToDv(_currentNode.Time, _currentNode.BurnVector);
-            Logger.LogInfo($"CreateManeuverNode: newDeltaV      [{newDeltaV.x:F3}, {newDeltaV.y:F3}, {newDeltaV.z:F3}] m/s  = {newDeltaV.magnitude:F3} m/s");
+            Logger.LogInfo($"CreateManeuverNode: newDeltaV      {newDeltaV:F3} m/s  = {newDeltaV.magnitude:F3} m/s");
             // Compute the change needed for this newDeltaV to equal the original
             Vector3d deltaDeltaV = deltaV - newDeltaV;
-            Logger.LogInfo($"CreateManeuverNode: deltaDeltaV    [{deltaDeltaV.x:F3}, {deltaDeltaV.y:F3}, {deltaDeltaV.z:F3}] m/s  = {deltaDeltaV.magnitude:F3} m/s");
+            Logger.LogInfo($"CreateManeuverNode: deltaDeltaV    {deltaDeltaV:F3} m/s  = {deltaDeltaV.magnitude:F3} m/s");
             // Convert this to a burnVector
             Vector3d newBurnParams = orbit.DeltaVToManeuverNodeCoordinates(_currentNode.Time, deltaDeltaV);
-            Logger.LogInfo($"CreateManeuverNode: newBurnParams  [{newBurnParams.x:F3}, {newBurnParams.y:F3}, {newBurnParams.z:F3}] m/s  = {newBurnParams.magnitude:F3} m/s");
+            Logger.LogInfo($"CreateManeuverNode: newBurnParams  {newBurnParams:F3} m/s  = {newBurnParams.magnitude:F3} m/s");
             maneuverPlanComponent.UpdateChangeOnNode(_currentNode.NodeID, newBurnParams);
-            Logger.LogInfo($"CreateManeuverNode: BurnVector     [{_currentNode.BurnVector.x:F3}, {_currentNode.BurnVector.y:F3}, {_currentNode.BurnVector.z:F3}] m/s  = {_currentNode.BurnVector.magnitude:F3} m/s");
+            Logger.LogInfo($"CreateManeuverNode: BurnVector     {_currentNode.BurnVector:F3} m/s  = {_currentNode.BurnVector.magnitude:F3} m/s");
 
             maneuverPlanComponent.UpdateNodeDetails(_currentNode);
         }
@@ -1017,11 +1022,20 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
         }
 
         Logger.LogDebug($"HohmannTransfer: Hohmann Transfer to {_currentTarget.Name} {BurnTimeOption.TimeRefDesc}");
-        // FlightPlanPlugin.Logger.LogDebug("Hohmann Transfer");
-        double _burnUTout;
-        Vector3d _deltaV;
+        double _burnUT1, _burnUT2;
+        Vector3d _deltaV1, _deltaV2;
 
         FPStatus.Warning($"Ready to Transfer to {_currentTarget.Name}");
+
+        double LagTime = 0.0;
+
+        bool Rendezvous = true;
+        bool Coplanar = false;
+        bool Capture = true;
+
+        double lagTime = Rendezvous ? LagTime : 0;
+
+        bool fixedTime = false;
 
         bool _simpleTransfer = false;
         bool _intercept_only;
@@ -1038,7 +1052,10 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
                 offsetDist = FpUiController.TargetInterceptDistanceVessel_m;
                 Logger.LogDebug($"HohmannTransfer: OffsetDist for non-celestial encounter {offsetDist:N2} m");
             }
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, tgtOrbit, _UT, out _burnUTout, offsetDist);
+            
+            Logger.LogDebug($"Hohmann Transfer: Calling DeltaVAndTimeForHohmannTransfer");
+            (_deltaV1, _burnUT1, _deltaV2, _burnUT2) = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, tgtOrbit, _UT,
+                lagTime, fixedTime, Coplanar, Rendezvous, Capture);
         }
         else
         {
@@ -1054,12 +1071,14 @@ public class FlightPlanPlugin : BaseSpaceWarpPlugin
             //bool _dnExists = _orbit.DescendingNodeExists(tgtOrbit);
             //double _anTime = _orbit.TimeOfAscendingNode(tgtOrbit, _UT);
             //double _dnTime = _orbit.TimeOfDescendingNode(tgtOrbit, _UT);
-            _deltaV = OrbitalManeuverCalculator.DeltaVAndTimeForBiImpulsiveAnnealed(_orbit, tgtOrbit, _UT, out _burnUTout, intercept_only: _intercept_only);
+            Logger.LogDebug($"Hohmann Transfer: Calling DeltaVAndTimeForHohmannTransfer");
+            (_deltaV1, _burnUT1, _deltaV2, _burnUT2) = OrbitalManeuverCalculator.DeltaVAndTimeForHohmannTransfer(_orbit, tgtOrbit, _UT,
+                lagTime, fixedTime, Coplanar, Rendezvous, Capture);
         }
 
-        if (_deltaV != Vector3d.zero)
+        if (_deltaV1 != Vector3d.zero)
         {
-            return CreateManeuverNodeCaller(_deltaV, _burnUTout, burnOffsetFactor);
+            return CreateManeuverNodeCaller(_deltaV1, _burnUT1, burnOffsetFactor);
         }
         else
         {
