@@ -24,6 +24,7 @@ jobs:
       - name: Find zip
         id: find-zip
         run: |
+          echo "ls -l dist"
           echo "zip=$(ls -1 dist/flight_plan-*.zip | head -n 1)" >> $GITHUB_ENV
           echo "artifact_name=FlightPlanRelease" >> $GITHUB_ENV
 
